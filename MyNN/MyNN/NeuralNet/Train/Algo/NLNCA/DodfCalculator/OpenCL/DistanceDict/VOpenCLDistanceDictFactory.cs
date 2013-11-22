@@ -45,7 +45,7 @@ __kernel void DistanceKernel(
 //                result += diff * diff;
 //            }
 
-            //GetExpDistanceDab
+            //GetExpDistanceDab vectorized
             float16 result16 = 0;
             
             int uu = 0;
@@ -98,7 +98,7 @@ __kernel void DistanceKernel(
 
                 const int batchSize = 64;
                 var kernelCount = fxwList.Count / batchSize;
-                if (fxwList.Count % 16 > 0)
+                if (fxwList.Count % batchSize > 0)
                 {
                     kernelCount++;
                 }

@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using MyNN.Data;
 using MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator;
 using MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL;
@@ -35,6 +36,7 @@ namespace MyNNConsoleApp
                 "NEW TAKES {0}",
                 (afterCreate1 - beforeCreate1));
 
+            var beforeChecking = DateTime.Now;
             for (var dd = 0; dd < data.Count; dd++)
             {
                 var oldItem = pabOld.CalculateDodf(dd);
@@ -46,15 +48,24 @@ namespace MyNNConsoleApp
 
                     if (Math.Abs(diff) > 1e-5)
                     {
-                        throw new InvalidOperationException("Math.Abs(diff) > 1e-5");
+                        throw new InvalidOperationException(
+                            string.Format(
+                                "diff = {0} > 1e-5, left= {1}, right = {2}",
+                                Math.Abs(diff),
+                                oldItem[cc],
+                                newItem[cc]));
                     }
                 }
 
-                if (dd%100 == 0)
+                if (dd % 100 == 0)
                 {
                     Console.WriteLine("{0} out of {1}", dd, data.Count);
                 }
             }
+            var afterChecking = DateTime.Now;
+            Console.WriteLine(
+                "CHECKING TAKES {0}",
+                (afterChecking - beforeChecking));
 
             Console.WriteLine("SUCCESS");
         }
@@ -63,11 +74,11 @@ namespace MyNNConsoleApp
         {
             const int count =
                 //5;
-                3000;
-                //12000;
+                //3000;
+                12000;
             const int inputLength =
-                50;
-                //100;
+                //50;
+                100;
             const int classesCount = 10;
 
             var rnd = new Random(DateTime.Now.Millisecond);

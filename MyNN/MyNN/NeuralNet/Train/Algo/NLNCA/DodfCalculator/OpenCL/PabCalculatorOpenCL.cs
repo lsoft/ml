@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MyNN.Data;
 using MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL.DistanceDict;
@@ -54,13 +55,15 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
             #region считаем знаменатель
 
             var x2 = DateTime.Now;
-            _znList = new List<float>();
+            _znList = new float[_fxwList.Count].ToList();
 
-            for (var cc = 0; cc < _fxwList.Count; cc++)
+            Parallel.For(0, _fxwList.Count, cc =>
+            //for (var cc = 0; cc < _fxwList.Count; cc++)
             {
                 var zn = this.CalculateZnamenatelForA(cc);
-                _znList.Add(zn);
+                _znList[cc] = zn;
             }
+            );//Parallel.For
             var x3 = DateTime.Now;
             var diff2 = x3 - x2;
             Console.WriteLine("считаем знаменатель = {0}", diff2);

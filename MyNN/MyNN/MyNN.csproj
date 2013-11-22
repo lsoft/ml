@@ -219,6 +219,7 @@
     <Compile Include="Pair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerializationHelper.cs" />
+    <Compile Include="ThreadSafetyHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenCL.Net\OpenCL.Net.csproj">
@@ -440,7 +441,9 @@
     <None Include="AForge.NET\Externals\ffmpeg\lib\swscale.lib" />
     <None Include="AForge.NET\Externals\libfreenect\APACHE20" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\Znamenatel\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
