@@ -166,6 +166,7 @@
     <Compile Include="NeuralNet\Structure\Neurons\Function\SparsifierFunction.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\DodfCalculatorVectorizedDebug.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\IDodfCalculator.cs" />
+    <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\DistanceDict\VOpenCLDistanceDictFactory.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\DistanceDict\IDistanceDictFactory.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\DistanceDict\OpenCLDistanceDictFactory.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\DistanceDict\CSharpDistanceDictFactory.cs" />

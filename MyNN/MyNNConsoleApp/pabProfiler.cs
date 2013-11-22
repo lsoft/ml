@@ -25,7 +25,7 @@ namespace MyNNConsoleApp
             var beforeCreate1 = DateTime.Now;
             var pabNew = new DodfCalculatorOpenCL(
                 data,
-                new OpenCLDistanceDictFactory());
+                new VOpenCLDistanceDictFactory());
             var afterCreate1 = DateTime.Now;
 
             Console.WriteLine(
