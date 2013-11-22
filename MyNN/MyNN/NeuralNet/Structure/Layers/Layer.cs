@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using MyNN.NeuralNet.Structure.Neurons;
 using MyNN.NeuralNet.Structure.Neurons.Function;
 
@@ -9,7 +10,7 @@ namespace MyNN.NeuralNet.Structure.Layers
         //: ILayer,
         //ITrainLayer<TrainableNeuron>
     {
-        private readonly bool _isNeedBiasNeuron;
+        private bool _isNeedBiasNeuron;
 
         public float[] LastOutput
         {
@@ -155,6 +156,19 @@ namespace MyNN.NeuralNet.Structure.Layers
             }
         }
 
+        public void RemoveBiasNeuron()
+        {
+            var nln = this.Neurons.Last();
+            if (nln is BiasNeuron)
+            {
+                var na = new TrainableNeuron[this.NonBiasNeuronCount];
+                Array.Copy(this.Neurons, na, this.NonBiasNeuronCount);
+
+                this.Neurons = na;
+                _isNeedBiasNeuron = false;
+            }
+        }
+
         public float[] Compute(float[] inputVector)
         {
             this.LastOutput = new float[this.Neurons.Length];
@@ -230,5 +244,6 @@ namespace MyNN.NeuralNet.Structure.Layers
                     nonbiasNeuronCount,
                     biasNeuronCount);
         }
+
     }
 }

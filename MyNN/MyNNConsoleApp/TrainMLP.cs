@@ -71,8 +71,7 @@ namespace MyNNConsoleApp
                             validationData, 
                             300, 
                             100).Validate,
-                        universe,
-                        rndSeed);
+                        universe);
 
                 //обучение сети
                 alg.Train(

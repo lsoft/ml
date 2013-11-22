@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using MyNN.Data;
+using MyNN.NeuralNet.Computers;
 using MyNN.NeuralNet.LearningConfig;
 using MyNN.NeuralNet.Structure;
 using MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator;
+using DataSet = MyNN.Data.DataSet;
 
 namespace MyNN.NeuralNet.Train.Algo.NLNCA
 {
@@ -26,6 +29,15 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA
         private readonly float[][][] _nablaWeights;
         private readonly int _ncaLayerIndex;
 
+        /// <summary>
+        /// Алгоритм обучения автоенкодера с одновременным оказанием давления NCA
+        /// </summary>
+        /// <param name="network">Сеть для обучения</param>
+        /// <param name="config">Конфиг обучения</param>
+        /// <param name="validation">Метод валидации обученной сети</param>
+        /// <param name="dodfCalculatorFactory">Фабрика производства DoDf калькулятора</param>
+        /// <param name="lambda">Коэффициент пропорциональности между ошибкой восстановления и давлением NCA</param>
+        /// <param name="takeIntoAccount">Количество нейронов на узком слое, на которые оказывается давление NCA</param>
         public NLNCAAutoencoderBackpropAlgorithm(
             MultiLayerNeuralNetwork network,
             ILearningAlgorithmConfig config,
@@ -87,31 +99,56 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA
 
                 #endregion
 
-                var uzSootv = new List<int>();
-                var uzkii = new List<DataItem>();
-
-                for (var uzIndex = 0; uzIndex < data.Count; uzIndex++)
-                {
-                    var d = data[uzIndex];
-
-                    if (d.OutputIndex >= 0)
-                    {
-                        _network.ComputeOutput(d.Input);
-
-                        uzkii.Add(
-                            new DataItem(
-                                _network.Layers[_ncaLayerIndex].LastOutput.Take(_takeIntoAccount).ToArray(),
-                                d.Output));
-
-                        uzSootv.Add(uzkii.Count - 1);
-                    }
-                    else
-                    {
-                        uzSootv.Add(-1);
-                    }
-                }
-
+                var ou_begin = DateTime.Now;
+                List<DataItem> uzkii;
+                List<int> uzSootv;
+                ObtainUzkiiData3(
+                    data,
+                    out uzSootv,
+                    out uzkii);
+                var ou_middle = DateTime.Now;
                 var dodfCalculator = _dodfCalculatorFactory(uzkii);
+                var ou_end = DateTime.Now;
+                //Console.WriteLine("Create uzkii = {0}, create dodf calculator = {1}", ou_middle - ou_begin, ou_end - ou_middle);
+
+                //var ou_begin = DateTime.Now;
+                //List<DataItem> uzkii;
+                //List<int> uzSootv;
+                //ObtainUzkiiData2(
+                //    data ,
+                //    out uzSootv,
+                //    out uzkii);
+                //var ou_middle = DateTime.Now;
+                //var dodfCalculator = _dodfCalculatorFactory(uzkii);
+                //var ou_end = DateTime.Now;
+                //Console.WriteLine("Create uzkii = {0}, create dodf calculator = {1}", ou_middle - ou_begin, ou_end - ou_middle);
+
+                //var ou_begin = DateTime.Now;
+                //List<DataItem> uzkii;
+                //List<int> uzSootv;
+                //ObtainUzkiiData(
+                //    data ,
+                //    out uzSootv,
+                //    out uzkii);
+                //var ou_middle = DateTime.Now;
+                //var dodfCalculator = _dodfCalculatorFactory(uzkii);
+                //var ou_end = DateTime.Now;
+                //Console.WriteLine("Create uzkii = {0}, create dodf calculator = {1}", ou_middle - ou_begin, ou_end - ou_middle);
+
+                //сравнение старого и нового метода получения данных для dodfcalculator
+                //for (var ccc = 0; ccc < uzkii3.Count; ccc++)
+                //{
+                //    for (var ddd = 0; ddd < _takeIntoAccount; ddd++)
+                //    {
+                //        if (Math.Abs(uzkii3[ccc].Input[ddd] - uzkii[ccc].Input[ddd]) > 1e-4)
+                //        {
+                //            throw new InvalidExpressionException("!!!");
+                //        }
+                //    }
+                //}
+
+
+                //*/
 
                 //process one batch
                 //float maxdiff = 0f;
@@ -122,7 +159,7 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA
 
                     //forward pass
                     var realOutput = _network.ComputeOutput(trainData.Input);
-
+                    
                     //производная по компонентам близости (если итем с меткой)
                     float[] dodf = null;
                     
@@ -303,7 +340,129 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA
             //DebugUzkiiInfo(data);
         }
 
-        private void DebugUzkiiInfo(DataSet data)
+        private void ObtainUzkiiData3(
+            DataSet data,
+            out List<int> uzSootv,
+            out List<DataItem> uzkii)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+
+            uzSootv = new List<int>();
+            uzkii = new List<DataItem>();
+
+            var cloned = SerializationHelper.DeepClone(_network);
+            cloned.AutoencoderCut();
+
+            List<float[]> output = null;
+            using (var universe = new VNNCLProvider(cloned))
+            {
+                //создаем объект просчитывающий сеть
+                var computer =
+                    new VOpenCLComputer(universe, true);
+
+                cloned.SetComputer(computer);
+
+                output = cloned.ComputeOutput(data.GetInputPart());
+            }
+
+            for (var uzIndex = 0; uzIndex < data.Count; uzIndex++)
+            {
+                var d = data[uzIndex];
+
+                if (d.OutputIndex >= 0)
+                {
+                    uzkii.Add(
+                        new DataItem(
+                            output[uzIndex].Take(_takeIntoAccount).ToArray(),
+                            d.Output));
+
+                    uzSootv.Add(uzkii.Count - 1);
+                }
+                else
+                {
+                    uzSootv.Add(-1);
+                }
+            }
+        }
+
+        private void ObtainUzkiiData2(
+            DataSet data,
+            out List<int> uzSootv,
+            out List<DataItem> uzkii)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+
+            uzSootv = new List<int>();
+            uzkii = new List<DataItem>();
+
+            var cloned = SerializationHelper.DeepClone(_network);
+            cloned.AutoencoderCut();
+            cloned.SetComputer(new DefaultComputer(cloned));
+            var output = cloned.ComputeOutput(data.GetInputPart());
+
+            for (var uzIndex = 0; uzIndex < data.Count; uzIndex++)
+            {
+                var d = data[uzIndex];
+
+                if (d.OutputIndex >= 0)
+                {
+                    uzkii.Add(
+                        new DataItem(
+                            output[uzIndex].Take(_takeIntoAccount).ToArray(),
+                            d.Output));
+
+                    uzSootv.Add(uzkii.Count - 1);
+                }
+                else
+                {
+                    uzSootv.Add(-1);
+                }
+            }
+        }
+
+        private void ObtainUzkiiData(
+            DataSet data, 
+            out List<int> uzSootv,
+            out List<DataItem> uzkii)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+
+            uzSootv = new List<int>();
+            uzkii = new List<DataItem>();
+
+            for (var uzIndex = 0; uzIndex < data.Count; uzIndex++)
+            {
+                var d = data[uzIndex];
+
+                if (d.OutputIndex >= 0)
+                {
+                    _network.ComputeOutput(d.Input);
+
+                    uzkii.Add(
+                        new DataItem(
+                            _network.Layers[_ncaLayerIndex].LastOutput.Take(_takeIntoAccount).ToArray(),
+                            d.Output));
+
+                    uzSootv.Add(uzkii.Count - 1);
+                }
+                else
+                {
+                    uzSootv.Add(-1);
+                }
+            }
+        }
+
+        private void DebugUzkiiInfo(
+            DataSet data)
         {
             if (data == null)
             {

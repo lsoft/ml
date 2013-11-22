@@ -99,8 +99,7 @@ namespace MyNN.Autoencoders
                         _net,
                         config,
                         validation.Validate,
-                        universe,
-                        rndSeed);
+                        universe);
 
                 //обучение сети
                 alg.Train(trainDataProvider.GetDeformationDataSet);

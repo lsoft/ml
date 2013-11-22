@@ -104,8 +104,7 @@ namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers
                         _net,
                         conf,
                         Validation,
-                        universe,
-                        _rndSeed);
+                        universe);
 
                 //валидация используемой сети
                 Console.WriteLine("Default net validation results:");

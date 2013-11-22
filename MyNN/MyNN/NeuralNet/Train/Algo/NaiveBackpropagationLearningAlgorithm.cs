@@ -14,13 +14,12 @@ namespace MyNN.NeuralNet.Train.Algo
 {
     public class NaiveBackpropagationLearningAlgorithm : BaseTrainAlgorithm
     {
-        private float[][][] _nablaWeights;
+        private readonly float[][][] _nablaWeights;
 
         public NaiveBackpropagationLearningAlgorithm(
             MultiLayerNeuralNetwork network,
             ILearningAlgorithmConfig config,
-            MultilayerTrainProcessDelegate validation,
-            int randomSeed)
+            MultilayerTrainProcessDelegate validation)
             : base(network, config, validation)
         {
             _nablaWeights = new float[_network.Layers.Length][][];

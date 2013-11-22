@@ -56,7 +56,7 @@ namespace MyNNConsoleApp
 
             network.SetComputer(computer);
 
-            var batchSize = trainData.Count/12;
+            var batchSize = 100;//trainData.Count/12;
 
             var config = new LearningAlgorithmConfig(
                 new LinearLearningRate(0.1f, 0.99f),
@@ -68,6 +68,7 @@ namespace MyNNConsoleApp
                 new HalfSquaredEuclidianDistance());
 
             var alg =
+                //new NaiveBackpropagationLearningAlgorithm(
                 new NLNCAAutoencoderBackpropAlgorithm(
                     network,
                     config,
@@ -75,7 +76,7 @@ namespace MyNNConsoleApp
                     new AutoencoderValidation(validationData, 100, 100).Validate,
                     (uzkii) => new DodfCalculatorVectorized(uzkii), 
                     0.1f,
-                    30);
+                    50);
 
             //обучение сети
             alg.Train(new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);

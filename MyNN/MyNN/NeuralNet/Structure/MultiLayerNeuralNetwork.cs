@@ -5,6 +5,7 @@ using System.Linq;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN;
 using MyNN.NeuralNet.Computers;
 using MyNN.NeuralNet.Structure.Layers;
+using MyNN.NeuralNet.Structure.Neurons;
 using MyNN.NeuralNet.Structure.Neurons.Function;
 
 namespace MyNN.NeuralNet.Structure
@@ -264,6 +265,10 @@ namespace MyNN.NeuralNet.Structure
             Array.Copy(this.Layers, 0, lls, 0, lls.Length);
 
             this.Layers = lls;
+
+            //у последнего слоя убираем Bias нейрон
+            var nll = this.Layers.Last();
+            nll.RemoveBiasNeuron();
         }
 
         public void AddLayer(

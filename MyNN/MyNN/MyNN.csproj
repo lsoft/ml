@@ -166,11 +166,16 @@
     <Compile Include="NeuralNet\Structure\Neurons\Function\SparsifierFunction.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\DodfCalculatorVectorizedDebug.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\IDodfCalculator.cs" />
+    <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\DistanceDict\IDistanceDictFactory.cs" />
+    <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\DistanceDict\OpenCLDistanceDictFactory.cs" />
+    <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\DistanceDict\CSharpDistanceDictFactory.cs" />
+    <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\DistanceDict\DistanceDictCLProvider.cs" />
+    <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\DodfCalculatorOpenCL.cs" />
+    <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\PabCalculatorOpenCL.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\NLNCAAutoencoderBackpropAlgorithm.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\DodfCalculator.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\DodfCalculatorMathNet.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\DodfCalculatorOld.cs" />
-    <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\DodfCalculatorOpenCL.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\DodfCalculatorVectorized.cs" />
     <Compile Include="NeuralNet\Train\Algo\VOpenCLBackpropAlgorithm.cs" />
     <Compile Include="NeuralNet\Train\Algo\NLNCA\NLNCABackpropagationLearningAlgorithm.cs" />
@@ -205,6 +210,7 @@
     <Compile Include="NeuralNet\Train\MultilayerTrainProcessDelegate.cs" />
     <Compile Include="OpenCL\Kernel.cs" />
     <Compile Include="OpenCL\Mem\BaseMem.cs" />
+    <Compile Include="OpenCL\Mem\MemInt.cs" />
     <Compile Include="OpenCL\Mem\MemFloat.cs" />
     <Compile Include="OpenCL\Mem\Mem.cs" />
     <Compile Include="OpenCL\Mem\MemDouble.cs" />

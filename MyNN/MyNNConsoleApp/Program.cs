@@ -31,6 +31,10 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+                pabProfiler.Main2();
+                return;
+
+
                 var rndSeed = 33514;
 
 
@@ -59,8 +63,8 @@ namespace MyNNConsoleApp
                     {
                         null,
                         new SigmoidFunction(1f), 
-                        new LinearFunction(1f),
-                        new SigmoidFunction(1f),
+                        new LinearFunction(1f), 
+                        new SigmoidFunction(1f), 
                         new SigmoidFunction(1f) 
                     },
                     ref rndSeed,
@@ -68,7 +72,7 @@ namespace MyNNConsoleApp
                     {
                         784,
                         500,
-                        50,
+                        100,
                         500,
                         784
                     });

@@ -33,8 +33,7 @@ namespace MyNN.NeuralNet.Train.Algo
             MultiLayerNeuralNetwork network,
             ILearningAlgorithmConfig config,
             MultilayerTrainProcessDelegate validation,
-            VNNCLProvider clProvider,
-            int randomSeed)
+            VNNCLProvider clProvider)
             : base(network, config, validation)
         {
             _config = config;

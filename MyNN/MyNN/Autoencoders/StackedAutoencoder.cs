@@ -145,8 +145,7 @@ namespace MyNN.Autoencoders
                             net,
                             config,
                             validation.Validate,
-                            universe,
-                            rndSeed);
+                            universe);
 
                     //обучение сети
                     alg.Train(trainDataProvider.GetDeformationDataSet);

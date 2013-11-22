@@ -224,6 +224,21 @@ namespace MyNN.OpenCL
             return k;
         }
 
+        public MemInt CreateIntMem(
+            int arrayLength,
+            Cl.MemFlags flags)
+        {
+            var memi = new MemInt(
+                _commandQueue,
+                _context,
+                arrayLength,
+                flags);
+
+            this._mems.Add(memi);
+
+            return memi;
+        }
+
         public MemFloat CreateFloatMem(
             int arrayLength,
             Cl.MemFlags flags)
