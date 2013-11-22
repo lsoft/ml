@@ -31,8 +31,8 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                pabProfiler.Main2();
-                return;
+                //pabProfiler.Main2();
+                //return;
 
 
                 var rndSeed = 33514;
@@ -62,10 +62,10 @@ namespace MyNNConsoleApp
                     new IFunction[]
                     {
                         null,
-                        new SigmoidFunction(1f), 
-                        new LinearFunction(1f), 
-                        new SigmoidFunction(1f), 
-                        new SigmoidFunction(1f) 
+                        new RLUFunction(), 
+                        new RLUFunction(), 
+                        new RLUFunction(), 
+                        new RLUFunction(), 
                     },
                     ref rndSeed,
                     new int[]
@@ -87,7 +87,6 @@ namespace MyNNConsoleApp
 
                 var trainer = new TrainAutoencoderNLNCA();
                 trainer.Train(
-                    ref rndSeed,
                     network,
                     trainData,
                     validationData,

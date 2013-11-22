@@ -5,6 +5,8 @@ using System.Linq;
 using MyNN.Data;
 using MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL.DistanceDict;
 
+//#define DODF_DEBUG_CHECKS //раскоментировать, если нужна проверка на NaN, +-Infinity и т.п.
+
 namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
 {
     public class DodfCalculatorOpenCL : IDodfCalculator
@@ -35,7 +37,7 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
 
             #region Заполняем _fxwDict
 
-            var x0 = DateTime.Now;
+            //var x0 = DateTime.Now;
 
             _fxwDict = new Dictionary<int, List<int>>();
 
@@ -50,9 +52,9 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
                 _fxwDict[_fxwList[a].OutputIndex].Add(a);
             }
 
-            var x1 = DateTime.Now;
-            var diff = x1 - x0;
-            Console.WriteLine("Заполняем _fxwDict = {0}", diff);
+            //var x1 = DateTime.Now;
+            //var diff = x1 - x0;
+            //Console.WriteLine("Заполняем _fxwDict = {0}", diff);
 
             #endregion
 
@@ -78,7 +80,7 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
 
                 var middle = DateTime.Now;
 
-                var opencl = new OpenCLDistanceDictFactory();
+                var opencl = new VOpenCLDistanceDictFactory();
                 opencl.CreateDistanceDict(fxwList);
 
                 var after = DateTime.Now;
@@ -161,6 +163,7 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
                     l,
                     a);
 
+#if DODF_DEBUG_CHECKS
                 #region floating point checks
 
                 if (part2.Any(j => float.IsInfinity(j) || float.IsNaN(j) || float.IsNegativeInfinity(j) || float.IsPositiveInfinity(j)))
@@ -173,6 +176,7 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
                 }
 
                 #endregion
+#endif
             }
 
             #region dodf = -2f * (part0 - part1) + 2f * (part2 - part3);
@@ -185,6 +189,7 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
 
             #endregion
 
+#if DODF_DEBUG_CHECKS
             #region floating point checks
 
             if (dodf.Any(j => float.IsInfinity(j) || float.IsNaN(j) || float.IsNegativeInfinity(j) || float.IsPositiveInfinity(j)))
@@ -193,6 +198,7 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
             }
 
             #endregion
+#endif
 
             return dodf;
         }

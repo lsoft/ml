@@ -36,8 +36,11 @@ namespace MyNNConsoleApp
                 "NEW TAKES {0}",
                 (afterCreate1 - beforeCreate1));
 
+            int index = 0;
+
             var beforeChecking = DateTime.Now;
-            for (var dd = 0; dd < data.Count; dd++)
+            Parallel.For(0, data.Count, dd =>
+            //for (var dd = 0; dd < data.Count; dd++)
             {
                 var oldItem = pabOld.CalculateDodf(dd);
                 var newItem = pabNew.CalculateDodf(dd);
@@ -57,11 +60,13 @@ namespace MyNNConsoleApp
                     }
                 }
 
-                if (dd % 100 == 0)
+                var newIndex = Interlocked.Increment(ref index);
+                if (newIndex  % 100 == 0)
                 {
-                    Console.WriteLine("{0} out of {1}", dd, data.Count);
+                    Console.WriteLine("{0} out of {1}", newIndex, data.Count);
                 }
             }
+            );//Parallel.For
             var afterChecking = DateTime.Now;
             Console.WriteLine(
                 "CHECKING TAKES {0}",
@@ -74,11 +79,13 @@ namespace MyNNConsoleApp
         {
             const int count =
                 //5;
+                //1000;
                 //3000;
                 12000;
             const int inputLength =
                 //50;
-                100;
+                //100;
+                200;
             const int classesCount = 10;
 
             var rnd = new Random(DateTime.Now.Millisecond);

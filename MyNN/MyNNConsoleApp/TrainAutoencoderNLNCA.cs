@@ -16,6 +16,8 @@ using MyNN.NeuralNet.Structure.Neurons.Function;
 using MyNN.NeuralNet.Train.Algo;
 using MyNN.NeuralNet.Train.Algo.NLNCA;
 using MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator;
+using MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL;
+using MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL.DistanceDict;
 using MyNN.NeuralNet.Train.Metrics;
 using MyNN.NeuralNet.Train.Validation;
 using MyNN.NeuralNet.Train.Validation.NLNCA;
@@ -25,7 +27,6 @@ namespace MyNNConsoleApp
     public class TrainAutoencoderNLNCA
     {
         public void Train(
-            ref int rndSeed,
             MultiLayerNeuralNetwork network,
             DataSet trainData,
             DataSet validationData,
@@ -56,10 +57,10 @@ namespace MyNNConsoleApp
 
             network.SetComputer(computer);
 
-            var batchSize = 100;//trainData.Count/12;
+            var batchSize = 50;//trainData.Count/12;
 
             var config = new LearningAlgorithmConfig(
-                new LinearLearningRate(0.1f, 0.99f),
+                new LinearLearningRate(0.01f, 0.99f),
                 batchSize,
                 0.0f,
                 1000,
@@ -74,7 +75,7 @@ namespace MyNNConsoleApp
                     config,
                     //new NLNCAValidation(trainData, validationData, colorProvider, 3).Validate,
                     new AutoencoderValidation(validationData, 100, 100).Validate,
-                    (uzkii) => new DodfCalculatorVectorized(uzkii), 
+                    (uzkii) => new DodfCalculatorOpenCL(uzkii, new VOpenCLDistanceDictFactory()), 
                     0.1f,
                     50);
 

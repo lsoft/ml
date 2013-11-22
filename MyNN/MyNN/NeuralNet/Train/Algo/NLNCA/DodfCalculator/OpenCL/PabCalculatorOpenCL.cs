@@ -8,6 +8,10 @@ using MyNN.Data;
 using MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL.DistanceDict;
 using OpenCL.Net;
 
+#if PAB_DEBUG_CHECKS
+    #undef PAB_DEBUG_CHECKS
+#endif
+
 namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
 {
     public class PabCalculatorOpenCL 
@@ -41,20 +45,20 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
 
             #region считаем distance dict
 
-            var x0 = DateTime.Now;
+            //var x0 = DateTime.Now;
             _expDistanceDict = _createDistanceDictFactory.CreateDistanceDict(_fxwList);
-            var x1 = DateTime.Now;
-            var diff1 = x1 - x0;
-            Console.WriteLine(
-                "Считаем distanceDict методом {0} = {1}",
-                _createDistanceDictFactory.GetType().Name,
-                diff1);
+            //var x1 = DateTime.Now;
+            //var diff1 = x1 - x0;
+            //Console.WriteLine(
+            //    "Считаем distanceDict методом {0} = {1}",
+            //    _createDistanceDictFactory.GetType().Name,
+            //    diff1);
 
             #endregion
 
             #region считаем знаменатель
 
-            var x2 = DateTime.Now;
+            //var x2 = DateTime.Now;
             _znList = new float[_fxwList.Count].ToList();
 
             Parallel.For(0, _fxwList.Count, cc =>
@@ -64,15 +68,15 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
                 _znList[cc] = zn;
             }
             );//Parallel.For
-            var x3 = DateTime.Now;
-            var diff2 = x3 - x2;
-            Console.WriteLine("считаем знаменатель = {0}", diff2);
+            //var x3 = DateTime.Now;
+            //var diff2 = x3 - x2;
+            //Console.WriteLine("считаем знаменатель = {0}", diff2);
 
             #endregion
 
             #region считаем pi, pi * di
 
-            var x4 = DateTime.Now;
+            //var x4 = DateTime.Now;
             var internalDict = new Dictionary<int, List<int>>();
             for (var cc = 0; cc < _fxwList.Count; cc++)
             {
@@ -85,13 +89,12 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
 
                 internalDict[key].Add(cc);
             }
-            var x5 = DateTime.Now;
-            var diff3 = x5 - x4;
-            Console.WriteLine("считаем pi, pi * di #1 = {0}", diff3);
+            //var x5 = DateTime.Now;
+            //var diff3 = x5 - x4;
+            //Console.WriteLine("считаем pi, pi * di #1 = {0}", diff3);
 
-            var x6 = DateTime.Now;
+            //var x6 = DateTime.Now;
             _piList = new List<float>();
-            //_pidiList = new List<float[]>();
             for (var l = 0; l < _fxwList.Count; l++)
             {
                 var fxl = _fxwList[l];
@@ -106,9 +109,9 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
 
                 _piList.Add(pi);
             }
-            var x7 = DateTime.Now;
-            var diff4 = x7 - x6;
-            Console.WriteLine("считаем pi, pi * di #2 = {0}", diff4);
+            //var x7 = DateTime.Now;
+            //var diff4 = x7 - x6;
+            //Console.WriteLine("считаем pi, pi * di #2 = {0}", diff4);
 
             #endregion
         }
@@ -197,11 +200,12 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
                 result = ch / _znList[a];
             }
 
+#if PAB_DEBUG_CHECKS
             if (float.IsInfinity(result) || float.IsNaN(result) || float.IsNegativeInfinity(result) || float.IsPositiveInfinity(result))
             {
                 throw new InvalidOperationException("float.IsInfinity(result) || float.IsNaN(result) || float.IsNegativeInfinity(result) || float.IsPositiveInfinity(result)");
             }
-
+#endif
 
             return result;
         }
