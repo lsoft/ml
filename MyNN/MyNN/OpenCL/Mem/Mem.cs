@@ -40,5 +40,11 @@ namespace MyNN.OpenCL.Mem
             _mem.Read(_commandQueue, _sizeOfT * Array.Length, Array, blockMode);
         }
 
+        public override void Dispose()
+        {
+            this.Array = null;
+
+            base.Dispose();
+        }
     }
 }

@@ -441,9 +441,7 @@
     <None Include="AForge.NET\Externals\ffmpeg\lib\swscale.lib" />
     <None Include="AForge.NET\Externals\libfreenect\APACHE20" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NeuralNet\Train\Algo\NLNCA\DodfCalculator\OpenCL\Znamenatel\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

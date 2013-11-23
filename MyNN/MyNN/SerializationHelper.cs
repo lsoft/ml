@@ -96,7 +96,7 @@ namespace MyNN
             Console.WriteLine("Loading " + fileName);
 
             var formatter = new BinaryFormatter();
-            using (Stream stream = File.Open(fileName, FileMode.Open))
+            using (var stream = File.Open(fileName, FileMode.Open))
             {
                 return (T)formatter.Deserialize(stream);
             }
@@ -105,7 +105,7 @@ namespace MyNN
         public static void SaveToFile<T>(T obj, string fileName)
         {
             var formatter = new BinaryFormatter();
-            using (Stream stream = File.Open(fileName, FileMode.Create))
+            using (var stream = File.Open(fileName, FileMode.Create))
             {
                 formatter.Serialize(stream, obj);
             }
@@ -116,7 +116,7 @@ namespace MyNN
             T result;
 
             var formatter = new BinaryFormatter();
-            using (Stream stream = new MemoryStream(1000000))
+            using (var stream = new MemoryStream(1000000))
             {
                 formatter.Serialize(stream, obj);
 

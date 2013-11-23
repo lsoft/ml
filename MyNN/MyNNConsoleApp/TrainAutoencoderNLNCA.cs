@@ -75,7 +75,10 @@ namespace MyNNConsoleApp
                     config,
                     //new NLNCAValidation(trainData, validationData, colorProvider, 3).Validate,
                     new AutoencoderValidation(validationData, 100, 100).Validate,
-                    (uzkii) => new DodfCalculatorOpenCL(uzkii, new VOpenCLDistanceDictFactory()), 
+                    (uzkii) => new DodfCalculatorOpenCL(
+                        uzkii,
+                        //new CSharpDistanceDictFactory()),
+                         new VOpenCLDistanceDictFactory()), 
                     0.1f,
                     50);
 

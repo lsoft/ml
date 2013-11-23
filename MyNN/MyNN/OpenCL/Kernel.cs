@@ -20,7 +20,7 @@ namespace MyNN.OpenCL
         {
             _commandQueue = commandQueue;
             _program = program;
-
+            
             _kernel = _program.CreateKernel(kernelName);
         }
 
@@ -53,6 +53,7 @@ namespace MyNN.OpenCL
         public void Dispose()
         {
             Cl.ReleaseKernel(_kernel);
+            Cl.ReleaseProgram(_program);
         }
     }
 }

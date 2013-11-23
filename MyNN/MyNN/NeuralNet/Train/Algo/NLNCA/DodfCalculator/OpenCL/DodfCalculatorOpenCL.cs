@@ -92,6 +92,10 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA.DodfCalculator.OpenCL
                     diff1 < diff0
                         ? (IDistanceDictFactory) opencl
                         : (IDistanceDictFactory) csharp;
+
+                Console.WriteLine(
+                    "Choosed {0}",
+                    _chooseDistanceDictFactory.GetType().Name);
             }
 
             return

@@ -286,6 +286,7 @@ namespace MyNN.OpenCL
                 k.Dispose();
             }
 
+            Cl.ReleaseCommandQueue(_commandQueue);
             Cl.ReleaseContext(_context);
         }
     }

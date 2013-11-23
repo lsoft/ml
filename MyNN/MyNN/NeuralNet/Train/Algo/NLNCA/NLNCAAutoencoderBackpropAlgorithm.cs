@@ -99,56 +99,17 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA
 
                 #endregion
 
-                var ou_begin = DateTime.Now;
+                //var ou_begin = DateTime.Now;
                 List<DataItem> uzkii;
                 List<int> uzSootv;
                 ObtainUzkiiData3(
                     data,
                     out uzSootv,
                     out uzkii);
-                var ou_middle = DateTime.Now;
+                //var ou_middle = DateTime.Now;
                 var dodfCalculator = _dodfCalculatorFactory(uzkii);
-                var ou_end = DateTime.Now;
-                //Console.WriteLine("Create uzkii = {0}, create dodf calculator = {1}", ou_middle - ou_begin, ou_end - ou_middle);
-
-                //var ou_begin = DateTime.Now;
-                //List<DataItem> uzkii;
-                //List<int> uzSootv;
-                //ObtainUzkiiData2(
-                //    data ,
-                //    out uzSootv,
-                //    out uzkii);
-                //var ou_middle = DateTime.Now;
-                //var dodfCalculator = _dodfCalculatorFactory(uzkii);
                 //var ou_end = DateTime.Now;
                 //Console.WriteLine("Create uzkii = {0}, create dodf calculator = {1}", ou_middle - ou_begin, ou_end - ou_middle);
-
-                //var ou_begin = DateTime.Now;
-                //List<DataItem> uzkii;
-                //List<int> uzSootv;
-                //ObtainUzkiiData(
-                //    data ,
-                //    out uzSootv,
-                //    out uzkii);
-                //var ou_middle = DateTime.Now;
-                //var dodfCalculator = _dodfCalculatorFactory(uzkii);
-                //var ou_end = DateTime.Now;
-                //Console.WriteLine("Create uzkii = {0}, create dodf calculator = {1}", ou_middle - ou_begin, ou_end - ou_middle);
-
-                //сравнение старого и нового метода получения данных для dodfcalculator
-                //for (var ccc = 0; ccc < uzkii3.Count; ccc++)
-                //{
-                //    for (var ddd = 0; ddd < _takeIntoAccount; ddd++)
-                //    {
-                //        if (Math.Abs(uzkii3[ccc].Input[ddd] - uzkii[ccc].Input[ddd]) > 1e-4)
-                //        {
-                //            throw new InvalidExpressionException("!!!");
-                //        }
-                //    }
-                //}
-
-
-                //*/
 
                 //process one batch
                 //float maxdiff = 0f;

@@ -12,7 +12,7 @@ namespace MyNN.NeuralNet.Computers
     {
         private readonly VNNCLProvider _clProvider;
 
-        private Kernel[] _kernels;
+        private readonly Kernel[] _kernels;
 
         public VOpenCLComputer(
             VNNCLProvider clProvider,
