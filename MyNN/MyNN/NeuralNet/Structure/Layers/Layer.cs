@@ -164,8 +164,9 @@ namespace MyNN.NeuralNet.Structure.Layers
                 var na = new TrainableNeuron[this.NonBiasNeuronCount];
                 Array.Copy(this.Neurons, na, this.NonBiasNeuronCount);
 
+                this.LastOutput = new float[this.NonBiasNeuronCount];
                 this.Neurons = na;
-                _isNeedBiasNeuron = false;
+                this._isNeedBiasNeuron = false;
             }
         }
 

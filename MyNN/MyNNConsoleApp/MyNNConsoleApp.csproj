@@ -75,6 +75,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
+    <Compile Include="TrainStackedNLNCAAutoencoder.cs" />
+    <Compile Include="NLNCAAutoencoderKNNTest.cs" />
     <Compile Include="pabProfiler.cs" />
     <Compile Include="TrainAutoencoderNLNCA.cs" />
     <Compile Include="TfidfCalculator.cs" />

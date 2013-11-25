@@ -96,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Autoencoders\Autoencoder.cs" />
+    <Compile Include="Autoencoders\StackedNLNCAAutoencoder.cs" />
     <Compile Include="Autoencoders\StackedAutoencoder.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\DeepBeliefNetwork.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\DBNFeatureExtractor.cs" />

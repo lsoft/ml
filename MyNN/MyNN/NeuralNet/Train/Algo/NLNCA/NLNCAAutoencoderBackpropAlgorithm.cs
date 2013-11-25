@@ -51,6 +51,7 @@ namespace MyNN.NeuralNet.Train.Algo.NLNCA
             {
                 throw new ArgumentNullException("dodfCalculatorFactory");
             }
+
             _dodfCalculatorFactory = dodfCalculatorFactory;
             _lambda = lambda;
             _takeIntoAccount = takeIntoAccount;

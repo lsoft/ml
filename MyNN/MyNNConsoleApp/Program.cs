@@ -35,8 +35,11 @@ namespace MyNNConsoleApp
                 //return;
 
 
-                var rndSeed = 33514;
+                var rndSeed = 32514;
 
+                var trainer = new TrainStackedNLNCAAutoencoder();
+                trainer.Train(ref rndSeed);
+                return;
 
                 var trainData = MNISTDataProvider.GetDataSet(
                     "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -47,12 +50,20 @@ namespace MyNNConsoleApp
                     "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
                     100,
                     true);
-                validationData = validationData.ConvertToAutoencoder();
+                //validationData = validationData.ConvertToAutoencoder();
 
                 var testData = MNISTDataProvider.GetDataSet(
                     "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
                     100,
                     true);
+
+                //NLNCAAutoencoderKNNTest.Test(
+                //    trainData,
+                //    testData,
+                //    50,
+                //    3);
+                //Console.ReadLine();
+                //return;
 
                 var root = ".";
 
@@ -85,12 +96,12 @@ namespace MyNNConsoleApp
                 //    validationData,
                 //    new MNISTColorProvider());
 
-                var trainer = new TrainAutoencoderNLNCA();
-                trainer.Train(
-                    network,
-                    trainData,
-                    validationData,
-                    new MNISTColorProvider());
+                //var trainer = new TrainAutoencoderNLNCA();
+                //trainer.Train(
+                //    network,
+                //    trainData,
+                //    validationData,
+                //    new MNISTColorProvider());
 
                 //var noiser =
                 //    new ZeroMaskingNoiser(ref rndSeed, 0.25f);
