@@ -28,14 +28,14 @@ namespace MyNNConsoleApp
             var root = "SDAE" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
             var trainData = MNISTDataProvider.GetDataSet(
-                "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
-                //"_MNIST_DATABASE/mnist/trainingset/",
+                //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
+                "_MNIST_DATABASE/mnist/trainingset/",
                 1000,
                 true);
 
             var validationData = MNISTDataProvider.GetDataSet(
-                "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
-                //"_MNIST_DATABASE/mnist/testset/",
+                //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
+                "_MNIST_DATABASE/mnist/testset/",
                 100,
                 true);
 
@@ -77,13 +77,13 @@ namespace MyNNConsoleApp
                 },
                 (int depthIndex) =>
                 {
-                    var lr = 0.001f;
+                    var lr = 0.002f;
 
                     var conf = new LearningAlgorithmConfig(
                         new LinearLearningRate(lr, 0.99f),
                         100,
                         0.0f,
-                        10,
+                        50,
                         0f,
                         -0.001f,
                         new HalfSquaredEuclidianDistance());
