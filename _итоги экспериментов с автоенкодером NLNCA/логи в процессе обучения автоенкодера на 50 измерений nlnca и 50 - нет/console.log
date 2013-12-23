@@ -1,0 +1,46 @@
+эпоха обучения автоенкодера - 0, 20 и 46.
+точность распознавания методом KNN в процессе обучения 
+1) для nlnca нейронов растет (90.37%, 92.34%, 92.35%)
+2) точность  для не nlnca нейронов падает (86.06%, 85.80%, 84.77%)
+но при этом общая ошибка восстановления автоенкодера все время падает (не приведено в логе)
+
+
+
+
+
+
+Processing images...
+processing images takes 0 sec
+Processing images...
+processing images takes 0 sec
+Loading NLNCA Autoencoder20131129225357 MLP2/epoche 0/20131129235430-perItemError=0,1771252.mynn
+KNN TEST: total 10000, NLNCA-correct = (9037, 90%), NotNLNCA-correct = (8606, 86%)
+.......... press any key to exit
+............... Close logging ...............
+
+
+
+
+
+Processing images...
+processing images takes 0 sec
+Processing images...
+processing images takes 0 sec
+Loading NLNCA Autoencoder20131129225357 MLP2/epoche 20/20131130195557-perItemError=0,0690959.mynn
+KNN TEST: total 10000, NLNCA-correct = (9234, 92%), NotNLNCA-correct = (8580, 85%)
+.......... press any key to exit
+............... Close logging ...............
+
+
+
+
+
+
+Processing images...
+processing images takes 0 sec
+Processing images...
+processing images takes 0 sec
+Loading NLNCA Autoencoder20131129225357 MLP2/epoche 46/20131201222317-perItemError=0,05835352.mynn
+KNN TEST: total 10000, NLNCA-correct = (9239, 92%), NotNLNCA-correct = (8477, 84%)
+.......... press any key to exit
+............... Close logging ...............

@@ -1,0 +1,480 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{67074E3D-0BF2-4E4A-A5EB-EDF74F33A5AC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MyNN</RootNamespace>
+    <AssemblyName>MyNN</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MathNet.Numerics, Version=2.4.0.26, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>NCA\Linear\Libraries\Math.NET\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord, Version=2.9.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Accord.NET\Accord.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.MachineLearning, Version=2.9.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Accord.NET\Accord.MachineLearning.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.Math, Version=2.9.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Accord.NET\Accord.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge, Version=2.2.4.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>AForge.NET\Release\AForge.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Math, Version=2.2.4.0, Culture=neutral, PublicKeyToken=abba2e25397ee8c9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>AForge.NET\Release\AForge.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp, Version=2.0.4666.42387, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\OpenCVSharp\OpenCvSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\DeepBeliefNetwork.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\DBNFeatureExtractor.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IFeatureExtractor.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IsolatedFeatureExtractor.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\IRestrictedBoltzmannMachine.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\CD.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\IRBMNegativeSampler.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\ParallelTempering\ITemperature.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\ParallelTempering\LinearTemperature.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\PCD.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\PT.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Reconstructor\DBNImageReconstructor.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Reconstructor\IsolatedImageReconstructor.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\RestrictedBoltzmannMachine.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\CDBaseSamplerProvider.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\INegativeSamplerProvider.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\PCDBaseSamplerProvider.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\PTBaseSamplerProvider.cs" />
+    <Compile Include="BoltzmannMachines\IImageReconstructor.cs" />
+    <Compile Include="BoltzmannMachines\LinearNReLU\DeepBeliefNetwork.cs" />
+    <Compile Include="BoltzmannMachines\LinearNReLU\RBM\RestrictedBoltzmannMachine.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\DataProviders\MostHardPercentDataProvider.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\DataProviders\RandomSeventyFivePercentDataProvider.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\EpocheTrainers\C45DecisionTreeTrainer.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\EpocheTrainers\Classifiers\MLPClassifier.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\EpocheTrainers\Classifiers\DecisionTreeEpocheClassifier.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\EpocheTrainers\MLPTrainer.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\IEpocheClassifier.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\IEpocheDataProvider.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\IEpocheTrainer.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\SAMME.cs" />
+    <Compile Include="Boosting\SAMMEBoosting\SAMMEClassifierSet.cs" />
+    <Compile Include="Data\DataItem.cs" />
+    <Compile Include="Data\DataSet.cs" />
+    <Compile Include="Data\TrainDataProvider\ITrainDataProvider.cs" />
+    <Compile Include="Data\TrainDataProvider\NoDeformationTrainDataProvider.cs" />
+    <Compile Include="Data\TrainDataProvider\NoiseDataProvider.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\AllNoisers.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\DistanceChangeNoiser.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\MultiplierNoiser.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\Range\FullRange.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\Range\IRange.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\Range\RandomRange.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\SetOfNoisers2.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\GaussNoiser.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\SaltAndPepperNoiser.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\INoiser.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\SetOfNoisers.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\ZeroMaskingNoiser.cs" />
+    <Compile Include="Data\TypicalDataProvider\MNISTDataProvider.cs" />
+    <Compile Include="Data\TypicalDataProvider\MNISTElasticExpander.cs" />
+    <Compile Include="Data\TypicalDataProvider\MNISTKaggleDataProvider.cs" />
+    <Compile Include="Data\TypicalDataProvider\MNISTVisualizer.cs" />
+    <Compile Include="Data\Visualizer\BitmapHelper.cs" />
+    <Compile Include="Data\Visualizer\IVisualizer.cs" />
+    <Compile Include="DoubleConverter.cs" />
+    <Compile Include="KNN\KNearest.cs" />
+    <Compile Include="LearningRateController\ConstLearningRate.cs" />
+    <Compile Include="LearningRateController\ILearningRate.cs" />
+    <Compile Include="LearningRateController\LinearLearningRate.cs" />
+    <Compile Include="MLP2\Autoencoders\Autoencoder.cs" />
+    <Compile Include="MLP2\Autoencoders\StackedAutoencoder.cs" />
+    <Compile Include="MLP2\Autoencoders\StackedNLNCAAutoencoder.cs" />
+    <Compile Include="MLP2\Backpropagaion\BackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\DataSourceDelegate.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculator.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorMathNet.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorOld.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorVectorized.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorVectorizedDebug.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\IDodfCalculator.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\CSharpDistanceDictFactory.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\DistanceDictCLProvider.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\IDistanceDictFactory.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\OpenCLDistanceDictFactory.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\VOpenCLDistanceDictFactory.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DodfCalculatorOpenCL.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\PabCalculatorOpenCL.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCLTranspose2\OpenCLTransposeBackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCLTranspose2\Transpose2KernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\DropConnectKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\DropConnectOpenCLBackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\BGOpenCLWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\BigArrayOpenCLWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\IOpenCLWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\IWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\OpenCLWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\IEpocheTrainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\AutoendoderNLNCAKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\OpenCLAutoencoderNLNCABackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\NLNCAKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\OpenCLNLNCABackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCLTranspose\TransposeKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCLTranspose\OpenCLTransposeBackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\KernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\OpenCLBackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\Metrics\HalfSquaredEuclidianDistance.cs" />
+    <Compile Include="MLP2\Backpropagaion\Metrics\IMetrics.cs" />
+    <Compile Include="MLP2\Backpropagaion\Metrics\Loglikelihood.cs" />
+    <Compile Include="MLP2\Backpropagaion\Metrics\RMSE.cs" />
+    <Compile Include="MLP2\Backpropagaion\Validation\AutoencoderValidation.cs" />
+    <Compile Include="MLP2\Backpropagaion\Validation\ClassificationValidation.cs" />
+    <Compile Include="MLP2\Backpropagaion\Validation\IValidation.cs" />
+    <Compile Include="MLP2\Backpropagaion\Validation\MetricErrorValidation.cs" />
+    <Compile Include="MLP2\Backpropagaion\Validation\NLNCA\IColorProvider.cs" />
+    <Compile Include="MLP2\Backpropagaion\Validation\NLNCA\MNISTColorProvider.cs" />
+    <Compile Include="MLP2\Backpropagaion\Validation\NLNCA\NLNCAValidation.cs" />
+    <Compile Include="MLP2\ForwardPropagation\CCharpForwardPropagation.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnectOpenCLForwardPropagation.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInferenceMedian.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInferenceNew16.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInferenceNew.cs" />
+    <Compile Include="MLP2\ForwardPropagation\InferenceOpenCLForwardPropagation.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnect\ILayerInference.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInference.cs" />
+    <Compile Include="MLP2\ForwardPropagation\IForwardPropagation.cs" />
+    <Compile Include="MLP2\ForwardPropagation\OpenCLForwardPropagation.cs" />
+    <Compile Include="MLP2\LearningConfig\ILearningAlgorithmConfig.cs" />
+    <Compile Include="MLP2\LearningConfig\LearningAlgorithmConfig.cs" />
+    <Compile Include="MLP2\OpenCL\VectorizationHelper.cs" />
+    <Compile Include="MLP2\OpenCL\VectorizationSizeEnum.cs" />
+    <Compile Include="MLP2\Randomizer\DefaultRandomizer.cs" />
+    <Compile Include="MLP2\Randomizer\IRandomizer.cs" />
+    <Compile Include="MLP2\Randomizer\NoRandomRandomizer.cs" />
+    <Compile Include="MLP2\SparseCalculator.cs" />
+    <Compile Include="MLP2\Structure\ILayerState.cs" />
+    <Compile Include="MLP2\Structure\IMLPState.cs" />
+    <Compile Include="MLP2\Structure\LayerInfo.cs" />
+    <Compile Include="MLP2\Structure\LayerState.cs" />
+    <Compile Include="MLP2\Structure\MLP.cs" />
+    <Compile Include="MLP2\Structure\MLPLayer.cs" />
+    <Compile Include="MLP2\Structure\MLPState.cs" />
+    <Compile Include="MLP2\Structure\Neurons\BiasMLPNeuron.cs" />
+    <Compile Include="MLP2\Structure\Neurons\Function\HyperbolicTangensFunction.cs" />
+    <Compile Include="MLP2\Structure\Neurons\Function\IFunction.cs" />
+    <Compile Include="MLP2\Structure\Neurons\Function\IRLUFunction.cs" />
+    <Compile Include="MLP2\Structure\Neurons\Function\LinearFunction.cs" />
+    <Compile Include="MLP2\Structure\Neurons\Function\RLUFunction.cs" />
+    <Compile Include="MLP2\Structure\Neurons\Function\SigmoidFunction.cs" />
+    <Compile Include="MLP2\Structure\Neurons\Function\SparsifierFunction.cs" />
+    <Compile Include="MLP2\Structure\Neurons\HiddeonOutputMLPNeuron.cs" />
+    <Compile Include="MLP2\Structure\Neurons\InputMLPNeuron.cs" />
+    <Compile Include="MLP2\Structure\Neurons\TrainableMLPNeuron.cs" />
+    <Compile Include="MLP2\Transposer\IOpenCLTranposer.cs" />
+    <Compile Include="MLP2\Transposer\ITranposer.cs" />
+    <Compile Include="MLP2\Transposer\TranposerNvidia.cs" />
+    <Compile Include="NCA\Linear\NCA.cs" />
+    <Compile Include="NCA\Linear\PijCalculator.cs" />
+    <Compile Include="Pair.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="rfloat.cs" />
+    <Compile Include="SerializationHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenCL.Net\OpenCL.Net.csproj">
+      <Project>{70AC8A83-9850-4F73-B7BC-541EB2505BE6}</Project>
+      <Name>OpenCL.Net</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Accord.NET\Accord.Audio.dll" />
+    <Content Include="Accord.NET\Accord.Audio.Formats.dll" />
+    <Content Include="Accord.NET\Accord.Audio.Formats.pdb" />
+    <Content Include="Accord.NET\Accord.Audio.Formats.XML" />
+    <Content Include="Accord.NET\Accord.Audio.pdb" />
+    <Content Include="Accord.NET\Accord.Audio.XML" />
+    <Content Include="Accord.NET\Accord.Audition.dll" />
+    <Content Include="Accord.NET\Accord.Audition.pdb" />
+    <Content Include="Accord.NET\Accord.Audition.XML" />
+    <Content Include="Accord.NET\Accord.Controls.Audio.dll" />
+    <Content Include="Accord.NET\Accord.Controls.Audio.pdb" />
+    <Content Include="Accord.NET\Accord.Controls.Audio.XML" />
+    <Content Include="Accord.NET\Accord.Controls.dll" />
+    <Content Include="Accord.NET\Accord.Controls.Imaging.dll" />
+    <Content Include="Accord.NET\Accord.Controls.Imaging.pdb" />
+    <Content Include="Accord.NET\Accord.Controls.Imaging.XML" />
+    <Content Include="Accord.NET\Accord.Controls.pdb" />
+    <Content Include="Accord.NET\Accord.Controls.Vision.dll" />
+    <Content Include="Accord.NET\Accord.Controls.Vision.pdb" />
+    <Content Include="Accord.NET\Accord.Controls.Vision.XML" />
+    <Content Include="Accord.NET\Accord.Controls.xml" />
+    <Content Include="Accord.NET\Accord.DirectSound.dll" />
+    <Content Include="Accord.NET\Accord.DirectSound.pdb" />
+    <Content Include="Accord.NET\Accord.DirectSound.XML" />
+    <Content Include="Accord.NET\Accord.dll" />
+    <Content Include="Accord.NET\Accord.Imaging.dll" />
+    <Content Include="Accord.NET\Accord.Imaging.pdb" />
+    <Content Include="Accord.NET\Accord.Imaging.XML" />
+    <Content Include="Accord.NET\Accord.MachineLearning.dll" />
+    <Content Include="Accord.NET\Accord.MachineLearning.pdb" />
+    <Content Include="Accord.NET\Accord.MachineLearning.XML" />
+    <Content Include="Accord.NET\Accord.Math.dll" />
+    <Content Include="Accord.NET\Accord.Math.pdb" />
+    <Content Include="Accord.NET\Accord.Math.XML" />
+    <Content Include="Accord.NET\Accord.Neuro.dll" />
+    <Content Include="Accord.NET\Accord.Neuro.pdb" />
+    <Content Include="Accord.NET\Accord.Neuro.XML" />
+    <Content Include="Accord.NET\Accord.pdb" />
+    <Content Include="Accord.NET\Accord.Statistics.dll" />
+    <Content Include="Accord.NET\Accord.Statistics.pdb" />
+    <Content Include="Accord.NET\Accord.Statistics.XML" />
+    <Content Include="Accord.NET\Accord.Vision.dll" />
+    <Content Include="Accord.NET\Accord.Vision.pdb" />
+    <Content Include="Accord.NET\Accord.Vision.XML" />
+    <Content Include="Accord.NET\Accord.xml" />
+    <Content Include="Accord.NET\GPL\Accord.MachineLearning.GPL.dll" />
+    <Content Include="Accord.NET\GPL\Accord.MachineLearning.GPL.pdb" />
+    <Content Include="Accord.NET\GPL\Accord.MachineLearning.GPL.XML" />
+    <Content Include="Accord.NET\GPL\License %28GPL%29.txt" />
+    <Content Include="Accord.NET\SlimDX.dll" />
+    <Content Include="Accord.NET\SlimDX.xml" />
+    <Content Include="Accord.NET\ZedGraph.dll" />
+    <Content Include="Accord.NET\ZedGraph.xml" />
+    <Content Include="AForge.NET\Externals\ffmpeg\AForge ReadMe.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\bin\avcodec-53.dll" />
+    <Content Include="AForge.NET\Externals\ffmpeg\bin\avdevice-53.dll" />
+    <Content Include="AForge.NET\Externals\ffmpeg\bin\avfilter-2.dll" />
+    <Content Include="AForge.NET\Externals\ffmpeg\bin\avformat-53.dll" />
+    <Content Include="AForge.NET\Externals\ffmpeg\bin\avutil-51.dll" />
+    <Content Include="AForge.NET\Externals\ffmpeg\bin\swscale-2.dll" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavcodec\avcodec.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavcodec\avfft.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavcodec\dxva2.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavcodec\opt.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavcodec\vaapi.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavcodec\vda.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavcodec\vdpau.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavcodec\version.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavcodec\xvmc.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavdevice\avdevice.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavfilter\avcodec.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavfilter\avfilter.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavfilter\avfiltergraph.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavfilter\buffersink.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavfilter\vsrc_buffer.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavformat\avformat.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavformat\avio.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavformat\version.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\adler32.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\aes.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\attributes.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\audioconvert.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\avassert.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\avconfig.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\avstring.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\avutil.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\base64.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\bswap.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\common.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\cpu.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\crc.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\dict.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\error.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\eval.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\fifo.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\file.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\imgutils.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\intfloat_readwrite.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\intreadwrite.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\lfg.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\log.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\lzo.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\mathematics.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\md5.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\mem.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\opt.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\parseutils.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\pixdesc.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\pixfmt.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\random_seed.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\rational.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\samplefmt.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libavutil\sha.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libpostproc\postprocess.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libswresample\swresample.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\include\libswscale\swscale.h" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\bzip2.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\ffmpeg.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\freetype.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\frei0r.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\gsm.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\lame.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\libvpx.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\opencore-amr.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\openjpeg.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\rtmp.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\schroedinger.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\sdl.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\speex.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\theora.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\vo-aacenc.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\vo-amrwbenc.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\vorbis.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\x264.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\xavs.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\xvid.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\licenses\zlib.txt" />
+    <Content Include="AForge.NET\Externals\ffmpeg\README.txt" />
+    <Content Include="AForge.NET\Externals\GhostAPI\AForge ReadMe.txt" />
+    <Content Include="AForge.NET\Externals\GhostAPI\GhostAPI.dll" />
+    <Content Include="AForge.NET\Externals\GhostAPI\PbkComm32.dll" />
+    <Content Include="AForge.NET\Externals\GhostAPI\PbkUsbPort.dll" />
+    <Content Include="AForge.NET\Externals\GhostAPI\relnotes.txt" />
+    <Content Include="AForge.NET\Externals\libfreenect\AForge ReadMe.txt" />
+    <Content Include="AForge.NET\Externals\libfreenect\freenect.dll" />
+    <Content Include="AForge.NET\Externals\msinttypes\AForge ReadMe.txt" />
+    <Content Include="AForge.NET\Externals\msinttypes\changelog.txt" />
+    <Content Include="AForge.NET\Externals\msinttypes\inttypes.h" />
+    <Content Include="AForge.NET\Externals\msinttypes\stdint.h" />
+    <Content Include="AForge.NET\Externals\TeRK\AForge ReadMe.txt" />
+    <Content Include="AForge.NET\Externals\TeRK\TeRK.dll" />
+    <Content Include="AForge.NET\Release\AForge.Controls.dll" />
+    <Content Include="AForge.NET\Release\AForge.Controls.xml" />
+    <Content Include="AForge.NET\Release\AForge.DebuggerVisualizers %282010%29.dll" />
+    <Content Include="AForge.NET\Release\AForge.dll" />
+    <Content Include="AForge.NET\Release\AForge.Fuzzy.dll" />
+    <Content Include="AForge.NET\Release\AForge.Fuzzy.xml" />
+    <Content Include="AForge.NET\Release\AForge.Genetic.dll" />
+    <Content Include="AForge.NET\Release\AForge.Genetic.xml" />
+    <Content Include="AForge.NET\Release\AForge.Imaging.dll" />
+    <Content Include="AForge.NET\Release\AForge.Imaging.Formats.dll" />
+    <Content Include="AForge.NET\Release\AForge.Imaging.Formats.xml" />
+    <Content Include="AForge.NET\Release\AForge.Imaging.IPPrototyper.dll" />
+    <Content Include="AForge.NET\Release\AForge.Imaging.xml" />
+    <Content Include="AForge.NET\Release\AForge.MachineLearning.dll" />
+    <Content Include="AForge.NET\Release\AForge.MachineLearning.xml" />
+    <Content Include="AForge.NET\Release\AForge.Math.dll" />
+    <Content Include="AForge.NET\Release\AForge.Math.xml" />
+    <Content Include="AForge.NET\Release\AForge.Neuro.dll" />
+    <Content Include="AForge.NET\Release\AForge.Neuro.xml" />
+    <Content Include="AForge.NET\Release\AForge.Robotics.Lego.dll" />
+    <Content Include="AForge.NET\Release\AForge.Robotics.Lego.xml" />
+    <Content Include="AForge.NET\Release\AForge.Robotics.Surveyor.dll" />
+    <Content Include="AForge.NET\Release\AForge.Robotics.Surveyor.xml" />
+    <Content Include="AForge.NET\Release\AForge.Robotics.TeRK.dll" />
+    <Content Include="AForge.NET\Release\AForge.Robotics.TeRK.xml" />
+    <Content Include="AForge.NET\Release\AForge.Video.DirectShow.dll" />
+    <Content Include="AForge.NET\Release\AForge.Video.DirectShow.xml" />
+    <Content Include="AForge.NET\Release\AForge.Video.dll" />
+    <Content Include="AForge.NET\Release\AForge.Video.FFMPEG.dll" />
+    <Content Include="AForge.NET\Release\AForge.Video.FFMPEG.xml" />
+    <Content Include="AForge.NET\Release\AForge.Video.Kinect.dll" />
+    <Content Include="AForge.NET\Release\AForge.Video.Kinect.xml" />
+    <Content Include="AForge.NET\Release\AForge.Video.VFW.dll" />
+    <Content Include="AForge.NET\Release\AForge.Video.VFW.xml" />
+    <Content Include="AForge.NET\Release\AForge.Video.Ximea.dll" />
+    <Content Include="AForge.NET\Release\AForge.Video.Ximea.xml" />
+    <Content Include="AForge.NET\Release\AForge.Video.xml" />
+    <Content Include="AForge.NET\Release\AForge.Vision.dll" />
+    <Content Include="AForge.NET\Release\AForge.Vision.xml" />
+    <Content Include="AForge.NET\Release\AForge.xml" />
+    <Content Include="AForge.NET\Release\IPPrototyper.exe" />
+    <Content Include="NCA\Linear\Libraries\Math.NET\MathNet.Numerics.dll" />
+    <Content Include="NCA\Linear\Libraries\Math.NET\MathNet.Numerics.FSharp.dll" />
+    <Content Include="NCA\Linear\Libraries\Math.NET\MathNet.Numerics.FSharp.pdb" />
+    <Content Include="NCA\Linear\Libraries\Math.NET\MathNet.Numerics.FSharp.XML" />
+    <Content Include="NCA\Linear\Libraries\Math.NET\MathNet.Numerics.IO.dll" />
+    <Content Include="NCA\Linear\Libraries\Math.NET\MathNet.Numerics.IO.pdb" />
+    <Content Include="NCA\Linear\Libraries\Math.NET\MathNet.Numerics.IO.xml" />
+    <Content Include="NCA\Linear\Libraries\Math.NET\MathNet.Numerics.pdb" />
+    <Content Include="NCA\Linear\Libraries\Math.NET\MathNet.Numerics.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AForge.NET\Externals\ffmpeg\lib\avcodec.lib" />
+    <None Include="AForge.NET\Externals\ffmpeg\lib\avdevice.lib" />
+    <None Include="AForge.NET\Externals\ffmpeg\lib\avfilter.lib" />
+    <None Include="AForge.NET\Externals\ffmpeg\lib\avformat.lib" />
+    <None Include="AForge.NET\Externals\ffmpeg\lib\avutil.lib" />
+    <None Include="AForge.NET\Externals\ffmpeg\lib\postproc.lib" />
+    <None Include="AForge.NET\Externals\ffmpeg\lib\swresample.lib" />
+    <None Include="AForge.NET\Externals\ffmpeg\lib\swscale.lib" />
+    <None Include="AForge.NET\Externals\libfreenect\APACHE20" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
