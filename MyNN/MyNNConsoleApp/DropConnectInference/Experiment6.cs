@@ -10,6 +10,7 @@ using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
@@ -24,7 +25,7 @@ using OpenCL.Net.OpenCL;
 
 namespace MyNNConsoleApp.DropConnectInference
 {
-    public class Experiment4
+    public class Experiment6
     {
         public static void Execute()
         {
@@ -33,19 +34,14 @@ namespace MyNNConsoleApp.DropConnectInference
                 new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
-                //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
                 "_MNIST_DATABASE/mnist/trainingset/",
                 int.MaxValue
-                //1
                 );
             trainData.Normalize();
-            //trainData = trainData.ConvertToAutoencoder();
 
             var validationData = MNISTDataProvider.GetDataSet(
-                //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
                 "_MNIST_DATABASE/mnist/testset/",
                 int.MaxValue
-                //10
                 );
             validationData.Normalize();
 
@@ -101,7 +97,7 @@ namespace MyNNConsoleApp.DropConnectInference
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new DropConnectOpenCLBackpropagationAlgorithm<OpenCLLayerInferenceNew16>(
+                            new DropConnectBitOpenCLBackpropagationAlgorithm<OpenCLLayerInferenceNew16>(
                                 randomizer,
                                 VectorizationSizeEnum.VectorizationMode16,
                                 currentMLP,
@@ -118,7 +114,7 @@ namespace MyNNConsoleApp.DropConnectInference
                     new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
             }
 
-            Console.WriteLine("Experiment #4 finished");
+            Console.WriteLine("Experiment #6 finished");
             Console.ReadLine();
         }
     }

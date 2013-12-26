@@ -224,6 +224,21 @@ namespace OpenCL.Net.OpenCL
             return k;
         }
 
+        public MemUint CreateUintMem(
+            int arrayLength,
+            Cl.MemFlags flags)
+        {
+            var memi = new MemUint(
+                _commandQueue,
+                _context,
+                arrayLength,
+                flags);
+
+            this._mems.Add(memi);
+
+            return memi;
+        }
+
         public MemInt CreateIntMem(
             int arrayLength,
             Cl.MemFlags flags)

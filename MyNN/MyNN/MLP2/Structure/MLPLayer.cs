@@ -88,7 +88,6 @@ namespace MyNN.MLP2.Structure
             for (var cc = 0; cc < this.Neurons.Length; cc++)
             {
                 this.Neurons[cc] = new InputMLPNeuron(
-                    new SigmoidFunction(1),
                     cc);
 
                 if (isNeedBiasNeuron && (cc == this.Neurons.Length - 1))

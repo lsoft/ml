@@ -48,7 +48,7 @@ namespace MyNN.MLP2.Structure.Neurons.Function
         public string GetOpenCLActivationFunction(string varName)
         {
             return
-                string.Format("({0} * tanh({1} * {2}) )",
+                string.Format("((float)({0}) * tanh((float)({1}) * {2}) )",
                       _alpha.ToString(CultureInfo.InvariantCulture),
                       _beta.ToString(CultureInfo.InvariantCulture),
                       varName);

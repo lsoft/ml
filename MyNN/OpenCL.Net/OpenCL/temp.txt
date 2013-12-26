@@ -1,4 +1,5 @@
-﻿int ComputeWeightIndex(
+﻿
+int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {
@@ -6,90 +7,206 @@
         previousLayerNeuronCount * neuronIndex;
 }
 
-__kernel void
-        InferenceKernel1(
-            __global float * randomMem,
-            __global float * previousLayerLastState,
-            __global float * weights,
-            __global float * currentLayerLastState,
-            float p,
-            int startRandomIndex,
-            int randomSize,
-            int previousLayerNeuronCountTotal,
-            int sampleCount)
+//const __constant float _alpha = 0.2;
+//const __constant float _beta = 1.0;
+
+__kernel void HiddenLayerTrain(
+    __global float * previousLayerLastState,
+    __global float * currentLayerLastState,
+    __global float * currentLayerDeDz,
+    __global float * nextLayerDeDz,
+
+    __global float * currentLayerWeights,
+    __global float * nextLayerWeights,
+            
+    __global float * nabla,
+
+    __global uint * mask,
+
+    int previousLayerNeuronCount4,
+    int previousLayerNeuronCount4M4,
+    int previousLayerNeuronCount,
+    int currentLayerNeuronCount,
+    int nextLayerNeuronCount,
+
+    float learningRate,
+    float regularizationFactor,
+    float dataCount,
+
+    uint bitmask)
 {
     int neuronIndex = get_global_id(0);
 
-    //суммируем веса * состояние нейронов пред. слоя и высчитываем медиану и сигма-квадрат для гауссианы
-    int weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
+    int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
-    float wv_median  = 0;
-    float wv_sigmasq = 0;
-    for (int plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
+    //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
+    float currentDeDz = 0;
+    for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
     {
-        float wv = weights[weightIndex++] * previousLayerLastState[plnIndex];
+        int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex; //не векторизуется:(
 
-        wv_median += wv;
-        wv_sigmasq += wv * wv;
+        float nextWeight = nextLayerWeights[nextWeightIndex];
+        float nextNabla = nextLayerDeDz[nextNeuronIndex];
+        float multiplied = nextWeight * nextNabla;
+
+        currentDeDz += multiplied;
     }
 
-    wv_median *= p;
-    wv_sigmasq *= p * (1 - p);
+    float nOut = currentLayerLastState[neuronIndex];
+    currentDeDz *= 
+(1.7159 * (
+    0.6666 
+    - pow(0.6666, 3) * pown(nOut, 2)
+    + 2.0f * pow(0.6666, 5) * pown(nOut, 4) / 3.0f
+    - 17.0f * pow(0.6666, 7) * pown(nOut, 6) / 45.0f
+    )
+);//nOut * (1 - nOut);
+    currentLayerDeDz[neuronIndex] = currentDeDz;
 
-    float wv_sigma = sqrt(wv_sigmasq);
+    int currentNablaIndex4 = currentNablaIndex / 4;
+    int currentNablaIndex4Shift = currentNablaIndex - currentNablaIndex4 * 4;
 
-    //начинаем семплировать из гауссианы и гнать через функцию активации
-    int workStartRandomIndex = (startRandomIndex + neuronIndex * previousLayerNeuronCountTotal) % randomSize;
-
-    if((workStartRandomIndex + sampleCount) >= randomSize)
+    //просчет изменений в весах нейронов текущего слоя по состоянию нейронов предыдущего
+    //векторизованная часть
+    for (
+        int currentWeightIndex4 = 0; 
+        currentWeightIndex4 < previousLayerNeuronCount4; 
+        ++currentWeightIndex4)
     {
-        if(workStartRandomIndex > sampleCount)
-        {
-            workStartRandomIndex -= sampleCount;
-        }
-        else
-        {
-            workStartRandomIndex = 0;
-        }
+        float4 prevOut = vload4(currentWeightIndex4, previousLayerLastState);
+
+        float4 regularizationCoef = 0;
+        float4 coef = prevOut + regularizationCoef;
+
+        uint4 mask4i = vload4(currentNablaIndex4 + currentWeightIndex4, mask + currentNablaIndex4Shift);
+        float4 mask4 = convert_float4(((mask4i & bitmask) > 0) ? 1 : 0);
+
+        float4 n = learningRate * mask4 * currentDeDz * coef;
+
+        
+        float4 nabla4 = vload4(currentNablaIndex4 + currentWeightIndex4, nabla + currentNablaIndex4Shift);
+        n += nabla4;
+
+
+        vstore4(
+            n,
+            currentNablaIndex4 + currentWeightIndex4,
+            nabla + currentNablaIndex4Shift);
     }
 
-    float16 lastStateSummator16 = 0;
-    for(int sampleIndex = workStartRandomIndex; sampleIndex < (workStartRandomIndex + sampleCount); sampleIndex+=16)
+    //невекторизованная часть (добиваем остатки)
+    for (
+        int currentWeightIndex = previousLayerNeuronCount4M4; 
+        currentWeightIndex < previousLayerNeuronCount; 
+        ++currentWeightIndex)
     {
-        float16 ogrnd16 = vload16(sampleIndex / 16, randomMem + sampleIndex % 16);
-        //float ogrnd = randomMem[sampleIndex];
+        float prevOut = previousLayerLastState[currentWeightIndex];
 
-        float16 grnd16 = ogrnd16 * wv_sigma + wv_median;
+        float regularizationCoef = 0;
+        float coef = prevOut + regularizationCoef;
 
-        //compute last state
-        float16 lastState16 = <activationFunction_grnd16>;
+        uint mask1i = mask[currentNablaIndex + currentWeightIndex];
+        float mask1 = ((mask1i & bitmask) > 0) ? (float)1 : (float)0;
 
-        lastStateSummator16 += lastState16;
+        float n = learningRate * mask1 * currentDeDz * coef;
+
+        
+        nabla[currentNablaIndex + currentWeightIndex] += n;
+
     }
-
-    float lastStateSummator = 
-          lastStateSummator16.s0 
-        + lastStateSummator16.s1 
-        + lastStateSummator16.s2 
-        + lastStateSummator16.s3
-        + lastStateSummator16.s4
-        + lastStateSummator16.s5
-        + lastStateSummator16.s6
-        + lastStateSummator16.s7
-        + lastStateSummator16.s8
-        + lastStateSummator16.s9
-        + lastStateSummator16.sa
-        + lastStateSummator16.sb
-        + lastStateSummator16.sc
-        + lastStateSummator16.sd
-        + lastStateSummator16.se
-        + lastStateSummator16.sf
-        ;
-
-    //усредняем
-    float result = lastStateSummator / sampleCount;
-
-    //записываем обратно в хранилище
-    currentLayerLastState[neuronIndex] = result;
 }
 
+__kernel void OutputLayerTrain(
+    __global float * previousLayerLastState,
+    __global float * currentLayerLastState,
+    __global float * currentLayerDeDz,
+
+    __global float * desiredOutput,
+
+    __global float * currentLayerWeights,
+            
+    __global float * nabla,
+
+    __global uint * mask,
+
+    int previousLayerNeuronCount4,
+    int previousLayerNeuronCount4M4,
+    int previousLayerNeuronCountTotal,
+    int currentLayerNeuronCount,
+
+    float learningRate,
+    float regularizationFactor,
+    float dataCount,
+
+    uint bitmask)
+{
+    int neuronIndex = get_global_id(0);
+
+    float nOut = currentLayerLastState[neuronIndex];
+
+    float n =
+        
+(1.7159 * (
+    0.6666 
+    - pow(0.6666, 3) * pown(nOut, 2)
+    + 2.0f * pow(0.6666, 5) * pown(nOut, 4) / 3.0f
+    - 17.0f * pow(0.6666, 7) * pown(nOut, 6) / 45.0f
+    )
+) //rOut * (1 - nOut)
+        * (desiredOutput[neuronIndex] - nOut);
+
+    currentLayerDeDz[neuronIndex] = n;
+
+    int nablaNeuronShift = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
+    int nablaNeuronShift4 = nablaNeuronShift / 4;
+    int nablaNeuronShift4Shift = nablaNeuronShift - nablaNeuronShift4 * 4;
+
+    //векторизованная часть
+    for (
+        int weightIndex4 = 0;
+        weightIndex4 < previousLayerNeuronCount4;
+        ++weightIndex4)
+    {
+        float4 previousLayerLastState4 = vload4(weightIndex4, previousLayerLastState);
+        float4 currentLayerWeights4 = vload4(nablaNeuronShift4 + weightIndex4, currentLayerWeights + nablaNeuronShift4Shift);
+
+        uint4 mask4i = vload4(nablaNeuronShift4 + weightIndex4, mask + nablaNeuronShift4Shift);
+        float4 mask4 = ((mask4i & bitmask) > 0) ? (float)1 : (float)0;
+
+        float4 deltaWeight4 = 
+            learningRate *
+            n *
+            mask4 *
+            (previousLayerLastState4 + 0);
+
+        
+        float4 nabla4 = vload4(nablaNeuronShift4 + weightIndex4, nabla + nablaNeuronShift4Shift);
+        deltaWeight4 += nabla4;
+
+
+        vstore4(
+            deltaWeight4,
+            nablaNeuronShift4 + weightIndex4,
+            nabla + nablaNeuronShift4Shift);
+    }
+
+    //добираем остатки (от нуля до 3 флоатов)
+    for (
+        int weightIndex = previousLayerNeuronCount4M4; 
+        weightIndex < previousLayerNeuronCountTotal; 
+        ++weightIndex)
+    {
+        uint mask1i = mask[nablaNeuronShift + weightIndex];
+        float mask1 = ((mask1i & bitmask) > 0) ? (float)1 : (float)0;
+
+        float deltaWeight =
+            learningRate *
+            n *
+            mask1 *
+            (previousLayerLastState[weightIndex] + 0);
+
+        
+        nabla[nablaNeuronShift + weightIndex] += deltaWeight;
+
+    }
+}

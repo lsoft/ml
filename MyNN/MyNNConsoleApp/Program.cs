@@ -7,6 +7,7 @@ using MyNN.Data.TypicalDataProvider;
 using MyNN.MLP2;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Neurons.Function;
 using MyNNConsoleApp.DropConnectInference;
 using MyNNConsoleApp.MLP2;
 using MyNNConsoleApp.TransposeExperiments;
@@ -31,8 +32,37 @@ namespace MyNNConsoleApp
 
                 
                 
-                Experiment4.Execute();
+                //Experiment4.Execute();
+                Experiment6.Execute();
                 return;
+
+                //*/
+
+                /*
+
+                var folderName = "_DropConnectMLP" + DateTime.Now.ToString("yyyMMddHHmmss");
+                int rndSeed = 5482;
+                var mlp = new MLP(
+                    new DefaultRandomizer(ref rndSeed), 
+                    null,
+                    folderName,
+                    new IFunction[]
+                    {
+                        null,
+                        new RLUFunction(), 
+                        new SigmoidFunction(1f), 
+                    },
+                        new int[]
+                    {
+                        4,
+                        3,
+                        2
+                    });
+
+                var scheme = mlp.GetVisualScheme();
+                scheme.Save("_scheme.bmp");
+                return;
+
 
                 //*/
 

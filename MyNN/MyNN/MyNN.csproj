@@ -160,6 +160,10 @@
     <Compile Include="MLP2\Autoencoders\StackedNLNCAAutoencoder.cs" />
     <Compile Include="MLP2\Backpropagaion\BackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\DataSourceDelegate.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\DropConnectBitKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\DropConnectBitOpenCLBackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\WeightMask\BigArrayOpenCLWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\WeightMask\IOpenCLWeightBitMaskContainer.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculator.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorMathNet.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorOld.cs" />
@@ -203,6 +207,7 @@
     <Compile Include="MLP2\Backpropagaion\Validation\NLNCA\MNISTColorProvider.cs" />
     <Compile Include="MLP2\Backpropagaion\Validation\NLNCA\NLNCAValidation.cs" />
     <Compile Include="MLP2\ForwardPropagation\CCharpForwardPropagation.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnectBitOpenCLForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnectOpenCLForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInferenceMedian.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInferenceNew16.cs" />

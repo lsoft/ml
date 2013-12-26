@@ -68,6 +68,7 @@
     <Compile Include="OpenCL\CLProvider.cs" />
     <Compile Include="OpenCL\Kernel.cs" />
     <Compile Include="OpenCL\Mem\BaseMem.cs" />
+    <Compile Include="OpenCL\Mem\MemUint.cs" />
     <Compile Include="OpenCL\Mem\Mem.cs" />
     <Compile Include="OpenCL\Mem\MemDouble.cs" />
     <Compile Include="OpenCL\Mem\MemFloat.cs" />

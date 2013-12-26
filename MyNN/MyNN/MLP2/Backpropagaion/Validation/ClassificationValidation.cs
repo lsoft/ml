@@ -158,7 +158,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation
                 string.Format(
                     "Error = {0}, per-item error = {1}",
                     totalError,
-                    perItemError));
+                    DoubleConverter.ToExactString(perItemError)));
 
             Console.WriteLine(
                 string.Format(
