@@ -82,6 +82,7 @@
     <Compile Include="DropConnectInference\Experiment2.cs" />
     <Compile Include="DropConnectInference\Experiment0.cs" />
     <Compile Include="DropConnectInference\Experiment1.cs" />
+    <Compile Include="DropConnectInference\TrainStackedAutoencoder.cs" />
     <Compile Include="DropConnectInference\MyBino.cs" />
     <Compile Include="DropConnectInference\MyNormal.cs" />
     <Compile Include="DropConnectInference\WVBino.cs" />

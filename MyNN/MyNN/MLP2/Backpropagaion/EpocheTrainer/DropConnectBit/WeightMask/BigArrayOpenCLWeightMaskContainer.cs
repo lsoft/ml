@@ -17,7 +17,8 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit.WeightMask
 {
     public class BigArrayOpenCLWeightBitMaskContainer : IOpenCLWeightBitMaskContainer
     {
-        private const int TotalIterationCount = 100000;
+        private const int TotalIterationCount = 10000;
+        private const int AdditionalPartSize = 100000;
 
         private readonly CLProvider _clProvider;
         private readonly MLP _mlp;
@@ -88,7 +89,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit.WeightMask
                 var w = mlp.Layers[li - 1].Neurons.Length*mlp.Layers[li].Neurons.Length;
                 _arraySize += w;
             }
-            _arraySize += TotalIterationCount;
+            _arraySize += AdditionalPartSize;
 
             _bitmask = new uint[32];
             for (var i = 0; i < 32; i++)

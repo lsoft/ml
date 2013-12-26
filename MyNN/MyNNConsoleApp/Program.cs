@@ -33,7 +33,8 @@ namespace MyNNConsoleApp
                 
                 
                 //Experiment4.Execute();
-                Experiment6.Execute();
+                //Experiment6.Execute();
+                TrainStackedAutoencoder.Train();
                 return;
 
                 //*/

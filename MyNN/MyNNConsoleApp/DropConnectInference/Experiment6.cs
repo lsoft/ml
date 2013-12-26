@@ -29,7 +29,7 @@ namespace MyNNConsoleApp.DropConnectInference
     {
         public static void Execute()
         {
-            var rndSeed = 895788;
+            var rndSeed = 1872390;
             var randomizer = 
                 new DefaultRandomizer(ref rndSeed);
 
@@ -60,15 +60,17 @@ namespace MyNNConsoleApp.DropConnectInference
                 new IFunction[]
                 {
                     null,
-                    new HyperbolicTangensFunction(), 
-                    new HyperbolicTangensFunction(), 
+                    new SigmoidFunction(1f), 
+                    new SigmoidFunction(1f), 
+                    new SigmoidFunction(1f), 
                     new SigmoidFunction(1f), 
                 },
                 new int[]
                 {
                     784,
-                    800,
-                    800,
+                    1200,
+                    1200,
+                    2200,
                     10
                 });
 
@@ -79,7 +81,7 @@ namespace MyNNConsoleApp.DropConnectInference
             using (var clProvider = new CLProvider())
             {
                 var config = new LearningAlgorithmConfig(
-                    new LinearLearningRate(0.02f, 0.997f),
+                    new LinearLearningRate(0.02f, 0.998f),
                     1,
                     0.0f,
                     1000,

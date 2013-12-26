@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using MyNN.Data;
 using MyNN.Data.TrainDataProvider;
+using MyNN.MLP2.Autoencoders.BackpropagationFactory;
 using MyNN.MLP2.Backpropagaion;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
 using MyNN.MLP2.Backpropagaion.Validation;
@@ -23,6 +24,7 @@ namespace MyNN.MLP2.Autoencoders
         private readonly Func<DataSet, ITrainDataProvider> _dataProviderFactory;
         private readonly Func<DataSet, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
+        private readonly IBackpropagationAlgorithmFactory _backpropagationAlgorithmFactory;
         private readonly LayerInfo[] _layerInfos;
 
         public MLP CombinedNet
@@ -37,6 +39,7 @@ namespace MyNN.MLP2.Autoencoders
             Func<DataSet, ITrainDataProvider> dataProviderFactory,
             Func<DataSet, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
+            IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
             params LayerInfo[] layerInfos)
         {
             if (randomizer == null)
@@ -77,6 +80,7 @@ namespace MyNN.MLP2.Autoencoders
             _dataProviderFactory = dataProviderFactory;
             _validationFactory = validationFactory;
             _configFactory = configFactory;
+            _backpropagationAlgorithmFactory = backpropagationAlgorithmFactory;
             _layerInfos = layerInfos;
         }
 
@@ -145,13 +149,9 @@ namespace MyNN.MLP2.Autoencoders
                 {
                     var config = _configFactory(depthIndex);
 
-                    var algo = new BackpropagationAlgorithm(
+                    var algo = _backpropagationAlgorithmFactory.GetBackpropagationAlgorithm(
                         _randomizer,
-                        (processedMLP, processedConfig) => new OpenCLBackpropagationAlgorithm(
-                            VectorizationSizeEnum.VectorizationMode16,
-                            processedMLP,
-                            processedConfig,
-                            clProvider),
+                        clProvider,
                         net,
                         validationDataProvider,
                         config);

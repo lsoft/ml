@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using MyNN;
 using MyNN.Data;
 using MyNN.Data.TrainDataProvider;
@@ -12,59 +11,38 @@ using MyNN.MLP2.Autoencoders;
 using MyNN.MLP2.Autoencoders.BackpropagationFactory;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
-using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 
-namespace MyNNConsoleApp.MLP2
+namespace MyNNConsoleApp.DropConnectInference
 {
-    public class MLP2TrainStackedAutoencoder
+    public class TrainStackedAutoencoder
     {
         public static void Train()
         {
 
-            int rndSeed = 399315;
+            int rndSeed = 666777888;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
-                //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
                 "_MNIST_DATABASE/mnist/trainingset/",
                 int.MaxValue
-                //500
+                //50
                 );
             trainData.Normalize();
-            //trainData = trainData.ConvertToAutoencoder();
 
             var validationData = MNISTDataProvider.GetDataSet(
-                //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
                 "_MNIST_DATABASE/mnist/testset/",
                 int.MaxValue
-                //100
+                //10
                 );
             validationData.Normalize();
-            //validationData = validationData.ConvertToAutoencoder();
 
             int firstLayerSize = trainData[0].Input.Length;
 
             var serialization = new SerializationHelper();
-
-            //var noiser = new SetOfNoisers(
-            //    randomizer,
-            //    new Pair<float, INoiser>(0.25f, new ZeroMaskingNoiser(randomizer, 0.25f)),
-            //    new Pair<float, INoiser>(0.25f, new SaltAndPepperNoiser(randomizer, 0.25f)),
-            //    new Pair<float, INoiser>(0.25f, new GaussNoiser(0.2f, false)),
-            //    new Pair<float, INoiser>(0.25f, new MultiplierNoiser(randomizer, 1f))
-            //    );
-
-            //var noiser = new SetOfNoisers2(
-            //    randomizer,
-            //    new Pair<float, INoiser>(0.25f, new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))),
-            //    new Pair<float, INoiser>(0.25f, new SaltAndPepperNoiser(randomizer, 0.25f, new RandomRange(randomizer))),
-            //    new Pair<float, INoiser>(0.25f, new GaussNoiser(0.2f, false, new RandomRange(randomizer))),
-            //    new Pair<float, INoiser>(0.25f, new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)))
-            //    );
 
             var noiser = new AllNoisers(
                 randomizer,
@@ -74,13 +52,15 @@ namespace MyNNConsoleApp.MLP2
                 new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
                 new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer))
                 );
-            //var noiser = new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer));
 
             //var noised = trainData.GetInputPart().Take(300).ToList().ConvertAll(j => noiser.ApplyNoise(j));
             //var v = new MNISTVisualizer();
             //v.SaveAsGrid(
             //    "_allnoisers.bmp",
             //    noised);
+
+            const int sampleCount = 2500;
+            const float p = 0.5f;
 
             var sa = new StackedAutoencoder(
                 randomizer,
@@ -99,7 +79,7 @@ namespace MyNNConsoleApp.MLP2
                             serialization,
                             new HalfSquaredEuclidianDistance(), 
                             vd.ConvertToAutoencoder(),
-                            300,
+                            400,
                             100);
                 },
                 (int depthIndex) =>
@@ -113,13 +93,13 @@ namespace MyNNConsoleApp.MLP2
                         new LinearLearningRate(lr, 0.99f),
                         1,
                         0.0f,
-                        50,
+                        100,
                         0f,
                         -0.0025f);
 
                     return conf;
                 },
-                new OpenCLBackpropagationAlgorithmFactory(),
+                new DropConnectBitOpenCLBackpropagationAlgorithmFactory(sampleCount, p),
                 new LayerInfo(firstLayerSize, new RLUFunction()),
                 new LayerInfo(1200, new RLUFunction()),
                 new LayerInfo(1200, new RLUFunction()),

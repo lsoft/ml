@@ -156,6 +156,9 @@
     <Compile Include="LearningRateController\ILearningRate.cs" />
     <Compile Include="LearningRateController\LinearLearningRate.cs" />
     <Compile Include="MLP2\Autoencoders\Autoencoder.cs" />
+    <Compile Include="MLP2\Autoencoders\BackpropagationFactory\DropConnectBitOpenCLBackpropagationAlgorithmFactory.cs" />
+    <Compile Include="MLP2\Autoencoders\BackpropagationFactory\IBackpropagationAlgorithmFactory.cs" />
+    <Compile Include="MLP2\Autoencoders\BackpropagationFactory\OpenCLBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\StackedAutoencoder.cs" />
     <Compile Include="MLP2\Autoencoders\StackedNLNCAAutoencoder.cs" />
     <Compile Include="MLP2\Backpropagaion\BackpropagationAlgorithm.cs" />
