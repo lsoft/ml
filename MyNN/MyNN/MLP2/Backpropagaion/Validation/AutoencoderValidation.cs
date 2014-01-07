@@ -149,6 +149,13 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 
             #endregion
 
+            if (!allowToSave)
+            {
+                Console.WriteLine(
+                    "Per item error = {0}",
+                    perItemError);
+            }
+
             return perItemError;
         }
 

@@ -23,7 +23,7 @@ namespace MyNNConsoleApp.DropConnectInference
         public static void Train()
         {
 
-            int rndSeed = 666777888;
+            int rndSeed = 66677890;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -84,10 +84,18 @@ namespace MyNNConsoleApp.DropConnectInference
                 },
                 (int depthIndex) =>
                 {
-                    var lr =
-                        depthIndex == 0
-                            ? 0.005f
-                            : 0.001f;
+                    //var lr = 0.005f;
+
+                    //if (depthIndex == 1)
+                    //{
+                    //    lr = 0.0003f;
+                    //}
+                    //else if (depthIndex == 2)
+                    //{
+                    //    lr = 0.00002f;
+                    //}
+
+                    var lr = 0.1f;
 
                     var conf = new LearningAlgorithmConfig(
                         new LinearLearningRate(lr, 0.99f),
@@ -100,11 +108,10 @@ namespace MyNNConsoleApp.DropConnectInference
                     return conf;
                 },
                 new DropConnectBitOpenCLBackpropagationAlgorithmFactory(sampleCount, p),
-                new LayerInfo(firstLayerSize, new RLUFunction()),
-                new LayerInfo(1200, new RLUFunction()),
-                new LayerInfo(1200, new RLUFunction()),
-                new LayerInfo(1200, new RLUFunction()),
-                new LayerInfo(2200, new RLUFunction())
+                new LayerInfo(firstLayerSize, new SigmoidFunction(1f)),
+                new LayerInfo(1500, new SigmoidFunction(1f)),
+                new LayerInfo(1500, new SigmoidFunction(1f)),
+                new LayerInfo(3000, new SigmoidFunction(1f))
                 );
 
             var root = "SDAE" + DateTime.Now.ToString("yyyyMMddHHmmss") + " MLP2";

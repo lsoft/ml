@@ -10,6 +10,9 @@ namespace MyNN.MLP2.Structure.Neurons.Function
         private readonly float _alpha = 0.0f;
         private readonly float _beta = 0.0f;
 
+        private readonly float _alphaSq = 0.0f;
+        private readonly float _betaSq = 0.0f;
+
         public string ShortName
         {
             get
@@ -27,6 +30,9 @@ namespace MyNN.MLP2.Structure.Neurons.Function
         {
             _alpha = alpha;
             _beta = beta;
+
+            _alphaSq = alpha*alpha;
+            _betaSq = beta*beta;
         }
 
         public float Compute(float x)
@@ -37,12 +43,10 @@ namespace MyNN.MLP2.Structure.Neurons.Function
 
         public float ComputeFirstDerivative(float t)
         {
-            return (float)(_alpha * (
-                _beta
-                - Math.Pow(_beta, 3) * Math.Pow(t, 2)
-                + 2.0 * Math.Pow(_beta, 5) * Math.Pow(t, 4) / 3.0
-                - 17.0 * Math.Pow(_beta, 7) * Math.Pow(t, 6) / 45.0
-                ));
+            var scaled = t/_alpha;
+
+            return
+                _alpha * _beta * (1f - scaled * scaled);
         }
 
         public string GetOpenCLActivationFunction(string varName)
@@ -58,12 +62,7 @@ namespace MyNN.MLP2.Structure.Neurons.Function
         {
             return
                 string.Format(@"
-({0} * (
-    {1} 
-    - pow({1}, 3) * pown({2}, 2)
-    + 2.0f * pow({1}, 5) * pown({2}, 4) / 3.0f
-    - 17.0f * pow({1}, 7) * pown({2}, 6) / 45.0f
-    )
+({0} * {1} * (((float)1) - ({2} / {0}) * ({2} / {0}))
 )",
                       _alpha.ToString(CultureInfo.InvariantCulture),
                       _beta.ToString(CultureInfo.InvariantCulture),

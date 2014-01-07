@@ -7,7 +7,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyNNConsoleApp", "MyNNConso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenCL.Net", "OpenCL.Net\OpenCL.Net.csproj", "{70AC8A83-9850-4F73-B7BC-541EB2505BE6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyNN.Tests", "MyNN.Tests\MyNN.Tests.csproj", "{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4A6002FD-6F16-4680-A699-7B1B021C6B26}"
+	ProjectSection(SolutionItems) = preProject
+		Local.testsettings = Local.testsettings
+		MyNN.vsmdi = MyNN.vsmdi
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = MyNN.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -61,6 +73,19 @@ Global
 		{70AC8A83-9850-4F73-B7BC-541EB2505BE6}.Release|x64.ActiveCfg = Release|x64
 		{70AC8A83-9850-4F73-B7BC-541EB2505BE6}.Release|x86.ActiveCfg = Release|x86
 		{70AC8A83-9850-4F73-B7BC-541EB2505BE6}.Release|x86.Build.0 = Release|x86
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Debug|x64.Build.0 = Debug|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Release|x64.ActiveCfg = Release|Any CPU
+		{7053F7AA-E7AE-4FE9-9FC9-BC2AE6D4E123}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
