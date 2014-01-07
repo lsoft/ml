@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
+    <Compile Include="DerivativeChange\Test0.cs" />
     <Compile Include="DropConnectInference\Experiment6.cs" />
     <Compile Include="DropConnectInference\Experiment5.cs" />
     <Compile Include="DropConnectInference\Experiment3.cs" />

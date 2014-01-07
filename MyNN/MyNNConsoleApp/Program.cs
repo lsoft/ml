@@ -8,6 +8,7 @@ using MyNN.MLP2;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNNConsoleApp.DerivativeChange;
 using MyNNConsoleApp.DropConnectInference;
 using MyNNConsoleApp.MLP2;
 using MyNNConsoleApp.TransposeExperiments;
@@ -19,36 +20,12 @@ namespace MyNNConsoleApp
     {
         private static void Main(string[] args)
         {
-            const float DeltaX = 0.01f;
-            const float DerivativeEpsilon = 0.001f;
-
-            var f = new SigmoidFunction(1f);
-
-            var x = 0f;
-
-            var center = f.Compute(x);
-            var left = f.Compute(x - DeltaX);
-            var right = f.Compute(x + DeltaX);
-
-            var cDerivative = (right - left) / (2f * DeltaX);
-            var fDerivative = f.ComputeFirstDerivative(x);//center);
-
-            var diff = Math.Abs(cDerivative - fDerivative);
-
-            if (diff >= DerivativeEpsilon)
-            {
-                throw new Exception();
-            }
-
-
-            Console.WriteLine("45456546546546546546546546546654654645");
-
-
-
-
-
             using (new CombinedConsole("console.log"))
             {
+
+                Test0.Execute();
+                return;
+
                 /*
 
                 //Transpose0.Execute();
