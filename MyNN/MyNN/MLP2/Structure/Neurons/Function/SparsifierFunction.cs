@@ -37,10 +37,10 @@ namespace MyNN.MLP2.Structure.Neurons.Function
         //http://www.wolframalpha.com/input/?i=first+derivative+%281-exp%28-lambda*x%29%29%2F%281%2Bexp%28-mu*x%29%29
         public float ComputeFirstDerivative(float computed)
         {
-            var emuxp1 = Math.Exp(_mu*computed) + 1.0;
+            var emuxp1 = (float)(Math.Exp(_mu*computed) + 1.0f);
 
-            var chislitel = Math.Exp(computed * (_mu - _lambda)) * (_lambda * emuxp1 + _mu * (Math.Exp(_lambda * computed) - 1.0));
-            var znamenatel = Math.Pow(emuxp1, 2);
+            var chislitel = (float)(Math.Exp(computed * (_mu - _lambda)) * (_lambda * emuxp1 + _mu * (Math.Exp(_lambda * computed) - 1.0)));
+            var znamenatel = (float)(Math.Pow(emuxp1, 2));
 
             var fd = (float) (chislitel/znamenatel);
 

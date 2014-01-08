@@ -135,7 +135,7 @@ namespace MyNN.MLP2.ForwardPropagation
                     "<activationFunction_lastNET>",
                     activationFunction);
 
-                var kernelName = VectorizationHelper.GetKernelName(_vse);
+                var kernelName = VectorizationHelper.GetKernelName("ComputeLayerKernel", _vse);
 
                 _kernels[layerIndex] = _clProvider.CreateKernel(
                     kernelSource,

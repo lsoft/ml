@@ -14,6 +14,7 @@ using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL;
 
 namespace MyNN.MLP2.Autoencoders
@@ -141,7 +142,7 @@ namespace MyNN.MLP2.Autoencoders
                         _layerInfos[depthIndex].LayerSize
                     });
 
-                Console.WriteLine("Network does not found. Created with conf: " + net.DumpLayerInformation());
+                ConsoleAmbientContext.Console.WriteLine("Network does not found. Created with conf: " + net.DumpLayerInformation());
 
                 var trainDataProvider = _dataProviderFactory(processingTrainData);
                 var validation = _validationFactory(processingValidationData);

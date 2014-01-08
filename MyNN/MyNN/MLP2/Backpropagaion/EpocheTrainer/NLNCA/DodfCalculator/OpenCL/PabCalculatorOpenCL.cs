@@ -45,7 +45,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
             _expDistanceDict = _createDistanceDictFactory.CreateDistanceDict(_fxwList);
             //var x1 = DateTime.Now;
             //var diff1 = x1 - x0;
-            //Console.WriteLine(
+            //ConsoleAmbientContext.Console.WriteLine(
             //    "Считаем distanceDict методом {0} = {1}",
             //    _createDistanceDictFactory.GetType().Name,
             //    diff1);
@@ -66,7 +66,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
             );//Parallel.For
             //var x3 = DateTime.Now;
             //var diff2 = x3 - x2;
-            //Console.WriteLine("считаем знаменатель = {0}", diff2);
+            //ConsoleAmbientContext.Console.WriteLine("считаем знаменатель = {0}", diff2);
 
             #endregion
 
@@ -87,7 +87,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
             }
             //var x5 = DateTime.Now;
             //var diff3 = x5 - x4;
-            //Console.WriteLine("считаем pi, pi * di #1 = {0}", diff3);
+            //ConsoleAmbientContext.Console.WriteLine("считаем pi, pi * di #1 = {0}", diff3);
 
             //var x6 = DateTime.Now;
             _piList = new List<float>();
@@ -107,7 +107,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
             }
             //var x7 = DateTime.Now;
             //var diff4 = x7 - x6;
-            //Console.WriteLine("считаем pi, pi * di #2 = {0}", diff4);
+            //ConsoleAmbientContext.Console.WriteLine("считаем pi, pi * di #2 = {0}", diff4);
 
             #endregion
         }

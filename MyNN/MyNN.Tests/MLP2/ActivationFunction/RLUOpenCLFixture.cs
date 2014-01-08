@@ -1,15 +1,19 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Structure.Neurons.Function;
 
 namespace MyNN.Tests.MLP2.ActivationFunction
 {
     /// <summary>
-    /// Summary description for SigmoidFixture
+    /// Summary description for RLUOpenCLFixture
     /// </summary>
     [TestClass]
-    public class SigmoidFixture
+    public class RLUOpenCLFixture
     {
-        public SigmoidFixture()
+        public RLUOpenCLFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -57,11 +61,11 @@ namespace MyNN.Tests.MLP2.ActivationFunction
         #endregion
 
         [TestMethod]
-        public void SigmoidTestWithOne()
+        public void RLUTest_OpenCL()
         {
-            var sf = new SigmoidFunction(1f);
+            var sf = new RLUFunction();
 
-            var tests = new ActivationFunctionDerivativeTests();
+            var tests = new ActivationFunctionDerivativeOpenCLTests();
             tests.ExecuteTests(sf);
         }
     }

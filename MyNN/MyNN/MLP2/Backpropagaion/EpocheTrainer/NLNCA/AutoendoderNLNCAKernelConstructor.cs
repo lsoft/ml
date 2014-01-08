@@ -168,6 +168,8 @@ int ComputeWeightIndex(
 //const __constant float _beta = 1.0;
 
 __kernel void HiddenLayerTrain(
+    __global float * currentLayerNET,
+
     __global float * previousLayerLastState,
     __global float * currentLayerLastState,
     __global float * currentLayerDeDz,
@@ -218,8 +220,8 @@ __kernel void HiddenLayerTrain(
         currentDeDz += lambda * dodf[neuronIndex];
     }
 
-    float nOut = currentLayerLastState[neuronIndex];
-    currentDeDz *= <firstDerivative_nOut>;//nOut * (1 - nOut);
+    float nOut = currentLayerNET[neuronIndex];
+    currentDeDz *= <firstDerivative_nOut>;
     currentLayerDeDz[neuronIndex] = currentDeDz;
 
     int currentNablaIndex4 = currentNablaIndex / 4;
@@ -263,6 +265,8 @@ __kernel void HiddenLayerTrain(
 }
 
 __kernel void OutputLayerTrain(
+    __global float * currentLayerNET,
+
     __global float * previousLayerLastState,
     __global float * currentLayerLastState,
     __global float * currentLayerDeDz,
@@ -286,11 +290,11 @@ __kernel void OutputLayerTrain(
 {
     int neuronIndex = get_global_id(0);
 
-    float nOut = currentLayerLastState[neuronIndex];
+    float nOut = currentLayerNET[neuronIndex];
 
     float n =
-        <firstDerivative_nOut> //rOut * (1 - nOut)
-        * lambda * (desiredOutput[neuronIndex] - nOut);
+        <firstDerivative_nOut>
+        * lambda * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);
 
     currentLayerDeDz[neuronIndex] = n;
 

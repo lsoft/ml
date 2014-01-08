@@ -19,19 +19,27 @@ namespace MyNN.MLP2.OpenCL
             }
         }
 
-        public static string GetKernelName(VectorizationSizeEnum vse)
+        public static string GetKernelName(string kernelRoot, VectorizationSizeEnum vse)
         {
-            switch (vse)
+            if (kernelRoot == null)
             {
-                case VectorizationSizeEnum.NoVectorization:
-                    return "ComputeLayerKernel1";
-                case VectorizationSizeEnum.VectorizationMode4:
-                    return "ComputeLayerKernel4";
-                case VectorizationSizeEnum.VectorizationMode16:
-                    return "ComputeLayerKernel16";
-                default:
-                    throw new ArgumentOutOfRangeException("vse");
+                throw new ArgumentNullException("kernelRoot");
             }
+
+            return
+                kernelRoot + GetVectorizationSize(vse).ToString();
+
+            //switch (vse)
+            //{
+            //    case VectorizationSizeEnum.NoVectorization:
+            //        return "ComputeLayerKernel1";
+            //    case VectorizationSizeEnum.VectorizationMode4:
+            //        return "ComputeLayerKernel4";
+            //    case VectorizationSizeEnum.VectorizationMode16:
+            //        return "ComputeLayerKernel16";
+            //    default:
+            //        throw new ArgumentOutOfRangeException("vse");
+            //}
         }
     }
 }

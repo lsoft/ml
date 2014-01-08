@@ -29,8 +29,10 @@ namespace MyNN.MLP2.Structure.Neurons.Function
             return r;
         }
 
-        public float ComputeFirstDerivative(float computed)
+        public float ComputeFirstDerivative(float x)
         {
+            var computed = this.Compute(x);
+
             return 
                 (float)(_alpha * computed * (1.0 - computed));
         }
@@ -40,18 +42,20 @@ namespace MyNN.MLP2.Structure.Neurons.Function
             return
                 string.Format(
                     //"(1.0 / (1.0 + exp(-1.0 * {0} * {1})))",
-                    "((float)(1.0) / ((float)(1.0) + exp((float)(-1.0) * (float)({0}) * {1})))",
+                    "((float)(1.0) / ((float)(1.0) + exp((float)(-{0}) * {1})))",
                     _alpha.ToString(CultureInfo.InvariantCulture),
                     varName);
         }
 
         public string GetOpenCLFirstDerivative(string varName)
         {
+            var computed = this.GetOpenCLActivationFunction(varName);
+
             return
                 string.Format(
                     "({0} * {1} * (1.0 - {1}))", 
                     _alpha.ToString(CultureInfo.InvariantCulture),
-                    varName);
+                    computed);
         }
     }
 }

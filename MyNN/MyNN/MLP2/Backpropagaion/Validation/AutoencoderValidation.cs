@@ -6,6 +6,7 @@ using System.Text;
 using MyNN.Data;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.ForwardPropagation;
+using MyNN.OutputConsole;
 
 namespace MyNN.MLP2.Backpropagaion.Validation
 {
@@ -143,7 +144,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation
                         forwardPropagation.MLP,
                         Path.Combine(epocheRoot, networkFilename));
 
-                    Console.WriteLine("Saved!");
+                    ConsoleAmbientContext.Console.WriteLine("Saved!");
                 }
             }
 
@@ -151,7 +152,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 
             if (!allowToSave)
             {
-                Console.WriteLine(
+                ConsoleAmbientContext.Console.WriteLine(
                     "Per item error = {0}",
                     perItemError);
             }

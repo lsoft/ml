@@ -8,6 +8,7 @@ using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
+using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL;
 using OpenCL.Net.OpenCL.Mem;
 using OpenCL.Net.Platform;
@@ -246,11 +247,6 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit
                     _desiredOutput.Write(BlockModeEnum.Blocking);
 
                     //output layer
-                    //скорее всего выгоднее посчитать на C#, так как на выходном слое мало нейронов
-                    //и гонять данные туда и обратно на OpenCL устройство дороже, чем считать в C#
-                    //но гонять данные все равно придется, так как скрытые слои работают на OpenCL
-                    //поэтому получается выгодно считать и выходной слой на OpenCL (теряем на нем, но
-                    //суммарно выигрыш)
                     var outputLayerIndex = _mlp.Layers.Length - 1;
 
                     var outputLayer = _mlp.Layers[outputLayerIndex];
@@ -261,41 +257,43 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit
                     if (inBatchIndex == 0)
                     {
                         _outputKernelOverwrite.Last()
-                            .SetKernelArgMem(0, _dropConnectForwardPropagation.StateMem[outputLayerIndex - 1])
-                            .SetKernelArgMem(1, _dropConnectForwardPropagation.StateMem[outputLayerIndex])
-                            .SetKernelArgMem(2, this._deDz[outputLayerIndex])
-                            .SetKernelArgMem(3, _desiredOutput)
-                            .SetKernelArgMem(4, _dropConnectForwardPropagation.WeightMem[outputLayerIndex])
-                            .SetKernelArgMem(5, outputNablaLayer)
-                            .SetKernelArgMem(6, _weightMask.MaskMem[outputLayerIndex])
-                            .SetKernelArg(7, 4, preOutputLayer.Neurons.Length / 4)
-                            .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
-                            .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
-                            .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
-                            .SetKernelArg(11, 4, learningRate)
-                            .SetKernelArg(12, 4, _config.RegularizationFactor)
-                            .SetKernelArg(13, 4, (float)(data.Count))
-                            .SetKernelArg(14, 4, _weightMask.BitMask)
+                            .SetKernelArgMem(0, _dropConnectForwardPropagation.NetMem[outputLayerIndex])
+                            .SetKernelArgMem(1, _dropConnectForwardPropagation.StateMem[outputLayerIndex - 1])
+                            .SetKernelArgMem(2, _dropConnectForwardPropagation.StateMem[outputLayerIndex])
+                            .SetKernelArgMem(3, this._deDz[outputLayerIndex])
+                            .SetKernelArgMem(4, _desiredOutput)
+                            .SetKernelArgMem(5, _dropConnectForwardPropagation.WeightMem[outputLayerIndex])
+                            .SetKernelArgMem(6, outputNablaLayer)
+                            .SetKernelArgMem(7, _weightMask.MaskMem[outputLayerIndex])
+                            .SetKernelArg(8, 4, preOutputLayer.Neurons.Length / 4)
+                            .SetKernelArg(9, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
+                            .SetKernelArg(10, 4, preOutputLayer.Neurons.Length)
+                            .SetKernelArg(11, 4, outputLayer.NonBiasNeuronCount)
+                            .SetKernelArg(12, 4, learningRate)
+                            .SetKernelArg(13, 4, _config.RegularizationFactor)
+                            .SetKernelArg(14, 4, (float)(data.Count))
+                            .SetKernelArg(15, 4, _weightMask.BitMask)
                             .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
                     }
                     else
                     {
                         _outputKernelIncrement.Last()
-                            .SetKernelArgMem(0, _dropConnectForwardPropagation.StateMem[outputLayerIndex - 1])
-                            .SetKernelArgMem(1, _dropConnectForwardPropagation.StateMem[outputLayerIndex])
-                            .SetKernelArgMem(2, this._deDz[outputLayerIndex])
-                            .SetKernelArgMem(3, _desiredOutput)
-                            .SetKernelArgMem(4, _dropConnectForwardPropagation.WeightMem[outputLayerIndex])
-                            .SetKernelArgMem(5, outputNablaLayer)
-                            .SetKernelArgMem(6, _weightMask.MaskMem[outputLayerIndex])
-                            .SetKernelArg(7, 4, preOutputLayer.Neurons.Length / 4)
-                            .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
-                            .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
-                            .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
-                            .SetKernelArg(11, 4, learningRate)
-                            .SetKernelArg(12, 4, _config.RegularizationFactor)
-                            .SetKernelArg(13, 4, (float)(data.Count))
-                            .SetKernelArg(14, 4, _weightMask.BitMask)
+                            .SetKernelArgMem(0, _dropConnectForwardPropagation.NetMem[outputLayerIndex])
+                            .SetKernelArgMem(1, _dropConnectForwardPropagation.StateMem[outputLayerIndex - 1])
+                            .SetKernelArgMem(2, _dropConnectForwardPropagation.StateMem[outputLayerIndex])
+                            .SetKernelArgMem(3, this._deDz[outputLayerIndex])
+                            .SetKernelArgMem(4, _desiredOutput)
+                            .SetKernelArgMem(5, _dropConnectForwardPropagation.WeightMem[outputLayerIndex])
+                            .SetKernelArgMem(6, outputNablaLayer)
+                            .SetKernelArgMem(7, _weightMask.MaskMem[outputLayerIndex])
+                            .SetKernelArg(8, 4, preOutputLayer.Neurons.Length / 4)
+                            .SetKernelArg(9, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
+                            .SetKernelArg(10, 4, preOutputLayer.Neurons.Length)
+                            .SetKernelArg(11, 4, outputLayer.NonBiasNeuronCount)
+                            .SetKernelArg(12, 4, learningRate)
+                            .SetKernelArg(13, 4, _config.RegularizationFactor)
+                            .SetKernelArg(14, 4, (float)(data.Count))
+                            .SetKernelArg(15, 4, _weightMask.BitMask)
                             .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
                     }
 
@@ -313,45 +311,47 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit
                         if (inBatchIndex == 0)
                         {
                             _hiddenKernelOverwrite[hiddenLayerIndex]
-                                .SetKernelArgMem(0, _dropConnectForwardPropagation.StateMem[hiddenLayerIndex - 1])
-                                .SetKernelArgMem(1, _dropConnectForwardPropagation.StateMem[hiddenLayerIndex])
-                                .SetKernelArgMem(2, this._deDz[hiddenLayerIndex])
-                                .SetKernelArgMem(3, this._deDz[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(4, _dropConnectForwardPropagation.WeightMem[hiddenLayerIndex])
-                                .SetKernelArgMem(5, _dropConnectForwardPropagation.WeightMem[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(6, _nablaWeights[hiddenLayerIndex])
-                                .SetKernelArgMem(7, _weightMask.MaskMem[hiddenLayerIndex])
-                                .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
-                                .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
-                                .SetKernelArg(10, 4, prevLayer.Neurons.Length)
-                                .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
-                                .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
-                                .SetKernelArg(13, 4, learningRate)
-                                .SetKernelArg(14, 4, _config.RegularizationFactor)
-                                .SetKernelArg(15, 4, (float)(data.Count))
-                                .SetKernelArg(16, 4, _weightMask.BitMask)
+                                .SetKernelArgMem(0, _dropConnectForwardPropagation.NetMem[hiddenLayerIndex])
+                                .SetKernelArgMem(1, _dropConnectForwardPropagation.StateMem[hiddenLayerIndex - 1])
+                                .SetKernelArgMem(2, _dropConnectForwardPropagation.StateMem[hiddenLayerIndex])
+                                .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
+                                .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(5, _dropConnectForwardPropagation.WeightMem[hiddenLayerIndex])
+                                .SetKernelArgMem(6, _dropConnectForwardPropagation.WeightMem[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
+                                .SetKernelArgMem(8, _weightMask.MaskMem[hiddenLayerIndex])
+                                .SetKernelArg(9, 4, prevLayer.Neurons.Length / 4)
+                                .SetKernelArg(10, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
+                                .SetKernelArg(11, 4, prevLayer.Neurons.Length)
+                                .SetKernelArg(12, 4, currentLayer.NonBiasNeuronCount)
+                                .SetKernelArg(13, 4, nextLayer.NonBiasNeuronCount)
+                                .SetKernelArg(14, 4, learningRate)
+                                .SetKernelArg(15, 4, _config.RegularizationFactor)
+                                .SetKernelArg(16, 4, (float)(data.Count))
+                                .SetKernelArg(17, 4, _weightMask.BitMask)
                                 .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
                         }
                         else
                         {
                             _hiddenKernelIncrement[hiddenLayerIndex]
-                                .SetKernelArgMem(0, _dropConnectForwardPropagation.StateMem[hiddenLayerIndex - 1])
-                                .SetKernelArgMem(1, _dropConnectForwardPropagation.StateMem[hiddenLayerIndex])
-                                .SetKernelArgMem(2, this._deDz[hiddenLayerIndex])
-                                .SetKernelArgMem(3, this._deDz[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(4, _dropConnectForwardPropagation.WeightMem[hiddenLayerIndex])
-                                .SetKernelArgMem(5, _dropConnectForwardPropagation.WeightMem[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(6, _nablaWeights[hiddenLayerIndex])
-                                .SetKernelArgMem(7, _weightMask.MaskMem[hiddenLayerIndex])
-                                .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
-                                .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
-                                .SetKernelArg(10, 4, prevLayer.Neurons.Length)
-                                .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
-                                .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
-                                .SetKernelArg(13, 4, learningRate)
-                                .SetKernelArg(14, 4, _config.RegularizationFactor)
-                                .SetKernelArg(15, 4, (float)(data.Count))
-                                .SetKernelArg(16, 4, _weightMask.BitMask)
+                                .SetKernelArgMem(0, _dropConnectForwardPropagation.NetMem[hiddenLayerIndex])
+                                .SetKernelArgMem(1, _dropConnectForwardPropagation.StateMem[hiddenLayerIndex - 1])
+                                .SetKernelArgMem(2, _dropConnectForwardPropagation.StateMem[hiddenLayerIndex])
+                                .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
+                                .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(5, _dropConnectForwardPropagation.WeightMem[hiddenLayerIndex])
+                                .SetKernelArgMem(6, _dropConnectForwardPropagation.WeightMem[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
+                                .SetKernelArgMem(8, _weightMask.MaskMem[hiddenLayerIndex])
+                                .SetKernelArg(9, 4, prevLayer.Neurons.Length / 4)
+                                .SetKernelArg(10, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
+                                .SetKernelArg(11, 4, prevLayer.Neurons.Length)
+                                .SetKernelArg(12, 4, currentLayer.NonBiasNeuronCount)
+                                .SetKernelArg(13, 4, nextLayer.NonBiasNeuronCount)
+                                .SetKernelArg(14, 4, learningRate)
+                                .SetKernelArg(15, 4, _config.RegularizationFactor)
+                                .SetKernelArg(16, 4, (float)(data.Count))
+                                .SetKernelArg(17, 4, _weightMask.BitMask)
                                 .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
                         }
                     }
@@ -363,12 +363,12 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit
                     int logStep = data.Count / 100;
                     if (logStep > 0 && currentIndex % logStep == 0)
                     {
-                        Console.Write(
+                        ConsoleAmbientContext.Console.Write(
                             "Epoche progress: {0}%, {1}      ",
                             (currentIndex * 100 / data.Count),
                             DateTime.Now.ToString());
 
-                        Console.SetCursorPosition(0, Console.CursorTop);
+                        ConsoleAmbientContext.Console.ReturnCarriage();
                     }
                 }
 
@@ -404,8 +404,8 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit
 
             #endregion
 
-            Console.Write(new string(' ', 60));
-            Console.SetCursorPosition(0, Console.CursorTop);
+            ConsoleAmbientContext.Console.Write(new string(' ', 60));
+            ConsoleAmbientContext.Console.ReturnCarriage();
 
             //конец эпохи обучения
 

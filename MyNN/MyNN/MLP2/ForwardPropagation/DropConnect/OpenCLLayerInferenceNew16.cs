@@ -6,6 +6,7 @@ using System.Text;
 using Accord.Math;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
+using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL;
 using OpenCL.Net.OpenCL.Mem;
 using OpenCL.Net.Platform;
@@ -86,7 +87,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
 
             if (_sampleCount != sampleCount)
             {
-                Console.WriteLine(
+                ConsoleAmbientContext.Console.WriteLine(
                     "Inferencer: Input sample count {0} has changed to {1} due to vectorization mode 16",
                     sampleCount,
                     _sampleCount);

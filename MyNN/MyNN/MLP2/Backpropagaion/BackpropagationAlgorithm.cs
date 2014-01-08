@@ -10,6 +10,7 @@ using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
+using MyNN.OutputConsole;
 
 
 namespace MyNN.MLP2.Backpropagaion
@@ -55,7 +56,7 @@ namespace MyNN.MLP2.Backpropagaion
 
         public void Train(DataSourceDelegate dataSource)
         {
-            Console.WriteLine(
+            ConsoleAmbientContext.Console.WriteLine(
                 "Backpropagation started with epoche trainer = {0}, validation = {1}",
                 this._epocheTrainer.GetType().Name,
                 this._validation.GetType().Name);
@@ -73,7 +74,7 @@ namespace MyNN.MLP2.Backpropagaion
 
             var beforeDefaultValidation = DateTime.Now;
 
-            Console.WriteLine("Default net validation results:");
+            ConsoleAmbientContext.Console.WriteLine("Default net validation results:");
 
             var preTrainFolder = Path.Combine(_mlp.WorkFolderPath, "_pretrain");
             Directory.CreateDirectory(preTrainFolder);
@@ -84,7 +85,7 @@ namespace MyNN.MLP2.Backpropagaion
                 false);
 
             var afterDefaultValidation = DateTime.Now;
-            Console.WriteLine("Default net validation takes {0}", (afterDefaultValidation - beforeDefaultValidation));
+            ConsoleAmbientContext.Console.WriteLine("Default net validation takes {0}", (afterDefaultValidation - beforeDefaultValidation));
 
             #endregion
 
@@ -93,12 +94,12 @@ namespace MyNN.MLP2.Backpropagaion
             var epochNumber = 0;
 
 
-            Console.WriteLine("Predeformation...");
+            ConsoleAmbientContext.Console.WriteLine("Predeformation...");
 
             //запрашиваем данные
             var trainData = dataSource(epochNumber);
 
-            Console.WriteLine("Start training...");
+            ConsoleAmbientContext.Console.WriteLine("Start training...");
 
             if (_config.BatchSize < 1 || _config.BatchSize > trainData.Count)
             {
@@ -113,15 +114,15 @@ namespace MyNN.MLP2.Backpropagaion
             {
                 lastError = currentError;
 
-                Console.WriteLine(
+                ConsoleAmbientContext.Console.WriteLine(
                 "---------------------------------------- Epoch #{0} --------------------------------------",
                     epochNumber.ToString("D7"));
 
-                Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
+                ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
 
                 //скорость обучения на эту эпоху
                 var learningRate = _config.LearningRateController.GetLearningRate(epochNumber);
-                Console.WriteLine("Epoch learning rate: " + learningRate);
+                ConsoleAmbientContext.Console.WriteLine("Epoch learning rate: " + learningRate);
 
                 #region epoche train
 
@@ -183,14 +184,14 @@ namespace MyNN.MLP2.Backpropagaion
 
                 #region report epoche results
 
-                Console.WriteLine(
+                ConsoleAmbientContext.Console.WriteLine(
                     "                  =========== Per-item error = {0} ===========",
                     (Math.Abs(currentError - float.MaxValue) < float.Epsilon ? "не вычислено" : DoubleConverter.ToExactString(currentError))
                     );
 
-                Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
+                ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
 
-                Console.WriteLine(
+                ConsoleAmbientContext.Console.WriteLine(
                     "   "
                     + "Total: " + (int) ((dtFinish - dtStart).TotalMilliseconds)
                     + "  Train: " + (int) ((trainTimeEnd - dtStart).TotalMilliseconds)
@@ -198,9 +199,9 @@ namespace MyNN.MLP2.Backpropagaion
                     + "  Validation: " + (int) ((cvFinish - trainTimeEnd).TotalMilliseconds)
                     + "  Deform: " + (int) ((dtFinish - deformStart).TotalMilliseconds));
 
-                Console.WriteLine(
+                ConsoleAmbientContext.Console.WriteLine(
                     "----------------------------------------------------------------------------------------------");
-                Console.WriteLine(string.Empty);
+                ConsoleAmbientContext.Console.WriteLine(string.Empty);
 
                 #endregion
 

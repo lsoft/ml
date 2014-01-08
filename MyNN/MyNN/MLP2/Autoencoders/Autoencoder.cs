@@ -8,6 +8,7 @@ using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
+using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL;
 
 namespace MyNN.MLP2.Autoencoders
@@ -57,7 +58,7 @@ namespace MyNN.MLP2.Autoencoders
                 layerInfos.Select(j => j.ActivationFunction).ToArray(),
                 layerInfos.Select(j => j.LayerSize).ToArray());
 
-            Console.WriteLine("Network does not found. Created with conf: " + _net.DumpLayerInformation());
+            ConsoleAmbientContext.Console.WriteLine("Network does not found. Created with conf: " + _net.DumpLayerInformation());
         }
 
         public MLP Train(

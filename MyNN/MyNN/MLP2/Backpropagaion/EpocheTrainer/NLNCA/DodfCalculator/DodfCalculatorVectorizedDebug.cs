@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MyNN.Data;
+using MyNN.OutputConsole;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
 {
@@ -51,7 +52,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
 
             var x1 = DateTime.Now;
             var diff = x1 - x0;
-            Console.WriteLine("Заполняем _fxwDict = {0}", diff);
+            ConsoleAmbientContext.Console.WriteLine("Заполняем _fxwDict = {0}", diff);
 
             #endregion
 
@@ -241,7 +242,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
 
             var x1 = DateTime.Now;
             var diff1 = x1 - x0;
-            Console.WriteLine("считаем distance dict = {0}", diff1);
+            ConsoleAmbientContext.Console.WriteLine("считаем distance dict = {0}", diff1);
             #endregion
 
             #region считаем знаменатель
@@ -256,7 +257,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
             }
             var x3 = DateTime.Now;
             var diff2 = x3 - x2;
-            Console.WriteLine("считаем знаменатель = {0}", diff2);
+            ConsoleAmbientContext.Console.WriteLine("считаем знаменатель = {0}", diff2);
 
             #endregion
 
@@ -277,7 +278,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
             }
             var x5 = DateTime.Now;
             var diff3 = x5 - x4;
-            Console.WriteLine("считаем pi, pi * di #1 = {0}", diff3);
+            ConsoleAmbientContext.Console.WriteLine("считаем pi, pi * di #1 = {0}", diff3);
 
             var x6 = DateTime.Now;
             _piList = new List<float>();
@@ -298,7 +299,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
             }
             var x7 = DateTime.Now;
             var diff4 = x7 - x6;
-            Console.WriteLine("считаем pi, pi * di #2 = {0}", diff4);
+            ConsoleAmbientContext.Console.WriteLine("считаем pi, pi * di #2 = {0}", diff4);
 
             #endregion
         }

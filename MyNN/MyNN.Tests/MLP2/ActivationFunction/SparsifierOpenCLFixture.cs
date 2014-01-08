@@ -1,15 +1,19 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Structure.Neurons.Function;
 
 namespace MyNN.Tests.MLP2.ActivationFunction
 {
     /// <summary>
-    /// Summary description for SigmoidFixture
+    /// Summary description for SparsifierOpenCLFixture
     /// </summary>
     [TestClass]
-    public class SigmoidFixture
+    public class SparsifierOpenCLFixture
     {
-        public SigmoidFixture()
+        public SparsifierOpenCLFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -57,12 +61,21 @@ namespace MyNN.Tests.MLP2.ActivationFunction
         #endregion
 
         [TestMethod]
-        public void SigmoidTestWithOne()
+        public void SparsifierTestWithDefaultCoef_OpenCL()
         {
-            var sf = new SigmoidFunction(1f);
+            var sf = new SparsifierFunction();
 
-            var tests = new ActivationFunctionDerivativeTests();
-            tests.ExecuteTests(sf);
+            var tests = new ActivationFunctionDerivativeOpenCLTests();
+            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
+        }
+
+        [TestMethod]
+        public void SparsifierTestWithOneTwoCoef_OpenCL()
+        {
+            var sf = new SparsifierFunction(1f, 2f);
+
+            var tests = new ActivationFunctionDerivativeOpenCLTests();
+            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
         }
     }
 }

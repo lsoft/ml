@@ -66,7 +66,17 @@ namespace MyNN.Tests.MLP2.ActivationFunction
             var sf = new SparsifierFunction();
 
             var tests = new ActivationFunctionDerivativeTests();
-            tests.ExecuteTests(sf);
+            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
         }
+
+        [TestMethod]
+        public void SparsifierTestWithOneTwoCoef()
+        {
+            var sf = new SparsifierFunction(1f, 2f);
+
+            var tests = new ActivationFunctionDerivativeTests();
+            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
+        }
+
     }
 }

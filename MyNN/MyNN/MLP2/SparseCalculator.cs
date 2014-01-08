@@ -4,7 +4,7 @@ using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Structure;
-
+using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL;
 
 namespace MyNN.MLP2
@@ -33,7 +33,7 @@ namespace MyNN.MLP2
                 throw new ArgumentNullException("dataset");
             }
 
-            Console.WriteLine(mlp.DumpLayerInformation());
+            ConsoleAmbientContext.Console.WriteLine(mlp.DumpLayerInformation());
 
             var sparsePart = 0f;
             using (var clProvider = new CLProvider())

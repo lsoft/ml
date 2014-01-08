@@ -5,6 +5,7 @@ using System.Linq;
 using MyNN.Data;
 //#define DODF_DEBUG_CHECKS //раскоментировать, если нужна проверка на NaN, +-Infinity и т.п.
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
+using MyNN.OutputConsole;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
 {
@@ -53,7 +54,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
 
             //var x1 = DateTime.Now;
             //var diff = x1 - x0;
-            //Console.WriteLine("Заполняем _fxwDict = {0}", diff);
+            //ConsoleAmbientContext.Console.WriteLine("Заполняем _fxwDict = {0}", diff);
 
             #endregion
 
@@ -92,7 +93,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
                         ? (IDistanceDictFactory) opencl
                         : (IDistanceDictFactory) csharp;
 
-                Console.WriteLine(
+                ConsoleAmbientContext.Console.WriteLine(
                     "Choosed {0}",
                     _chooseDistanceDictFactory.GetType().Name);
             }

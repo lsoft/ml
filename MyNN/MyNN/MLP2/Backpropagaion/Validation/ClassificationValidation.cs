@@ -6,6 +6,7 @@ using MyNN.Data;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.Structure;
+using MyNN.OutputConsole;
 
 namespace MyNN.MLP2.Backpropagaion.Validation
 {
@@ -154,13 +155,13 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 
             var correctPercentCount = ((int)(totalCorrectCount * 10000 / totalCount) / 100.0);
 
-            Console.WriteLine(
+            ConsoleAmbientContext.Console.WriteLine(
                 string.Format(
                     "Error = {0}, per-item error = {1}",
                     totalError,
                     DoubleConverter.ToExactString(perItemError)));
 
-            Console.WriteLine(
+            ConsoleAmbientContext.Console.WriteLine(
                 string.Format(
                     "Success: {0}, fail: {1}, total: {2}, success %: {3}",
                     totalCorrectCount,
@@ -174,18 +175,18 @@ namespace MyNN.MLP2.Backpropagaion.Validation
             {
                 for (var cc = 0; cc < correctArray.Length; cc++)
                 {
-                    Console.Write(cc + ": ");
+                    ConsoleAmbientContext.Console.Write(cc + ": ");
 
                     var p = (int)((correctArray[cc] / (double)totalArray[cc]) * 10000) / 100.0;
-                    Console.Write(correctArray[cc] + "/" + totalArray[cc] + "(" + p + "%)");
+                    ConsoleAmbientContext.Console.Write(correctArray[cc] + "/" + totalArray[cc] + "(" + p + "%)");
 
                     if (cc != (correctArray.Length - 1))
                     {
-                        Console.Write("   ");
+                        ConsoleAmbientContext.Console.Write("   ");
                     }
                     else
                     {
-                        Console.WriteLine(string.Empty);
+                        ConsoleAmbientContext.Console.WriteLine(string.Empty);
                     }
                 }
 
@@ -205,14 +206,14 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 
                 if (!string.IsNullOrEmpty(zeroClasses))
                 {
-                    Console.WriteLine("Not recognized: " + zeroClasses);
+                    ConsoleAmbientContext.Console.WriteLine("Not recognized: " + zeroClasses);
                 }
 
                 #endregion
             }
             else
             {
-                Console.WriteLine("Too many domains, details output is disabled");
+                ConsoleAmbientContext.Console.WriteLine("Too many domains, details output is disabled");
             }
 
             #endregion
@@ -264,7 +265,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation
                         forwardPropagation.MLP,
                         Path.Combine(epocheRoot, networkFilename));
 
-                    Console.WriteLine("Saved!");
+                    ConsoleAmbientContext.Console.WriteLine("Saved!");
                 }
             }
 

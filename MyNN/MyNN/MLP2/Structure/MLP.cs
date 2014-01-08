@@ -11,6 +11,7 @@ using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure.Neurons;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.OutputConsole;
 
 namespace MyNN.MLP2.Structure
 {
@@ -469,7 +470,7 @@ namespace MyNN.MLP2.Structure
             var pathToDbnInfo = Path.Combine(root, "dbn.info");
             if (File.Exists(pathToDbnInfo))
             {
-                Console.WriteLine("dbn.info found, check processed...");
+                ConsoleAmbientContext.Console.WriteLine("dbn.info found, check processed...");
 
                 //проверяем что размеры слоев в DBN сходятся с размерами слоев в MLP
 
@@ -481,7 +482,7 @@ namespace MyNN.MLP2.Structure
                     {
                         if (layerSizes[cc] != this.Layers[cc].NonBiasNeuronCount)
                         {
-                            Console.WriteLine(
+                            ConsoleAmbientContext.Console.WriteLine(
                                 string.Format(
                                     "Layer {0} has different neuron count: {1} in MLP vs {2} in DBN, weights loading fails",
                                     cc,
@@ -491,22 +492,22 @@ namespace MyNN.MLP2.Structure
                         }
                     }
 
-                    Console.WriteLine("dbn.info checks ok...");
+                    ConsoleAmbientContext.Console.WriteLine("dbn.info checks ok...");
                 }
                 else
                 {
-                    Console.WriteLine("dbn.info can't be parsed, check skipped...");
+                    ConsoleAmbientContext.Console.WriteLine("dbn.info can't be parsed, check skipped...");
                 }
             }
             else
             {
-                Console.WriteLine("dbn.info not found, check skipped...");
+                ConsoleAmbientContext.Console.WriteLine("dbn.info not found, check skipped...");
             }
 
             #endregion
 
 
-            Console.WriteLine("Load weights from DBN...");
+            ConsoleAmbientContext.Console.WriteLine("Load weights from DBN...");
 
             for (var layerIndex = 1; layerIndex <= Math.Min(this.Layers.Length, dbnFolderCount); layerIndex++)
             {
@@ -516,7 +517,7 @@ namespace MyNN.MLP2.Structure
                      orderby this.ExtractRBMEpocheNumberFromDirName(d) descending
                      select d).First();
 
-                Console.WriteLine(
+                ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
                         "Processed layers {0} weights from: {1}",
                         layerIndex,
@@ -527,7 +528,7 @@ namespace MyNN.MLP2.Structure
                 this.Layers[layerIndex].LoadWeightsFromRBM(pathToWeightsFile);
             }
 
-            Console.WriteLine("Load weights done");
+            ConsoleAmbientContext.Console.WriteLine("Load weights done");
         }
 
         /// <summary>
@@ -551,7 +552,7 @@ namespace MyNN.MLP2.Structure
             var pathToDbnInfo = Path.Combine(root, "dbn.info");
             if (File.Exists(pathToDbnInfo))
             {
-                Console.WriteLine("dbn.info found, check processed...");
+                ConsoleAmbientContext.Console.WriteLine("dbn.info found, check processed...");
 
                 //проверяем что размеры слоев в DBN сходятся с размерами слоев в MLP
 
@@ -567,7 +568,7 @@ namespace MyNN.MLP2.Structure
                         {
                             if (layerSizes[cc] != this.Layers[cc].NonBiasNeuronCount)
                             {
-                                Console.WriteLine(
+                                ConsoleAmbientContext.Console.WriteLine(
                                     string.Format(
                                         "Layer {0} has different neuron count: {1} in MLP vs {2} in DBN, cancel operation",
                                         cc,
@@ -578,7 +579,7 @@ namespace MyNN.MLP2.Structure
 
                             if (layerSizes[cc] != this.Layers[mlpLayersCount - cc - 1].NonBiasNeuronCount)
                             {
-                                Console.WriteLine(
+                                ConsoleAmbientContext.Console.WriteLine(
                                     string.Format(
                                         "Layer {0} has different neuron count: {1} in MLP vs {2} in DBN, cancel operation",
                                         (mlpLayersCount - cc - 1),
@@ -588,27 +589,27 @@ namespace MyNN.MLP2.Structure
                             }
                         }
 
-                        Console.WriteLine("dbn.info checks ok...");
+                        ConsoleAmbientContext.Console.WriteLine("dbn.info checks ok...");
                     }
                     else
                     {
-                        Console.WriteLine("dbn contains more layer than can be gets by this autoencoder, cancel operation");
+                        ConsoleAmbientContext.Console.WriteLine("dbn contains more layer than can be gets by this autoencoder, cancel operation");
                     }
                 }
                 else
                 {
-                    Console.WriteLine("dbn.info can't be parsed, check skipped...");
+                    ConsoleAmbientContext.Console.WriteLine("dbn.info can't be parsed, check skipped...");
                 }
             }
             else
             {
-                Console.WriteLine("dbn.info not found, check skipped...");
+                ConsoleAmbientContext.Console.WriteLine("dbn.info not found, check skipped...");
             }
 
             #endregion
 
 
-            Console.WriteLine("Load weights from DBN...");
+            ConsoleAmbientContext.Console.WriteLine("Load weights from DBN...");
 
             for (var layerIndex = 1; layerIndex <= Math.Min(this.Layers.Length, dbnFolderCount); layerIndex++)
             {
@@ -618,7 +619,7 @@ namespace MyNN.MLP2.Structure
                      orderby this.ExtractRBMEpocheNumberFromDirName(d) descending
                      select d).First();
 
-                Console.WriteLine(
+                ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
                         "Processed layers {0}, {1} weights from: {2}",
                         layerIndex,
@@ -631,7 +632,7 @@ namespace MyNN.MLP2.Structure
                 this.Layers[mlpLayersCount - layerIndex].LoadAutoencoderWeightsFromRBM(pathToWeightsFile);
             }
 
-            Console.WriteLine("Load weights done");
+            ConsoleAmbientContext.Console.WriteLine("Load weights done");
         }
 
         private int ExtractRBMEpocheNumberFromDirName(string dirname)

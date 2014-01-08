@@ -90,10 +90,12 @@ namespace MyNNConsoleApp.DerivativeChange
                 {
                     null,
                     new SigmoidFunction(1f), 
+                    new SigmoidFunction(1f), 
                 },
                     new int[]
                 {
                     784,
+                    500,
                     10
                 });
 
@@ -172,10 +174,12 @@ namespace MyNNConsoleApp.DerivativeChange
                 {
                     null,
                     new SigmoidFunction(1f), 
+                    new SigmoidFunction(1f), 
                 },
                     new int[]
                 {
                     784,
+                    500,
                     10
                 });
 
@@ -254,10 +258,12 @@ namespace MyNNConsoleApp.DerivativeChange
                 {
                     null,
                     new SigmoidFunction(1f), 
+                    new SigmoidFunction(1f), 
                 },
                     new int[]
                 {
                     784,
+                    500,
                     10
                 });
 
@@ -339,10 +345,12 @@ namespace MyNNConsoleApp.DerivativeChange
                 {
                     null,
                     new SigmoidFunction(1f), 
+                    new SigmoidFunction(1f), 
                 },
                     new int[]
                 {
                     784,
+                    500,
                     10
                 });
 

@@ -7,6 +7,7 @@ using MyNN.Data;
 using MyNN.KNN;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.Structure;
+using MyNN.OutputConsole;
 
 namespace MyNN.MLP2.Backpropagaion.Validation.NLNCA
 {
@@ -225,7 +226,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation.NLNCA
                 forwardPropagation.MLP,
                 Path.Combine(epocheRoot, networkFilename));
 
-            Console.WriteLine("Saved!");
+            ConsoleAmbientContext.Console.WriteLine("Saved!");
 
             _validationKNNEpocheNumber++;
 
@@ -274,7 +275,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation.NLNCA
                 total++;
             }
 
-            Console.WriteLine(
+            ConsoleAmbientContext.Console.WriteLine(
                 "KNN TEST: total {0}, correct {1},  {2}%                ",
                 total,
                 correct,

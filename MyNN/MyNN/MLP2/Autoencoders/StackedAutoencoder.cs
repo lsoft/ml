@@ -13,6 +13,7 @@ using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL;
 
 namespace MyNN.MLP2.Autoencoders
@@ -140,7 +141,7 @@ namespace MyNN.MLP2.Autoencoders
                 //var pp = string.Empty;
                 //var net = SerializationHelper.LoadFromFile<MLP>(pp);
 
-                Console.WriteLine("Network does not found. Created with conf: " + net.DumpLayerInformation());
+                ConsoleAmbientContext.Console.WriteLine("Network does not found. Created with conf: " + net.DumpLayerInformation());
 
                 var trainDataProvider = _dataProviderFactory(processingTrainData);
                 var validationDataProvider = _validationFactory(processingValidationData);
