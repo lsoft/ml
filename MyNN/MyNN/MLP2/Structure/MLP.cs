@@ -20,6 +20,18 @@ namespace MyNN.MLP2.Structure
     {
         private readonly IRandomizer _randomizer;
 
+        public bool IsAutoencoder
+        {
+            get
+            {
+                var fl = this.Layers.First();
+                var ll = this.Layers.Last();
+
+                return
+                    fl.NonBiasNeuronCount == ll.NonBiasNeuronCount;
+            }
+        }
+
         [NonSerialized]
         private string _root;
         public string Root
@@ -166,14 +178,11 @@ namespace MyNN.MLP2.Structure
         }
 
         /// <summary>
-        /// Обрезать автоенкодер по узкий слой
+        /// Обрезать автоенкодер. Удаляются слои, начиная с узкого слоя и до конца
         /// </summary>
-        public void AutoencoderCut()
+        public void AutoencoderCutTail()
         {
-            var fl = this.Layers.First();
-            var ll = this.Layers.Last();
-
-            if (fl.NonBiasNeuronCount != ll.NonBiasNeuronCount)
+            if (!this.IsAutoencoder)
             {
                 throw new InvalidOperationException("Это не автоенкодер");
             }
@@ -186,6 +195,22 @@ namespace MyNN.MLP2.Structure
             //у последнего слоя убираем Bias нейрон
             var nll = this.Layers.Last();
             nll.RemoveBiasNeuron();
+        }
+
+        /// <summary>
+        /// Обрезать автоенкодер. Удаляются слои, начиная с первого и до узкого слоя
+        /// </summary>
+        public void AutoencoderCutHead()
+        {
+            if (!this.IsAutoencoder)
+            {
+                throw new InvalidOperationException("Это не автоенкодер");
+            }
+
+            var lls = new MLPLayer[(this.Layers.Length + 1) / 2];
+            Array.Copy(this.Layers, this.Layers.Length - lls.Length, lls, 0, lls.Length);
+
+            this.Layers = lls;
         }
 
         //public void OverwriteLayers(MLPLayer[] mlpLayers)

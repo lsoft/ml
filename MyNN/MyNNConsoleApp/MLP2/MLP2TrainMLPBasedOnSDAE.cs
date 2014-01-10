@@ -54,7 +54,7 @@ namespace MyNNConsoleApp.MLP2
                 "MLP20131221192758/epoche 56/20131223081806-perItemError=3,892169.mynn");
                 
 
-            mlp.AutoencoderCut();
+            mlp.AutoencoderCutTail();
 
             mlp.AddLayer(
                 new SigmoidFunction(1f),

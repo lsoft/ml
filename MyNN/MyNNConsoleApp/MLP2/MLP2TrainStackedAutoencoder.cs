@@ -25,7 +25,7 @@ namespace MyNNConsoleApp.MLP2
         public static void Train()
         {
 
-            int rndSeed = 399315;
+            int rndSeed = 399316;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -50,22 +50,6 @@ namespace MyNNConsoleApp.MLP2
 
             var serialization = new SerializationHelper();
 
-            //var noiser = new SetOfNoisers(
-            //    randomizer,
-            //    new Pair<float, INoiser>(0.25f, new ZeroMaskingNoiser(randomizer, 0.25f)),
-            //    new Pair<float, INoiser>(0.25f, new SaltAndPepperNoiser(randomizer, 0.25f)),
-            //    new Pair<float, INoiser>(0.25f, new GaussNoiser(0.2f, false)),
-            //    new Pair<float, INoiser>(0.25f, new MultiplierNoiser(randomizer, 1f))
-            //    );
-
-            //var noiser = new SetOfNoisers2(
-            //    randomizer,
-            //    new Pair<float, INoiser>(0.25f, new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))),
-            //    new Pair<float, INoiser>(0.25f, new SaltAndPepperNoiser(randomizer, 0.25f, new RandomRange(randomizer))),
-            //    new Pair<float, INoiser>(0.25f, new GaussNoiser(0.2f, false, new RandomRange(randomizer))),
-            //    new Pair<float, INoiser>(0.25f, new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)))
-            //    );
-
             var noiser = new AllNoisers(
                 randomizer,
                 new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer)),
@@ -74,7 +58,6 @@ namespace MyNNConsoleApp.MLP2
                 new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
                 new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer))
                 );
-            //var noiser = new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer));
 
             //var noised = trainData.GetInputPart().Take(300).ToList().ConvertAll(j => noiser.ApplyNoise(j));
             //var v = new MNISTVisualizer();
@@ -113,7 +96,7 @@ namespace MyNNConsoleApp.MLP2
                         new LinearLearningRate(lr, 0.99f),
                         1,
                         0.0f,
-                        50,
+                        40,
                         0f,
                         -0.0025f);
 
@@ -121,7 +104,6 @@ namespace MyNNConsoleApp.MLP2
                 },
                 new OpenCLBackpropagationAlgorithmFactory(),
                 new LayerInfo(firstLayerSize, new RLUFunction()),
-                new LayerInfo(1200, new RLUFunction()),
                 new LayerInfo(1200, new RLUFunction()),
                 new LayerInfo(1200, new RLUFunction()),
                 new LayerInfo(2200, new RLUFunction())

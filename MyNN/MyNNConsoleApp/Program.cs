@@ -5,6 +5,9 @@ using MyNN;
 using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.MLP2;
+using MyNN.MLP2.ForwardPropagation.DropConnect;
+using MyNN.MLP2.ForwardPropagation.ForwardFactory;
+using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
@@ -22,9 +25,30 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+                /*
+                var seed = DateTime.Now.Millisecond;
+                var fv = new FeatureVisualization(
+                    new DefaultRandomizer(ref seed),
+                    //SerializationHelper.LoadFromFile<MLP>("SDAE20140107000011 MLP2/mlp20140110053243.mynn"),
+                    SerializationHelper.LoadFromFile<MLP>("SDAE20140107000011 MLP2/1st ae/20140107094406-perItemError=3,447127.mynn"),
+                    new DropConnectOpenCLForwardPropagationFactory<OpenCLLayerInferenceNew16>(VectorizationSizeEnum.VectorizationMode16, 2500, 0.5f),
+                    //new OpenCLForwardPropagationFactory(), 
+                    1f);
 
+                fv.Visualize(
+                    new MNISTVisualizer(),
+                    "features.bmp",
+                    900,
+                    true,
+                    false);
+
+                return;
+                //*/
+
+                /*
                 Test0.Execute();
                 return;
+                //*/
 
                 /*
 
@@ -35,7 +59,7 @@ namespace MyNNConsoleApp
 
                 //*/
 
-                
+                /*
                 
                 //Experiment4.Execute();
                 //Experiment6.Execute();
@@ -82,7 +106,7 @@ namespace MyNNConsoleApp
                 vd.Normalize();
 
                 var mlp = SerializationHelper.LoadFromFile<MLP>("20131223081806-perItemError=3,892169.mynn");
-                mlp.AutoencoderCut();
+                mlp.AutoencoderCutTail();
 
                 var sc = new SparseCalculator();
                 var sparsePercent = sc.Calculate(
@@ -93,16 +117,17 @@ namespace MyNNConsoleApp
                 return;
                 //*/
 
-                //MLP2TrainStackedAutoencoder.Train();
+
+
+                MLP2TrainStackedAutoencoder.Train();
                 //MLP2TuneSDAE.Tune();
-                MLP2TrainMLPBasedOnSDAE.Tune();
+                //MLP2TrainMLPBasedOnSDAE.Tune();
+                //*/
+
 
                 //MLP2NLNCA.TrainNLNCA();
-
                 //MLP2AutoencoderNLNCA.TrainAutoencoderNLNCA();
-
                 //MLP2NLNCAAutoencoderTest.Test();
-
                 //MLP2TrainStackedNLNCAAutoencoder.Train();
 
                 Console.WriteLine(".......... press any key to exit");

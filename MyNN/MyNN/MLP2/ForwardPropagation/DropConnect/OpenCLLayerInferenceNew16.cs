@@ -104,12 +104,9 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
                 Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
 
             var normal = new Normal(0, 1);
-            normal.RandomSource = new Random(_randomizer.Next(100000));
-            
-            for (var cc = 0; cc < _randomCount; cc++)
-            {
-                _randomMem.Array[cc] = (float)normal.Sample();
-            }
+            normal.RandomSource = new Random(_randomizer.Next(1000000));
+
+            _randomMem.Array.Fill(() => (float)normal.Sample());
 
             _randomMem.Write(BlockModeEnum.NonBlocking);
 

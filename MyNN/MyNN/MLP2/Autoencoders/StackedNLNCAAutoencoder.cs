@@ -178,7 +178,7 @@ namespace MyNN.MLP2.Autoencoders
                     //        net.Layers[0],
                     //        net.Layers[1]
                     //    });
-                    net.AutoencoderCut();
+                    net.AutoencoderCutTail();
 
                     using (var universe = new CLProvider())
                     {

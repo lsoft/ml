@@ -47,7 +47,7 @@ namespace MyNNConsoleApp.MLP2
             var net = SerializationHelper.LoadFromFile<MLP>(
                 "NLNCA Autoencoder20131129225357 MLP2/epoche 20/20131130195557-perItemError=0,0690959.mynn");
 
-            net.AutoencoderCut();
+            net.AutoencoderCutTail();
 
             using (var clProvider = new CLProvider())
             {

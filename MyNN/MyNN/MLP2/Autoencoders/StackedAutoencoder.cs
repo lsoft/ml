@@ -177,7 +177,7 @@ namespace MyNN.MLP2.Autoencoders
                 if (depthIndex < depth - 1)
                 {
                     //обновляем обучающие данные (от исходного множества, чтобы без применения возможных деформаций)
-                    net.AutoencoderCut();
+                    net.AutoencoderCutTail();
 
                     using (var clProvider = new CLProvider())
                     {
