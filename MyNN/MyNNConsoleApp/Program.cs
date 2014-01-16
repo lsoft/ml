@@ -14,6 +14,7 @@ using MyNN.MLP2.Structure.Neurons.Function;
 using MyNNConsoleApp.DerivativeChange;
 using MyNNConsoleApp.DropConnectInference;
 using MyNNConsoleApp.MLP2;
+using MyNNConsoleApp.PingPong;
 using MyNNConsoleApp.TransposeExperiments;
 using OpenCvSharp;
 
@@ -30,14 +31,15 @@ namespace MyNNConsoleApp
                 var fv = new FeatureVisualization(
                     new DefaultRandomizer(ref seed),
                     //SerializationHelper.LoadFromFile<MLP>("SDAE20140107000011 MLP2/mlp20140110053243.mynn"),
-                    SerializationHelper.LoadFromFile<MLP>("SDAE20140107000011 MLP2/1st ae/20140107094406-perItemError=3,447127.mynn"),
-                    new DropConnectOpenCLForwardPropagationFactory<OpenCLLayerInferenceNew16>(VectorizationSizeEnum.VectorizationMode16, 2500, 0.5f),
-                    //new OpenCLForwardPropagationFactory(), 
-                    1f);
+                    //SerializationHelper.LoadFromFile<MLP>("SDAE20140107000011 MLP2/1st ae/20140107094406-perItemError=3,447127.mynn"),
+                    SerializationHelper.LoadFromFile<MLP>("temp/20140111181658-perItemError=3,921761.mynn"),
+                    //new DropConnectOpenCLForwardPropagationFactory<OpenCLLayerInferenceNew16>(VectorizationSizeEnum.VectorizationMode16, 2500, 0.5f),
+                    new OpenCLForwardPropagationFactory(), 
+                    50f);
 
                 fv.Visualize(
                     new MNISTVisualizer(),
-                    "features.bmp",
+                    "features sdae.bmp",
                     900,
                     true,
                     false);
@@ -105,12 +107,11 @@ namespace MyNNConsoleApp
                     );
                 vd.Normalize();
 
-                var mlp = SerializationHelper.LoadFromFile<MLP>("20131223081806-perItemError=3,892169.mynn");
+                var mlp = SerializationHelper.LoadFromFile<MLP>("temp/mlp20140111112104.mynn");
                 mlp.AutoencoderCutTail();
 
-                var sc = new SparseCalculator();
+                var sc = new SparseCalculator(mlp);
                 var sparsePercent = sc.Calculate(
-                    mlp,
                     vd);
                 Console.WriteLine("Sparse percent: {0}", (sparsePercent * 100));
                 Console.ReadLine();
@@ -118,10 +119,17 @@ namespace MyNNConsoleApp
                 //*/
 
 
-
-                MLP2TrainStackedAutoencoder.Train();
+                /*
+                //MLP2TrainStackedAutoencoder.Train();
                 //MLP2TuneSDAE.Tune();
                 //MLP2TrainMLPBasedOnSDAE.Tune();
+                //*/
+
+
+                //NextAutoencoder.Execute();
+                //NextMLP.Execute();
+                //NextAutoencoder2.Execute();
+                NextMLP2.Execute();
                 //*/
 
 

@@ -24,17 +24,11 @@ namespace MyNN.MLP2.Autoencoders
             string folderName,
             params LayerInfo[] layerInfos)
         {
+            //root, folderName  allowed to be null
+
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
-            }
-            if (root == null)
-            {
-                throw new ArgumentNullException("root");
-            }
-            if (folderName == null)
-            {
-                throw new ArgumentNullException("folderName");
             }
             if (layerInfos == null)
             {

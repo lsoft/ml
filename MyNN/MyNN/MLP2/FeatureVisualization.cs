@@ -121,7 +121,7 @@ namespace MyNN.MLP2
                 //cut to only requested count
                 var images = results.Take(takeIntoAccount).ToList().ConvertAll(j => j.State);
 
-                //it clamp is requested to do so
+                //if clamp is requested to do so
                 if (clampTo01)
                 {   
                     images.ForEach(j => j.Transform((f) => (f < 0f ? 0f : (f > 1f ? 1f : f))));

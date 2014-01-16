@@ -55,7 +55,14 @@ namespace MyNN.MLP2
 
                 var sparseddata = forward.ComputeOutput(dataset);
                 var totalZero = sparseddata.Sum(j => j.Count(k => Math.Abs(k) < float.Epsilon));
-                
+
+                sparseddata.ForEach(j => j.State.Transform(k => (Math.Abs(k) < float.Epsilon ? 0f : k)));
+
+                //var count = sparseddata.Average(j => j.State.Count(k => Math.Abs(k) > float.Epsilon));
+                //Console.WriteLine("count = {0}", count);
+                //var avg = sparseddata.Average(j => j.State.Where(k => Math.Abs(k) > float.Epsilon).Average());
+                //Console.WriteLine("avg = {0}", avg);
+
                 sparsePart = totalZero / (float)sparseddata.Count / (float)sparseddata[0].State.Length;
             }
 

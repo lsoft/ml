@@ -146,12 +146,12 @@ namespace MyNN.MLP2.Structure
             string folderName, 
             MLPLayer[] layerList)
         {
+            //root, folderName allowed to be null
+
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
             }
-
-            //root, folderName allowed to be null
             if (layerList == null)
             {
                 throw new ArgumentNullException("layerList");
@@ -166,6 +166,15 @@ namespace MyNN.MLP2.Structure
             this.Layers = layerList;
         }
 
+        public void SetRootFolder(string root)
+        {
+            if (root == null)
+            {
+                throw new ArgumentNullException("root");
+            }
+
+            this.Root = root;
+        }
 
         private void CreateWorkFolderFolder()
         {
@@ -198,6 +207,18 @@ namespace MyNN.MLP2.Structure
         }
 
         /// <summary>
+        /// Убрать последний слой
+        /// </summary>
+        public void CutLastLayer()
+        {
+            var lls = new MLPLayer[this.Layers.Length - 1];
+            Array.Copy(this.Layers, 0, lls, 0, lls.Length);
+
+            this.Layers = lls;
+        }
+
+
+        /// <summary>
         /// Обрезать автоенкодер. Удаляются слои, начиная с первого и до узкого слоя
         /// </summary>
         public void AutoencoderCutHead()
@@ -212,16 +233,6 @@ namespace MyNN.MLP2.Structure
 
             this.Layers = lls;
         }
-
-        //public void OverwriteLayers(MLPLayer[] mlpLayers)
-        //{
-        //    if (mlpLayers == null)
-        //    {
-        //        throw new ArgumentNullException("mlpLayers");
-        //    }
-
-        //    this.Layers = mlpLayers;
-        //}
 
         public void AddLayer(
             IFunction activationFunction,

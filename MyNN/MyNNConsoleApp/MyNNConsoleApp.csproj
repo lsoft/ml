@@ -101,6 +101,11 @@
     <Compile Include="MLP2\MLP2NLNCAAutoencoderTest.cs" />
     <Compile Include="MLP2\MLP2TrainStackedNLNCAAutoencoder.cs" />
     <Compile Include="pabProfiler.cs" />
+    <Compile Include="PingPong\NextMLP2.cs" />
+    <Compile Include="PingPong\NextAutoencoder2.cs" />
+    <Compile Include="PingPong\NextDataSet.cs" />
+    <Compile Include="PingPong\NextMLP.cs" />
+    <Compile Include="PingPong\NextAutoencoder.cs" />
     <Compile Include="TfidfCalculator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

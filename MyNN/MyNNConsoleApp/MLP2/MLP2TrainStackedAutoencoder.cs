@@ -25,7 +25,7 @@ namespace MyNNConsoleApp.MLP2
         public static void Train()
         {
 
-            int rndSeed = 399316;
+            int rndSeed = 399317;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -50,14 +50,21 @@ namespace MyNNConsoleApp.MLP2
 
             var serialization = new SerializationHelper();
 
-            var noiser = new AllNoisers(
+            var noiser = new SetOfNoisers(
                 randomizer,
-                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer)),
-                new SaltAndPepperNoiser(randomizer, 0.25f, new RandomRange(randomizer)),
-                new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
-                new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
-                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer))
+                new Pair<float, INoiser>(0.33f, new ZeroMaskingNoiser(randomizer, 0.25f)),
+                new Pair<float, INoiser>(0.33f, new SaltAndPepperNoiser(randomizer, 0.25f)),
+                new Pair<float, INoiser>(0.34f, new GaussNoiser(0.20f, false))
                 );
+
+            //var noiser = new AllNoisers(
+            //    randomizer,
+            //    new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer)),
+            //    new SaltAndPepperNoiser(randomizer, 0.25f, new RandomRange(randomizer)),
+            //    new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
+            //    new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
+            //    new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer))
+            //    );
 
             //var noised = trainData.GetInputPart().Take(300).ToList().ConvertAll(j => noiser.ApplyNoise(j));
             //var v = new MNISTVisualizer();
@@ -96,7 +103,7 @@ namespace MyNNConsoleApp.MLP2
                         new LinearLearningRate(lr, 0.99f),
                         1,
                         0.0f,
-                        40,
+                        50,
                         0f,
                         -0.0025f);
 
