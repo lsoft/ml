@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using MathNet.Numerics.Distributions;
 using MyNN;
@@ -11,6 +12,7 @@ using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNNConsoleApp.ClassificationAutoencoder;
 using MyNNConsoleApp.DerivativeChange;
 using MyNNConsoleApp.DropConnectInference;
 using MyNNConsoleApp.MLP2;
@@ -30,12 +32,11 @@ namespace MyNNConsoleApp
                 var seed = DateTime.Now.Millisecond;
                 var fv = new FeatureVisualization(
                     new DefaultRandomizer(ref seed),
-                    //SerializationHelper.LoadFromFile<MLP>("SDAE20140107000011 MLP2/mlp20140110053243.mynn"),
-                    //SerializationHelper.LoadFromFile<MLP>("SDAE20140107000011 MLP2/1st ae/20140107094406-perItemError=3,447127.mynn"),
-                    SerializationHelper.LoadFromFile<MLP>("temp/20140111181658-perItemError=3,921761.mynn"),
+                    SerializationHelper.LoadFromFile<MLP>("temp/20140117112110-perItemError=5,645099.mynn"),
                     //new DropConnectOpenCLForwardPropagationFactory<OpenCLLayerInferenceNew16>(VectorizationSizeEnum.VectorizationMode16, 2500, 0.5f),
                     new OpenCLForwardPropagationFactory(), 
-                    50f);
+                    5,
+                    5f);
 
                 fv.Visualize(
                     new MNISTVisualizer(),
@@ -107,17 +108,32 @@ namespace MyNNConsoleApp
                     );
                 vd.Normalize();
 
-                var mlp = SerializationHelper.LoadFromFile<MLP>("temp/mlp20140111112104.mynn");
+                var mlp = SerializationHelper.LoadFromFile<MLP>("temp/20140117112110-perItemError=5,645099.mynn");
                 mlp.AutoencoderCutTail();
 
                 var sc = new SparseCalculator(mlp);
-                var sparsePercent = sc.Calculate(
-                    vd);
-                Console.WriteLine("Sparse percent: {0}", (sparsePercent * 100));
+                
+                float sparsePercent;
+                float avgNonZeroCountPerItem;
+                float avgValueOfNonZero;
+                sc.Calculate(
+                    vd,
+                    out sparsePercent,
+                    out avgNonZeroCountPerItem,
+                    out avgValueOfNonZero);
+                
+                Console.WriteLine("Sparse: {0}%", (sparsePercent * 100));
+                Console.WriteLine("Average non-zero count per-item: {0}", avgNonZeroCountPerItem);
+                Console.WriteLine("Average value of non-zero values per-dataset: {0}", avgValueOfNonZero);
                 Console.ReadLine();
                 return;
                 //*/
 
+
+                //CATrainSCDAE.Train();
+                CATuneSCDAE.Tune();
+                //CATrainMLPBasedOnSCDAE.Tune();
+                //*/
 
                 /*
                 //MLP2TrainStackedAutoencoder.Train();
@@ -125,11 +141,11 @@ namespace MyNNConsoleApp
                 //MLP2TrainMLPBasedOnSDAE.Tune();
                 //*/
 
-
+                /*
                 //NextAutoencoder.Execute();
                 //NextMLP.Execute();
                 //NextAutoencoder2.Execute();
-                NextMLP2.Execute();
+                //NextMLP2.Execute();
                 //*/
 
 

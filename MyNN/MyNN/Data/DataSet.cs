@@ -36,11 +36,14 @@ namespace MyNN.Data
 
         public bool IsAuencoderDataSet
         {
-            get
-            {
-                return
-                    this.Data.All(j => j.Input.Length == j.OutputLength);
-            }
+            get;
+            private set;
+        }
+
+        public bool IsClassificationAuencoderDataSet
+        {
+            get;
+            private set;
         }
 
         public int Count
@@ -57,6 +60,9 @@ namespace MyNN.Data
         {
             Visualizer = visualizer;
             Data = new List<DataItem>();
+
+            IsAuencoderDataSet = false;
+            IsClassificationAuencoderDataSet = false;
         }
 
         public DataSet(
@@ -70,6 +76,9 @@ namespace MyNN.Data
 
             Data = data;
             Visualizer = visualizer;
+
+            IsAuencoderDataSet = false;
+            IsClassificationAuencoderDataSet = false;
         }
 
         public DataSet(DataSet dataSet)
@@ -85,6 +94,9 @@ namespace MyNN.Data
 
             Visualizer = dataSet.Visualizer;
             Data = new List<DataItem>(dataSet.Data);
+
+            IsAuencoderDataSet = false;
+            IsClassificationAuencoderDataSet = false;
         }
 
         public DataSet(DataSet dataSet, int takeCount)
@@ -105,12 +117,18 @@ namespace MyNN.Data
 
             Visualizer = dataSet.Visualizer;
             Data = new List<DataItem>(dataSet.Data.Take(takeCount));
+
+            IsAuencoderDataSet = false;
+            IsClassificationAuencoderDataSet = false;
         }
 
         public DataSet(
             DataSet dataSet,
-            List<float[]> inputPart)
+            List<float[]> inputPart,
+            IVisualizer visualizer)
         {
+            //visualizer allowed to be null
+
             if (dataSet == null)
             {
                 throw new ArgumentNullException("dataSet");
@@ -124,7 +142,7 @@ namespace MyNN.Data
                 throw new InvalidOperationException("ƒатасет и данные должны быть одного размера");
             }
 
-            Visualizer = dataSet.Visualizer;
+            Visualizer = visualizer;
             this.Data = new List<DataItem>();
 
             for (var i = 0; i < dataSet.Count; i++)
@@ -132,6 +150,9 @@ namespace MyNN.Data
                 var di = new DataItem(inputPart[i], dataSet[i].Output);
                 this.Data.Add(di);
             }
+
+            IsAuencoderDataSet = false;
+            IsClassificationAuencoderDataSet = false;
         }
 
         public void AddItem(DataItem di)
@@ -148,12 +169,28 @@ namespace MyNN.Data
             }
         }
 
+        public DataSet ConvertToClassificationAutoencoder()
+        {
+            var result =
+                new DataSet(
+                    this.Data.ConvertAll(j => new DataItem(j.Input, j.Output.Concatenate(j.Input))),
+                    this.Visualizer);
+
+            result.IsClassificationAuencoderDataSet = true;
+
+            return result;
+        }
+
         public DataSet ConvertToAutoencoder()
         {
-            return
+            var result =
                 new DataSet(
                     this.Data.ConvertAll(j => new DataItem(j.Input, j.Input)),
                     this.Visualizer);
+
+            result.IsAuencoderDataSet = true;
+
+            return result;
         }
 
         public List<float[]> GetInputPart()

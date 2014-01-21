@@ -19,6 +19,14 @@ namespace MyNN.Data.TrainDataProvider
             }
         }
 
+        public bool IsClassificationAuencoderDataSet
+        {
+            get
+            {
+                return this._trainData.IsClassificationAuencoderDataSet;
+            }
+        }
+
         public NoiseDataProvider(
             DataSet trainData,
             INoiser noiser)

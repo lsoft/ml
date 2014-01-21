@@ -18,6 +18,20 @@ namespace MyNN.Tests
             Console.Write(message, p);
         }
 
+        public void WriteWarning(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
+
+        public void WriteWarning(string message, params object[] p)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(message, p);
+            Console.ResetColor();
+        }
+
         public void WriteLine(string message)
         {
             Console.WriteLine(message);

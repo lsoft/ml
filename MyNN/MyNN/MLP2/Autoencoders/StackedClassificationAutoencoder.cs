@@ -3,10 +3,9 @@ using System.IO;
 using System.Linq;
 using MyNN.Data;
 using MyNN.Data.TrainDataProvider;
+using MyNN.MLP2.Autoencoders.BackpropagationFactory;
 using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
@@ -19,15 +18,14 @@ using OpenCL.Net.OpenCL;
 
 namespace MyNN.MLP2.Autoencoders
 {
-    public class StackedNLNCAAutoencoder
+    public class StackedClassificationAutoencoder
     {
         private readonly IRandomizer _randomizer;
         private readonly ISerializationHelper _serialization;
-        private readonly Func<DataSet, ITrainDataProvider> _dataProviderFactory;
+        private readonly Func<int, DataSet, ITrainDataProvider> _dataProviderFactory;
         private readonly Func<DataSet, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
-        private readonly float _lambda;
-        private readonly float _partTakeOfAccount;
+        private readonly IBackpropagationAlgorithmFactory _backpropagationAlgorithmFactory;
         private readonly LayerInfo[] _layerInfos;
 
         public MLP CombinedNet
@@ -36,14 +34,13 @@ namespace MyNN.MLP2.Autoencoders
             private set;
         }
 
-        public StackedNLNCAAutoencoder(
+        public StackedClassificationAutoencoder(
             IRandomizer randomizer,
             ISerializationHelper serialization,
-            Func<DataSet, ITrainDataProvider> dataProviderFactory,
+            Func<int, DataSet, ITrainDataProvider> dataProviderFactory,
             Func<DataSet, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
-            float lambda,
-            float partTakeOfAccount,
+            IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
             params LayerInfo[] layerInfos)
         {
             if (randomizer == null)
@@ -76,7 +73,7 @@ namespace MyNN.MLP2.Autoencoders
             }
             if (layerInfos.First().LayerSize == layerInfos.Last().LayerSize)
             {
-                throw new ArgumentException("В StackedAutoencoder надо задавать информации о слоях из первой половины автоенкодера, в отличии от Autoencoder");
+                throw new ArgumentException("В StackedClassificationAutoencoder надо задавать информации о слоях из первой половины автоенкодера, в отличии от Autoencoder");
             }
 
             _randomizer = randomizer;
@@ -84,8 +81,7 @@ namespace MyNN.MLP2.Autoencoders
             _dataProviderFactory = dataProviderFactory;
             _validationFactory = validationFactory;
             _configFactory = configFactory;
-            _lambda = lambda;
-            _partTakeOfAccount = partTakeOfAccount;
+            _backpropagationAlgorithmFactory = backpropagationAlgorithmFactory;
             _layerInfos = layerInfos;
         }
 
@@ -106,14 +102,16 @@ namespace MyNN.MLP2.Autoencoders
             {
                 throw new ArgumentNullException("trainData");
             }
-            if (trainData.IsAuencoderDataSet)
+            if (trainData.IsClassificationAuencoderDataSet)
             {
-                throw new InvalidOperationException("trainData.IsAuencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
+                throw new InvalidOperationException("trainData.IsClassificationAuencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
             }
-            if (validationData.IsAuencoderDataSet)
+            if (validationData.IsClassificationAuencoderDataSet)
             {
-                throw new InvalidOperationException("validationData.IsAuencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
+                throw new InvalidOperationException("validationData.IsClassificationAuencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
             }
+
+            var classificationLength = trainData[0].OutputLength;
 
             var processingTrainData = trainData;
             var processingValidationData = validationData;
@@ -139,53 +137,53 @@ namespace MyNN.MLP2.Autoencoders
                     {
                         _layerInfos[depthIndex].LayerSize,
                         _layerInfos[depthIndex + 1].LayerSize,
-                        _layerInfos[depthIndex].LayerSize
+                        _layerInfos[depthIndex].LayerSize + classificationLength
                     });
 
-                ConsoleAmbientContext.Console.WriteLine("Network does not found. Created with conf: " + net.DumpLayerInformation());
+                ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + net.DumpLayerInformation());
 
-                var trainDataProvider = _dataProviderFactory(processingTrainData);
-                var validation = _validationFactory(processingValidationData);
+                var trainDataProvider = _dataProviderFactory(depthIndex, processingTrainData);
+                var validationDataProvider = _validationFactory(processingValidationData);
 
-                var config = _configFactory(depthIndex);
-
-                this.Train3LayerAutoencoder(
-                    net,
-                    config, 
-                    validation, 
-                    trainDataProvider);
-
-                //добавляем в итоговый автоенкодер слои
-                var cloned = _serialization.DeepClone(net);
-                if (depthIndex == 0)
+                using (var clProvider = new CLProvider())
                 {
-                    layerList[0] = cloned.Layers[0];
-                    layerList[1] = cloned.Layers[1];
-                    layerList[layerListCount - 1] = cloned.Layers[2];
-                }
-                else
-                {
-                    layerList[depthIndex + 1] = cloned.Layers[1];
-                    layerList[layerListCount - 1 - depthIndex] = cloned.Layers[2];
+                    var config = _configFactory(depthIndex);
+
+                    var algo = _backpropagationAlgorithmFactory.GetBackpropagationAlgorithm(
+                        _randomizer,
+                        clProvider,
+                        net,
+                        validationDataProvider,
+                        config);
+
+                    algo.Train(trainDataProvider.GetDeformationDataSet);
+
+                    //добавляем в итоговый автоенкодер слои
+                    var cloned = _serialization.DeepClone(net);
+                    if (depthIndex == 0)
+                    {
+                        layerList[0] = cloned.Layers[0];
+                        layerList[1] = cloned.Layers[1];
+                        layerList[layerListCount - 1] = cloned.Layers[2];
+                    }
+                    else
+                    {
+                        layerList[depthIndex + 1] = cloned.Layers[1];
+                        layerList[layerListCount - 1 - depthIndex] = cloned.Layers[2];
+                    }
                 }
 
                 if (depthIndex < depth - 1)
                 {
                     //обновляем обучающие данные (от исходного множества, чтобы без применения возможных деформаций)
-                    //net.OverwriteLayers(
-                    //    new MLPLayer[]
-                    //    {
-                    //        net.Layers[0],
-                    //        net.Layers[1]
-                    //    });
                     net.AutoencoderCutTail();
 
-                    using (var universe = new CLProvider())
+                    using (var clProvider = new CLProvider())
                     {
                         var forward = new OpenCLForwardPropagation(
                             VectorizationSizeEnum.VectorizationMode16,
                             net,
-                            universe);
+                            clProvider);
 
                         var nextTrain = forward.ComputeOutput(processingTrainData);
                         var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.State), null);
@@ -197,6 +195,14 @@ namespace MyNN.MLP2.Autoencoders
                         processingValidationData = newValidationData;
                     }
                 }
+            }
+
+            //удаляем нейроны, которые отвечали за классификацию (кроме последнего слоя, так как все равно должен получиться SCDAE)
+            for (var cc = (layerListCount + 1) / 2; cc < layerListCount - 1; cc++)
+            {
+                layerList[cc] = new MLPLayer(
+                    layerList[cc].Neurons.GetSubArray(classificationLength),
+                    false);
             }
 
             //приделываем биас-нейроны
@@ -217,7 +223,7 @@ namespace MyNN.MLP2.Autoencoders
             using (var clProvider = new CLProvider())
             {
                 var forward = new OpenCLForwardPropagation(
-                    VectorizationSizeEnum.VectorizationMode16, 
+                    VectorizationSizeEnum.VectorizationMode16,
                     this.CombinedNet,
                     clProvider);
 
@@ -233,45 +239,11 @@ namespace MyNN.MLP2.Autoencoders
             //сохраняем
             _serialization.SaveToFile(
                 this.CombinedNet,
-                Path.Combine(root, this.CombinedNet.FolderName.ToLower() + ".mynn"));
+                Path.Combine(root, this.CombinedNet.FolderName.ToLower() + ".scdae"));
 
             return
                 this.CombinedNet;
         }
 
-        private void Train3LayerAutoencoder(
-            MLP net,
-            ILearningAlgorithmConfig config, 
-            IValidation validation, 
-            ITrainDataProvider trainDataProvider)
-        {
-            var takeIntoAccount = (int)(_partTakeOfAccount * net.Layers[1].NonBiasNeuronCount);
-
-            using (var clProvider = new CLProvider())
-            {
-
-                var algo = new BackpropagationAlgorithm(
-                    _randomizer,
-                    (currentMLP, currentConfig) =>
-                        new OpenCLAutoencoderNLNCABackpropagationAlgorithm(
-                            VectorizationSizeEnum.VectorizationMode16,
-                            currentMLP,
-                            currentConfig,
-                            clProvider,
-                            (uzkii) => new DodfCalculatorOpenCL(
-                                uzkii,
-                                new VOpenCLDistanceDictFactory()),
-                            1,
-                            _lambda,
-                            takeIntoAccount),
-                    net,
-                    validation, 
-                    config);
-
-                algo.Train(trainDataProvider.GetDeformationDataSet);
-
-            }
-
-        }
     }
 }

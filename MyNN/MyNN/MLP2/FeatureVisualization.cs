@@ -21,6 +21,7 @@ namespace MyNN.MLP2
     {
         private readonly MLP _mlp;
         private readonly IForwardPropagationFactory _forwardPropagationFactory;
+        private readonly int _nonZeroCount;
         private readonly float _featureValue;
         private readonly IRandomizer _randomizer;
 
@@ -28,6 +29,7 @@ namespace MyNN.MLP2
             IRandomizer randomizer,
             MLP mlp,
             IForwardPropagationFactory forwardPropagationFactory,
+            int nonZeroCount,
             float featureValue)
         {
             if (randomizer == null)
@@ -42,14 +44,11 @@ namespace MyNN.MLP2
             {
                 throw new ArgumentNullException("forwardPropagationFactory");
             }
-            if (!mlp.IsAutoencoder)
-            {
-                throw new ArgumentException("!mlp.IsAutoencoder");
-            }
 
             _randomizer = randomizer;
             _mlp = mlp;
             _forwardPropagationFactory = forwardPropagationFactory;
+            _nonZeroCount = nonZeroCount;
             _featureValue = featureValue;
         }
 
@@ -92,7 +91,11 @@ namespace MyNN.MLP2
                 for (var cc = 0; cc < inputLayerSize; cc++)
                 {
                     var input = new float[inputLayerSize];
-                    input[cc] = _featureValue;
+
+                    for (var nz = 0; nz < _nonZeroCount; nz++)
+                    {
+                        input[_randomizer.Next(input.Length)] = _featureValue;
+                    }
 
                     var output = new float[1];
 

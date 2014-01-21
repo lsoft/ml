@@ -249,7 +249,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 
             #region если результат лучше, чем был, то сохраняем его
 
-            if ((_bestCorrectCount <= totalCorrectCount && totalCorrectCount > 0) || (totalCorrectCount >= totalCount * 0.99))
+            if (_bestCorrectCount <= totalCorrectCount && totalCorrectCount > 0)
             {
                 _bestCorrectCount = Math.Max(_bestCorrectCount, totalCorrectCount);
 

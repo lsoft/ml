@@ -87,17 +87,17 @@ namespace MyNNConsoleApp.DerivativeChange
                     null,
                     folderName,
                     new IFunction[]
-                {
-                    null,
-                    new SigmoidFunction(1f), 
-                    new SigmoidFunction(1f), 
-                },
-                    new int[]
-                {
-                    784,
-                    500,
-                    10
-                });
+                    {
+                        null,
+                        new SigmoidFunction(1f), 
+                        new SigmoidFunction(1f), 
+                    },
+                        new int[]
+                    {
+                        784,
+                        500,
+                        10
+                    });
 
 
                 using (var clProvider = new CLProvider())
@@ -171,17 +171,17 @@ namespace MyNNConsoleApp.DerivativeChange
                     null,
                     folderName,
                     new IFunction[]
-                {
-                    null,
-                    new SigmoidFunction(1f), 
-                    new SigmoidFunction(1f), 
-                },
-                    new int[]
-                {
-                    784,
-                    500,
-                    10
-                });
+                    {
+                        null,
+                        new SigmoidFunction(1f), 
+                        new SigmoidFunction(1f), 
+                    },
+                        new int[]
+                    {
+                        784,
+                        500,
+                        10
+                    });
 
 
                 using (var clProvider = new CLProvider())
@@ -255,17 +255,17 @@ namespace MyNNConsoleApp.DerivativeChange
                     null,
                     folderName,
                     new IFunction[]
-                {
-                    null,
-                    new SigmoidFunction(1f), 
-                    new SigmoidFunction(1f), 
-                },
-                    new int[]
-                {
-                    784,
-                    500,
-                    10
-                });
+                    {
+                        null,
+                        new SigmoidFunction(1f), 
+                        new SigmoidFunction(1f), 
+                    },
+                        new int[]
+                    {
+                        784,
+                        500,
+                        10
+                    });
 
 
                 using (var clProvider = new CLProvider())
@@ -342,17 +342,17 @@ namespace MyNNConsoleApp.DerivativeChange
                     null,
                     folderName,
                     new IFunction[]
-                {
-                    null,
-                    new SigmoidFunction(1f), 
-                    new SigmoidFunction(1f), 
-                },
-                    new int[]
-                {
-                    784,
-                    500,
-                    10
-                });
+                    {
+                        null,
+                        new SigmoidFunction(1f), 
+                        new SigmoidFunction(1f), 
+                    },
+                        new int[]
+                    {
+                        784,
+                        500,
+                        10
+                    });
 
 
                 using (var clProvider = new CLProvider())

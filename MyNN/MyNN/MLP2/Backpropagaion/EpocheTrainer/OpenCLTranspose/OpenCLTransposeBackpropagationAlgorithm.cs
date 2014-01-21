@@ -63,14 +63,12 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose
 
             if (config.BatchSize == 1)
             {
-                ConsoleAmbientContext.Console.WriteLine("========================================= WARNING =========================================");
-                ConsoleAmbientContext.Console.WriteLine("This backpropagation algorithm optimized to work in batch mode (typical with batch size = [25;100]). Online backpropagation is not an optimal choise. Try to use OpenCLTranspose2BackpropagationAlgorithm.");
+                ConsoleAmbientContext.Console.WriteWarning("This backpropagation algorithm optimized to work in batch mode (typical with batch size = [25;100]). Online backpropagation is not an optimal choise. Try to use OpenCLTranspose2BackpropagationAlgorithm.");
             }
 
             if (config.BatchSize > 1 && config.BatchSize < 25)
             {
-                ConsoleAmbientContext.Console.WriteLine("========================================= WARNING =========================================");
-                ConsoleAmbientContext.Console.WriteLine("Too low minibatch size ({0}) to achieve optimal performance. Try to increase batch size to 25 minimum.", config.BatchSize);
+                ConsoleAmbientContext.Console.WriteWarning("Too low minibatch size ({0}) to achieve optimal performance. Try to increase batch size to 25 minimum.", config.BatchSize);
             }
 
             _mlp = mlp;

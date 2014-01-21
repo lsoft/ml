@@ -7,6 +7,11 @@
             get;
         }
 
+        bool IsClassificationAuencoderDataSet
+        {
+            get;
+        }
+
         DataSet GetDeformationDataSet(int epocheNumber);
     }
 }

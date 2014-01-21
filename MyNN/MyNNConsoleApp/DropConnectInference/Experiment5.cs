@@ -64,15 +64,15 @@ namespace MyNNConsoleApp.DropConnectInference
                     null,
                     folderName,
                     new IFunction[]
-                {
-                    null,
-                    new SigmoidFunction(1f), 
-                },
-                    new int[]
-                {
-                    784,
-                    10
-                });
+                    {
+                        null,
+                        new SigmoidFunction(1f), 
+                    },
+                        new int[]
+                    {
+                        784,
+                        10
+                    });
 
 
                 using (var clProvider = new CLProvider())

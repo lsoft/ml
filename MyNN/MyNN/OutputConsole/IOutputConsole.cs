@@ -10,6 +10,10 @@ namespace MyNN.OutputConsole
 
         void Write(string message, params object[] p);
 
+        void WriteWarning(string message);
+
+        void WriteWarning(string message, params object[] p);
+
         void WriteLine(string message);
 
         void WriteLine(string message, params object[] p);

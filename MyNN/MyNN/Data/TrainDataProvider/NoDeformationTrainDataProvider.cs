@@ -14,6 +14,14 @@ namespace MyNN.Data.TrainDataProvider
             }
         }
 
+        public bool IsClassificationAuencoderDataSet
+        {
+            get
+            {
+                return this._trainData.IsClassificationAuencoderDataSet;
+            }
+        }
+
         public NoDeformationTrainDataProvider(DataSet trainData)
         {
             if (trainData == null)

@@ -33,19 +33,23 @@ namespace MyNN.MLP2
         /// <summary>
         /// Просчет доли нулей
         /// </summary>
-        /// <param name="dataset">Проверочные данные (обычно валидационные)</param>
-        /// <returns>Доля нулей по всем нейронам выходного слоя и по всему датасету (0-1)</returns>
-        public float Calculate(
-            DataSet dataset)
+        /// <param name="testDataset">Проверочные данные (обычно валидационные)</param>
+        /// <param name="sparsePart">Доля нулей по всем нейронам выходного слоя и по всему датасету (0-1)</param>
+        /// <param name="avgNonZeroCountPerItem">Среднее количество не нулевых флоатов на один тестовый пример</param>
+        /// <param name="avgValueOfNonZero">Среднее значение не нулевых флоатов</param>
+        public void Calculate(
+            DataSet testDataset,
+            out float sparsePart,
+            out float avgNonZeroCountPerItem,
+            out float avgValueOfNonZero)
         {
-            if (dataset == null)
+            if (testDataset == null)
             {
-                throw new ArgumentNullException("dataset");
+                throw new ArgumentNullException("testDataset");
             }
 
             ConsoleAmbientContext.Console.WriteLine(_mlp.DumpLayerInformation());
 
-            var sparsePart = 0f;
             using (var clProvider = new CLProvider())
             {
                 var forward = new OpenCLForwardPropagation(
@@ -53,20 +57,14 @@ namespace MyNN.MLP2
                     _mlp,
                     clProvider);
 
-                var sparseddata = forward.ComputeOutput(dataset);
+                var sparseddata = forward.ComputeOutput(testDataset);
+
                 var totalZero = sparseddata.Sum(j => j.Count(k => Math.Abs(k) < float.Epsilon));
-
-                sparseddata.ForEach(j => j.State.Transform(k => (Math.Abs(k) < float.Epsilon ? 0f : k)));
-
-                //var count = sparseddata.Average(j => j.State.Count(k => Math.Abs(k) > float.Epsilon));
-                //Console.WriteLine("count = {0}", count);
-                //var avg = sparseddata.Average(j => j.State.Where(k => Math.Abs(k) > float.Epsilon).Average());
-                //Console.WriteLine("avg = {0}", avg);
-
                 sparsePart = totalZero / (float)sparseddata.Count / (float)sparseddata[0].State.Length;
-            }
 
-            return sparsePart;
+                avgNonZeroCountPerItem = (float)sparseddata.Average(j => j.State.Count(k => Math.Abs(k) >= float.Epsilon));
+                avgValueOfNonZero = sparseddata.Average(j => j.State.Where(k => Math.Abs(k) >= float.Epsilon).Average());
+            }
         }
     }
 }

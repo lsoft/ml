@@ -127,6 +127,9 @@
     <Compile Include="Boosting\SAMMEBoosting\IEpocheTrainer.cs" />
     <Compile Include="Boosting\SAMMEBoosting\SAMME.cs" />
     <Compile Include="Boosting\SAMMEBoosting\SAMMEClassifierSet.cs" />
+    <Compile Include="MLP2\Autoencoders\BackpropagationFactory\OpenCLTransposeBackpropagationAlgorithmFactory.cs" />
+    <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
+    <Compile Include="MLP2\Backpropagaion\Validation\ClassificationAutoencoderValidation.cs" />
     <Compile Include="MLP2\FeatureVisualization.cs" />
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\DropConnectOpenCLForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\IForwardPropagationFactory.cs" />

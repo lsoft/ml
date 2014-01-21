@@ -141,7 +141,7 @@ namespace MyNN.MLP2.Autoencoders
                 //var pp = string.Empty;
                 //var net = SerializationHelper.LoadFromFile<MLP>(pp);
 
-                ConsoleAmbientContext.Console.WriteLine("Network does not found. Created with conf: " + net.DumpLayerInformation());
+                ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + net.DumpLayerInformation());
 
                 var trainDataProvider = _dataProviderFactory(processingTrainData);
                 var validationDataProvider = _validationFactory(processingValidationData);
@@ -187,12 +187,12 @@ namespace MyNN.MLP2.Autoencoders
                             clProvider);
 
                         var nextTrain = forward.ComputeOutput(processingTrainData);
-                        var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.State));
+                        var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.State), null);
                         processingTrainData = newTrainData;
 
                         //обновляем валидационные данные (от исходного множества, чтобы без применения возможных деформаций)
                         var nextValidation = forward.ComputeOutput(processingValidationData);
-                        var newValidationData = new DataSet(validationData, nextValidation.ConvertAll(j => j.State));
+                        var newValidationData = new DataSet(validationData, nextValidation.ConvertAll(j => j.State), null);
                         processingValidationData = newValidationData;
                     }
                 }
@@ -232,7 +232,7 @@ namespace MyNN.MLP2.Autoencoders
             //сохраняем
             _serialization.SaveToFile(
                 this.CombinedNet,
-                Path.Combine(root, this.CombinedNet.FolderName.ToLower() + ".mynn"));
+                Path.Combine(root, this.CombinedNet.FolderName.ToLower() + ".sdae"));
 
             return
                 this.CombinedNet;

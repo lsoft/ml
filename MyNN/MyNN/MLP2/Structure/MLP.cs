@@ -20,18 +20,6 @@ namespace MyNN.MLP2.Structure
     {
         private readonly IRandomizer _randomizer;
 
-        public bool IsAutoencoder
-        {
-            get
-            {
-                var fl = this.Layers.First();
-                var ll = this.Layers.Last();
-
-                return
-                    fl.NonBiasNeuronCount == ll.NonBiasNeuronCount;
-            }
-        }
-
         [NonSerialized]
         private string _root;
         public string Root
@@ -143,7 +131,7 @@ namespace MyNN.MLP2.Structure
         public MLP(
             IRandomizer randomizer,
             string root, 
-            string folderName, 
+            string folderName,
             MLPLayer[] layerList)
         {
             //root, folderName allowed to be null
@@ -161,7 +149,7 @@ namespace MyNN.MLP2.Structure
 
             Root = root;
             FolderName = folderName;
-
+            
             //формируем слои
             this.Layers = layerList;
         }
@@ -191,11 +179,6 @@ namespace MyNN.MLP2.Structure
         /// </summary>
         public void AutoencoderCutTail()
         {
-            if (!this.IsAutoencoder)
-            {
-                throw new InvalidOperationException("Это не автоенкодер");
-            }
-
             var lls = new MLPLayer[(this.Layers.Length + 1) / 2];
             Array.Copy(this.Layers, 0, lls, 0, lls.Length);
 
@@ -223,11 +206,6 @@ namespace MyNN.MLP2.Structure
         /// </summary>
         public void AutoencoderCutHead()
         {
-            if (!this.IsAutoencoder)
-            {
-                throw new InvalidOperationException("Это не автоенкодер");
-            }
-
             var lls = new MLPLayer[(this.Layers.Length + 1) / 2];
             Array.Copy(this.Layers, this.Layers.Length - lls.Length, lls, 0, lls.Length);
 
