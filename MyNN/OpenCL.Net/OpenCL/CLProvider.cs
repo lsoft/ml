@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenCL.Net.OpenCL.DeviceChooser;
 using OpenCL.Net.OpenCL.Mem;
 using OpenCL.Net.Platform;
 
@@ -8,6 +9,7 @@ namespace OpenCL.Net.OpenCL
 {
     public class CLProvider : IDisposable
     {
+        private readonly IDeviceChooser _deviceChooser;
         private Cl.Device _device;
         private Cl.Context _context;
         private Cl.CommandQueue _commandQueue;
@@ -21,8 +23,17 @@ namespace OpenCL.Net.OpenCL
             private set;
         }
 
-        public CLProvider(bool silentStart = true)
+        public CLProvider(
+            IDeviceChooser deviceChooser,
+            bool silentStart)
         {
+            if (deviceChooser == null)
+            {
+                throw new ArgumentNullException("deviceChooser");
+            }
+
+            _deviceChooser = deviceChooser;
+            
             //ищем подходящее устройство opencl
             ChooseDevice();
 
@@ -41,6 +52,12 @@ namespace OpenCL.Net.OpenCL
             //создаем пустые структуры
             _mems = new List<BaseMem>();
             _kernels = new List<Kernel>();
+        }
+
+        public CLProvider(
+            bool silentStart = true)
+             : this(new IntelCPUDeviceChooser(), silentStart)
+        {
         }
 
         #region opencl init
@@ -116,58 +133,54 @@ namespace OpenCL.Net.OpenCL
 
         private void ChooseDevice()
         {
-            Cl.ErrorCode error;
+            //Cl.ErrorCode error;
 
-            var platforms = Cl.GetPlatformIDs(out error);
-            if (error != Cl.ErrorCode.Success)
-            {
-                throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Device, error was: {0}!", error));
-            }
+            //var platforms = Cl.GetPlatformIDs(out error);
+            //if (error != Cl.ErrorCode.Success)
+            //{
+            //    throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Device, error was: {0}!", error));
+            //}
 
-            Cl.Device? device = null;
+            //Cl.Device? device = null;
 
-            Cl.DeviceType[] devicePriority =
-            {
-                Cl.DeviceType.Cpu, //!!!
-                Cl.DeviceType.Gpu, 
-                Cl.DeviceType.Accelerator, 
-                Cl.DeviceType.All, 
-                Cl.DeviceType.Cpu
-            };
+            //Cl.DeviceType[] devicePriority =
+            //{
+            //    //Cl.DeviceType.Cpu, //!!!
+            //    Cl.DeviceType.Gpu, 
+            //    Cl.DeviceType.Accelerator, 
+            //    Cl.DeviceType.All, 
+            //    Cl.DeviceType.Cpu
+            //};
 
-            foreach (var deviceType in devicePriority)
-            {
-                //look for GPUs first
-                foreach (var platform in platforms)
-                {
-                    var deviceIds = Cl.GetDeviceIDs(platform, deviceType, out error);
-                    if (deviceIds.Any())
-                    {
-                        device = deviceIds.First();
-                        this.ChoosedDeviceType = deviceType;
-                        break;
-                    }
-                }
+            //foreach (var deviceType in devicePriority)
+            //{
+            //    //look for GPUs first
+            //    foreach (var platform in platforms)//.Skip(1))
+            //    {
+            //        var deviceIds = Cl.GetDeviceIDs(platform, deviceType, out error);
+            //        if (deviceIds.Any())
+            //        {
+            //            device = deviceIds.First();
+            //            this.ChoosedDeviceType = deviceType;
+            //            break;
+            //        }
+            //    }
 
-                if (device != null)
-                {
-                    break;
-                }
-            }
+            //    if (device != null)
+            //    {
+            //        break;
+            //    }
+            //}
 
             //if (error != Cl.ErrorCode.Success)
             //{
             //    throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Device, error was: {0}!", error));
             //}
 
-            if (device != null)
-            {
-                _device = device.Value;
-            }
-            else
-            {
-                throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Device, error was: {0}!", error));
-            }
+            Cl.DeviceType choosedDeviceType;
+            _deviceChooser.ChooseDevice(out choosedDeviceType, out _device);
+
+            this.ChoosedDeviceType = choosedDeviceType;
         }
 
         #endregion

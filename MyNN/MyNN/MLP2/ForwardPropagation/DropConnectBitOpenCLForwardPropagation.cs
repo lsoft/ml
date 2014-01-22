@@ -347,11 +347,23 @@ __kernel void
 
         public List<ILayerState> ComputeOutput(DataSet dataSet)
         {
+            TimeSpan propagationTime;
+            var result = ComputeOutput(
+                dataSet,
+                out propagationTime);
+
+            return result;
+        }
+
+        public List<ILayerState> ComputeOutput(DataSet dataSet, out TimeSpan propagationTime)
+        {
             var result = new List<ILayerState>();
 
             this.PushWeights();
 
             this.ClearAndPushHiddenLayers();
+
+            var before = DateTime.Now;
 
             foreach (var d in dataSet)
             {
@@ -363,6 +375,9 @@ __kernel void
                 result.Add(ls);
             }
 
+            var after = DateTime.Now;
+            propagationTime = (after - before);
+            
             return result;
         }
 

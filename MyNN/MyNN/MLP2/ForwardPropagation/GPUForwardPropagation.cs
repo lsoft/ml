@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting;
-using MathNet.Numerics.LinearAlgebra.Complex.Factorization;
 using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation.DropConnect;
 using MyNN.MLP2.OpenCL;
-using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using OpenCL.Net.OpenCL;
 using OpenCL.Net.OpenCL.Mem;
@@ -14,8 +10,7 @@ using OpenCL.Net.Platform;
 
 namespace MyNN.MLP2.ForwardPropagation
 {
-    public class InferenceOpenCLForwardPropagation<T> : IForwardPropagation
-        where T : ILayerInference
+    public class GPUForwardPropagation : IForwardPropagation
     {
         private readonly VectorizationSizeEnum _vse;
         private readonly MLP _mlp;
@@ -29,22 +24,17 @@ namespace MyNN.MLP2.ForwardPropagation
         }
 
         private readonly CLProvider _clProvider;
-        private readonly IRandomizer _randomizer;
-        private readonly int _sampleCount;
-        private readonly float _p;
 
-        private T[] _inferencers;
-
-        private MemFloat[] _weightMem;
-        private MemFloat[] _netMem;
-        private MemFloat[] _stateMem;
+        public MemFloat[] WeightMem;
+        public MemFloat[] NetMem;
+        public MemFloat[] StateMem;
 
         private MemFloat _lastLayerNetMem
         {
             get
             {
                 return
-                    this._netMem.Last();
+                    this.NetMem.Last();
             }
         }
 
@@ -53,19 +43,16 @@ namespace MyNN.MLP2.ForwardPropagation
             get
             {
                 return
-                    this._stateMem.Last();
+                    this.StateMem.Last();
             }
         }
 
         private Kernel[] _kernels;
 
-        public InferenceOpenCLForwardPropagation(
+        public GPUForwardPropagation(
             VectorizationSizeEnum vse,
             MLP mlp,
-            CLProvider clProvider,
-            IRandomizer randomizer,
-            int sampleCount = 10000,
-            float p = 0.5f
+            CLProvider clProvider
             )
         {
             if (mlp == null)
@@ -76,17 +63,10 @@ namespace MyNN.MLP2.ForwardPropagation
             {
                 throw new ArgumentNullException("clProvider");
             }
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
-            }
 
             _vse = vse;
             _mlp = mlp;
             _clProvider = clProvider;
-            _randomizer = randomizer;
-            _sampleCount = sampleCount;
-            _p = p;
 
             this.PrepareInfrastructure();
         }
@@ -101,58 +81,13 @@ namespace MyNN.MLP2.ForwardPropagation
             //загружаем программу и параметры
             LoadProgram();
 
-            //create inferencers
-            CreateInferencers();
-        }
-
-        private void CreateInferencers()
-        {
-            this._inferencers =new T[this._mlp.Layers.Length];
-
-            for (var li = 1; li < this._mlp.Layers.Length; li++)
-            {
-                var prevLayer = this._mlp.Layers[li - 1];
-                var currentLayer = this._mlp.Layers[li];
-
-                var weightMem = this._weightMem[li];
-
-                var prevLayerStateMem = this._stateMem[li - 1];
-                var currentLayerStateMem = this._stateMem[li];
-
-                var inferencer = (T)Activator.CreateInstance(
-                    typeof(T),
-                    _randomizer,
-                    _clProvider,
-                    _sampleCount,
-                    prevLayer,
-                    currentLayer,
-                    weightMem,
-                    prevLayerStateMem,
-                    currentLayerStateMem,
-                    _p
-                    );
-
-                //var inferencer = new OpenCLLayerInference(
-                //    _randomizer,
-                //    _clProvider,
-                //    _sampleCount,
-                //    prevLayer,
-                //    currentLayer,
-                //    weightMem,
-                //    prevLayerStateMem,
-                //    currentLayerStateMem,
-                //    _p
-                //    );
-
-                this._inferencers[li] = inferencer;
-            }
         }
 
         private void GenerateMems()
         {
-            _netMem = new MemFloat[_mlp.Layers.Length];
-            _stateMem = new MemFloat[_mlp.Layers.Length];
-            _weightMem = new MemFloat[_mlp.Layers.Length];
+            NetMem = new MemFloat[_mlp.Layers.Length];
+            StateMem = new MemFloat[_mlp.Layers.Length];
+            WeightMem = new MemFloat[_mlp.Layers.Length];
 
             var layerCount = _mlp.Layers.Length;
 
@@ -165,13 +100,13 @@ namespace MyNN.MLP2.ForwardPropagation
                     currentLayerNeuronCount,
                     Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
                 netMem.Write(BlockModeEnum.Blocking);
-                _netMem[cc] = netMem;
+                NetMem[cc] = netMem;
 
                 var stateMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount,
                     Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
                 stateMem.Write(BlockModeEnum.Blocking);
-                _stateMem[cc] = stateMem;
+                StateMem[cc] = stateMem;
             }
 
             //веса
@@ -184,7 +119,7 @@ namespace MyNN.MLP2.ForwardPropagation
                     currentLayerNeuronCount * previousLayerNeuronCount,
                     Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
                 weightMem.Write(BlockModeEnum.Blocking);
-                _weightMem[cc] = weightMem;
+                WeightMem[cc] = weightMem;
             }
         }
 
@@ -209,7 +144,6 @@ namespace MyNN.MLP2.ForwardPropagation
         }
 
         private string _kernelSource = @"
-
 int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
@@ -224,144 +158,25 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCount4,
-            int previousLayerNeuronCount4M4,
             int previousLayerNeuronCountTotal)
 {
     //оригинальный алгоритм более чем в два раза медленен
 
     int neuronIndex = get_global_id(0);
+    int currentLayerNeuronCount = get_global_size(0);
+
+    int weightIndex = 
+        neuronIndex;
+        //ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
 
     //compute LastNET
-    int weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
     float lastNET = 0;
     for (int plnIndex =0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
     {
-        lastNET += weights[weightIndex++] * previousLayerLastState[plnIndex];
-    }
-
-    currentLayerLastNET[neuronIndex] = lastNET;
-
-    //compute last state
-
-    float lastState = <activationFunction_lastNET>;
-    currentLayerLastState[neuronIndex] = lastState;
-}
-
-
-__kernel void
-        ComputeLayerKernel4(
-            __global float * previousLayerLastState,
-            __global float * currentLayerLastNET,
-            __global float * currentLayerLastState,
-            __global float * weights,
-            int previousLayerNeuronCount4,
-            int previousLayerNeuronCount4M4,
-            int previousLayerNeuronCountTotal)
-{
-    int neuronIndex = get_global_id(0);
-
-    //compute LastNET
-
-    //забираем векторизованные данные
-
-    //смещение в массиве весов на первый элемент
-    int beginWeightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
-
-    float4 lastNET4 = 0;
-    for (
-        int plnIndex4 = 0, //индексатор внутри состояния нейронов пред. слоя
-            weightIndex4 = beginWeightIndex / 4, //индексатор на первый элемент float4 в массиве весов
-            weightShift4 = beginWeightIndex - weightIndex4 * 4; //смещение для получения правильного float4 (так как например, для нейрона 33 и нейронов пред. слоя 127 смещение будет 4191, не кратно 4)
-        plnIndex4 < previousLayerNeuronCount4;
-        ++plnIndex4, ++weightIndex4)
-    {
-        float4 weights4 = vload4(weightIndex4, weights + weightShift4);
-        float4 previousLayerLastState4 = vload4(plnIndex4, previousLayerLastState);
-
-        lastNET4 += weights4 * previousLayerLastState4;
-    }
-
-    float lastNET = lastNET4.s0 + lastNET4.s1 + lastNET4.s2 + lastNET4.s3;
-
-    //добираем невекторизованные данные (максимум - 3 флоата)
-    for (
-        int plnIndex = previousLayerNeuronCount4M4, //индексатор внутри состояния нейронов пред. слоя
-            weightIndex = beginWeightIndex + previousLayerNeuronCount4M4; //индексатор на массив весов
-        plnIndex < previousLayerNeuronCountTotal;
-        ++plnIndex, ++weightIndex)
-    {
         lastNET += weights[weightIndex] * previousLayerLastState[plnIndex];
-    }
 
-    currentLayerLastNET[neuronIndex] = lastNET;
-
-    //compute last state
-
-    float lastState = <activationFunction_lastNET>;
-    currentLayerLastState[neuronIndex] = lastState;
-}
-
-__kernel void
-        ComputeLayerKernel16(
-            __global float * previousLayerLastState,
-            __global float * currentLayerLastNET,
-            __global float * currentLayerLastState,
-            __global float * weights,
-            int previousLayerNeuronCount16,
-            int previousLayerNeuronCount16M16,
-            int previousLayerNeuronCountTotal)
-{
-    int neuronIndex = get_global_id(0);
-
-    //compute LastNET
-
-    //забираем векторизованные данные
-
-    //смещение в массиве весов на первый элемент
-    int beginWeightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
-
-    float16 lastNET16 = 0;
-    for (
-        int plnIndex16 = 0, //индексатор внутри состояния нейронов пред. слоя
-            weightIndex16 = beginWeightIndex / 16, //индексатор на первый элемент float16 в массиве весов
-            weightShift16 = beginWeightIndex - weightIndex16 * 16; //смещение для получения правильного float16 (так как например, для нейрона 33 и нейронов пред. слоя 127 смещение будет 4191, не кратно 4)
-        plnIndex16 < previousLayerNeuronCount16;
-        ++plnIndex16, ++weightIndex16)
-    {
-        float16 weights16 = vload16(weightIndex16, weights + weightShift16);
-        float16 previousLayerLastState16 = vload16(plnIndex16, previousLayerLastState);
-
-        lastNET16 += weights16 * previousLayerLastState16;
-    }
-
-    float lastNET = 
-          lastNET16.s0 
-        + lastNET16.s1 
-        + lastNET16.s2 
-        + lastNET16.s3
-        + lastNET16.s4
-        + lastNET16.s5
-        + lastNET16.s6
-        + lastNET16.s7
-        + lastNET16.s8
-        + lastNET16.s9
-        + lastNET16.sa
-        + lastNET16.sb
-        + lastNET16.sc
-        + lastNET16.sd
-        + lastNET16.se
-        + lastNET16.sf
-        ;
-
-    //добираем невекторизованные данные (максимум - 15 флоатов)
-    for (
-        int plnIndex = previousLayerNeuronCount16M16, //индексатор внутри состояния нейронов пред. слоя
-            weightIndex = beginWeightIndex + previousLayerNeuronCount16M16; //индексатор на массив весов
-        plnIndex < previousLayerNeuronCountTotal;
-        ++plnIndex, ++weightIndex)
-    {
-        lastNET += weights[weightIndex] * previousLayerLastState[plnIndex];
+        weightIndex += currentLayerNeuronCount;
+        //weightIndex ++;
     }
 
     currentLayerLastNET[neuronIndex] = lastNET;
@@ -431,7 +246,7 @@ __kernel void
 
                 for (var layerIndex = 0; layerIndex < _mlp.Layers.Count(); layerIndex++)
                 {
-                    var mem = this._stateMem[layerIndex];
+                    var mem = this.StateMem[layerIndex];
                     var ls = new LayerState(mem.Array, this.MLP.Layers[layerIndex].NonBiasNeuronCount);
                     listls.Add(ls);
                 }
@@ -447,13 +262,13 @@ __kernel void
         {
             for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; layerIndex++)
             {
-                var nm = _netMem[layerIndex];
+                var nm = NetMem[layerIndex];
                 var nml = nm.Array.Length;
                 Array.Clear(nm.Array, 0, nml);
                 nm.Array[nml - 1] = 1f;
                 nm.Write(BlockModeEnum.NonBlocking);
 
-                var sm = _stateMem[layerIndex];
+                var sm = StateMem[layerIndex];
                 var sml = sm.Array.Length;
                 Array.Clear(sm.Array, 0, sml);
                 sm.Array[sml - 1] = 1f;
@@ -469,7 +284,7 @@ __kernel void
             }
 
             PushInput(d);
-            
+
             // Make sure we're done with everything that's been requested before
             _clProvider.QueueFinish();
 
@@ -480,19 +295,57 @@ __kernel void
             {
                 var prevLayerNeuronTotalCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
 
-                var vectorizationSize = VectorizationHelper.GetVectorizationSize(_vse);
+                if (_vse != VectorizationSizeEnum.NoVectorization)
+                {
+                    throw new NotSupportedException();
+                }
+
+                var currentLayerNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
+
+                var globalNeuronSize = currentLayerNeuronCount;
+                var globalWeightSize = prevLayerNeuronTotalCount;
+
+                const int WorkGroupSize0 = 32;
+                const int WorkGroupSize1 = 32;
+
+                var corrected_globalNeuronSize = globalNeuronSize;
+                if (WorkGroupSize0 > 1 && corrected_globalNeuronSize > WorkGroupSize0)
+                {
+                    corrected_globalNeuronSize += (WorkGroupSize0 - globalNeuronSize % WorkGroupSize0);
+                }
+
+                var corrected_globalWeightSize = globalWeightSize;
+                if (WorkGroupSize1 > 1 && corrected_globalWeightSize > WorkGroupSize1)
+                {
+                    corrected_globalWeightSize += (WorkGroupSize1 - globalWeightSize % WorkGroupSize1);
+                }
+
+                var localNeuronSize = WorkGroupSize0;
+                var localWeightSize = WorkGroupSize1;
+
+                var localNeuronCount = corrected_globalNeuronSize / localNeuronSize;
+                var localWeightCount = corrected_globalWeightSize / localWeightSize;
 
                 _kernels[layerIndex]
-                    .SetKernelArgMem(0, this._stateMem[layerIndex - 1])
-                    .SetKernelArgMem(1, this._netMem[layerIndex])
-                    .SetKernelArgMem(2, this._stateMem[layerIndex])
-                    .SetKernelArgMem(3, this._weightMem[layerIndex])
-                    .SetKernelArg(4, 4, prevLayerNeuronTotalCount / vectorizationSize)
-                    .SetKernelArg(5, 4, prevLayerNeuronTotalCount - prevLayerNeuronTotalCount % vectorizationSize)
-                    .SetKernelArg(6, 4, prevLayerNeuronTotalCount)
-                    .EnqueueNDRangeKernel(_mlp.Layers[layerIndex].NonBiasNeuronCount);
-
-                _inferencers[layerIndex].InferenceLayer();
+                    .SetKernelArgMem(0, this.StateMem[layerIndex - 1])
+                    .SetKernelArgMem(1, this.NetMem[layerIndex])
+                    .SetKernelArgMem(2, this.StateMem[layerIndex])
+                    .SetKernelArgMem(3, this.WeightMem[layerIndex])
+                    //.SetKernelArgLocalMem(4, 4 * localNeuronCount * localWeightCount)
+                    .SetKernelArg(4, 4, prevLayerNeuronTotalCount)
+                    .EnqueueNDRangeKernel(
+                        currentLayerNeuronCount
+                        //new int[]
+                        //{
+                        //    localNeuronSize,//corrected_globalNeuronSize,
+                        //    localWeightSize,//corrected_globalWeightSize,
+                        //}
+                        //,new int[]
+                        //{
+                        //    localNeuronSize,
+                        //    localWeightSize
+                        //}
+                        );
             }
 
             // Make sure we're done with everything that's been requested before
@@ -506,22 +359,17 @@ __kernel void
             //веса оставшихся слоев
             for (var layerIndex = 1; layerIndex < layerCount; ++layerIndex)
             {
-                var weightShift = 0;
-
                 var layer = _mlp.Layers[layerIndex];
-                var weightMem = _weightMem[layerIndex];
+                var weightMem = WeightMem[layerIndex];
+
                 for (var neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; neuronIndex++)
                 {
                     var neuron = layer.Neurons[neuronIndex];
 
-                    Array.Copy(
-                        neuron.Weights,
-                        0,
-                        weightMem.Array,
-                        weightShift,
-                        neuron.Weights.Length);
-
-                    weightShift += neuron.Weights.Length;
+                    for (var weightIndex = 0; weightIndex < neuron.Weights.Length; weightIndex++)
+                    {
+                        weightMem.Array[weightIndex * layer.NonBiasNeuronCount + neuronIndex] = neuron.Weights[weightIndex];
+                    }
                 }
 
                 weightMem.Write(BlockModeEnum.NonBlocking);
@@ -543,8 +391,8 @@ __kernel void
             for (var layerIndex = 1; layerIndex < layerCount - 1; layerIndex++)
             {
                 //читаем его из opencl
-                _netMem[layerIndex].Read(BlockModeEnum.Blocking);
-                _stateMem[layerIndex].Read(BlockModeEnum.Blocking);
+                NetMem[layerIndex].Read(BlockModeEnum.Blocking);
+                StateMem[layerIndex].Read(BlockModeEnum.Blocking);
             }
         }
 
@@ -574,15 +422,15 @@ __kernel void
             {
                 var isBiasNeuron = neuronIndex == (firstLayerNeuronCount - 1);
 
-                _netMem[0].Array[neuronIndex] = 0; //LastNET
-                _stateMem[0].Array[neuronIndex] = 
+                NetMem[0].Array[neuronIndex] = 0; //LastNET
+                StateMem[0].Array[neuronIndex] = 
                     isBiasNeuron 
                         ? 1.0f
                         : d.Input[neuronIndex];
             }
 
-            _netMem[0].Write(BlockModeEnum.NonBlocking);
-            _stateMem[0].Write(BlockModeEnum.NonBlocking);
+            NetMem[0].Write(BlockModeEnum.NonBlocking);
+            StateMem[0].Write(BlockModeEnum.NonBlocking);
         }
 
 

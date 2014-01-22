@@ -103,6 +103,7 @@
     <Compile Include="MLP2\MLP2TuneSDAE.cs" />
     <Compile Include="MLP2\MLP2NLNCAAutoencoderTest.cs" />
     <Compile Include="MLP2\MLP2TrainStackedNLNCAAutoencoder.cs" />
+    <Compile Include="Nvidia\NvidiaForwardOptimizer.cs" />
     <Compile Include="pabProfiler.cs" />
     <Compile Include="PingPong\NextMLP2.cs" />
     <Compile Include="PingPong\NextAutoencoder2.cs" />

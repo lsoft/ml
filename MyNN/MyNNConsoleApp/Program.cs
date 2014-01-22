@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using MathNet.Numerics.Distributions;
 using MyNN;
 using MyNN.Data.TrainDataProvider.Noiser;
@@ -16,6 +17,7 @@ using MyNNConsoleApp.ClassificationAutoencoder;
 using MyNNConsoleApp.DerivativeChange;
 using MyNNConsoleApp.DropConnectInference;
 using MyNNConsoleApp.MLP2;
+using MyNNConsoleApp.Nvidia;
 using MyNNConsoleApp.PingPong;
 using MyNNConsoleApp.TransposeExperiments;
 using OpenCvSharp;
@@ -28,6 +30,12 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+                Thread.Sleep(1000);
+
+                NvidiaForwardOptimizer.Optimize();
+                //Console.ReadLine();
+                return;
+
                 /*
                 var seed = DateTime.Now.Millisecond;
                 var fv = new FeatureVisualization(
@@ -129,9 +137,9 @@ namespace MyNNConsoleApp
                 return;
                 //*/
 
-
-                //CATrainSCDAE.Train();
-                CATuneSCDAE.Tune();
+                /*
+                CATrainSCDAE.Train();
+                //CATuneSCDAE.Tune();
                 //CATrainMLPBasedOnSCDAE.Tune();
                 //*/
 

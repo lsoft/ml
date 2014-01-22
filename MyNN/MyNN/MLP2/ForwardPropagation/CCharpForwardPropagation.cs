@@ -7,6 +7,7 @@ using MyNN.MLP2.Structure.Neurons;
 
 namespace MyNN.MLP2.ForwardPropagation
 {
+/*
     public class CCharpForwardPropagation : IForwardPropagation
     {
         public MLP MLP
@@ -167,4 +168,5 @@ namespace MyNN.MLP2.ForwardPropagation
 
 
     }
+//*/
 }

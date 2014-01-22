@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using MyNN.Data;
 using MyNN.MLP2.Structure;
@@ -21,6 +22,14 @@ namespace MyNN.MLP2.ForwardPropagation
         /// <param name="dataSet">Данные для прохождения по сети</param>
         /// <returns>Значение выходного слоя</returns>
         List<ILayerState> ComputeOutput(DataSet dataSet);
+
+        /// <summary>
+        /// Получение значений на выходном слое сети
+        /// </summary>
+        /// <param name="dataSet">Данные для прохождения по сети</param>
+        /// <param name="propagationTime">Время просчета (без учета времени подготовки)</param>
+        /// <returns>Значение выходного слоя</returns>
+        List<ILayerState> ComputeOutput(DataSet dataSet, out TimeSpan propagationTime);
 
         /// <summary>
         /// Вычисление состояние всей сети по одному примеру

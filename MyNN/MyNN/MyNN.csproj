@@ -131,6 +131,7 @@
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
     <Compile Include="MLP2\Backpropagaion\Validation\ClassificationAutoencoderValidation.cs" />
     <Compile Include="MLP2\FeatureVisualization.cs" />
+    <Compile Include="MLP2\ForwardPropagation\GPUForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\DropConnectOpenCLForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\IForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\OpenCLForwardPropagationFactory.cs" />

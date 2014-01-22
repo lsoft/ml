@@ -61,6 +61,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="OpenCL\CLProvider.cs" />
+    <Compile Include="OpenCL\DeviceChooser\IDeviceChooser.cs" />
+    <Compile Include="OpenCL\DeviceChooser\IntelCPUDeviceChooser.cs" />
+    <Compile Include="OpenCL\DeviceChooser\NvidiaGPUDeviceChooser.cs" />
     <Compile Include="OpenCL\Kernel.cs" />
     <Compile Include="OpenCL\Mem\BaseMem.cs" />
     <Compile Include="OpenCL\Mem\MemUint.cs" />
