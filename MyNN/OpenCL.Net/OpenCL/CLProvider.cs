@@ -17,6 +17,15 @@ namespace OpenCL.Net.OpenCL
         private readonly List<BaseMem> _mems;
         private readonly List<Kernel> _kernels;
 
+        public Cl.Device ChoosedDevice
+        {
+            get
+            {
+                return
+                    _device;
+            }
+        }
+
         public Cl.DeviceType ChoosedDeviceType
         {
             get;

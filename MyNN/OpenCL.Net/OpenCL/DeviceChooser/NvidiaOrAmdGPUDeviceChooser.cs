@@ -4,7 +4,7 @@ using OpenCL.Net.Platform;
 
 namespace OpenCL.Net.OpenCL.DeviceChooser
 {
-    public class NvidiaGPUDeviceChooser : IDeviceChooser
+    public class NvidiaOrAmdGPUDeviceChooser : IDeviceChooser
     {
         public void ChooseDevice(
             out Cl.DeviceType choosedDeviceType,
@@ -29,8 +29,16 @@ namespace OpenCL.Net.OpenCL.DeviceChooser
                     foreach (var device in deviceIds)
                     {
                         var vendor = Cl.GetDeviceInfo(device, Cl.DeviceInfo.Vendor, out error).ToString();
-                        if (vendor.ToUpper().Contains("NVIDIA"))
+                        var uvendor = vendor.ToUpper();
+
+                        //Console.WriteLine(uvendor);
+
+                        if (uvendor.Contains("NVIDIA") || uvendor.Contains("ADVANCED MICRO DEVICES"))
                         {
+                            Console.WriteLine(
+                                "Choosed vendor: {0}",
+                                uvendor);
+
                             choosedDevice = deviceIds.First();
                             choosedDeviceType = Cl.DeviceType.Gpu;
                             return;
@@ -39,7 +47,7 @@ namespace OpenCL.Net.OpenCL.DeviceChooser
                 }
             }
 
-            throw new InvalidOperationException("There is no NVIDIA GPU device");
+            throw new InvalidOperationException("There is no NVIDIA/ATI/AMD GPU device");
         }
     }
 }

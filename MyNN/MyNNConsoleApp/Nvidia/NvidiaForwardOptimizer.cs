@@ -19,7 +19,6 @@ namespace MyNNConsoleApp.Nvidia
     {
         public static void Optimize()
         {
-            //intel haswell i5 takes about 650 - 750 msec
 
             var rndSeed = 1;
             var randomizer = new DefaultRandomizer(ref rndSeed);
@@ -44,7 +43,7 @@ namespace MyNNConsoleApp.Nvidia
                 new[]
                     {
                         784,
-                        5000,
+                        784 * 10,
                         784
                     });
 
@@ -53,17 +52,17 @@ namespace MyNNConsoleApp.Nvidia
                 trainData,
                 mlp);
 
-            var intelResults = ProfileIntelCPU(
-                randomizer,
-                trainData,
-                mlp);
+           var intelResults = ProfileIntelCPU(
+               randomizer,
+               trainData,
+               mlp);
 
-            var nvidiaSum = nvidiaResults.Sum(j => j.State.Sum());
-            var intelSum = intelResults.Sum(j => j.State.Sum());
+           var nvidiaSum = nvidiaResults.Sum(j => j.State.Sum());
+           var intelSum = intelResults.Sum(j => j.State.Sum());
 
-            Console.WriteLine(
-                "DIFF = {0}",
-                (nvidiaSum - intelSum));
+           Console.WriteLine(
+               "DIFF = {0}",
+               (nvidiaSum - intelSum));
         }
 
         private static List<ILayerState> ProfileNvidiaGPU(
@@ -72,12 +71,11 @@ namespace MyNNConsoleApp.Nvidia
             MLP mlp)
         {
             using (var clProvider = new CLProvider(
-                new NvidiaGPUDeviceChooser(),
+                new NvidiaOrAmdGPUDeviceChooser(),
                 true))
             {
 
                 var forward = new GPUForwardPropagation(
-                    VectorizationSizeEnum.NoVectorization,
                     mlp,
                     clProvider);
 

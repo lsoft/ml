@@ -32,7 +32,8 @@ namespace MyNNConsoleApp
             {
                 Thread.Sleep(1000);
 
-                NvidiaForwardOptimizer.Optimize();
+                //NvidiaForwardOptimizer.Optimize();
+                NvidiaBackpropOptimizer.Optimize();
                 //Console.ReadLine();
                 return;
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.OpenCL;
@@ -12,7 +13,6 @@ namespace MyNN.MLP2.ForwardPropagation
 {
     public class GPUForwardPropagation : IForwardPropagation
     {
-        private readonly VectorizationSizeEnum _vse;
         private readonly MLP _mlp;
 
         public MLP MLP
@@ -47,10 +47,9 @@ namespace MyNN.MLP2.ForwardPropagation
             }
         }
 
-        private Kernel[] _kernels;
+        private Kernel[] _mulKernels;
 
         public GPUForwardPropagation(
-            VectorizationSizeEnum vse,
             MLP mlp,
             CLProvider clProvider
             )
@@ -64,7 +63,6 @@ namespace MyNN.MLP2.ForwardPropagation
                 throw new ArgumentNullException("clProvider");
             }
 
-            _vse = vse;
             _mlp = mlp;
             _clProvider = clProvider;
 
@@ -98,13 +96,13 @@ namespace MyNN.MLP2.ForwardPropagation
 
                 var netMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadWrite);
                 netMem.Write(BlockModeEnum.Blocking);
                 NetMem[cc] = netMem;
 
                 var stateMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadWrite);
                 stateMem.Write(BlockModeEnum.Blocking);
                 StateMem[cc] = stateMem;
             }
@@ -117,7 +115,7 @@ namespace MyNN.MLP2.ForwardPropagation
 
                 var weightMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount * previousLayerNeuronCount,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadWrite);
                 weightMem.Write(BlockModeEnum.Blocking);
                 WeightMem[cc] = weightMem;
             }
@@ -125,26 +123,34 @@ namespace MyNN.MLP2.ForwardPropagation
 
         private void LoadProgram()
         {
-            _kernels = new Kernel[_mlp.Layers.Length];
+            _mulKernels = new Kernel[_mlp.Layers.Length];
 
             for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; layerIndex++)
             {
                 var activationFunction = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLActivationFunction("lastNET");
 
-                var kernelSource = _kernelSource.Replace(
+                var mulKernelSource = _kernelSource.Replace(
                     "<activationFunction_lastNET>",
                     activationFunction);
 
-                var kernelName = VectorizationHelper.GetKernelName("ComputeLayerKernel", _vse);
+                mulKernelSource = mulKernelSource.Replace(
+                    "{CURRENT_LAYER_NEURON_COUNT}",
+                    _mlp.Layers[layerIndex].NonBiasNeuronCount.ToString(CultureInfo.InvariantCulture));
 
-                _kernels[layerIndex] = _clProvider.CreateKernel(
-                    kernelSource,
+                mulKernelSource = mulKernelSource.Replace(
+                    "{PREVIOUS_LAYER_NEURON_COUNT}",
+                    _mlp.Layers[layerIndex - 1].Neurons.Length.ToString(CultureInfo.InvariantCulture));
+
+                var kernelName = "ComputeLayerKernel";
+
+                _mulKernels[layerIndex] = _clProvider.CreateKernel(
+                    mulKernelSource,
                     kernelName);
             }
         }
 
         private string _kernelSource = @"
-int ComputeWeightIndex(
+inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {
@@ -152,31 +158,211 @@ int ComputeWeightIndex(
         previousLayerNeuronCount * neuronIndex;
 }
 
+#define WARP_SIZE 32
+
+__kernel void ComputeLayerKernel(
+    const __global float* previousLayerLastState,
+    __global float* currentLayerLastNET,
+    __global float * currentLayerLastState,
+    const __global float* weights,
+    __local float* partialDotProduct
+    )
+{
+    uint width = {PREVIOUS_LAYER_NEURON_COUNT};
+    uint height = {CURRENT_LAYER_NEURON_COUNT};
+
+//__kernel void MatVecMulCoalesced3(const __global float* M,
+//                                  const __global float* V,
+//                                  uint width, uint height,
+//                                  __global float* W,
+//                                  __local float* partialDotProduct)
+//{
+
+   // Each work-group computes multiple elements of W
+   for (uint y = get_group_id(0); y < height; y += get_num_groups(0))
+   {
+      const __global float* row = weights + y * width;
+
+      // Each work-item accumulates as many products as necessary
+      // into private variable 'sum'
+      float sum = 0;
+      for (uint x = get_local_id(0); x < width; x += get_local_size(0))
+         sum += row[x] * previousLayerLastState[x];
+
+      // Each partial dot product is stored in shared memory
+      partialDotProduct[get_local_id(0)] = sum;
+
+      // Perform parallel reduction to add each work-item's
+      // partial dot product together
+
+      // Synchronize to make sure each work-item is done writing to
+      // partialDotProduct
+      barrier(CLK_LOCAL_MEM_FENCE);
+
+      // Thread local ID within a warp
+      uint id = get_local_id(0) & (WARP_SIZE - 1); 
+
+      // Each warp reduces 64 (default) consecutive elements
+      float warpResult = 0.0f;
+      if (get_local_id(0) < get_local_size(0)/2 )
+      {
+          volatile __local float* p = partialDotProduct + 2 * get_local_id(0) - id;
+          p[0] += p[32];
+          p[0] += p[16];
+          p[0] += p[8];
+          p[0] += p[4];
+          p[0] += p[2];
+          p[0] += p[1];
+          warpResult = p[0];
+      }
+
+      // Synchronize to make sure each warp is done reading
+      // partialDotProduct before it is overwritten in the next step
+      barrier(CLK_LOCAL_MEM_FENCE);
+
+      // The first thread of each warp stores the result of the reduction
+      // at the beginning of partialDotProduct
+      if (id == 0)
+         partialDotProduct[get_local_id(0) / WARP_SIZE] = warpResult;
+
+      // Synchronize to make sure each warp is done writing to
+      // partialDotProduct before it is read in the next step
+      barrier(CLK_LOCAL_MEM_FENCE);
+
+      // Number of remaining elements after the first reduction
+      uint size = get_local_size(0) / (2 * WARP_SIZE);
+
+      // get_local_size(0) is less or equal to 512 on NVIDIA GPUs, so
+      // only a single warp is needed for the following last reduction
+      // step
+      if (get_local_id(0) < size / 2)
+      {
+         volatile __local float* p = partialDotProduct + get_local_id(0);
+
+         if (size >= 8)
+            p[0] += p[4];
+         if (size >= 4)
+            p[0] += p[2];
+         if (size >= 2)
+            p[0] += p[1];
+      }
+
+      // Write the result of the reduction to global memory
+      if (get_local_id(0) == 0)
+      {
+         float lastNET = partialDotProduct[0];
+         currentLayerLastNET[y] = lastNET;
+
+         //compute last state
+         float lastState = <activationFunction_lastNET>;
+         currentLayerLastState[y] = lastState;
+      }
+
+      // Synchronize to make sure the first work-item is done with
+      // reading partialDotProduct
+      barrier(CLK_LOCAL_MEM_FENCE);
+   }
+}
+
+
+/*
+__kernel void ComputeLayerKernel1(
+    const __global float* V,
+    __global float* W,
+    __global float * currentLayerLastState,
+    const __global float* M)
+{
+    uint width = {PREVIOUS_LAYER_NEURON_COUNT};
+    uint height = {CURRENT_LAYER_NEURON_COUNT};
+
+    // Each work-item handles as many matrix rows as necessary
+    for (uint y = get_global_id(0);
+         y < height;
+         y += get_global_size(0))
+    {
+
+        // Row pointer
+        const __global float* row = M + y * width;
+
+        // Compute dot product  
+        float lastNET = 0;
+        for (uint x = 0; x < width; ++x)
+            lastNET += row[x] * V[x];
+
+        // Write result to global memory
+        W[y] = lastNET;
+
+        //compute last state
+
+        float lastState = <activationFunction_lastNET>;
+        currentLayerLastState[y] = lastState;
+
+    }
+}
+//*/
+
+/*
+__kernel void ComputeLayerKernel1(
+    const __global float* V,
+    __global float* W,
+    __global float * currentLayerLastState,
+    const __global float* M)
+{
+    uint width = {PREVIOUS_LAYER_NEURON_COUNT};
+    uint height = {CURRENT_LAYER_NEURON_COUNT};
+
+
+    // Row index
+    uint y = get_global_id(0);
+    if (y < height)
+    {
+        // Row pointer
+        const __global float* row = M + y * width;
+
+        // Compute dot product  
+        float lastNET = 0;
+        for (int x = 0; x < width; ++x)
+            lastNET += row[x] * V[x];
+
+        // Write result to global memory
+        W[y] = lastNET;
+
+        //compute last state
+
+        float lastState = <activationFunction_lastNET>;
+        currentLayerLastState[y] = lastState;
+    }
+}
+
+/*
 __kernel void
         ComputeLayerKernel1(
             __global float * previousLayerLastState,
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
-            __global float * weights,
-            int previousLayerNeuronCountTotal)
+            __global float * weights
+            //__local float * previous_local_cache
+            )
 {
     //оригинальный алгоритм более чем в два раза медленен
 
     int neuronIndex = get_global_id(0);
-    int currentLayerNeuronCount = get_global_size(0);
 
-    int weightIndex = 
-        neuronIndex;
-        //ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
+    //int weightIndex = ComputeWeightIndex({PREVIOUS_LAYER_NEURON_COUNT}, neuronIndex);
+
+    const __global float* row = weights + {PREVIOUS_LAYER_NEURON_COUNT} * neuronIndex;
+
 
     //compute LastNET
     float lastNET = 0;
-    for (int plnIndex =0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
+    for (int plnIndex = 0; plnIndex < {PREVIOUS_LAYER_NEURON_COUNT}; ++plnIndex)
     {
-        lastNET += weights[weightIndex] * previousLayerLastState[plnIndex];
+        //prefetch(weights + weightIndex + 32, 4);
 
-        weightIndex += currentLayerNeuronCount;
-        //weightIndex ++;
+        lastNET += 
+            //weights[weightIndex++] 
+            row[plnIndex]
+            * previousLayerLastState[plnIndex];
     }
 
     currentLayerLastNET[neuronIndex] = lastNET;
@@ -186,6 +372,7 @@ __kernel void
     float lastState = <activationFunction_lastNET>;
     currentLayerLastState[neuronIndex] = lastState;
 }
+//*/
 ";
 
 
@@ -293,58 +480,31 @@ __kernel void
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
-                var prevLayerNeuronTotalCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
-
-                if (_vse != VectorizationSizeEnum.NoVectorization)
-                {
-                    throw new NotSupportedException();
-                }
+                var previousLayerNeuronTotalCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
 
                 var currentLayerNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
 
-                var globalNeuronSize = currentLayerNeuronCount;
-                var globalWeightSize = prevLayerNeuronTotalCount;
+                Cl.ErrorCode error;
+                var num_compute_units = Cl.GetDeviceInfo(_clProvider.ChoosedDevice, Cl.DeviceInfo.MaxComputeUnits, out error).CastTo<int>();
 
-                const int WorkGroupSize0 = 32;
-                const int WorkGroupSize1 = 32;
+                var szLocalWorkSize = 256;
+                var szGlobalWorkSize = 32 * 2 * num_compute_units * szLocalWorkSize;
 
-                var corrected_globalNeuronSize = globalNeuronSize;
-                if (WorkGroupSize0 > 1 && corrected_globalNeuronSize > WorkGroupSize0)
-                {
-                    corrected_globalNeuronSize += (WorkGroupSize0 - globalNeuronSize % WorkGroupSize0);
-                }
-
-                var corrected_globalWeightSize = globalWeightSize;
-                if (WorkGroupSize1 > 1 && corrected_globalWeightSize > WorkGroupSize1)
-                {
-                    corrected_globalWeightSize += (WorkGroupSize1 - globalWeightSize % WorkGroupSize1);
-                }
-
-                var localNeuronSize = WorkGroupSize0;
-                var localWeightSize = WorkGroupSize1;
-
-                var localNeuronCount = corrected_globalNeuronSize / localNeuronSize;
-                var localWeightCount = corrected_globalWeightSize / localWeightSize;
-
-                _kernels[layerIndex]
+                _mulKernels[layerIndex]
                     .SetKernelArgMem(0, this.StateMem[layerIndex - 1])
                     .SetKernelArgMem(1, this.NetMem[layerIndex])
                     .SetKernelArgMem(2, this.StateMem[layerIndex])
                     .SetKernelArgMem(3, this.WeightMem[layerIndex])
-                    //.SetKernelArgLocalMem(4, 4 * localNeuronCount * localWeightCount)
-                    .SetKernelArg(4, 4, prevLayerNeuronTotalCount)
+                    .SetKernelArgLocalMem(4, 4 * szLocalWorkSize)
                     .EnqueueNDRangeKernel(
-                        currentLayerNeuronCount
-                        //new int[]
-                        //{
-                        //    localNeuronSize,//corrected_globalNeuronSize,
-                        //    localWeightSize,//corrected_globalWeightSize,
-                        //}
-                        //,new int[]
-                        //{
-                        //    localNeuronSize,
-                        //    localWeightSize
-                        //}
+                        new int[]
+                        {
+                            szGlobalWorkSize
+                        }
+                        , new int[]
+                        {
+                            szLocalWorkSize
+                        }
                         );
             }
 
@@ -359,22 +519,51 @@ __kernel void
             //веса оставшихся слоев
             for (var layerIndex = 1; layerIndex < layerCount; ++layerIndex)
             {
+                var weightShift = 0;
+
                 var layer = _mlp.Layers[layerIndex];
                 var weightMem = WeightMem[layerIndex];
-
                 for (var neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; neuronIndex++)
                 {
                     var neuron = layer.Neurons[neuronIndex];
 
-                    for (var weightIndex = 0; weightIndex < neuron.Weights.Length; weightIndex++)
-                    {
-                        weightMem.Array[weightIndex * layer.NonBiasNeuronCount + neuronIndex] = neuron.Weights[weightIndex];
-                    }
+                    Array.Copy(
+                        neuron.Weights,
+                        0,
+                        weightMem.Array,
+                        weightShift,
+                        neuron.Weights.Length);
+
+                    weightShift += neuron.Weights.Length;
                 }
 
                 weightMem.Write(BlockModeEnum.NonBlocking);
             }
         }
+
+        //public void PushWeights()
+        //{
+        //    var layerCount = _mlp.Layers.Length;
+
+        //    //веса оставшихся слоев
+        //    for (var layerIndex = 1; layerIndex < layerCount; ++layerIndex)
+        //    {
+        //        var layer = _mlp.Layers[layerIndex];
+        //        var weightMem = WeightMem[layerIndex];
+
+        //        for (var neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; neuronIndex++)
+        //        {
+        //            var neuron = layer.Neurons[neuronIndex];
+
+        //            for (var weightIndex = 0; weightIndex < neuron.Weights.Length; weightIndex++)
+        //            {
+        //                weightMem.Array[weightIndex * layer.NonBiasNeuronCount + neuronIndex] = neuron.Weights[weightIndex];
+        //            }
+        //        }
+
+        //        weightMem.Write(BlockModeEnum.NonBlocking);
+        //    }
+        //}
 
         public void PopState()
         {
@@ -423,8 +612,8 @@ __kernel void
                 var isBiasNeuron = neuronIndex == (firstLayerNeuronCount - 1);
 
                 NetMem[0].Array[neuronIndex] = 0; //LastNET
-                StateMem[0].Array[neuronIndex] = 
-                    isBiasNeuron 
+                StateMem[0].Array[neuronIndex] =
+                    isBiasNeuron
                         ? 1.0f
                         : d.Input[neuronIndex];
             }
