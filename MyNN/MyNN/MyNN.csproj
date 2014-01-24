@@ -153,6 +153,8 @@
     <Compile Include="Boosting\SAMMEBoosting\SAMMEClassifierSet.cs" />
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\OpenCLTransposeBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\GPUTranposeKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\GPUTransposeBackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\GPUKernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\GPUBackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\Metrics\TestPurposeMetric.cs" />

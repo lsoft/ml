@@ -28,7 +28,7 @@ namespace MyNNConsoleApp.Nvidia
         {
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                10,
+                50,
                 true
                 );
             trainData.Normalize();
@@ -48,7 +48,7 @@ namespace MyNNConsoleApp.Nvidia
                 () =>
                     new LearningAlgorithmConfig(
                         new ConstLearningRate(0.0001f),
-                        1,
+                        25,
                         0.0f,
                         1,
                         0.0001f,

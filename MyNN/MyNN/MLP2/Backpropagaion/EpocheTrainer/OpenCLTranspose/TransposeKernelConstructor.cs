@@ -243,21 +243,6 @@ __kernel void HiddenLayerTrain(
         currentDeDz += multiplied;
     }
 
-
-//    //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (НЕ ВЕКТОРИЗОВАНО)
-//    float currentDeDz = 0;
-//    
-//    for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
-//    {
-//        int nextWeightIndex = ComputeWeightIndex(nextLayerNeuronCount, neuronIndex) + nextNeuronIndex;
-//
-//        float nextWeight = nextLayerWeights[nextWeightIndex];
-//        float nextNabla = nextLayerDeDz[nextNeuronIndex];
-//        float multiplied = nextWeight * nextNabla;
-//
-//        currentDeDz += multiplied;
-//    }
-
     float nOut = currentLayerNET[neuronIndex];
     currentDeDz *= <firstDerivative_nOut>;
     currentLayerDeDz[neuronIndex] = currentDeDz;
