@@ -28,25 +28,13 @@ namespace MyNNConsoleApp.Nvidia
         {
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                100,
+                10,
                 true
                 );
             trainData.Normalize();
-            trainData = new DataSet(
-                new List<DataItem>
-                {
-                    trainData[0]
-                    ,trainData[1]
-                    ,trainData[2]
-                    ,trainData[3]
-                    ,trainData[4]
-                    ,trainData[5]
-                    ,trainData[6]
-                    ,trainData[7]
-                    ,trainData[8]
-                    ,trainData[9]
-                },
-                trainData.Visualizer);
+            //trainData = new DataSet(
+            //    trainData.Take(50).ToList(),
+            //    trainData.Visualizer);
             trainData = trainData.ConvertToAutoencoder();
 
             var validationData = MNISTDataProvider.GetDataSet(

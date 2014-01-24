@@ -203,6 +203,27 @@ inline void WarpReductionToFirstElement(
 
 }
 
+
+__kernel void Reduction0(__local float *L)
+{
+        for(uint c = get_local_size(0) / 2; c > 0; c /= 2)
+        {
+            barrier(CLK_LOCAL_MEM_FENCE);
+            
+            if(c>get_local_id(0))
+            {
+                L[get_local_id(0)] += L[get_local_id(0)+c];
+            }
+        }
+
+//        if(get_local_id(0) == 0)
+//        {
+//            L[get_group_id(0)] = L[0];
+//        }
+
+        barrier(CLK_LOCAL_MEM_FENCE);
+}
+
 __kernel void HiddenLayerTrain(
     __global float * currentLayerNET,
 
@@ -253,24 +274,39 @@ __kernel void HiddenLayerTrain(
 
         local_next_nabla[get_local_id(0)] = currentDeDz;
         barrier(CLK_LOCAL_MEM_FENCE);
+
+//        if(get_local_id(0) == 0)
+//            for(int i = 0; i < get_local_size(0); i++)
+//                local_next_nabla[i] = 0.0001;
+//        barrier(CLK_LOCAL_MEM_FENCE);
+
         WarpReductionToFirstElement(local_next_nabla);
+//        Reduction0(local_next_nabla);
         barrier(CLK_LOCAL_MEM_FENCE);
         currentDeDz = local_next_nabla[0];
 
+//        if(get_local_id(0) == 0)
+//            printf(""123"");//printf(""%F"", currentDeDz);
 
-//        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
-//        float currentDeDz = 0;
-//        for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
-//        {
-//            int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex;
-//
-//            float nextWeight = nextLayerWeights[nextWeightIndex];
-//            float nextNabla = nextLayerDeDz[nextNeuronIndex];
-//            float multiplied = nextWeight * nextNabla;
-//
-//            currentDeDz += multiplied;
-//        }
+//        currentDeDz  = 0;
+//        for(int i = 0; i < get_local_size(0); i++)
+//            currentDeDz += local_next_nabla[i];
+//*/
 
+/*
+        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
+        float currentDeDz = 0;
+        for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
+        {
+            int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex;
+
+            float nextWeight = nextLayerWeights[nextWeightIndex];
+            float nextNabla = nextLayerDeDz[nextNeuronIndex];
+            float multiplied = nextWeight * nextNabla;
+
+            currentDeDz += multiplied;
+        }
+//*/
 
         int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
@@ -316,8 +352,16 @@ __kernel void OutputLayerTrain(
 
     float learningRate,
     float regularizationFactor,
-    float dataCount)
+    float dataCount
+
+    )
 {
+//    int neuronIndex = get_global_id(0);
+//
+//    if(neuronIndex >= currentLayerNeuronCount)
+//    {
+//        return;
+//    }
 
     for (uint neuronIndex = get_group_id(0); neuronIndex < currentLayerNeuronCount; neuronIndex += get_num_groups(0))
     {
@@ -331,10 +375,26 @@ __kernel void OutputLayerTrain(
 
         int nablaNeuronShift = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
 
+/*
+        for (
+            int weightIndex = 0;
+            weightIndex < previousLayerNeuronCountTotal; 
+            weightIndex += 1
+            )
+        {
+            float deltaWeight =
+                learningRate *
+                n *
+                (previousLayerLastState[weightIndex] );//                                                   + <weight_regularization2>);
+
+            <weight_update> //nabla[nablaNeuronShift + weightIndex] = deltaWeight;
+        }
+//*/
+
+
         for (
             int weightIndex = get_local_id(0);
             weightIndex < previousLayerNeuronCountTotal; 
-            //++weightIndex
             weightIndex += get_local_size(0)
             )
         {
@@ -345,40 +405,8 @@ __kernel void OutputLayerTrain(
 
             <weight_update> //nabla[nablaNeuronShift + weightIndex] = deltaWeight;
         }
-
-    }
-
-/*
-    int neuronIndex = get_global_id(0);
-
-    if(neuronIndex >= currentLayerNeuronCount)
-    {
-        return;
-    }
-
-    float nOut = currentLayerNET[neuronIndex];
-
-    float n =
-        <firstDerivative_nOut>
-        * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);
-
-    currentLayerDeDz[neuronIndex] = n;
-
-    int nablaNeuronShift = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
-
-    for (
-        int weightIndex = 0;//previousLayerNeuronCount4M4; 
-        weightIndex < previousLayerNeuronCountTotal; 
-        ++weightIndex)
-    {
-        float deltaWeight =
-            learningRate *
-            n *
-            (previousLayerLastState[weightIndex] + <weight_regularization2>);
-
-        <weight_update>
-    }
 //*/
+    }
 }
 ";
 
@@ -390,15 +418,32 @@ __kernel void OutputLayerTrain(
 __kernel void UpdateWeightKernel(
     __global float * currentLayerWeights,
     const __global float * nabla,
-    //__local float* partialDotProduct,
     const float batchSize
-    //,const int totalNeuronCount
-    //,const int totalWeightCount
+    ,const int totalNeuronCount
+    ,const int totalWeightCount
+    , const int totalValueCount
     )
 {
     int gi = get_global_id(0);
 
+//    if(gi >= totalValueCount)
+//    {
+//        return;
+//    }
+
     currentLayerWeights[gi] += nabla[gi] / batchSize;
+
+//   for (uint y = get_group_id(0); y < totalNeuronCount; y += get_num_groups(0))
+//   {
+//        const __global float* from_ = nabla + y * totalWeightCount;
+//        __global float* to_ = currentLayerWeights + y * totalWeightCount;
+//
+//        for (uint i = get_local_id(0); i < totalWeightCount; i += get_local_size(0))
+//        {
+//            to_[i] += from_[i] / batchSize;
+//        }
+//
+//    }
 }
 ";
 

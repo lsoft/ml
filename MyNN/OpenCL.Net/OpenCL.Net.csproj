@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="OpenCL\CLProvider.cs" />
+    <Compile Include="OpenCL\DeviceChooser\IntelGPUDeviceChooser.cs" />
     <Compile Include="OpenCL\DeviceChooser\IDeviceChooser.cs" />
     <Compile Include="OpenCL\DeviceChooser\IntelCPUDeviceChooser.cs" />
     <Compile Include="OpenCL\DeviceChooser\NvidiaOrAmdGPUDeviceChooser.cs" />

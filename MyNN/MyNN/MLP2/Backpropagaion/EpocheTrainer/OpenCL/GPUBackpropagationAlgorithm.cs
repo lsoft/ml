@@ -14,8 +14,6 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 {
     public class GPUBackpropagationAlgorithm : IEpocheTrainer
     {
-        private const int LocalGroupSize = 28;
-
         private readonly MLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
@@ -56,6 +54,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
+            }
+
+            if (config.RegularizationFactor > float.Epsilon)
+            {
+                throw new NotSupportedException("config.RegularizationFactor > float.Epsilon");
             }
 
             _mlp = mlp;
@@ -213,7 +216,9 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                     var outputNablaLayer = _nablaWeights[outputLayerIndex];
 
                     const int OutputLocalGroupSize = 64;
-                    const int OutputGlobalGroupSize = OutputLocalGroupSize * 128;
+                    int OutputGlobalGroupSize = 
+                        OutputLocalGroupSize * 128;
+                        //outputLayer.NonBiasNeuronCount + (OutputLocalGroupSize - outputLayer.NonBiasNeuronCount%OutputLocalGroupSize);
 
                     if (inBatchIndex == 0)
                     {
@@ -238,7 +243,6 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                                 new int[]
                                 {
                                     OutputGlobalGroupSize
-                                    //outputLayer.NonBiasNeuronCount + (LocalGroupSize -  outputLayer.NonBiasNeuronCount % LocalGroupSize)
                                 },
                                 new int[]
                                 {
@@ -265,7 +269,6 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                                 new int[]
                                 {
                                     OutputGlobalGroupSize
-                                    //outputLayer.NonBiasNeuronCount + (LocalGroupSize -  outputLayer.NonBiasNeuronCount % LocalGroupSize)
                                 },
                                 new int[]
                                 {
@@ -285,8 +288,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                         var currentLayer = _mlp.Layers[hiddenLayerIndex];
                         var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
 
-                        const int HiddenLocalGroupSize = 256;
-                        const int HiddenGlobalGroupSize = HiddenLocalGroupSize*4096;
+                        //const int HiddenLocalGroupSize = 256;
+                        //const int HiddenGlobalGroupSize = HiddenLocalGroupSize * 4096;
+
+                        const int HiddenLocalGroupSize = 128;
+                        const int HiddenGlobalGroupSize = HiddenLocalGroupSize * 16;
 
                         if (inBatchIndex == 0)
                         {
@@ -374,31 +380,29 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                     var weightMem = _forwardPropagation.WeightMem[layerIndex];
                     var nablaMem = _nablaWeights[layerIndex];
 
-                    //var neuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
-                    //var weightCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
+                    var neuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
+                    var weightCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
 
-                    //Cl.ErrorCode error;
-                    //var num_compute_units = Cl.GetDeviceInfo(_clProvider.ChoosedDevice, Cl.DeviceInfo.MaxComputeUnits, out error).CastTo<int>();
-
-                    //var szLocalWorkSize = 1024;
-                    //var szGlobalWorkSize = 1024 * 2 * 2 * szLocalWorkSize;
+                    //var localSize = 512;
+                    //var globalSize = localSize*256;
 
                     _updateWeightKernel
                         .SetKernelArgMem(0, weightMem)
                         .SetKernelArgMem(1, nablaMem)
                         //.SetKernelArgLocalMem(2, 4 * weightCount)
                         .SetKernelArg(2, 4, (float)(_config.BatchSize))
-                        //.SetKernelArg(4, 4, neuronCount)
-                        //.SetKernelArg(5, 4, weightCount)
+                        .SetKernelArg(3, 4, neuronCount)
+                        .SetKernelArg(4, 4, weightCount)
+                        .SetKernelArg(5, 4, weightMem.Array.Length)
                         .EnqueueNDRangeKernel(weightMem.Array.Length);
                         //.EnqueueNDRangeKernel(
                         //    new int[]
                         //    {
-                        //        szGlobalWorkSize
+                        //        globalSize  
                         //    }
                         //    , new int[]
                         //    {
-                        //        szLocalWorkSize
+                        //        localSize
                         //    }
                         //    );
                 }
