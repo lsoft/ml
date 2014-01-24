@@ -358,8 +358,8 @@ __kernel void ComputeLayerKernel(
 
             PushInput(d);
 
-            // Make sure we're done with everything that's been requested before
-            _clProvider.QueueFinish();
+            //// Make sure we're done with everything that's been requested before
+            //_clProvider.QueueFinish();
 
             //начинаем считать
             var layerCount = _mlp.Layers.Length;
@@ -371,7 +371,7 @@ __kernel void ComputeLayerKernel(
                 var currentLayerNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
 
                 var szLocalWorkSize = 256;
-                var szGlobalWorkSize = 32 * 2 * _numComputeUnits * szLocalWorkSize;
+                var szGlobalWorkSize =  32 * 2 * _numComputeUnits * szLocalWorkSize;
 
                 _mulKernels[layerIndex]
                     .SetKernelArgMem(0, this.StateMem[layerIndex - 1])

@@ -183,8 +183,8 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 
             _forwardPropagation.ClearAndPushHiddenLayers();
 
-            // Make sure we're done with everything that's been requested before
-            _clProvider.QueueFinish();
+            //// Make sure we're done with everything that's been requested before
+            //_clProvider.QueueFinish();
 
             //process data set
             var currentIndex = 0;
@@ -215,10 +215,8 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 
                     var outputNablaLayer = _nablaWeights[outputLayerIndex];
 
-                    const int OutputLocalGroupSize = 64;
-                    int OutputGlobalGroupSize = 
-                        OutputLocalGroupSize * 128;
-                        //outputLayer.NonBiasNeuronCount + (OutputLocalGroupSize - outputLayer.NonBiasNeuronCount%OutputLocalGroupSize);
+                    const int OutputLocalGroupSize = 256;
+                    const int OutputGlobalGroupSize = OutputLocalGroupSize * 256;
 
                     if (inBatchIndex == 0)
                     {
@@ -287,9 +285,6 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                         var prevLayer = _mlp.Layers[hiddenLayerIndex - 1];
                         var currentLayer = _mlp.Layers[hiddenLayerIndex];
                         var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
-
-                        //const int HiddenLocalGroupSize = 256;
-                        //const int HiddenGlobalGroupSize = HiddenLocalGroupSize * 4096;
 
                         const int HiddenLocalGroupSize = 128;
                         const int HiddenGlobalGroupSize = HiddenLocalGroupSize * 16;
@@ -407,8 +402,8 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                         //    );
                 }
 
-                // Make sure we're done with everything that's been requested before
-                _clProvider.QueueFinish();
+                //// Make sure we're done with everything that's been requested before
+                //_clProvider.QueueFinish();
 
                 currentIndex += _config.BatchSize;
             } while (currentIndex < data.Count);
@@ -419,6 +414,9 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
             ConsoleAmbientContext.Console.ReturnCarriage();
 
             //конец эпохи обучения
+
+            // Make sure we're done with everything that's been requested before
+            _clProvider.QueueFinish();
 
             //считываем веса с устройства
             foreach (var wm in _forwardPropagation.WeightMem)

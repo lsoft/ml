@@ -140,7 +140,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 
 
         private const string _calculationKernelsSource = @"
-int ComputeWeightIndex(
+inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {
