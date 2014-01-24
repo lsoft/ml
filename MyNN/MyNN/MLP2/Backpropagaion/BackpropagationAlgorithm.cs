@@ -186,7 +186,7 @@ namespace MyNN.MLP2.Backpropagaion
 
                 ConsoleAmbientContext.Console.WriteLine(
                     "                  =========== Per-item error = {0} ===========",
-                    (Math.Abs(currentError - float.MaxValue) < float.Epsilon ? "не вычислено" : DoubleConverter.ToExactString(currentError))
+                    (currentError >= float.MaxValue ? "не вычислено" : DoubleConverter.ToExactString(currentError))
                     );
 
                 ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));

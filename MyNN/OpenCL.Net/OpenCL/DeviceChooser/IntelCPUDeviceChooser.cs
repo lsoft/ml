@@ -33,6 +33,10 @@ namespace OpenCL.Net.OpenCL.DeviceChooser
                         var vendor = Cl.GetDeviceInfo(device, Cl.DeviceInfo.Vendor, out error).ToString();
                         if (vendor.ToUpper().Contains("INTEL"))
                         {
+                            Console.WriteLine(
+                                "Choosed vendor: {0}",
+                                vendor.ToUpper());
+
                             choosedDevice = deviceIds.First();
                             choosedDeviceType = Cl.DeviceType.Cpu;
                             return;

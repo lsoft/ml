@@ -9,7 +9,6 @@ using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
-using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
@@ -29,7 +28,8 @@ namespace MyNNConsoleApp.Nvidia
         {
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                100
+                100,
+                true
                 );
             trainData.Normalize();
             trainData = new DataSet(
@@ -51,88 +51,136 @@ namespace MyNNConsoleApp.Nvidia
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                1
+                1,
+                true
                 );
             validationData.Normalize();
 
-            var config = new LearningAlgorithmConfig(
-                new ConstLearningRate(0.1f),
-                1,
-                0.0f,
-                1,
-                0.0001f,
-                -1.0f);
+            Func<ILearningAlgorithmConfig> configProvider = 
+                () =>
+                    new LearningAlgorithmConfig(
+                        new ConstLearningRate(0.0001f),
+                        1,
+                        0.0f,
+                        1,
+                        0.0001f,
+                        -1.0f);
 
             var serialization = new SerializationHelper();
 
-            var validation = new AutoencoderValidation(
-                serialization,
-                new HalfSquaredEuclidianDistance(),
-                validationData.ConvertToAutoencoder(),
-                3,
-                1);
+            Func<TestPurposeValidation> validationProvider = 
+                () =>
+                    new TestPurposeValidation(validationData.ConvertToAutoencoder());
 
-            var mlp = new MLP(
-                new NoRandomRandomizer(), 
-                null,
-                null,
-                new IFunction[]
-                    {
+            Func<MLP> mlpProvider = 
+                () =>
+                    new MLP(
+                        new NoRandomRandomizer(), 
                         null,
-                        new SigmoidFunction(1f),
-                        new SigmoidFunction(1f),
-                    },
-                new[]
-                    {
-                        784,
-                        784 * 10,
-                        784
-                    });
+                        null,
+                        new IFunction[]
+                            {
+                                null,
+                                new LinearFunction(1f), 
+                                new LinearFunction(1f), 
+                            },
+                        new[]
+                            {
+                                784,
+                                784 * 10,
+                                784
+                            });
 
-
-            //{
-            //    var randomizer = new NoRandomRandomizer();
-
-            //    var config2 = new LearningAlgorithmConfig(
-            //        new ConstLearningRate(0.1f),
-            //        1,
-            //        0.0f,
-            //        10,
-            //        0.0001f,
-            //        -1.0f);
-
-            //    ProfileNvidiaGPU(
-            //        randomizer,
-            //        trainData,
-            //        serialization.DeepClone(mlp),
-            //        config2,
-            //        validation);
-            //}
-
-            //Console.Clear();
-
-
+            var nvidiaTotalError = float.MinValue;
+            var nvidiaResult = ulong.MinValue;
             {
                 var randomizer = new NoRandomRandomizer();
-
+                var validation = validationProvider();
+                var mlp = mlpProvider();
+                var config = configProvider();
+                
                 ProfileNvidiaGPU(
                     randomizer,
                     trainData,
-                    serialization.DeepClone(mlp),
+                    mlp,
                     config,
                     validation);
+
+                nvidiaTotalError = validation.TotalError;
+                nvidiaResult = validation.TotalSum;
             }
 
+            var intelTotalError = float.MaxValue;
+            var intelResult = ulong.MaxValue;
             {
                 var randomizer = new NoRandomRandomizer();
+                var validation = validationProvider();
+                var mlp = mlpProvider();
+                var config = configProvider();
 
                 ProfileIntelCPU(
                     randomizer,
                     trainData,
-                    serialization.DeepClone(mlp),
+                    mlp,
                     config,
                     validation);
+
+                intelTotalError = validation.TotalError;
+                intelResult = validation.TotalSum;
             }
+
+            var diff = nvidiaTotalError >= intelTotalError ? nvidiaTotalError - intelTotalError : intelTotalError - nvidiaTotalError;
+            var diff2 = BitConverter.GetBytes(diff);
+            Console.WriteLine("diff double\r\n{4}\r\ndiff bytes\r\n{0} {1} {2} {3}\r\n", diff2[0], diff2[1], diff2[2], diff2[3], DoubleConverter.ToExactString(diff));
+
+            var nvidiaTotalError2 = BitConverter.GetBytes(nvidiaTotalError);
+            var intelTotalError2 = BitConverter.GetBytes(intelTotalError);
+
+            var nvidiaTotalError3 = BitConverter.ToUInt32(nvidiaTotalError2, 0);
+            var intelTotalError3 = BitConverter.ToUInt32(intelTotalError2, 0);
+
+            var nvidiaTotalError4 = DoubleConverter.ToExactString(nvidiaTotalError);
+            var intelTotalError4 = DoubleConverter.ToExactString(intelTotalError);
+
+            Console.WriteLine("nvidia bytes\r\n{0} {1} {2} {3}\r\n", nvidiaTotalError2[0], nvidiaTotalError2[1], nvidiaTotalError2[2], nvidiaTotalError2[3]);
+            Console.WriteLine("intel  bytes\r\n{0} {1} {2} {3}\r\n", intelTotalError2[0], intelTotalError2[1], intelTotalError2[2], intelTotalError2[3]);
+            Console.WriteLine("uint\r\n{0}\r\n{1}\r\n", nvidiaTotalError3, intelTotalError3);
+            Console.WriteLine("double\r\n{0}\r\n{1}\r\n", nvidiaTotalError4, intelTotalError4);
+
+            if(Math.Abs(nvidiaTotalError - intelTotalError) < float.Epsilon)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("RESULTS ARE EQUALS");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("RESULTS ARE NOT EQUALS \r\n{0} = nvidia\r\n{1} = intel", DoubleConverter.ToExactString(nvidiaTotalError), DoubleConverter.ToExactString(intelTotalError));
+                Console.ResetColor();
+            }
+
+            //if 
+            //    //(Math.Abs(nvidiaTotalError - intelTotalError) < float.Epsilon)
+            //    (nvidiaResult == intelResult)
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Green;
+            //    Console.WriteLine("RESULTS ARE EQUALS ({0})", nvidiaResult);
+            //    Console.ResetColor();
+            //}
+            //else if (((nvidiaResult >= intelResult) ? (nvidiaResult - intelResult) : (intelResult - nvidiaResult)) < 1000)
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Yellow;
+            //    Console.WriteLine("RESULTS ARE NOT EQUALS \r\n{0} = nvidia\r\n{1} = intel", nvidiaResult, intelResult);
+            //    Console.ResetColor();
+            //}
+
+            //else
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Red;
+            //    Console.WriteLine("RESULTS ARE NOT EQUALS \r\n{0} = nvidia\r\n{1} = intel", nvidiaResult, intelResult);
+            //    Console.ResetColor();
+            //}
         }
 
         private static void ProfileNvidiaGPU(

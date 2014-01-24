@@ -25,6 +25,8 @@ namespace MyNN.MLP2.ForwardPropagation
 
         private readonly CLProvider _clProvider;
 
+        private int _numComputeUnits;
+
         public MemFloat[] WeightMem;
         public MemFloat[] NetMem;
         public MemFloat[] StateMem;
@@ -74,6 +76,9 @@ namespace MyNN.MLP2.ForwardPropagation
 
         private void PrepareInfrastructure()
         {
+            Cl.ErrorCode error;
+            _numComputeUnits = Cl.GetDeviceInfo(_clProvider.ChoosedDevice, Cl.DeviceInfo.MaxComputeUnits, out error).CastTo<int>();
+
             GenerateMems();
 
             //загружаем программу и параметры
@@ -171,13 +176,6 @@ __kernel void ComputeLayerKernel(
     uint width = {PREVIOUS_LAYER_NEURON_COUNT};
     uint height = {CURRENT_LAYER_NEURON_COUNT};
 
-//__kernel void MatVecMulCoalesced3(const __global float* M,
-//                                  const __global float* V,
-//                                  uint width, uint height,
-//                                  __global float* W,
-//                                  __local float* partialDotProduct)
-//{
-
    // Each work-group computes multiple elements of W
    for (uint y = get_group_id(0); y < height; y += get_num_groups(0))
    {
@@ -263,119 +261,7 @@ __kernel void ComputeLayerKernel(
       barrier(CLK_LOCAL_MEM_FENCE);
    }
 }
-
-
-/*
-__kernel void ComputeLayerKernel1(
-    const __global float* V,
-    __global float* W,
-    __global float * currentLayerLastState,
-    const __global float* M)
-{
-    uint width = {PREVIOUS_LAYER_NEURON_COUNT};
-    uint height = {CURRENT_LAYER_NEURON_COUNT};
-
-    // Each work-item handles as many matrix rows as necessary
-    for (uint y = get_global_id(0);
-         y < height;
-         y += get_global_size(0))
-    {
-
-        // Row pointer
-        const __global float* row = M + y * width;
-
-        // Compute dot product  
-        float lastNET = 0;
-        for (uint x = 0; x < width; ++x)
-            lastNET += row[x] * V[x];
-
-        // Write result to global memory
-        W[y] = lastNET;
-
-        //compute last state
-
-        float lastState = <activationFunction_lastNET>;
-        currentLayerLastState[y] = lastState;
-
-    }
-}
-//*/
-
-/*
-__kernel void ComputeLayerKernel1(
-    const __global float* V,
-    __global float* W,
-    __global float * currentLayerLastState,
-    const __global float* M)
-{
-    uint width = {PREVIOUS_LAYER_NEURON_COUNT};
-    uint height = {CURRENT_LAYER_NEURON_COUNT};
-
-
-    // Row index
-    uint y = get_global_id(0);
-    if (y < height)
-    {
-        // Row pointer
-        const __global float* row = M + y * width;
-
-        // Compute dot product  
-        float lastNET = 0;
-        for (int x = 0; x < width; ++x)
-            lastNET += row[x] * V[x];
-
-        // Write result to global memory
-        W[y] = lastNET;
-
-        //compute last state
-
-        float lastState = <activationFunction_lastNET>;
-        currentLayerLastState[y] = lastState;
-    }
-}
-
-/*
-__kernel void
-        ComputeLayerKernel1(
-            __global float * previousLayerLastState,
-            __global float * currentLayerLastNET,
-            __global float * currentLayerLastState,
-            __global float * weights
-            //__local float * previous_local_cache
-            )
-{
-    //оригинальный алгоритм более чем в два раза медленен
-
-    int neuronIndex = get_global_id(0);
-
-    //int weightIndex = ComputeWeightIndex({PREVIOUS_LAYER_NEURON_COUNT}, neuronIndex);
-
-    const __global float* row = weights + {PREVIOUS_LAYER_NEURON_COUNT} * neuronIndex;
-
-
-    //compute LastNET
-    float lastNET = 0;
-    for (int plnIndex = 0; plnIndex < {PREVIOUS_LAYER_NEURON_COUNT}; ++plnIndex)
-    {
-        //prefetch(weights + weightIndex + 32, 4);
-
-        lastNET += 
-            //weights[weightIndex++] 
-            row[plnIndex]
-            * previousLayerLastState[plnIndex];
-    }
-
-    currentLayerLastNET[neuronIndex] = lastNET;
-
-    //compute last state
-
-    float lastState = <activationFunction_lastNET>;
-    currentLayerLastState[neuronIndex] = lastState;
-}
-//*/
 ";
-
-
 
         #endregion
 
@@ -484,11 +370,8 @@ __kernel void
 
                 var currentLayerNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
 
-                Cl.ErrorCode error;
-                var num_compute_units = Cl.GetDeviceInfo(_clProvider.ChoosedDevice, Cl.DeviceInfo.MaxComputeUnits, out error).CastTo<int>();
-
                 var szLocalWorkSize = 256;
-                var szGlobalWorkSize = 32 * 2 * num_compute_units * szLocalWorkSize;
+                var szGlobalWorkSize = 32 * 2 * _numComputeUnits * szLocalWorkSize;
 
                 _mulKernels[layerIndex]
                     .SetKernelArgMem(0, this.StateMem[layerIndex - 1])

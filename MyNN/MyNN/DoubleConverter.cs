@@ -15,7 +15,7 @@ namespace MyNN
         /// exact decimal value.
         /// </summary>
         /// <param name="d">The double to convert.</param>
-        /// <returns>A string representation of the double's exact decimal value.</return>
+        /// <return>A string representation of the double's exact decimal value.</return>
         public static string ToExactString(double d)
         {
             if (double.IsPositiveInfinity(d))
