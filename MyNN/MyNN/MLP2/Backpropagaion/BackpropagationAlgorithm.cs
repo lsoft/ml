@@ -57,7 +57,11 @@ namespace MyNN.MLP2.Backpropagaion
         public void Train(DataSourceDelegate dataSource)
         {
             ConsoleAmbientContext.Console.WriteLine(
-                "Backpropagation started with epoche trainer = {0}, validation = {1}",
+                "BACKPROPAGATION STARTED");
+            ConsoleAmbientContext.Console.WriteLine(
+                _mlp.DumpLayerInformation());
+            ConsoleAmbientContext.Console.WriteLine(
+                "Epoche trainer = {0}, validation = {1}",
                 this._epocheTrainer.GetType().Name,
                 this._validation.GetType().Name);
 
