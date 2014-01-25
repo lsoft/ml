@@ -137,11 +137,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 
                 _nablaWeights[i] = _clProvider.CreateFloatMem(
                     (_mlp.Layers[i].Neurons.Length - biasNeuronCount) * _mlp.Layers[i].Neurons[0].Weights.Length,
-                    Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadWrite);
+                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
 
                 _deDz[i] = _clProvider.CreateFloatMem(
                     _mlp.Layers[i].NonBiasNeuronCount,
-                    Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadWrite);
+                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
             }
 
             var outputLength = _mlp.Layers.Last().NonBiasNeuronCount;
@@ -149,7 +149,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
             //создаем объекты желаемых выходных данных (т.е. правильных ответов сети)
             _desiredOutput = _clProvider.CreateFloatMem(
                 outputLength,
-                Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadOnly);
+                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
         }
 
         public void TrainEpoche(

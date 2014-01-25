@@ -33,8 +33,8 @@ namespace MyNNConsoleApp
                 Thread.Sleep(1000);
 
                 //NvidiaForwardOptimizer.Optimize();
-                //NvidiaBackpropOptimizer.Optimize();
-                NvidiaTransposeBackpropOptimizer.Optimize();
+                NvidiaBackpropOptimizer.Optimize();
+                //NvidiaTransposeBackpropOptimizer.Optimize();
                 //Console.ReadLine();
                 return;
 

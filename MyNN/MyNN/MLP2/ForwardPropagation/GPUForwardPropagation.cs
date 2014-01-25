@@ -95,13 +95,13 @@ namespace MyNN.MLP2.ForwardPropagation
 
                 var netMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount,
-                    Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadWrite);
+                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
                 netMem.Write(BlockModeEnum.Blocking);
                 NetMem[cc] = netMem;
 
                 var stateMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount,
-                    Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadWrite);
+                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
                 stateMem.Write(BlockModeEnum.Blocking);
                 StateMem[cc] = stateMem;
             }
@@ -114,7 +114,7 @@ namespace MyNN.MLP2.ForwardPropagation
 
                 var weightMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount * previousLayerNeuronCount,
-                    Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadWrite);
+                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
                 weightMem.Write(BlockModeEnum.Blocking);
                 WeightMem[cc] = weightMem;
             }
