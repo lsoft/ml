@@ -25,8 +25,6 @@ namespace MyNN.MLP2.ForwardPropagation
 
         private readonly CLProvider _clProvider;
 
-        private int _numComputeUnits;
-
         public MemFloat[] WeightMem;
         public MemFloat[] NetMem;
         public MemFloat[] StateMem;
@@ -76,14 +74,10 @@ namespace MyNN.MLP2.ForwardPropagation
 
         private void PrepareInfrastructure()
         {
-            Cl.ErrorCode error;
-            _numComputeUnits = Cl.GetDeviceInfo(_clProvider.ChoosedDevice, Cl.DeviceInfo.MaxComputeUnits, out error).CastTo<int>();
-
             GenerateMems();
 
             //загружаем программу и параметры
             LoadProgram();
-
         }
 
         private void GenerateMems()
@@ -370,8 +364,8 @@ __kernel void ComputeLayerKernel(
 
                 var currentLayerNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
 
-                var szLocalWorkSize = 256;
-                var szGlobalWorkSize =  32 * 2 * _numComputeUnits * szLocalWorkSize;
+                const int szLocalWorkSize = 256;
+                int szGlobalWorkSize = 64 * _clProvider.Parameters.NumComputeUnits * szLocalWorkSize;
 
                 _mulKernels[layerIndex]
                     .SetKernelArgMem(0, this.StateMem[layerIndex - 1])

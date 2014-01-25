@@ -246,7 +246,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                     var outputNablaLayer = _nablaWeights[outputLayerIndex];
 
                     const int OutputLocalGroupSize = 256;
-                    const int OutputGlobalGroupSize = OutputLocalGroupSize * 256;
+                    int OutputGlobalGroupSize = 128 * _clProvider.Parameters.NumComputeUnits * OutputLocalGroupSize;
 
                     if (inBatchIndex == 0)
                     {
@@ -317,7 +317,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                         var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
 
                         const int HiddenLocalGroupSize = 128;
-                        const int HiddenGlobalGroupSize = HiddenLocalGroupSize * 16;
+                        int HiddenGlobalGroupSize = 8 * _clProvider.Parameters.NumComputeUnits * HiddenLocalGroupSize;
 
                         if (inBatchIndex == 0)
                         {

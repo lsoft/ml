@@ -32,6 +32,12 @@ namespace OpenCL.Net.OpenCL
             private set;
         }
 
+        public CLParameters Parameters
+        {
+            get;
+            private set;
+        }
+
         public CLProvider(
             IDeviceChooser deviceChooser,
             bool silentStart)
@@ -46,10 +52,12 @@ namespace OpenCL.Net.OpenCL
             //ищем подходящее устройство opencl
             ChooseDevice();
 
+            this.Parameters = new CLParameters(this.ChoosedDevice);
+
             if (!silentStart)
             {
                 //выводим его параметры
-                GetDeviceInfo();
+                this.Parameters.DumpToConsole();
             }
 
             //создаем контекст вычислений
@@ -92,52 +100,6 @@ namespace OpenCL.Net.OpenCL
             {
                 throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Context, error was: {0}!", error));
             }
-        }
-
-        public void GetDeviceInfo()
-        {
-            Cl.ErrorCode error;
-
-            var name = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.Name, out error).ToString();
-            var vendor = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.Vendor, out error).ToString();
-            var openclVersion = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.Version, out error).ToString();
-            var driverVersion = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.DriverVersion, out error).ToString();
-            var globalMemory = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.GlobalMemSize, out error).CastTo<long>();
-            var maxSamplers = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.MaxSamplers, out error).CastTo<int>();
-            var extensions = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.Extensions, out error).ToString();
-            var preferredFloat = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.PreferredVectorWidthFloat, out error).CastTo<int>();
-            var preferredDouble = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.PreferredVectorWidthDouble, out error).CastTo<int>();
-            var preferredShort = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.PreferredVectorWidthShort, out error).CastTo<int>();
-            var preferredInt = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.PreferredVectorWidthInt, out error).CastTo<int>();
-            var preferredLong = Cl.GetDeviceInfo(_device, Cl.DeviceInfo.PreferredVectorWidthLong, out error).CastTo<int>();
-
-            Console.WriteLine("OpenCL device: " + name);
-            Console.WriteLine("OpenCL vendor: " + vendor);
-            Console.WriteLine("OpenCL version: " + openclVersion);
-            Console.WriteLine("OpenCL driver version: " + driverVersion);
-            Console.WriteLine(
-                string.Format(
-                    "Device global memory: {0} MB",
-                    (int)(globalMemory / 1024 / 1024)));
-            Console.WriteLine("Max samplers: " + maxSamplers);
-
-
-            Console.WriteLine("Supported extensions: " + "\r\n    " + extensions.Replace(" ", "\r\n    "));
-
-            if (extensions.Contains("cl_khr_fp64"))
-            {
-                Console.WriteLine("DOUBLES DOES SUPPORTED");
-            }
-            else
-            {
-                Console.WriteLine("DOUBLES DOES NOT SUPPORTED");
-            }
-
-            Console.WriteLine("Preferred vector width float: " + preferredFloat);
-            Console.WriteLine("Preferred vector width double: " + preferredDouble);
-            Console.WriteLine("Preferred vector width short: " + preferredShort);
-            Console.WriteLine("Preferred vector width int: " + preferredInt);
-            Console.WriteLine("Preferred vector width long: " + preferredLong);
         }
 
         private void ChooseDevice()
