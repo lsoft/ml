@@ -34,13 +34,13 @@ namespace MyNNConsoleApp.DerivativeChange
             Console.WriteLine(string.Empty);
             Console.WriteLine(string.Empty);
 
-            BackpropagationTranpose();
+            BackpropagationTranspose();
             Console.WriteLine(string.Empty);
             Console.WriteLine(string.Empty);
             Console.WriteLine(string.Empty);
             Console.WriteLine(string.Empty);
 
-            BackpropagationTranpose2();
+            BackpropagationTranspose2();
             Console.WriteLine(string.Empty);
             Console.WriteLine(string.Empty);
             Console.WriteLine(string.Empty);
@@ -137,7 +137,7 @@ namespace MyNNConsoleApp.DerivativeChange
             }
         }
 
-        private static void BackpropagationTranpose()
+        private static void BackpropagationTranspose()
         {
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
@@ -221,7 +221,7 @@ namespace MyNNConsoleApp.DerivativeChange
             }
         }
 
-        private static void BackpropagationTranpose2()
+        private static void BackpropagationTranspose2()
         {
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",

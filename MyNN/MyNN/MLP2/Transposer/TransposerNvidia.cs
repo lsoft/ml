@@ -5,7 +5,7 @@ using OpenCL.Net.Platform;
 
 namespace MyNN.MLP2.Transposer
 {
-    public class TranposerNvidia : IOpenCLTranposer
+    public class TransposerNvidia : IOpenCLTransposer
     {
         private const int BLOCK_DIM = 16;
 
@@ -26,7 +26,7 @@ namespace MyNN.MLP2.Transposer
             }
         }
 
-        public TranposerNvidia(
+        public TransposerNvidia(
             CLProvider clProvider,
             MemFloat source,
             int width,
@@ -68,7 +68,7 @@ namespace MyNN.MLP2.Transposer
 
         #endregion
 
-        public void Tranpose()
+        public void Transpose()
         {
             var glob = new int[]
             {

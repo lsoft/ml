@@ -153,7 +153,7 @@
     <Compile Include="Boosting\SAMMEBoosting\SAMMEClassifierSet.cs" />
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\OpenCLTransposeBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\GPUTranposeKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\GPUTransposeKernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\GPUTransposeBackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\GPUKernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\GPUBackpropagationAlgorithm.cs" />
@@ -287,9 +287,9 @@
     <Compile Include="MLP2\Structure\Neurons\HiddeonOutputMLPNeuron.cs" />
     <Compile Include="MLP2\Structure\Neurons\InputMLPNeuron.cs" />
     <Compile Include="MLP2\Structure\Neurons\TrainableMLPNeuron.cs" />
-    <Compile Include="MLP2\Transposer\IOpenCLTranposer.cs" />
-    <Compile Include="MLP2\Transposer\ITranposer.cs" />
-    <Compile Include="MLP2\Transposer\TranposerNvidia.cs" />
+    <Compile Include="MLP2\Transposer\IOpenCLTransposer.cs" />
+    <Compile Include="MLP2\Transposer\ITransposer.cs" />
+    <Compile Include="MLP2\Transposer\TransposerNvidia.cs" />
     <Compile Include="NCA\Linear\NCA.cs" />
     <Compile Include="NCA\Linear\PijCalculator.cs" />
     <Compile Include="Pair.cs" />

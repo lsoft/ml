@@ -419,7 +419,7 @@ __kernel void UpdateWeightKernel(
 
     float newWeight = currentLayerWeights[gi] + nabla[gi] / batchSize;
     currentLayerWeights[gi] = newWeight;
-//
+
 //    int neuronIndex = gi / totalWeightCount;
 //    int weightIndex = gi - neuronIndex * totalWeightCount;
 //    int transposedIndex = weightIndex * totalNeuronCount + neuronIndex;

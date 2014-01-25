@@ -94,7 +94,7 @@ namespace MyNNConsoleApp.TransposeExperiments
 
                 var randomizer = new NoRandomRandomizer();
 
-                var folderName = "_TranposeAutoencoder" + DateTime.Now.ToString("yyyyMMddHHmmss") + " MLP2";
+                var folderName = "_TransposeAutoencoder" + DateTime.Now.ToString("yyyyMMddHHmmss") + " MLP2";
 
                 mlp1 = new MLP(
                     randomizer,
@@ -150,7 +150,7 @@ namespace MyNNConsoleApp.TransposeExperiments
 
                 var randomizer = new NoRandomRandomizer();
 
-                var folderName = "_TranposeAutoencoder" + DateTime.Now.ToString("yyyyMMddHHmmss") + " MLP2";
+                var folderName = "_TransposeAutoencoder" + DateTime.Now.ToString("yyyyMMddHHmmss") + " MLP2";
 
                 mlp2 = new MLP(
                     randomizer,
@@ -219,7 +219,7 @@ namespace MyNNConsoleApp.TransposeExperiments
                 }
             }
 
-            Console.WriteLine("EXPERIMENT: Tranpose1");
+            Console.WriteLine("EXPERIMENT: Transpose1");
             Console.WriteLine("Max diff = {0}", maxdiff);
             Console.ReadLine();
         }

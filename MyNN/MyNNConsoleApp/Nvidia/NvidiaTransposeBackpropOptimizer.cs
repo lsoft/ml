@@ -9,6 +9,7 @@ using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
@@ -22,7 +23,7 @@ using OpenCL.Net.OpenCL.DeviceChooser;
 
 namespace MyNNConsoleApp.Nvidia
 {
-    public class NvidiaBackpropOptimizer
+    public class NvidiaTransposeBackpropOptimizer
     {
         public static void Optimize()
         {
@@ -49,7 +50,7 @@ namespace MyNNConsoleApp.Nvidia
                 () =>
                     new LearningAlgorithmConfig(
                         new ConstLearningRate(0.0001f),
-                        2,
+                        10,
                         0.0f,
                         1,
                         0.0001f,
@@ -187,7 +188,7 @@ namespace MyNNConsoleApp.Nvidia
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new GPUBackpropagationAlgorithm(
+                            new GPUTransposeBackpropagationAlgorithm(
                                 currentMLP,
                                 currentConfig,
                                 clProvider),
@@ -217,7 +218,7 @@ namespace MyNNConsoleApp.Nvidia
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new OpenCLBackpropagationAlgorithm(
+                            new OpenCLTransposeBackpropagationAlgorithm(
                                 VectorizationSizeEnum.VectorizationMode16,
                                 currentMLP,
                                 currentConfig,

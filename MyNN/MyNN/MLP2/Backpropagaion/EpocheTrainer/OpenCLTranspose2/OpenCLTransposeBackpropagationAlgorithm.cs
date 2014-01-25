@@ -25,11 +25,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2
         private MemFloat[] _nablaWeights;
         private MemFloat _desiredOutput;
 
-        private MemFloat[] _tranposers;
+        private MemFloat[] _transposers;
 
         private Kernel[] _hiddenKernelIncrement, _hiddenKernelOverwrite;
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
-        private Kernel _updateWeightAndTranposedKernel;
+        private Kernel _updateWeightKernel;
 
         private readonly OpenCLForwardPropagation _forwardPropagation;
         public IForwardPropagation ForwardPropagation
@@ -95,7 +95,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2
             _nablaWeights = new MemFloat[_mlp.Layers.Length];
             _deDz = new MemFloat[_mlp.Layers.Length];
 
-            _tranposers = new MemFloat[_mlp.Layers.Length];
+            _transposers = new MemFloat[_mlp.Layers.Length];
         }
 
         private void LoadPrograms()
@@ -129,7 +129,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2
             }
 
             //определяем кернел обновления весов
-            _updateWeightAndTranposedKernel = _clProvider.CreateKernel(
+            _updateWeightKernel = _clProvider.CreateKernel(
                 Transpose2KernelConstructor.UpdateWeightKernelSource,
                 "UpdateWeightAndTransposedWeightsKernel");
         }
@@ -152,7 +152,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2
                     _mlp.Layers[i].NonBiasNeuronCount,
                     Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
 
-                _tranposers[i] = _clProvider.CreateFloatMem(
+                _transposers[i] = _clProvider.CreateFloatMem(
                     _mlp.Layers[i - 1].Neurons.Length * _mlp.Layers[i].NonBiasNeuronCount,
                     Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
 
@@ -209,10 +209,10 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2
                 var nablaMem = _nablaWeights[layerIndex];
 
                 //обновляем веса и транспонированные веса
-                _updateWeightAndTranposedKernel
+                _updateWeightKernel
                     .SetKernelArgMem(0, weightMem)
                     .SetKernelArgMem(1, nablaMem)
-                    .SetKernelArgMem(2, _tranposers[layerIndex])
+                    .SetKernelArgMem(2, _transposers[layerIndex])
                     .SetKernelArg(3, 4, _mlp.Layers[layerIndex].NonBiasNeuronCount)
                     .SetKernelArg(4, 4, _mlp.Layers[layerIndex - 1].Neurons.Length)
                     .SetKernelArg(5, 4, (float)(_config.BatchSize))
@@ -312,7 +312,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2
                                 .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
                                 .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
-                                .SetKernelArgMem(6, _tranposers[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(6, _transposers[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
                                 .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
                                 .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
@@ -333,7 +333,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2
                                 .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
                                 .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
-                                .SetKernelArgMem(6, _tranposers[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(6, _transposers[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
                                 .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
                                 .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
@@ -367,10 +367,10 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2
                     var nablaMem = _nablaWeights[layerIndex];
 
                     //обновляем веса и транспонированные веса
-                    _updateWeightAndTranposedKernel
+                    _updateWeightKernel
                         .SetKernelArgMem(0, weightMem)
                         .SetKernelArgMem(1, nablaMem)
-                        .SetKernelArgMem(2, _tranposers[layerIndex])
+                        .SetKernelArgMem(2, _transposers[layerIndex])
                         .SetKernelArg(3, 4, _mlp.Layers[layerIndex].NonBiasNeuronCount)
                         .SetKernelArg(4, 4, _mlp.Layers[layerIndex - 1].Neurons.Length)
                         .SetKernelArg(5, 4, (float)(_config.BatchSize))

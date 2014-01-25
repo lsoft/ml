@@ -2,7 +2,7 @@
 
 namespace MyNN.MLP2.Transposer
 {
-    public interface IOpenCLTranposer : ITranposer
+    public interface IOpenCLTransposer : ITransposer
     {
         MemFloat Destination
         {

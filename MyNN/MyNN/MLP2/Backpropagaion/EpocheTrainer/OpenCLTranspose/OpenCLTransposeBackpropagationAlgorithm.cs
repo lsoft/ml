@@ -25,7 +25,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose
         private MemFloat[] _nablaWeights;
         private MemFloat _desiredOutput;
 
-        private IOpenCLTranposer[] _transposers;
+        private IOpenCLTransposer[] _transposers;
 
         private Kernel[] _hiddenKernelIncrement, _hiddenKernelOverwrite;
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
@@ -99,7 +99,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose
             _nablaWeights = new MemFloat[_mlp.Layers.Length];
             _deDz = new MemFloat[_mlp.Layers.Length];
 
-            _transposers = new IOpenCLTranposer[_mlp.Layers.Length];
+            _transposers = new IOpenCLTransposer[_mlp.Layers.Length];
         }
 
         private void LoadPrograms()
@@ -156,7 +156,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose
                     _mlp.Layers[i].NonBiasNeuronCount,
                     Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
 
-                _transposers[i] = new TranposerNvidia(
+                _transposers[i] = new TransposerNvidia(
                     _clProvider,
                     _forwardPropagation.WeightMem[i],
                     _mlp.Layers[i - 1].Neurons.Length,
@@ -204,7 +204,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose
             //транспонируем все веса вначале (так как повторно они транспонируются после батча)
             for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
             {
-                _transposers[layerIndex].Tranpose();
+                _transposers[layerIndex].Transpose();
             }
 
             // Make sure we're done with everything that's been requested before
@@ -373,7 +373,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose
                         .EnqueueNDRangeKernel(kernelCount);
 
                     //транспонируем
-                    _transposers[layerIndex].Tranpose();
+                    _transposers[layerIndex].Transpose();
                 }
 
                 // Make sure we're done with everything that's been requested before

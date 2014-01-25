@@ -24,7 +24,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
         private MemFloat[] _nablaWeights;
         private MemFloat _desiredOutput;
 
-        private IOpenCLTranposer[] _transposers;
+        private IOpenCLTransposer[] _transposers;
 
         private Kernel[] _hiddenKernelIncrement, _hiddenKernelOverwrite;
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
@@ -64,6 +64,16 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                 throw new NotSupportedException("config.RegularizationFactor > float.Epsilon");
             }
 
+            if (config.BatchSize == 1)
+            {
+                ConsoleAmbientContext.Console.WriteWarning("This backpropagation algorithm optimized to work in batch mode (typical with batch size = [25;100]). Online backpropagation is not an optimal choise. Try to use OpenCLTranspose2BackpropagationAlgorithm.");
+            }
+
+            if (config.BatchSize > 1 && config.BatchSize < 25)
+            {
+                ConsoleAmbientContext.Console.WriteWarning("Too low minibatch size ({0}) to achieve optimal performance. Try to increase batch size to 25 minimum.", config.BatchSize);
+            }
+
             _mlp = mlp;
             _config = config;
             _clProvider = clProvider;
@@ -91,12 +101,12 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
         {
             _nablaWeights = new MemFloat[_mlp.Layers.Length];
             _deDz = new MemFloat[_mlp.Layers.Length];
-            _transposers = new IOpenCLTranposer[_mlp.Layers.Length];
+            _transposers = new IOpenCLTransposer[_mlp.Layers.Length];
         }
 
         private void LoadPrograms()
         {
-            var kg = new GPUKernelConstructor(
+            var kg = new GPUTransposeKernelConstructor(
                 _mlp,
                 _config);
 
@@ -148,12 +158,16 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                     _mlp.Layers[i].NonBiasNeuronCount,
                     Cl.MemFlags.AllocHostPtr | Cl.MemFlags.ReadWrite);
 
-                _transposers[i] = new TranposerNvidia(
-                    _clProvider,
-                    _forwardPropagation.WeightMem[i],
-                    _mlp.Layers[i - 1].Neurons.Length,
-                    _mlp.Layers[i].NonBiasNeuronCount);
+                if (i > 1)
+                {
+                    //для ПЕРВОГО СКРЫТОГО слоя не надо траспонера
 
+                    _transposers[i] = new TransposerNvidia(
+                        _clProvider,
+                        _forwardPropagation.WeightMem[i],
+                        _mlp.Layers[i - 1].Neurons.Length,
+                        _mlp.Layers[i].NonBiasNeuronCount);
+                }
             }
 
             var outputLength = _mlp.Layers.Last().NonBiasNeuronCount;
@@ -196,9 +210,10 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
             _forwardPropagation.ClearAndPushHiddenLayers();
 
             //транспонируем все веса вначале (так как повторно они транспонируются после батча)
-            for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
+            //ПЕРВЫЙ СКРЫТЫЙ слой транспонировать не надо
+            for (var layerIndex = 2; layerIndex < _mlp.Layers.Length; ++layerIndex)
             {
-                _transposers[layerIndex].Tranpose();
+                _transposers[layerIndex].Transpose();
             }
 
             //process data set
@@ -417,7 +432,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                         //    );
 
                     //транспонируем
-                    _transposers[layerIndex].Tranpose();
+                    if (layerIndex > 1)
+                    {
+                        //ПЕРВЫЙ СКРЫТЫЙ слой не надо транспонировать
+                        _transposers[layerIndex].Transpose();
+                    }
                 }
 
                 //// Make sure we're done with everything that's been requested before

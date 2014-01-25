@@ -32,13 +32,13 @@ namespace MyNNConsoleApp.TransposeExperiments
 
                         source.Write(BlockModeEnum.Blocking);
 
-                        var t = new TranposerNvidia(
+                        var t = new TransposerNvidia(
                             clProvider,
                             source,
                             width,
                             height);
 
-                        t.Tranpose();
+                        t.Transpose();
 
                         clProvider.QueueFinish();
 
@@ -53,7 +53,7 @@ namespace MyNNConsoleApp.TransposeExperiments
             }
 
 
-            Console.WriteLine("Tranpose 0 finished!");
+            Console.WriteLine("Transpose 0 finished!");
             Console.ReadLine();
         }
 

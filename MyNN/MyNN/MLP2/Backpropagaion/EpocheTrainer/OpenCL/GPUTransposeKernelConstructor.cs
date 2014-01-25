@@ -4,12 +4,12 @@ using MyNN.MLP2.Structure;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 {
-    public class GPUTranposeKernelConstructor
+    public class GPUTransposeKernelConstructor
     {
         private readonly MLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public GPUTranposeKernelConstructor(
+        public GPUTransposeKernelConstructor(
             MLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -276,49 +276,36 @@ __kernel void HiddenLayerTrain(
         local_next_nabla[get_local_id(0)] = currentDeDz;
         barrier(CLK_LOCAL_MEM_FENCE);
 
-//        if(get_local_id(0) == 0)
-//            for(int i = 0; i < get_local_size(0); i++)
-//                local_next_nabla[i] = 0.0001;
-//        barrier(CLK_LOCAL_MEM_FENCE);
-
         WarpReductionToFirstElement(local_next_nabla);
 //        Reduction0(local_next_nabla);
         barrier(CLK_LOCAL_MEM_FENCE);
         currentDeDz = local_next_nabla[0];
-
-//        if(get_local_id(0) == 0)
-//            printf(""123"");//printf(""%F"", currentDeDz);
-
-//        currentDeDz  = 0;
-//        for(int i = 0; i < get_local_size(0); i++)
-//            currentDeDz += local_next_nabla[i];
 //*/
 
-/*
-        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
-        float currentDeDz = 0;
-        for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
-        {
-            int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex;
 
-            float nextWeight = nextLayerWeights[nextWeightIndex];
-            float nextNabla = nextLayerDeDz[nextNeuronIndex];
-            float multiplied = nextWeight * nextNabla;
-
-            currentDeDz += multiplied;
-        }
+//        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
+//        float currentDeDz = 0;
+//        for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
+//        {
+//            int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex;
+//
+//            float nextWeight = nextLayerWeights[nextWeightIndex];
+//            float nextNabla = nextLayerDeDz[nextNeuronIndex];
+//            float multiplied = nextWeight * nextNabla;
+//
+//            currentDeDz += multiplied;
+//        }
 //*/
-
-        int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
         float nOut = currentLayerNET[neuronIndex];
         currentDeDz *= <firstDerivative_nOut>;
         currentLayerDeDz[neuronIndex] = currentDeDz;
 
+        int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
+
         for (
             int currentWeightIndex = get_local_id(0);
             currentWeightIndex < previousLayerNeuronCount; 
-            //++currentWeightIndex
             currentWeightIndex += get_local_size(0)
             )
         {
