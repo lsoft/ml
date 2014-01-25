@@ -28,9 +28,10 @@ namespace MyNNConsoleApp.Nvidia
         {
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                50,
-                true
+                //int.MaxValue
+                100
                 );
+            trainData.Data.ForEach(item => item.Input.Transform((value) => value + 0.1f)); //чтобы не было нулей в датасете, а то вдруг алгоритм "забывает" например учесть последний флоат в датаитеме...
             trainData.Normalize();
             //trainData = new DataSet(
             //    trainData.Take(50).ToList(),
@@ -39,8 +40,8 @@ namespace MyNNConsoleApp.Nvidia
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                1,
-                true
+                //int.MaxValue
+                100
                 );
             validationData.Normalize();
 
@@ -48,7 +49,7 @@ namespace MyNNConsoleApp.Nvidia
                 () =>
                     new LearningAlgorithmConfig(
                         new ConstLearningRate(0.0001f),
-                        25,
+                        1,
                         0.0f,
                         1,
                         0.0001f,
@@ -69,13 +70,13 @@ namespace MyNNConsoleApp.Nvidia
                         new IFunction[]
                             {
                                 null,
-                                new LinearFunction(1f), 
-                                new LinearFunction(1f), 
+                                new RLUFunction(), 
+                                new RLUFunction(),
                             },
                         new[]
                             {
                                 784,
-                                784 * 10,
+                                1200,//784 * 10,
                                 784
                             });
 

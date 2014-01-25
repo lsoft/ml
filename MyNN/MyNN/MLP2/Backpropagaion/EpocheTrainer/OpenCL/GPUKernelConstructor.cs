@@ -225,25 +225,25 @@ __kernel void Reduction0(__local float *L)
 }
 
 __kernel void HiddenLayerTrain(
-    __global float * currentLayerNET,
+    const __global float * currentLayerNET,
 
-    __global float * previousLayerLastState,
-    __global float * currentLayerLastState,
+    const __global float * previousLayerLastState,
+    const __global float * currentLayerLastState,
     __global float * currentLayerDeDz,
-    __global float * nextLayerDeDz,
+    const __global float * nextLayerDeDz,
 
-    __global float * currentLayerWeights,
-    __global float * nextLayerWeights,
+    const __global float * currentLayerWeights,
+    const __global float * nextLayerWeights,
             
     __global float * nabla,
 
-    int previousLayerNeuronCount,
-    int currentLayerNeuronCount,
-    int nextLayerNeuronCount,
+    const int previousLayerNeuronCount,
+    const int currentLayerNeuronCount,
+    const int nextLayerNeuronCount,
 
     float learningRate,
     float regularizationFactor,
-    float dataCount
+    const float dataCount
     
     ,__local float * local_next_nabla
     )
@@ -268,56 +268,42 @@ __kernel void HiddenLayerTrain(
             float nextWeight = nextLayerWeights[nextWeightIndex];
 
             float multiplied = nextWeight * nextNabla;
-
             currentDeDz += multiplied;
         }
 
         local_next_nabla[get_local_id(0)] = currentDeDz;
         barrier(CLK_LOCAL_MEM_FENCE);
 
-//        if(get_local_id(0) == 0)
-//            for(int i = 0; i < get_local_size(0); i++)
-//                local_next_nabla[i] = 0.0001;
-//        barrier(CLK_LOCAL_MEM_FENCE);
-
         WarpReductionToFirstElement(local_next_nabla);
 //        Reduction0(local_next_nabla);
         barrier(CLK_LOCAL_MEM_FENCE);
         currentDeDz = local_next_nabla[0];
 
-//        if(get_local_id(0) == 0)
-//            printf(""123"");//printf(""%F"", currentDeDz);
 
-//        currentDeDz  = 0;
-//        for(int i = 0; i < get_local_size(0); i++)
-//            currentDeDz += local_next_nabla[i];
+//        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
+//        float currentDeDz = 0;
+//        for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
+//        {
+//            int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex;
+//
+//            float nextWeight = nextLayerWeights[nextWeightIndex];
+//            float nextNabla = nextLayerDeDz[nextNeuronIndex];
+//            float multiplied = nextWeight * nextNabla;
+//
+//            currentDeDz += multiplied;
+//        }
 //*/
 
-/*
-        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
-        float currentDeDz = 0;
-        for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
-        {
-            int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex;
-
-            float nextWeight = nextLayerWeights[nextWeightIndex];
-            float nextNabla = nextLayerDeDz[nextNeuronIndex];
-            float multiplied = nextWeight * nextNabla;
-
-            currentDeDz += multiplied;
-        }
-//*/
-
-        int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
         float nOut = currentLayerNET[neuronIndex];
         currentDeDz *= <firstDerivative_nOut>;
         currentLayerDeDz[neuronIndex] = currentDeDz;
 
+        int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
+
         for (
             int currentWeightIndex = get_local_id(0);
             currentWeightIndex < previousLayerNeuronCount; 
-            //++currentWeightIndex
             currentWeightIndex += get_local_size(0)
             )
         {
@@ -335,24 +321,24 @@ __kernel void HiddenLayerTrain(
 
 
 __kernel void OutputLayerTrain(
-    __global float * currentLayerNET,
+    const __global float * currentLayerNET,
 
-    __global float * previousLayerLastState,
-    __global float * currentLayerLastState,
+    const __global float * previousLayerLastState,
+    const __global float * currentLayerLastState,
     __global float * currentLayerDeDz,
 
-    __global float * desiredOutput,
+    const __global float * desiredOutput,
 
-    __global float * currentLayerWeights,
+    const __global float * currentLayerWeights,
             
     __global float * nabla,
 
-    int previousLayerNeuronCountTotal,
-    int currentLayerNeuronCount,
+    const int previousLayerNeuronCountTotal,
+    const int currentLayerNeuronCount,
 
     float learningRate,
     float regularizationFactor,
-    float dataCount
+    const float dataCount
 
     )
 {
@@ -431,7 +417,13 @@ __kernel void UpdateWeightKernel(
 //        return;
 //    }
 
-    currentLayerWeights[gi] += nabla[gi] / batchSize;
+    float newWeight = currentLayerWeights[gi] + nabla[gi] / batchSize;
+    currentLayerWeights[gi] = newWeight;
+//
+//    int neuronIndex = gi / totalWeightCount;
+//    int weightIndex = gi - neuronIndex * totalWeightCount;
+//    int transposedIndex = weightIndex * totalNeuronCount + neuronIndex;
+//    currentLayerWeights[transposedIndex] = newWeight;
 
 //   for (uint y = get_group_id(0); y < totalNeuronCount; y += get_num_groups(0))
 //   {

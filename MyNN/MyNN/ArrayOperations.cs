@@ -7,6 +7,7 @@ namespace MyNN
 {
     public static class ArrayOperations
     {
+
         public static void Clear<T>(this T[] a)
         {
             for (var cc = 0; cc < a.Length; cc++)

@@ -219,6 +219,7 @@ namespace OpenCL.Net.OpenCL
                 //"-cl-opt-disable -cl-single-precision-constant -cl-fast-relaxed-math", 
                 //"-cl-denorms-are-zero",
                 //"-cl-single-precision-constant",
+                //"-cl-mad-enable",
                 null,
                 IntPtr.Zero);
             if (error != Cl.ErrorCode.Success)
