@@ -15,11 +15,13 @@ using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL;
+using OpenCL.Net.OpenCL.DeviceChooser;
 
 namespace MyNN.MLP2.Autoencoders
 {
     public class StackedClassificationAutoencoder
     {
+        private readonly IDeviceChooser _deviceChooser;
         private readonly IRandomizer _randomizer;
         private readonly ISerializationHelper _serialization;
         private readonly Func<int, DataSet, ITrainDataProvider> _dataProviderFactory;
@@ -35,6 +37,7 @@ namespace MyNN.MLP2.Autoencoders
         }
 
         public StackedClassificationAutoencoder(
+            IDeviceChooser deviceChooser,
             IRandomizer randomizer,
             ISerializationHelper serialization,
             Func<int, DataSet, ITrainDataProvider> dataProviderFactory,
@@ -43,6 +46,10 @@ namespace MyNN.MLP2.Autoencoders
             IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
             params LayerInfo[] layerInfos)
         {
+            if (deviceChooser == null)
+            {
+                throw new ArgumentNullException("deviceChooser");
+            }
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
@@ -76,6 +83,7 @@ namespace MyNN.MLP2.Autoencoders
                 throw new ArgumentException("В StackedClassificationAutoencoder надо задавать информации о слоях из первой половины автоенкодера, в отличии от Autoencoder");
             }
 
+            _deviceChooser = deviceChooser;
             _randomizer = randomizer;
             _serialization = serialization;
             _dataProviderFactory = dataProviderFactory;
@@ -145,7 +153,7 @@ namespace MyNN.MLP2.Autoencoders
                 var trainDataProvider = _dataProviderFactory(depthIndex, processingTrainData);
                 var validationDataProvider = _validationFactory(processingValidationData);
 
-                using (var clProvider = new CLProvider())
+                using (var clProvider = new CLProvider(_deviceChooser, true))
                 {
                     var config = _configFactory(depthIndex);
 
@@ -178,7 +186,7 @@ namespace MyNN.MLP2.Autoencoders
                     //обновляем обучающие данные (от исходного множества, чтобы без применения возможных деформаций)
                     net.AutoencoderCutTail();
 
-                    using (var clProvider = new CLProvider())
+                    using (var clProvider = new CLProvider(_deviceChooser, true))
                     {
                         var forward = new OpenCLForwardPropagation(
                             VectorizationSizeEnum.VectorizationMode16,
@@ -220,7 +228,7 @@ namespace MyNN.MLP2.Autoencoders
                 null,
                 layerList);
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(_deviceChooser, true))
             {
                 var forward = new OpenCLForwardPropagation(
                     VectorizationSizeEnum.VectorizationMode16,
