@@ -8,7 +8,8 @@ using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Default;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.GPU.Default;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
@@ -217,7 +218,7 @@ namespace MyNNConsoleApp.Nvidia
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new OpenCLBackpropagationAlgorithm(
+                            new CPUBackpropagationAlgorithm(
                                 VectorizationSizeEnum.VectorizationMode16,
                                 currentMLP,
                                 currentConfig,

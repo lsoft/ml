@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;

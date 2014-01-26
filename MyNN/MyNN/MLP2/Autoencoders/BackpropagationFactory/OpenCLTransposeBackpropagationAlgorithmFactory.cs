@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Transpose;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
@@ -46,7 +45,7 @@ namespace MyNN.MLP2.Autoencoders.BackpropagationFactory
 
             var algo = new BackpropagationAlgorithm(
                 randomizer,
-                (processedMLP, processedConfig) => new OpenCLTransposeBackpropagationAlgorithm(
+                (processedMLP, processedConfig) => new CPUTransposeBackpropagationAlgorithm(
                     VectorizationSizeEnum.VectorizationMode16,
                     processedMLP,
                     processedConfig,

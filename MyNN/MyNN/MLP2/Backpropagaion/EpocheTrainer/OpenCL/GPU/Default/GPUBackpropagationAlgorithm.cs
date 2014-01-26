@@ -3,16 +3,15 @@ using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
-using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Structure;
 using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL;
 using OpenCL.Net.OpenCL.Mem;
 using OpenCL.Net.Platform;
 
-namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
+namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.GPU.Default
 {
-    public class OpenCLBackpropagationAlgorithm : IEpocheTrainer
+    public class GPUBackpropagationAlgorithm : IEpocheTrainer
     {
         private readonly MLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
@@ -27,7 +26,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
         private Kernel _updateWeightKernel;
 
-        private readonly OpenCLForwardPropagation _forwardPropagation;
+        private readonly GPUForwardPropagation _forwardPropagation;
         public IForwardPropagation ForwardPropagation
         {
             get
@@ -37,8 +36,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
             }
         }
 
-        public OpenCLBackpropagationAlgorithm(
-            VectorizationSizeEnum vse,
+        public GPUBackpropagationAlgorithm(
             MLP mlp,
             ILearningAlgorithmConfig config,
             CLProvider clProvider
@@ -57,12 +55,16 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                 throw new ArgumentNullException("clProvider");
             }
 
+            if (config.RegularizationFactor > float.Epsilon)
+            {
+                throw new NotSupportedException("config.RegularizationFactor > float.Epsilon");
+            }
+
             _mlp = mlp;
             _config = config;
             _clProvider = clProvider;
 
-            _forwardPropagation = new OpenCLForwardPropagation(
-                vse,
+            _forwardPropagation = new GPUForwardPropagation(
                 _mlp,
                 _clProvider);
 
@@ -88,7 +90,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 
         private void LoadPrograms()
         {
-            var kg = new KernelConstructor(
+            var kg = new GPUKernelConstructor(
                 _mlp,
                 _config);
 
@@ -118,7 +120,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 
             //определяем кернел обновления весов
             _updateWeightKernel = _clProvider.CreateKernel(
-                KernelConstructor.UpdateWeightKernelSource,
+                GPUKernelConstructor.UpdateWeightKernelSource,
                 "UpdateWeightKernel");
         }
 
@@ -180,8 +182,8 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 
             _forwardPropagation.ClearAndPushHiddenLayers();
 
-            // Make sure we're done with everything that's been requested before
-            _clProvider.QueueFinish();
+            //// Make sure we're done with everything that's been requested before
+            //_clProvider.QueueFinish();
 
             //process data set
             var currentIndex = 0;
@@ -202,7 +204,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 
                     //отправляем на OpenCL желаемые выходы
                     trainDataItem.Output.CopyTo(_desiredOutput.Array, 0);
-                    _desiredOutput.Write(BlockModeEnum.Blocking);
+                    _desiredOutput.Write(BlockModeEnum.NonBlocking);
 
                     //output layer
                     var outputLayerIndex = _mlp.Layers.Length - 1;
@@ -211,6 +213,9 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                     var preOutputLayer = _mlp.Layers[outputLayerIndex - 1];
 
                     var outputNablaLayer = _nablaWeights[outputLayerIndex];
+
+                    const int OutputLocalGroupSize = 256;
+                    int OutputGlobalGroupSize = 128 * _clProvider.Parameters.NumComputeUnits * OutputLocalGroupSize;
 
                     if (inBatchIndex == 0)
                     {
@@ -225,14 +230,21 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                             .SetKernelArgMem(4, _desiredOutput)
                             .SetKernelArgMem(5, _forwardPropagation.WeightMem[outputLayerIndex])
                             .SetKernelArgMem(6, outputNablaLayer)
-                            .SetKernelArg(7, 4, preOutputLayer.Neurons.Length / 4)
-                            .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
-                            .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
-                            .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
-                            .SetKernelArg(11, 4, learningRate)
-                            .SetKernelArg(12, 4, _config.RegularizationFactor)
-                            .SetKernelArg(13, 4, (float)(data.Count))
-                            .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
+                            .SetKernelArg(7, 4, preOutputLayer.Neurons.Length)
+                            .SetKernelArg(8, 4, outputLayer.NonBiasNeuronCount)
+                            .SetKernelArg(9, 4, learningRate)
+                            .SetKernelArg(10, 4, _config.RegularizationFactor)
+                            .SetKernelArg(11, 4, (float)(data.Count))
+                            //.EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
+                            .EnqueueNDRangeKernel(
+                                new int[]
+                                {
+                                    OutputGlobalGroupSize
+                                },
+                                new int[]
+                                {
+                                    OutputLocalGroupSize
+                                });
                     }
                     else
                     {
@@ -244,26 +256,37 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                             .SetKernelArgMem(4, _desiredOutput)
                             .SetKernelArgMem(5, _forwardPropagation.WeightMem[outputLayerIndex])
                             .SetKernelArgMem(6, outputNablaLayer)
-                            .SetKernelArg(7, 4, preOutputLayer.Neurons.Length / 4)
-                            .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
-                            .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
-                            .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
-                            .SetKernelArg(11, 4, learningRate)
-                            .SetKernelArg(12, 4, _config.RegularizationFactor)
-                            .SetKernelArg(13, 4, (float)(data.Count))
-                            .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
+                            .SetKernelArg(7, 4, preOutputLayer.Neurons.Length)
+                            .SetKernelArg(8, 4, outputLayer.NonBiasNeuronCount)
+                            .SetKernelArg(9, 4, learningRate)
+                            .SetKernelArg(10, 4, _config.RegularizationFactor)
+                            .SetKernelArg(11, 4, (float)(data.Count))
+                            //.EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
+                            .EnqueueNDRangeKernel(
+                                new int[]
+                                {
+                                    OutputGlobalGroupSize
+                                },
+                                new int[]
+                                {
+                                    OutputLocalGroupSize
+                                });
+
                     }
 
                     
                     //hidden layers
                     //цикл по скрытым слоям, он должен идти последовательно, так как это "обратное распространение ошибки"
                     //тут паралеллизовать нечего
-                    for (int hiddenLayerIndex = _mlp.Layers.Length - 2; hiddenLayerIndex > 0; hiddenLayerIndex--)
+                    for (var hiddenLayerIndex = _mlp.Layers.Length - 2; hiddenLayerIndex > 0; hiddenLayerIndex--)
                     {
                         //определяем слои
                         var prevLayer = _mlp.Layers[hiddenLayerIndex - 1];
                         var currentLayer = _mlp.Layers[hiddenLayerIndex];
                         var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
+
+                        const int HiddenLocalGroupSize = 128;
+                        int HiddenGlobalGroupSize = 8 * _clProvider.Parameters.NumComputeUnits * HiddenLocalGroupSize;
 
                         if (inBatchIndex == 0)
                         {
@@ -276,24 +299,25 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                                 .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
                                 .SetKernelArgMem(6, _forwardPropagation.WeightMem[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
-                                .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
-                                .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
-                                .SetKernelArg(10, 4, prevLayer.Neurons.Length)
-                                .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
-                                .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
-                                .SetKernelArg(13, 4, learningRate)
-                                .SetKernelArg(14, 4, _config.RegularizationFactor)
-                                .SetKernelArg(15, 4, (float)(data.Count))
-                                .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
-                                //.EnqueueNDRangeKernel(
-                                //    new int[]
-                                //    {
-                                //        currentLayer.NonBiasNeuronCount
-                                //    },
-                                //    new int[]
-                                //    {
-                                //        8
-                                //    });
+                                .SetKernelArg(8, 4, prevLayer.Neurons.Length)
+                                .SetKernelArg(9, 4, currentLayer.NonBiasNeuronCount)
+                                .SetKernelArg(10, 4, nextLayer.NonBiasNeuronCount)
+                                .SetKernelArg(11, 4, learningRate)
+                                .SetKernelArg(12, 4, _config.RegularizationFactor)
+                                .SetKernelArg(13, 4, (float)(data.Count))
+                                .SetKernelArgLocalMem(14, 4 * HiddenLocalGroupSize)
+                                //.EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
+                                .EnqueueNDRangeKernel(
+                                    new int[]
+                                    {
+                                        HiddenGlobalGroupSize
+                                        //currentLayer.NonBiasNeuronCount + (LocalGroupSize -  currentLayer.NonBiasNeuronCount % LocalGroupSize)
+                                    },
+                                    new int[]
+                                    {
+                                        HiddenLocalGroupSize
+                                        //LocalGroupSize
+                                    });
                         }
                         else
                         {
@@ -306,27 +330,28 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
                                 .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
                                 .SetKernelArgMem(6, _forwardPropagation.WeightMem[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
-                                .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
-                                .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
-                                .SetKernelArg(10, 4, prevLayer.Neurons.Length)
-                                .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
-                                .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
-                                .SetKernelArg(13, 4, learningRate)
-                                .SetKernelArg(14, 4, _config.RegularizationFactor)
-                                .SetKernelArg(15, 4, (float)(data.Count))
-                                .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
-                                //.EnqueueNDRangeKernel(
-                                //    new int[]
-                                //    {
-                                //        currentLayer.NonBiasNeuronCount
-                                //    },
-                                //    new int[]
-                                //    {
-                                //        8
-                                //    });
+                                .SetKernelArg(8, 4, prevLayer.Neurons.Length)
+                                .SetKernelArg(9, 4, currentLayer.NonBiasNeuronCount)
+                                .SetKernelArg(10, 4, nextLayer.NonBiasNeuronCount)
+                                .SetKernelArg(11, 4, learningRate)
+                                .SetKernelArg(12, 4, _config.RegularizationFactor)
+                                .SetKernelArg(13, 4, (float)(data.Count))
+                                .SetKernelArgLocalMem(14, 4 * HiddenLocalGroupSize)
+                                //.EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
+                                .EnqueueNDRangeKernel(
+                                    new int[]
+                                    {
+                                        HiddenGlobalGroupSize
+                                        //currentLayer.NonBiasNeuronCount + (LocalGroupSize -  currentLayer.NonBiasNeuronCount % LocalGroupSize)
+                                    },
+                                    new int[]
+                                    {
+                                        HiddenLocalGroupSize
+                                        //LocalGroupSize
+                                    });
                         }
                     }
-            //*/
+
                     //// Make sure we're done with everything that's been requested before
                     //_clProvider.QueueFinish();
 
@@ -344,30 +369,40 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
 
                 //update weights and bias into opencl memory wrappers
 
-                for (int layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
+                for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
                 {
                     var weightMem = _forwardPropagation.WeightMem[layerIndex];
                     var nablaMem = _nablaWeights[layerIndex];
 
-                    const int perKernelFloats = 1500; //по 1500 флоатов на кернел (должно быть кратно 4м!!!)
+                    var neuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
+                    var weightCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
 
-                    var kernelCount = weightMem.Array.Length / perKernelFloats;
-                    if (weightMem.Array.Length % perKernelFloats > 0)
-                    {
-                        kernelCount++;
-                    }
+                    //var localSize = 512;
+                    //var globalSize = localSize*256;
 
                     _updateWeightKernel
                         .SetKernelArgMem(0, weightMem)
                         .SetKernelArgMem(1, nablaMem)
-                        .SetKernelArg(2, 4, weightMem.Array.Length)
-                        .SetKernelArg(3, 4, perKernelFloats)
-                        .SetKernelArg(4, 4, (float)(_config.BatchSize))
-                        .EnqueueNDRangeKernel(kernelCount);
+                        //.SetKernelArgLocalMem(2, 4 * weightCount)
+                        .SetKernelArg(2, 4, (float)(_config.BatchSize))
+                        .SetKernelArg(3, 4, neuronCount)
+                        .SetKernelArg(4, 4, weightCount)
+                        .SetKernelArg(5, 4, weightMem.Array.Length)
+                        .EnqueueNDRangeKernel(weightMem.Array.Length);
+                        //.EnqueueNDRangeKernel(
+                        //    new int[]
+                        //    {
+                        //        globalSize  
+                        //    }
+                        //    , new int[]
+                        //    {
+                        //        localSize
+                        //    }
+                        //    );
                 }
 
-                // Make sure we're done with everything that's been requested before
-                _clProvider.QueueFinish();
+                //// Make sure we're done with everything that's been requested before
+                //_clProvider.QueueFinish();
 
                 currentIndex += _config.BatchSize;
             } while (currentIndex < data.Count);
@@ -378,6 +413,9 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
             ConsoleAmbientContext.Console.ReturnCarriage();
 
             //конец эпохи обучения
+
+            // Make sure we're done with everything that's been requested before
+            _clProvider.QueueFinish();
 
             //считываем веса с устройства
             foreach (var wm in _forwardPropagation.WeightMem)

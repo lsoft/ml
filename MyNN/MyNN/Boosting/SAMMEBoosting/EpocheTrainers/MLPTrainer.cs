@@ -7,7 +7,7 @@ using MyNN.Boosting.SAMMEBoosting.EpocheTrainers.Classifiers;
 using MyNN.Data;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Default;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
@@ -108,7 +108,7 @@ namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers
                     new BackpropagationAlgorithm(
                         _randomizer,
                         (currentMLP, currentConfig) =>
-                            new OpenCLBackpropagationAlgorithm(
+                            new CPUBackpropagationAlgorithm(
                                 VectorizationSizeEnum.VectorizationMode16,
                                 currentMLP,
                                 currentConfig,

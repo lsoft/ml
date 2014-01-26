@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Default;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
@@ -154,7 +154,7 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new OpenCLBackpropagationAlgorithm(
+                            new CPUBackpropagationAlgorithm(
                                 VectorizationSizeEnum.NoVectorization,
                                 currentMLP,
                                 currentConfig,

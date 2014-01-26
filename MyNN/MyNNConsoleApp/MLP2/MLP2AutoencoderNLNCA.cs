@@ -10,7 +10,6 @@ using MyNN.MLP2.Backpropagaion;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.Backpropagaion.Validation.NLNCA;

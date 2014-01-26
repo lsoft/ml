@@ -2,14 +2,14 @@ using System;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose
+namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Default
 {
-    public class TransposeKernelConstructor
+    public class KernelConstructor
     {
         private readonly MLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public TransposeKernelConstructor(
+        public KernelConstructor(
             MLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -195,47 +195,11 @@ __kernel void HiddenLayerTrain(
     int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
     //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего
-    float16 currentDeDz16 = 0;
-    
-    int nextNeuronIndex = 0;
-
-    int nextWeightIndex = ComputeWeightIndex(nextLayerNeuronCount, neuronIndex);
-    int nextWeightShift = nextWeightIndex % 16;
-    nextWeightIndex = (nextWeightIndex - nextWeightShift) / 16;
-
-    for (; nextNeuronIndex < (nextLayerNeuronCount / 16); nextNeuronIndex++, nextWeightIndex ++)
+    float currentDeDz = 0;
+    for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
     {
-        float16 nextWeight16 = vload16(nextWeightIndex, nextLayerWeights + nextWeightShift);
-        float16 nextNabla16 = vload16(nextNeuronIndex, nextLayerDeDz);
-        float16 multiplied16 = nextWeight16 * nextNabla16;
+        int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex; //не векторизуетс€:(
 
-        currentDeDz16 += multiplied16;
-    }
-
-    nextNeuronIndex = nextNeuronIndex * 16;
-    nextWeightIndex = nextWeightIndex * 16 + nextWeightShift;
-
-    float currentDeDz = 
-          currentDeDz16.s0 
-        + currentDeDz16.s1 
-        + currentDeDz16.s2 
-        + currentDeDz16.s3
-        + currentDeDz16.s4
-        + currentDeDz16.s5
-        + currentDeDz16.s6
-        + currentDeDz16.s7
-        + currentDeDz16.s8
-        + currentDeDz16.s9
-        + currentDeDz16.sa
-        + currentDeDz16.sb
-        + currentDeDz16.sc
-        + currentDeDz16.sd
-        + currentDeDz16.se
-        + currentDeDz16.sf
-        ;
-
-    for (; nextNeuronIndex < nextLayerNeuronCount; nextNeuronIndex += 1, nextWeightIndex += 1)
-    {
         float nextWeight = nextLayerWeights[nextWeightIndex];
         float nextNabla = nextLayerDeDz[nextNeuronIndex];
         float multiplied = nextWeight * nextNabla;

@@ -2,14 +2,14 @@ using System;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2
+namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Transpose
 {
-    public class Transpose2KernelConstructor
+    public class TransposeKernelConstructor
     {
         private readonly MLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public Transpose2KernelConstructor(
+        public TransposeKernelConstructor(
             MLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -243,21 +243,6 @@ __kernel void HiddenLayerTrain(
         currentDeDz += multiplied;
     }
 
-
-//    //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (НЕ ВЕКТОРИЗОВАНО)
-//    float currentDeDz = 0;
-//    
-//    for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
-//    {
-//        int nextWeightIndex = ComputeWeightIndex(nextLayerNeuronCount, neuronIndex) + nextNeuronIndex;
-//
-//        float nextWeight = nextLayerWeights[nextWeightIndex];
-//        float nextNabla = nextLayerDeDz[nextNeuronIndex];
-//        float multiplied = nextWeight * nextNabla;
-//
-//        currentDeDz += multiplied;
-//    }
-
     float nOut = currentLayerNET[neuronIndex];
     currentDeDz *= <firstDerivative_nOut>;
     currentLayerDeDz[neuronIndex] = currentDeDz;
@@ -381,26 +366,40 @@ __kernel void OutputLayerTrain(
         #region update weight kernel source
 
         public const string UpdateWeightKernelSource = @"
-__kernel void UpdateWeightAndTransposedWeightsKernel(
+__kernel void UpdateWeightKernel(
     __global float * currentLayerWeights,
     __global float * nabla,
-    __global float * transposedCurrentLayerWeights,
-    int currentLayerNeuronCountWithoutBias,
-    int previousLayerNeuronCountWithBias, 
+    int count, //общее количество флоатов для обработки (для всех кернелов, длина currentLayerWeights, длина nabla)
+    int kernelDataCount, //количество флоатов для обработки ОДНИМ кернелом (должно быть кратно 4м!!!)
     float batchSize)
 {
-    int neuronIndex = get_global_id(0);
-    int weightIndex = get_global_id(1);
+    int kernelIndex = get_global_id(0);
+    
+    int d1StartIndex = kernelIndex * kernelDataCount;
+    int d1Count = min(kernelDataCount, count - d1StartIndex);
 
-    int i = neuronIndex * previousLayerNeuronCountWithBias + weightIndex;
+    int d4StartIndex = d1StartIndex / 4;
+    int d4Count = d1Count / 4;
+    
+    int d1StartRemainder = d1StartIndex + d4Count * 4;
 
-    float additive = nabla[i] / batchSize;
-    float newValue = currentLayerWeights[i] + additive;
+    for(int cc = d4StartIndex; cc < d4StartIndex + d4Count; cc++)
+    {
+        float4 currentLayerWeights4 = vload4(cc, currentLayerWeights);
+        float4 nabla4 = vload4(cc, nabla);
 
-    currentLayerWeights[i] = newValue;
+        float4 result = currentLayerWeights4 + nabla4 / batchSize;
 
-    int transposedi = currentLayerNeuronCountWithoutBias * weightIndex + neuronIndex;
-    transposedCurrentLayerWeights[transposedi] = newValue;
+        vstore4(
+            result,
+            cc,
+            currentLayerWeights);
+    }
+
+    for(int cc = d1StartRemainder; cc < d1StartIndex + d1Count; cc++)
+    {
+        currentLayerWeights[cc] += nabla[cc] / batchSize;
+    }
 }
 ";
 

@@ -2,14 +2,14 @@ using System;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
+namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Transpose2
 {
-    public class KernelConstructor
+    public class Transpose2KernelConstructor
     {
         private readonly MLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public KernelConstructor(
+        public Transpose2KernelConstructor(
             MLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -195,17 +195,68 @@ __kernel void HiddenLayerTrain(
     int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
     //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
-    float currentDeDz = 0;
-    for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
-    {
-        int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex; //не векторизуется:(
+    float16 currentDeDz16 = 0;
+    
+    int nextNeuronIndex = 0;
 
+    int nextWeightIndex = ComputeWeightIndex(nextLayerNeuronCount, neuronIndex);
+    int nextWeightShift = nextWeightIndex % 16;
+    nextWeightIndex = (nextWeightIndex - nextWeightShift) / 16;
+
+    for (; nextNeuronIndex < (nextLayerNeuronCount / 16); nextNeuronIndex++, nextWeightIndex ++)
+    {
+        float16 nextWeight16 = vload16(nextWeightIndex, nextLayerWeights + nextWeightShift);
+        float16 nextNabla16 = vload16(nextNeuronIndex, nextLayerDeDz);
+        float16 multiplied16 = nextWeight16 * nextNabla16;
+
+        currentDeDz16 += multiplied16;
+    }
+
+    nextNeuronIndex = nextNeuronIndex * 16;
+    nextWeightIndex = nextWeightIndex * 16 + nextWeightShift;
+
+    float currentDeDz = 
+          currentDeDz16.s0 
+        + currentDeDz16.s1 
+        + currentDeDz16.s2 
+        + currentDeDz16.s3
+        + currentDeDz16.s4
+        + currentDeDz16.s5
+        + currentDeDz16.s6
+        + currentDeDz16.s7
+        + currentDeDz16.s8
+        + currentDeDz16.s9
+        + currentDeDz16.sa
+        + currentDeDz16.sb
+        + currentDeDz16.sc
+        + currentDeDz16.sd
+        + currentDeDz16.se
+        + currentDeDz16.sf
+        ;
+
+    for (; nextNeuronIndex < nextLayerNeuronCount; nextNeuronIndex += 1, nextWeightIndex += 1)
+    {
         float nextWeight = nextLayerWeights[nextWeightIndex];
         float nextNabla = nextLayerDeDz[nextNeuronIndex];
         float multiplied = nextWeight * nextNabla;
 
         currentDeDz += multiplied;
     }
+
+
+//    //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (НЕ ВЕКТОРИЗОВАНО)
+//    float currentDeDz = 0;
+//    
+//    for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
+//    {
+//        int nextWeightIndex = ComputeWeightIndex(nextLayerNeuronCount, neuronIndex) + nextNeuronIndex;
+//
+//        float nextWeight = nextLayerWeights[nextWeightIndex];
+//        float nextNabla = nextLayerDeDz[nextNeuronIndex];
+//        float multiplied = nextWeight * nextNabla;
+//
+//        currentDeDz += multiplied;
+//    }
 
     float nOut = currentLayerNET[neuronIndex];
     currentDeDz *= <firstDerivative_nOut>;
@@ -330,40 +381,26 @@ __kernel void OutputLayerTrain(
         #region update weight kernel source
 
         public const string UpdateWeightKernelSource = @"
-__kernel void UpdateWeightKernel(
+__kernel void UpdateWeightAndTransposedWeightsKernel(
     __global float * currentLayerWeights,
     __global float * nabla,
-    int count, //общее количество флоатов для обработки (для всех кернелов, длина currentLayerWeights, длина nabla)
-    int kernelDataCount, //количество флоатов для обработки ОДНИМ кернелом (должно быть кратно 4м!!!)
+    __global float * transposedCurrentLayerWeights,
+    int currentLayerNeuronCountWithoutBias,
+    int previousLayerNeuronCountWithBias, 
     float batchSize)
 {
-    int kernelIndex = get_global_id(0);
-    
-    int d1StartIndex = kernelIndex * kernelDataCount;
-    int d1Count = min(kernelDataCount, count - d1StartIndex);
+    int neuronIndex = get_global_id(0);
+    int weightIndex = get_global_id(1);
 
-    int d4StartIndex = d1StartIndex / 4;
-    int d4Count = d1Count / 4;
-    
-    int d1StartRemainder = d1StartIndex + d4Count * 4;
+    int i = neuronIndex * previousLayerNeuronCountWithBias + weightIndex;
 
-    for(int cc = d4StartIndex; cc < d4StartIndex + d4Count; cc++)
-    {
-        float4 currentLayerWeights4 = vload4(cc, currentLayerWeights);
-        float4 nabla4 = vload4(cc, nabla);
+    float additive = nabla[i] / batchSize;
+    float newValue = currentLayerWeights[i] + additive;
 
-        float4 result = currentLayerWeights4 + nabla4 / batchSize;
+    currentLayerWeights[i] = newValue;
 
-        vstore4(
-            result,
-            cc,
-            currentLayerWeights);
-    }
-
-    for(int cc = d1StartRemainder; cc < d1StartIndex + d1Count; cc++)
-    {
-        currentLayerWeights[cc] += nabla[cc] / batchSize;
-    }
+    int transposedi = currentLayerNeuronCountWithoutBias * weightIndex + neuronIndex;
+    transposedCurrentLayerWeights[transposedi] = newValue;
 }
 ";
 

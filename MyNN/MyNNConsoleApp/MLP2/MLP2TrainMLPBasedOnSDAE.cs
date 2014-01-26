@@ -9,7 +9,7 @@ using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Default;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
@@ -85,7 +85,7 @@ namespace MyNNConsoleApp.MLP2
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new OpenCLBackpropagationAlgorithm(
+                            new CPUBackpropagationAlgorithm(
                                 VectorizationSizeEnum.VectorizationMode16,
                                 currentMLP,
                                 currentConfig,

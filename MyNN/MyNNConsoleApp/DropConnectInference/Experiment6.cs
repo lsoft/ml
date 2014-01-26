@@ -11,7 +11,6 @@ using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;

@@ -9,9 +9,9 @@ using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCLTranspose2;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Default;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Transpose;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Transpose2;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation.DropConnect;
@@ -122,7 +122,7 @@ namespace MyNNConsoleApp.DerivativeChange
                         new BackpropagationAlgorithm(
                             randomizer,
                             (currentMLP, currentConfig) =>
-                                new OpenCLBackpropagationAlgorithm(
+                                new CPUBackpropagationAlgorithm(
                                     VectorizationSizeEnum.VectorizationMode16,
                                     currentMLP,
                                     currentConfig,
@@ -206,7 +206,7 @@ namespace MyNNConsoleApp.DerivativeChange
                         new BackpropagationAlgorithm(
                             randomizer,
                             (currentMLP, currentConfig) =>
-                                new OpenCLTransposeBackpropagationAlgorithm(
+                                new CPUTransposeBackpropagationAlgorithm(
                                     VectorizationSizeEnum.VectorizationMode16,
                                     currentMLP,
                                     currentConfig,
@@ -290,7 +290,7 @@ namespace MyNNConsoleApp.DerivativeChange
                         new BackpropagationAlgorithm(
                             randomizer,
                             (currentMLP, currentConfig) =>
-                                new OpenCLTranspose2BackpropagationAlgorithm(
+                                new CPUTranspose2BackpropagationAlgorithm(
                                     VectorizationSizeEnum.VectorizationMode16,
                                     currentMLP,
                                     currentConfig,

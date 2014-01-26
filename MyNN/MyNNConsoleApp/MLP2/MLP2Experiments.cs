@@ -2,7 +2,7 @@
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Default;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
@@ -82,7 +82,7 @@ namespace MyNNConsoleApp.MLP2
             {
                 var algo = new BackpropagationAlgorithm(
                     randomizer,
-                    (processedMLP, processedConfig) => new OpenCLBackpropagationAlgorithm(
+                    (processedMLP, processedConfig) => new CPUBackpropagationAlgorithm(
                         VectorizationSizeEnum.VectorizationMode16,
                         processedMLP,
                         processedConfig,

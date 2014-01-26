@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using MyNN.MLP2.Backpropagaion;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation.DropConnect;
 using MyNN.MLP2.LearningConfig;

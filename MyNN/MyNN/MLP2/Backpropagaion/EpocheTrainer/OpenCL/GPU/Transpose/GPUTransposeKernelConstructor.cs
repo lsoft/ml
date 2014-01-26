@@ -2,14 +2,14 @@ using System;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL
+namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.GPU.Transpose
 {
-    public class GPUKernelConstructor
+    public class GPUTransposeKernelConstructor
     {
         private readonly MLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public GPUKernelConstructor(
+        public GPUTransposeKernelConstructor(
             MLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -225,25 +225,25 @@ __kernel void Reduction0(__local float *L)
 }
 
 __kernel void HiddenLayerTrain(
-    const __global float * currentLayerNET,
+    __global float * currentLayerNET,
 
-    const __global float * previousLayerLastState,
-    const __global float * currentLayerLastState,
+    __global float * previousLayerLastState,
+    __global float * currentLayerLastState,
     __global float * currentLayerDeDz,
-    const __global float * nextLayerDeDz,
+    __global float * nextLayerDeDz,
 
-    const __global float * currentLayerWeights,
-    const __global float * nextLayerWeights,
+    __global float * currentLayerWeights,
+    __global float * nextLayerWeights,
             
     __global float * nabla,
 
-    const int previousLayerNeuronCount,
-    const int currentLayerNeuronCount,
-    const int nextLayerNeuronCount,
+    int previousLayerNeuronCount,
+    int currentLayerNeuronCount,
+    int nextLayerNeuronCount,
 
     float learningRate,
     float regularizationFactor,
-    const float dataCount
+    float dataCount
     
     ,__local float * local_next_nabla
     )
@@ -257,17 +257,19 @@ __kernel void HiddenLayerTrain(
 
     for (uint neuronIndex = get_group_id(0); neuronIndex < currentLayerNeuronCount; neuronIndex += get_num_groups(0))
     {
+        int nextWeightIndex = ComputeWeightIndex(nextLayerNeuronCount, neuronIndex) + get_local_id(0);
 
         //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
         float currentDeDz = 0;
-        for (int nextNeuronIndex = get_local_id(0); nextNeuronIndex < nextLayerNeuronCount; nextNeuronIndex += get_local_size(0))
+        for (int nextNeuronIndex = get_local_id(0); nextNeuronIndex < nextLayerNeuronCount; nextWeightIndex += get_local_size(0), nextNeuronIndex += get_local_size(0))
         {
             float nextNabla = nextLayerDeDz[nextNeuronIndex];
 
-            int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex;
+            //int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex;
             float nextWeight = nextLayerWeights[nextWeightIndex];
 
             float multiplied = nextWeight * nextNabla;
+
             currentDeDz += multiplied;
         }
 
@@ -278,6 +280,7 @@ __kernel void HiddenLayerTrain(
 //        Reduction0(local_next_nabla);
         barrier(CLK_LOCAL_MEM_FENCE);
         currentDeDz = local_next_nabla[0];
+//*/
 
 
 //        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
@@ -293,7 +296,6 @@ __kernel void HiddenLayerTrain(
 //            currentDeDz += multiplied;
 //        }
 //*/
-
 
         float nOut = currentLayerNET[neuronIndex];
         currentDeDz *= <firstDerivative_nOut>;
@@ -321,24 +323,24 @@ __kernel void HiddenLayerTrain(
 
 
 __kernel void OutputLayerTrain(
-    const __global float * currentLayerNET,
+    __global float * currentLayerNET,
 
-    const __global float * previousLayerLastState,
-    const __global float * currentLayerLastState,
+    __global float * previousLayerLastState,
+    __global float * currentLayerLastState,
     __global float * currentLayerDeDz,
 
-    const __global float * desiredOutput,
+    __global float * desiredOutput,
 
-    const __global float * currentLayerWeights,
+    __global float * currentLayerWeights,
             
     __global float * nabla,
 
-    const int previousLayerNeuronCountTotal,
-    const int currentLayerNeuronCount,
+    int previousLayerNeuronCountTotal,
+    int currentLayerNeuronCount,
 
     float learningRate,
     float regularizationFactor,
-    const float dataCount
+    float dataCount
 
     )
 {
@@ -417,13 +419,7 @@ __kernel void UpdateWeightKernel(
 //        return;
 //    }
 
-    float newWeight = currentLayerWeights[gi] + nabla[gi] / batchSize;
-    currentLayerWeights[gi] = newWeight;
-
-//    int neuronIndex = gi / totalWeightCount;
-//    int weightIndex = gi - neuronIndex * totalWeightCount;
-//    int transposedIndex = weightIndex * totalNeuronCount + neuronIndex;
-//    currentLayerWeights[transposedIndex] = newWeight;
+    currentLayerWeights[gi] += nabla[gi] / batchSize;
 
 //   for (uint y = get_group_id(0); y < totalNeuronCount; y += get_num_groups(0))
 //   {
