@@ -26,7 +26,7 @@ namespace MyNNConsoleApp.PingPong
             List<ILayerState> validationOutput;
             using (var clProvider = new CLProvider())
             {
-                var forward = new OpenCLForwardPropagation(
+                var forward = new CPUForwardPropagation(
                     VectorizationSizeEnum.VectorizationMode16,
                     mlp,
                     clProvider);

@@ -34,7 +34,7 @@ namespace MyNN.MLP2.ForwardPropagation.ForwardFactory
                 throw new ArgumentNullException("mlp");
             }
             return 
-                new OpenCLForwardPropagation(
+                new CPUForwardPropagation(
                     _vse,
                     mlp,
                     clProvider);

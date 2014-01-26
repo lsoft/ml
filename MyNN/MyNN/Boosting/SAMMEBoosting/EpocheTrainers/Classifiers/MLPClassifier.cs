@@ -30,7 +30,7 @@ namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers.Classifiers
             ILayerState netResult = null;
             using (var clProvider = new CLProvider())
             {
-                var forward = new OpenCLForwardPropagation(
+                var forward = new CPUForwardPropagation(
                     VectorizationSizeEnum.VectorizationMode16,
                     _network,
                     clProvider);

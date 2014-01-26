@@ -32,7 +32,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
         private Kernel _updateWeightKernel;
 
-        private readonly OpenCLForwardPropagation _forwardPropagation;
+        private readonly CPUForwardPropagation _forwardPropagation;
         public IForwardPropagation ForwardPropagation
         {
             get
@@ -87,7 +87,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
                         ncaLayerFunctionType.Name));
             }
 
-            _forwardPropagation = new OpenCLForwardPropagation(
+            _forwardPropagation = new CPUForwardPropagation(
                 vse,
                 _mlp,
                 _clProvider);

@@ -89,7 +89,7 @@ namespace MyNN.Tests.MLP2.Forward
                 (clProvider, mlp) =>
                 {
                     return 
-                        new OpenCLForwardPropagation(
+                        new CPUForwardPropagation(
                             VectorizationSizeEnum.NoVectorization,
                             mlp,
                             clProvider);
@@ -120,7 +120,7 @@ namespace MyNN.Tests.MLP2.Forward
                 (clProvider, mlp) =>
                 {
                     return
-                        new OpenCLForwardPropagation(
+                        new CPUForwardPropagation(
                             VectorizationSizeEnum.NoVectorization,
                             mlp,
                             clProvider);

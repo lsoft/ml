@@ -85,7 +85,7 @@ namespace MyNNConsoleApp.MLP2
 
                 var algo = new BackpropagationAlgorithm(
                     (processedMLP, processedConfig) => new DropConnectOpenCLBackpropagationAlgorithm(
-                        OpenCLForwardPropagation.VectorizationSizeEnum.VectorizationMode16,
+                        CPUForwardPropagation.VectorizationSizeEnum.VectorizationMode16,
                         processedMLP,
                         processedConfig,
                         clProvider),

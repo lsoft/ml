@@ -10,7 +10,7 @@ using OpenCL.Net.Platform;
 
 namespace MyNN.MLP2.ForwardPropagation
 {
-    public class OpenCLForwardPropagation : IForwardPropagation
+    public class CPUForwardPropagation : IForwardPropagation
     {
         private readonly VectorizationSizeEnum _vse;
         private readonly MLP _mlp;
@@ -49,7 +49,7 @@ namespace MyNN.MLP2.ForwardPropagation
 
         private Kernel[] _kernels;
 
-        public OpenCLForwardPropagation(
+        public CPUForwardPropagation(
             VectorizationSizeEnum vse,
             MLP mlp,
             CLProvider clProvider

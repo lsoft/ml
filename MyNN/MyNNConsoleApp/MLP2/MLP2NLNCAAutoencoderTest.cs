@@ -52,7 +52,7 @@ namespace MyNNConsoleApp.MLP2
             using (var clProvider = new CLProvider())
             {
                 //создаем объект просчитывающий сеть
-                var forward = new OpenCLForwardPropagation(
+                var forward = new CPUForwardPropagation(
                     VectorizationSizeEnum.VectorizationMode16,
                     net,
                     clProvider);

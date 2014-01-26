@@ -99,7 +99,7 @@ namespace MyNNConsoleApp.Nvidia
                 new IntelCPUDeviceChooser(),
                 true))
             {
-                var forward = new OpenCLForwardPropagation(
+                var forward = new CPUForwardPropagation(
                     VectorizationSizeEnum.VectorizationMode16,
                     mlp,
                     clProvider);

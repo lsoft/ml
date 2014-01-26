@@ -182,7 +182,7 @@ namespace MyNN.MLP2.Autoencoders
 
                     using (var universe = new CLProvider())
                     {
-                        var forward = new OpenCLForwardPropagation(
+                        var forward = new CPUForwardPropagation(
                             VectorizationSizeEnum.VectorizationMode16,
                             net,
                             universe);
@@ -216,7 +216,7 @@ namespace MyNN.MLP2.Autoencoders
 
             using (var clProvider = new CLProvider())
             {
-                var forward = new OpenCLForwardPropagation(
+                var forward = new CPUForwardPropagation(
                     VectorizationSizeEnum.VectorizationMode16, 
                     this.CombinedNet,
                     clProvider);

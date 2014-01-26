@@ -167,7 +167,7 @@
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Default\CPUBackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Default\KernelConstructor.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Transpose2\OpenCLTransposeBackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Transpose2\CPUTranspose2BackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Transpose2\Transpose2KernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Transpose\CPUTransposeBackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Transpose\TransposeKernelConstructor.cs" />
@@ -278,7 +278,7 @@
     <Compile Include="MLP2\ForwardPropagation\DropConnect\ILayerInference.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInference.cs" />
     <Compile Include="MLP2\ForwardPropagation\IForwardPropagation.cs" />
-    <Compile Include="MLP2\ForwardPropagation\OpenCLForwardPropagation.cs" />
+    <Compile Include="MLP2\ForwardPropagation\CPUForwardPropagation.cs" />
     <Compile Include="MLP2\LearningConfig\ILearningAlgorithmConfig.cs" />
     <Compile Include="MLP2\LearningConfig\LearningAlgorithmConfig.cs" />
     <Compile Include="MLP2\OpenCL\VectorizationHelper.cs" />

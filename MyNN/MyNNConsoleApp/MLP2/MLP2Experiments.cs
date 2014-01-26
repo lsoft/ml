@@ -59,7 +59,7 @@ namespace MyNNConsoleApp.MLP2
 
             //using (var clProvider = new CLProvider())
             //{
-            //    var forward = new OpenCLForwardPropagation(
+            //    var forward = new CPUForwardPropagation(
             //        mlp,
             //        clProvider);
 
