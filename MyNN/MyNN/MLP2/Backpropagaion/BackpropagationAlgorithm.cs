@@ -57,11 +57,10 @@ namespace MyNN.MLP2.Backpropagaion
         public void Train(DataSourceDelegate dataSource)
         {
             ConsoleAmbientContext.Console.WriteLine(
-                "BACKPROPAGATION STARTED");
-            ConsoleAmbientContext.Console.WriteLine(
+                "BACKPROPAGATION STARTED WITH {0}",
                 _mlp.DumpLayerInformation());
             ConsoleAmbientContext.Console.WriteLine(
-                "Epoche trainer = {0}, validation = {1}",
+                "EPOCHE TRAINER = {0}, VALIDATION = {1}",
                 this._epocheTrainer.GetType().Name,
                 this._validation.GetType().Name);
 
@@ -128,7 +127,7 @@ namespace MyNN.MLP2.Backpropagaion
                 var learningRate = _config.LearningRateController.GetLearningRate(epochNumber);
                 ConsoleAmbientContext.Console.WriteLine("Epoch learning rate: " + learningRate);
 
-                #region epoche train
+                #region train epoche
 
                 //создаем папку эпохи
                 var epocheRoot = Path.Combine(_mlp.WorkFolderPath, string.Format("epoche {0}", epochNumber));

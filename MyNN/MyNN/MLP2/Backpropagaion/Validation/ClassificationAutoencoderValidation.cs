@@ -8,6 +8,7 @@ using AForge;
 using MyNN.Data;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.ForwardPropagation;
+using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.OutputConsole;
 
@@ -15,7 +16,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 {
     public class ClassificationAutoencoderValidation : IValidation
     {
-        private readonly ISerializationHelper _serialization;
+        private readonly IMLPSaver _mlpSaver;
         private readonly IMetrics _metrics;
         private readonly DataSet _validationData;
         private readonly int _visualizeAsGridCount;
@@ -53,16 +54,16 @@ namespace MyNN.MLP2.Backpropagaion.Validation
         }
 
         public ClassificationAutoencoderValidation(
-            ISerializationHelper serialization,
+            IMLPSaver mlpSaver,
             IMetrics metrics,
             DataSet validationData,
             int visualizeAsGridCount,
             int visualizeAsPairCount,
             int domainCountThreshold = 100)
         {
-            if (serialization == null)
+            if (mlpSaver == null)
             {
-                throw new ArgumentNullException("serialization");
+                throw new ArgumentNullException("mlpSaver");
             }
             if (metrics == null)
             {
@@ -81,7 +82,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation
                 throw new ArgumentException("Не надо делать ClassificationAuencoder-датасет, сам сделаю");
             }
 
-            _serialization = serialization;
+            _mlpSaver = mlpSaver;
             _metrics = metrics;
             _validationData = validationData;
             _visualizeAsGridCount = visualizeAsGridCount;
@@ -108,8 +109,12 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 
             var netResults = forwardPropagation.ComputeOutput(_validationData);
 
+            int totalCount;
+            int correctCount;
             ExecuteClassificationValidation(
-                netResults.ConvertAll(j => j.State.GetSubArray(0, _classificationLength)));
+                netResults.ConvertAll(j => j.State.GetSubArray(0, _classificationLength)),
+                out totalCount,
+                out correctCount);
 
             ExecuteAutoencoderValidation(
                 forwardPropagation,
@@ -143,14 +148,15 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 
                 if (allowToSave)
                 {
-                    var networkFilename = string.Format(
-                        "{0}-perItemError={1}.mynn",
-                        DateTime.Now.ToString("yyyyMMddHHmmss"),
-                        perItemError);
+                    var accuracyRecord = new MLPAccuracyRecord(
+                        perItemError,
+                        totalCount,
+                        correctCount);
 
-                    _serialization.SaveToFile(
-                        forwardPropagation.MLP,
-                        Path.Combine(epocheRoot, networkFilename));
+                    _mlpSaver.Save(
+                        epocheRoot,
+                        accuracyRecord,
+                        forwardPropagation.MLP);
 
                     ConsoleAmbientContext.Console.WriteLine("Saved!");
                 }
@@ -232,7 +238,9 @@ namespace MyNN.MLP2.Backpropagaion.Validation
         }
 
         private void ExecuteClassificationValidation(
-            List<float[]> netResults)
+            List<float[]> netResults,
+            out int totalCount,
+            out int correctCount)
         {
             var totalCorrectCount = 0;
             var totalFailCount = 0;
@@ -280,7 +288,8 @@ namespace MyNN.MLP2.Backpropagaion.Validation
                 #endregion
             }
 
-            var totalCount = totalCorrectCount + totalFailCount;
+            totalCount = totalCorrectCount + totalFailCount;
+            correctCount = totalCorrectCount;
 
             var correctPercentCount = ((int) (totalCorrectCount*10000/totalCount)/100.0);
 

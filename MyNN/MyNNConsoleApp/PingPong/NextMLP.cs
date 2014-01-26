@@ -17,6 +17,7 @@ using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
+using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.OpenCL;
@@ -81,7 +82,7 @@ namespace MyNNConsoleApp.PingPong
                     -1.0f);
 
                 var validation = new ClassificationValidation(
-                    serialization,
+                    new FileSystemMLPSaver(serialization),
                     new HalfSquaredEuclidianDistance(),
                     validationNext,
                     300,

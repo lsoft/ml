@@ -18,6 +18,7 @@ using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
+using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.OpenCL;
@@ -127,7 +128,7 @@ namespace MyNNConsoleApp.MLP2
                     //    new MNISTColorProvider(),
                     //    3), 
                     new AutoencoderValidation(
-                        serialization,
+                        new FileSystemMLPSaver(serialization),
                         new RMSE(),
                         validationData.ConvertToAutoencoder(),
                         300,

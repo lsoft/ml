@@ -5,6 +5,7 @@ using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.ForwardPropagation;
+using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.OutputConsole;
 
@@ -12,7 +13,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 {
     public class ClassificationValidation : IValidation
     {
-        private readonly ISerializationHelper _serialization;
+        private readonly IMLPSaver _mlpSaver;
         private readonly IMetrics _errorMetrics;
         private readonly DataSet _validationData;
         private readonly int _visualizeAsGridCount;
@@ -41,16 +42,16 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 
 
         public ClassificationValidation(
-            ISerializationHelper serialization,
+            IMLPSaver mlpSaver,
             IMetrics errorMetrics,
             DataSet validationData,
             int visualizeAsGridCount,
             int visualizeAsPairCount,
             int domainCountThreshold = 100)
         {
-            if (serialization == null)
+            if (mlpSaver == null)
             {
-                throw new ArgumentNullException("serialization");
+                throw new ArgumentNullException("mlpSaver");
             }
             if (errorMetrics == null)
             {
@@ -66,7 +67,7 @@ namespace MyNN.MLP2.Backpropagaion.Validation
                 throw new ArgumentException("Для этого валидатора годятся только датасеты НЕ для автоенкодера");
             }
 
-            _serialization = serialization;
+            _mlpSaver = mlpSaver;
             _errorMetrics = errorMetrics;
             _validationData = validationData;
             _visualizeAsGridCount = visualizeAsGridCount;
@@ -255,15 +256,14 @@ namespace MyNN.MLP2.Backpropagaion.Validation
 
                 if (allowToSave)
                 {
-                    var networkFilename = string.Format(
-                        "{0}-{1} out of {2}%.mynn",
-                        DateTime.Now.ToString("yyyyMMddHHmmss"),
-                        totalCorrectCount,
-                        correctPercentCount);
+                    var accuracyRecord = new MLPAccuracyRecord(
+                        totalCount,
+                        totalCorrectCount);
 
-                    _serialization.SaveToFile(
-                        forwardPropagation.MLP,
-                        Path.Combine(epocheRoot, networkFilename));
+                    _mlpSaver.Save(
+                        epocheRoot,
+                        accuracyRecord,
+                        forwardPropagation.MLP);
 
                     ConsoleAmbientContext.Console.WriteLine("Saved!");
                 }

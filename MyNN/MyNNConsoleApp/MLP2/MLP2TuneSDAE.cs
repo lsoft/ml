@@ -17,6 +17,7 @@ using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
+using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using OpenCL.Net.OpenCL;
 
@@ -67,7 +68,7 @@ namespace MyNNConsoleApp.MLP2
                     -1.0f);
 
                 var validation = new AutoencoderValidation(
-                    serialization,
+                    new FileSystemMLPSaver(serialization),
                     new HalfSquaredEuclidianDistance(), 
                     validationData.ConvertToAutoencoder(),
                     300,

@@ -12,6 +12,7 @@ using MyNN.MLP2.ForwardPropagation.DropConnect;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
+using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.OpenCL;
@@ -71,7 +72,7 @@ namespace MyNNConsoleApp.DropConnectInference
                     -1.0f);
 
                 var validation = new ClassificationValidation(
-                    serialization,
+                    new FileSystemMLPSaver(serialization),
                     new HalfSquaredEuclidianDistance(), 
                     validationData,
                     300,

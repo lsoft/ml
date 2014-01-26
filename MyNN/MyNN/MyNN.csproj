@@ -176,6 +176,11 @@
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\DropConnectOpenCLForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\IForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\OpenCLForwardPropagationFactory.cs" />
+    <Compile Include="MLP2\Saver\ConsoleMLPSaver.cs" />
+    <Compile Include="MLP2\Saver\FileSystemMLPSaver.cs" />
+    <Compile Include="MLP2\Saver\IAccuracyRecord.cs" />
+    <Compile Include="MLP2\Saver\IMLPSaver.cs" />
+    <Compile Include="MLP2\Saver\MLPAccuracyRecord.cs" />
     <Compile Include="OutputConsole\ConsoleAmbientContext.cs" />
     <Compile Include="OutputConsole\DefaultOutputConsole.cs" />
     <Compile Include="OutputConsole\IOutputConsole.cs" />

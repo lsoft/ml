@@ -19,6 +19,7 @@ using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
+using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.MLP2.Transposer;
@@ -118,7 +119,7 @@ namespace MyNNConsoleApp.TransposeExperiments
                     -0.0025f);
 
                 var validation = new AutoencoderValidation(
-                    serialization,
+                    new FileSystemMLPSaver(serialization),
                     new HalfSquaredEuclidianDistance(),
                     validationData.ConvertToAutoencoder(),
                     300,
@@ -174,7 +175,7 @@ namespace MyNNConsoleApp.TransposeExperiments
                     -0.0025f);
 
                 var validation = new AutoencoderValidation(
-                    serialization,
+                    new FileSystemMLPSaver(serialization),
                     new HalfSquaredEuclidianDistance(),
                     validationData.ConvertToAutoencoder(),
                     300,

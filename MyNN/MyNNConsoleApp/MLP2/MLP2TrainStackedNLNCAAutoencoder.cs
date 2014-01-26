@@ -11,6 +11,7 @@ using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
+using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 
@@ -65,7 +66,7 @@ namespace MyNNConsoleApp.MLP2
                 {
                     return
                         new AutoencoderValidation(
-                            serialization,
+                            new FileSystemMLPSaver(serialization),
                             new RMSE(), 
                             vd.ConvertToAutoencoder(),
                             300,

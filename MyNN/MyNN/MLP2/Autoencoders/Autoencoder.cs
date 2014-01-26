@@ -74,7 +74,7 @@ namespace MyNN.MLP2.Autoencoders
             }
             if (!trainDataProvider.IsAuencoderDataSet)
             {
-                throw new InvalidOperationException("!trainDataProvider.IsAuencoderDataSet");
+                throw new InvalidOperationException("!trainDataProvider.IsAutoencoderDataSet");
             }
 
             using (var clProvider = new CLProvider())

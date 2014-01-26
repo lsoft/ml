@@ -104,11 +104,11 @@ namespace MyNN.MLP2.Autoencoders
             }
             if (trainData.IsAuencoderDataSet)
             {
-                throw new InvalidOperationException("trainData.IsAuencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
+                throw new InvalidOperationException("trainData.IsAutoencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
             }
             if (validationData.IsAuencoderDataSet)
             {
-                throw new InvalidOperationException("validationData.IsAuencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
+                throw new InvalidOperationException("validationData.IsAutoencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
             }
 
             var processingTrainData = trainData;
