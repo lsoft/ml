@@ -128,8 +128,8 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
 
                     return conf;
                 },
-                new GPUBackpropagationAlgorithmFactory(),
-                //new OpenCLTransposeBackpropagationAlgorithmFactory(),
+                new GPUBackpropagationAlgorithmFactory(), //new OpenCLTransposeBackpropagationAlgorithmFactory(),
+                new GPUForwardPropagationFactory(),
                 new LayerInfo(firstLayerSize, new RLUFunction()),
                 new LayerInfo(800, new RLUFunction()),
                 new LayerInfo(800, new RLUFunction()),

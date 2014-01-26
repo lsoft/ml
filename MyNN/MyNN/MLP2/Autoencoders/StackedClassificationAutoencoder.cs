@@ -16,6 +16,7 @@ using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL;
 using OpenCL.Net.OpenCL.DeviceChooser;
+using MyNN.MLP2.ForwardPropagation.ForwardFactory;
 
 namespace MyNN.MLP2.Autoencoders
 {
@@ -28,6 +29,7 @@ namespace MyNN.MLP2.Autoencoders
         private readonly Func<DataSet, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
         private readonly IBackpropagationAlgorithmFactory _backpropagationAlgorithmFactory;
+        private readonly IForwardPropagationFactory _forwardPropagationFactory;
         private readonly LayerInfo[] _layerInfos;
 
         public MLP CombinedNet
@@ -44,6 +46,7 @@ namespace MyNN.MLP2.Autoencoders
             Func<DataSet, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
             IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
+            IForwardPropagationFactory forwardPropagationFactory,
             params LayerInfo[] layerInfos)
         {
             if (deviceChooser == null)
@@ -70,6 +73,14 @@ namespace MyNN.MLP2.Autoencoders
             {
                 throw new ArgumentNullException("configFactory");
             }
+            if (backpropagationAlgorithmFactory == null)
+            {
+                throw new ArgumentNullException("backpropagationAlgorithmFactory");
+            }
+            if (forwardPropagationFactory == null)
+            {
+                throw new ArgumentNullException("forwardPropagationFactory");
+            }
             if (layerInfos == null)
             {
                 throw new ArgumentNullException("layerInfos");
@@ -90,6 +101,7 @@ namespace MyNN.MLP2.Autoencoders
             _validationFactory = validationFactory;
             _configFactory = configFactory;
             _backpropagationAlgorithmFactory = backpropagationAlgorithmFactory;
+            _forwardPropagationFactory = forwardPropagationFactory;
             _layerInfos = layerInfos;
         }
 
@@ -188,10 +200,11 @@ namespace MyNN.MLP2.Autoencoders
 
                     using (var clProvider = new CLProvider(_deviceChooser, true))
                     {
-                        var forward = new OpenCLForwardPropagation(
-                            VectorizationSizeEnum.VectorizationMode16,
-                            net,
-                            clProvider);
+                        //var forward = new OpenCLForwardPropagation(
+                        //    VectorizationSizeEnum.VectorizationMode16,
+                        //    net,
+                        //    clProvider);
+                        var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, net);
 
                         var nextTrain = forward.ComputeOutput(processingTrainData);
                         var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.State), null);
@@ -230,10 +243,12 @@ namespace MyNN.MLP2.Autoencoders
 
             using (var clProvider = new CLProvider(_deviceChooser, true))
             {
-                var forward = new OpenCLForwardPropagation(
-                    VectorizationSizeEnum.VectorizationMode16,
-                    this.CombinedNet,
-                    clProvider);
+                //var forward = new OpenCLForwardPropagation(
+                //    VectorizationSizeEnum.VectorizationMode16,
+                //    this.CombinedNet,
+                //    clProvider);
+                var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, this.CombinedNet);
+
 
                 //валидируем его
                 var finalValidation = _validationFactory(validationData);
