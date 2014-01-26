@@ -352,8 +352,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.GPU.Default
                         }
                     }
 
-                    //// Make sure we're done with everything that's been requested before
-                    //_clProvider.QueueFinish();
+                    if (batchIndex % 5 == 0)
+                    {
+                        // Make sure we're done with everything that's been requested before
+                        _clProvider.QueueFinish();
+                    }
 
                     int logStep = data.Count / 100;
                     if (logStep > 0 && currentIndex % logStep == 0)

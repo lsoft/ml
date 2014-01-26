@@ -10,6 +10,7 @@ namespace MyNN.Data.TrainDataProvider
     {
         private readonly DataSet _trainData;
         private readonly INoiser _noiser;
+        private readonly Func<int, INoiser> _noiserProvider;
 
         public bool IsAuencoderDataSet
         {
@@ -42,8 +43,26 @@ namespace MyNN.Data.TrainDataProvider
 
             _trainData = trainData;
             _noiser = noiser;
+            _noiserProvider = null;
         }
 
+        public NoiseDataProvider(
+            DataSet trainData,
+            Func<int, INoiser> noiserProvider)
+        {
+            if (trainData == null)
+            {
+                throw new ArgumentNullException("trainData");
+            }
+            if (noiserProvider == null)
+            {
+                throw new ArgumentNullException("noiserProvider");
+            }
+
+            _trainData = trainData;
+            _noiser = null;
+            _noiserProvider = noiserProvider;
+        }
 
         public DataSet GetDeformationDataSet(int epocheNumber)
         {
@@ -51,7 +70,9 @@ namespace MyNN.Data.TrainDataProvider
 
             foreach (var d in this._trainData)
             {
-                var id = this._noiser.ApplyNoise(d.Input);
+                var noiser = _noiser ?? _noiserProvider(epocheNumber);
+
+                var id = noiser.ApplyNoise(d.Input);
 
                 var di = new DataItem(
                     id,

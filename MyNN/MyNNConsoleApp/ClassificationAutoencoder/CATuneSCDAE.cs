@@ -20,6 +20,8 @@ using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using OpenCL.Net.OpenCL;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.GPU.Default;
+using OpenCL.Net.OpenCL.DeviceChooser;
 
 namespace MyNNConsoleApp.ClassificationAutoencoder
 {
@@ -27,7 +29,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
     {
         public static void Tune()
         {
-            var rndSeed = 32323234;
+            var rndSeed = 12323234;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -50,20 +52,22 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
             var serialization = new SerializationHelper();
 
             var mlp = SerializationHelper.LoadFromFile<MLP>(
-                "SCDAE20140120143731/mlp20140121091839.scdae");
+                "SCDAE20140126124353/mlp20140126190531.scdae");
                 //"MLP20131218124915/epoche 42/20131219100700-perItemError=3,6219.mynn");
                 //"MLP20131219184828/epoche 28/20131220091649-perItemError=2,600619.mynn");
 
             Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
 
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(), false))
             {
+                const int epocheCount = 20;
+
                 var config = new LearningAlgorithmConfig(
                     new LinearLearningRate(0.001f, 0.99f),
                     1,
                     0.0f,
-                    50,
+                    epocheCount,
                     0.0001f,
                     -1.0f);
 
@@ -78,8 +82,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.VectorizationMode16,
+                            new GPUBackpropagationAlgorithm(
                                 currentMLP,
                                 currentConfig,
                                 clProvider),
@@ -87,23 +90,32 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                         validation,
                         config);
 
-                var noiser = new AllNoisers(
-                    randomizer,
-                    new ZeroMaskingNoiser(randomizer, 0.20f, new RandomRange(randomizer)),
-                    new SaltAndPepperNoiser(randomizer, 0.20f, new RandomRange(randomizer)),
-                    new GaussNoiser(0.175f, false, new RandomRange(randomizer)),
-                    new MultiplierNoiser(randomizer, 0.75f, new RandomRange(randomizer)),
-                    new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer))
-                    );
+                Func<int, INoiser> noiserProvider =
+                    (int epocheNumber) =>
+                    {
+                        var coef = (epocheNumber >= epocheCount) ? 0f : ((epocheCount - epocheNumber) / (float)epocheCount);
+
+                        var noiser = new AllNoisers(
+                            randomizer,
+                            new ZeroMaskingNoiser(randomizer, coef * 0.20f, new RandomRange(randomizer)),
+                            new SaltAndPepperNoiser(randomizer, coef * 0.20f, new RandomRange(randomizer)),
+                            new GaussNoiser(coef * 0.175f, false, new RandomRange(randomizer)),
+                            new MultiplierNoiser(randomizer, coef * 0.75f, new RandomRange(randomizer)),
+                            new DistanceChangeNoiser(randomizer, coef * 1f, 3, new RandomRange(randomizer))
+                            );
+
+                        return noiser;
+                    };
 
 
                 //обучение сети
                 alg.Train(
                     //new NoDeformationTrainDataProvider(trainData.ConvertToAutoencoder()).GetDeformationDataSet);
-                    new NoiseDataProvider(trainData.ConvertToClassificationAutoencoder(), noiser).GetDeformationDataSet);
+                    new NoiseDataProvider(trainData.ConvertToClassificationAutoencoder(), noiserProvider).GetDeformationDataSet);
             }
-
-
         }
+
+
+
     }
 }
