@@ -25,7 +25,7 @@ namespace MyNN.MLP2.Saver
             get
             {
                 return
-                    ((int)(CorrectCount * 10000 / TotalCount)) / 100;
+                    ((int)(CorrectCount * 10000 / TotalCount)) / 100f;
             }
         }
 

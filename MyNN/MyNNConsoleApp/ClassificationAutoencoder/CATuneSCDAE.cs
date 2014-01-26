@@ -36,7 +36,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
                 "_MNIST_DATABASE/mnist/trainingset/",
                 int.MaxValue
-                //1000
+                //10
                 );
             trainData.Normalize();
             //trainData = trainData.ConvertToAutoencoder();
@@ -45,7 +45,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
                 "_MNIST_DATABASE/mnist/testset/",
                 int.MaxValue
-                //100
+                //10
                 );
             validationData.Normalize();
 
@@ -64,7 +64,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                 const int epocheCount = 20;
 
                 var config = new LearningAlgorithmConfig(
-                    new LinearLearningRate(0.001f, 0.99f),
+                    new LinearLearningRate(0.0003f, 0.99f),
                     1,
                     0.0f,
                     epocheCount,
@@ -93,7 +93,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                 Func<int, INoiser> noiserProvider =
                     (int epocheNumber) =>
                     {
-                        var coef = (epocheNumber >= epocheCount) ? 0f : ((epocheCount - epocheNumber) / (float)epocheCount);
+                        var coef = (epocheNumber >= epocheCount) ? 0f : ((epocheCount + 1 - epocheNumber) / (float)epocheCount);
 
                         var noiser = new AllNoisers(
                             randomizer,

@@ -14,6 +14,8 @@ using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.OpenCL;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.GPU.Default;
+using OpenCL.Net.OpenCL.DeviceChooser;
 
 namespace MyNNConsoleApp.ClassificationAutoencoder
 {
@@ -21,7 +23,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
     {
         public static void Tune()
         {
-            var rndSeed = 8890;
+            var rndSeed = 18890;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -45,7 +47,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
 
             var mlp = SerializationHelper.LoadFromFile<MLP>(
                 //"SCDAE20140117102818/mlp20140118003337.mynn");
-                "MLP20140119123739/epoche 49/20140120040244-perItemError=3,195857.mynn");
+                "MLP20140126193312/epoche 17/20140126203515-(3,800932) 9754 correct out of 10000 - 97%.mynn");
 
             mlp.AutoencoderCutTail();
 
@@ -58,10 +60,10 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
             Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
 
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(), false))
             {
                 var config = new LearningAlgorithmConfig(
-                    new LinearLearningRate(0.02f, 0.98f),
+                    new LinearLearningRate(0.004f, 0.98f),
                     1,
                     0.0f,
                     50,
@@ -79,24 +81,13 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.VectorizationMode16,
+                            new GPUBackpropagationAlgorithm(
                                 currentMLP,
                                 currentConfig,
                                 clProvider),
                         mlp,
                         validation,
                         config);
-
-               //var noiser = new ZeroMaskingNoiser(randomizer, 0.1f);
-
-                //var noiser = new SetOfNoisers(
-                //    randomizer,
-                //    new Pair<float, INoiser>(0.25f, new ZeroMaskingNoiser(randomizer, 0.10f)),
-                //    new Pair<float, INoiser>(0.25f, new SaltAndPepperNoiser(randomizer, 0.10f)),
-                //    new Pair<float, INoiser>(0.25f, new GaussNoiser(0.05f, false)),
-                //    new Pair<float, INoiser>(0.25f, new MultiplierNoiser(randomizer, 0.2f))
-                //    );
 
                 //обучение сети
                 alg.Train(
