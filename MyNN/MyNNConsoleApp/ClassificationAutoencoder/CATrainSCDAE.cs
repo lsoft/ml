@@ -19,6 +19,8 @@ using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.MLP2.ForwardPropagation.ForwardFactory;
+using OpenCL.Net.OpenCL.DeviceChooser;
 
 namespace MyNNConsoleApp.ClassificationAutoencoder
 {
@@ -27,7 +29,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
         public static void Train()
         {
 
-            int rndSeed = 888225;
+            int rndSeed = 1888226;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -78,6 +80,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
             //    noised);
 
             var scdae = new StackedClassificationAutoencoder(
+                new NvidiaOrAmdGPUDeviceChooser(),
                 randomizer,
                 serialization,
                 (int depthIndex, DataSet td) =>
@@ -120,18 +123,18 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                         new LinearLearningRate(lr, 0.99f),
                         1,
                         0.0f,
-                        50,
+                        100,
                         0f,
                         -0.0025f);
 
                     return conf;
                 },
-                new OpenCLBackpropagationAlgorithmFactory(),
-                //new OpenCLTransposeBackpropagationAlgorithmFactory(),
+                new GPUBackpropagationAlgorithmFactory(), //new OpenCLTransposeBackpropagationAlgorithmFactory(),
+                new GPUForwardPropagationFactory(),
                 new LayerInfo(firstLayerSize, new RLUFunction()),
-                new LayerInfo(1400, new RLUFunction()),
-                new LayerInfo(1400, new RLUFunction()),
-                new LayerInfo(2500, new RLUFunction())
+                new LayerInfo(800, new RLUFunction()),
+                new LayerInfo(800, new RLUFunction()),
+                new LayerInfo(1600, new RLUFunction())
                 //new LayerInfo(firstLayerSize, new SigmoidFunction(1f)),
                 //new LayerInfo(500, new SigmoidFunction(1f)),
                 //new LayerInfo(500, new SigmoidFunction(1f)),
