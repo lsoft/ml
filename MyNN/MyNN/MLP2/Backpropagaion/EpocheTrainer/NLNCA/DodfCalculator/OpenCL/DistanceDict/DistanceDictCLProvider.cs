@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MyNN.Data;
 using OpenCL.Net.OpenCL;
+using OpenCL.Net.OpenCL.DeviceChooser;
 using OpenCL.Net.OpenCL.Mem;
 using OpenCL.Net.Platform;
 
@@ -29,8 +30,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             private set;
         }
 
-        public DistanceDictCLProvider(List<DataItem> fxwList)
-            : base()
+        public DistanceDictCLProvider(
+            IDeviceChooser deviceChooser, 
+            bool silentStart, 
+            List<DataItem> fxwList)
+                : base(deviceChooser, silentStart)
         {
             if (fxwList == null)
             {
@@ -38,10 +42,18 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             }
 
             _fxwList = fxwList;
-            
+
             this.GenerateMems();
             this.FillMems();
             this.WriteMems();
+        }
+
+        public DistanceDictCLProvider(List<DataItem> fxwList)
+            : this(
+                new IntelCPUDeviceChooser(),
+                true,
+                fxwList)
+        {
         }
 
         private void WriteMems()
@@ -64,7 +76,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             }
 
             //IndexMem
-            for (var cc = 0; cc < _fxwList.Count; cc++)
+            for (var cc = 0; cc < _fxwList.Count; cc++) //!!! тут оптимизировать - чертовски неэффективно
             {
                 IndexMem.Array[cc] = GetIndexCount(cc, _fxwList.Count);
             }

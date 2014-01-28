@@ -8,8 +8,8 @@ using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Transpose;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.GPU.Transpose;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Default;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.GPU.Default;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
@@ -23,7 +23,7 @@ using OpenCL.Net.OpenCL.DeviceChooser;
 
 namespace MyNNConsoleApp.Nvidia
 {
-    public class NvidiaTransposeBackpropOptimizer
+    public class NvidiaBackpropSmallMLPOptimizer
     {
         public static void Optimize()
         {
@@ -33,11 +33,11 @@ namespace MyNNConsoleApp.Nvidia
                 100
                 );
             trainData.Data.ForEach(item => item.Input.Transform((value) => value + 0.1f)); //чтобы не было нулей в датасете, а то вдруг алгоритм "забывает" например учесть последний флоат в датаитеме...
-            //trainData.Normalize();
+            trainData.Normalize();
+            trainData.Data.ForEach(item => item.Output = item.Output.Take(7).ToArray()); //чтобы не было нулей в датасете, а то вдруг алгоритм "забывает" например учесть последний флоат в датаитеме...
             //trainData = new DataSet(
             //    trainData.Take(50).ToList(),
             //    trainData.Visualizer);
-            trainData = trainData.ConvertToAutoencoder();
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
@@ -45,12 +45,13 @@ namespace MyNNConsoleApp.Nvidia
                 100
                 );
             validationData.Normalize();
+            validationData.Data.ForEach(item => item.Output = item.Output.Take(7).ToArray()); //чтобы не было нулей в датасете, а то вдруг алгоритм "забывает" например учесть последний флоат в датаитеме...
 
             Func<ILearningAlgorithmConfig> configProvider = 
                 () =>
                     new LearningAlgorithmConfig(
                         new ConstLearningRate(0.0001f),
-                        10,
+                        1,
                         0.0f,
                         1,
                         0.0001f,
@@ -60,7 +61,7 @@ namespace MyNNConsoleApp.Nvidia
 
             Func<TestPurposeValidation> validationProvider = 
                 () =>
-                    new TestPurposeValidation(validationData.ConvertToAutoencoder());
+                    new TestPurposeValidation(validationData);
 
             Func<MLP> mlpProvider = 
                 () =>
@@ -77,8 +78,8 @@ namespace MyNNConsoleApp.Nvidia
                         new[]
                             {
                                 784,
-                                1200,//784 * 10,
-                                784
+                                50,
+                                7
                             });
 
             var nvidiaTotalError = float.MinValue;
@@ -88,7 +89,7 @@ namespace MyNNConsoleApp.Nvidia
                 var validation = validationProvider();
                 var mlp = mlpProvider();
                 var config = configProvider();
-                
+
                 ProfileNvidiaGPU(
                     randomizer,
                     trainData,
@@ -188,7 +189,7 @@ namespace MyNNConsoleApp.Nvidia
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new GPUTransposeBackpropagationAlgorithm(
+                            new GPUBackpropagationAlgorithm(
                                 currentMLP,
                                 currentConfig,
                                 clProvider),
@@ -218,7 +219,7 @@ namespace MyNNConsoleApp.Nvidia
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new CPUTransposeBackpropagationAlgorithm(
+                            new CPUBackpropagationAlgorithm(
                                 VectorizationSizeEnum.VectorizationMode16,
                                 currentMLP,
                                 currentConfig,

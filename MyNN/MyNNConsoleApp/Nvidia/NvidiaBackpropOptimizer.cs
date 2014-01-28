@@ -33,7 +33,7 @@ namespace MyNNConsoleApp.Nvidia
                 100
                 );
             trainData.Data.ForEach(item => item.Input.Transform((value) => value + 0.1f)); //чтобы не было нулей в датасете, а то вдруг алгоритм "забывает" например учесть последний флоат в датаитеме...
-            trainData.Normalize();
+            //trainData.Normalize();
             //trainData = new DataSet(
             //    trainData.Take(50).ToList(),
             //    trainData.Visualizer);

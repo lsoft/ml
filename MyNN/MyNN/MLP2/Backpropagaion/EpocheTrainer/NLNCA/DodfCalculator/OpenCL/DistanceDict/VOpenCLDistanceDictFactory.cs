@@ -9,13 +9,21 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
     {
         public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList)
         {
+            TimeSpan takenTime;
+
+            return
+                CreateDistanceDict(fxwList, out takenTime);
+        }
+
+        public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList, out TimeSpan takenTime)
+        {
             var result = new Dictionary<int, float[]>();
 
             var inputLength = fxwList[0].Input.Length;
 
-            using (var universe = new DistanceDictCLProvider(fxwList))
+            using (var clProvider = new DistanceDictCLProvider(fxwList))
             {
-                var distanceKernel = universe.CreateKernel(@"
+                var distanceKernel = clProvider.CreateKernel(@"
 __kernel void DistanceKernel(
     __global float * fxwList,
     __global float * distance,
@@ -92,6 +100,8 @@ __kernel void DistanceKernel(
 ",
         "DistanceKernel");
 
+                var before = DateTime.Now;
+
                 const int batchSize = 64;
                 var kernelCount = fxwList.Count / batchSize;
                 if (fxwList.Count % batchSize > 0)
@@ -100,18 +110,21 @@ __kernel void DistanceKernel(
                 }
 
                 distanceKernel
-                    .SetKernelArgMem(0, universe.FxwMem)
-                    .SetKernelArgMem(1, universe.DistanceMem)
-                    .SetKernelArgMem(2, universe.IndexMem)
+                    .SetKernelArgMem(0, clProvider.FxwMem)
+                    .SetKernelArgMem(1, clProvider.DistanceMem)
+                    .SetKernelArgMem(2, clProvider.IndexMem)
                     .SetKernelArg(3, 4, batchSize)
                     .SetKernelArg(4, 4, inputLength)
                     .SetKernelArg(5, 4, fxwList.Count)
                     .EnqueueNDRangeKernel(kernelCount);
 
                 // Make sure we're done with everything that's been requested before
-                universe.QueueFinish();
+                clProvider.QueueFinish();
 
-                universe.DistanceMem.Read(BlockModeEnum.Blocking);
+                var after = DateTime.Now;
+                takenTime = (after - before);
+
+                clProvider.DistanceMem.Read(BlockModeEnum.Blocking);
 
                 //колбасим в диктионари
                 var pointer = 0;
@@ -121,7 +134,7 @@ __kernel void DistanceKernel(
 
                     var array = new float[iterSize];
                     Array.Copy(
-                        universe.DistanceMem.Array,
+                        clProvider.DistanceMem.Array,
                         pointer,
                         array,
                         0,

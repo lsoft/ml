@@ -165,6 +165,7 @@
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\GPUBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\OpenCLTransposeBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\GPUNaiveDistanceDictFactory.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Default\CPUBackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Default\KernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Transpose2\CPUTranspose2BackpropagationAlgorithm.cs" />

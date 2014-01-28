@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MyNN;
 using MyNN.Data;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.MLP2.ForwardPropagation;
@@ -27,7 +28,8 @@ namespace MyNNConsoleApp.Nvidia
                 "_MNIST_DATABASE/mnist/trainingset/",
                 100
                 );
-            trainData.Normalize();
+            trainData.Data.ForEach(item => item.Input.Transform((value) => value + 0.1f)); //чтобы не было нулей в датасете, а то вдруг алгоритм "забывает" например учесть последний флоат в датаитеме...
+            //trainData.Normalize();
             trainData = trainData.ConvertToAutoencoder();
 
             var mlp = new MLP(

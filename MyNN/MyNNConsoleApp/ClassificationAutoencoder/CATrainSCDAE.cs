@@ -29,7 +29,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
         public static void Train()
         {
 
-            int rndSeed = 1888226;
+            int rndSeed = 1888227;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -59,19 +59,19 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
 
             var depth0Noiser = new AllNoisers(
                 randomizer,
-                new ZeroMaskingNoiser(randomizer, 0.20f, new RandomRange(randomizer)),
-                new SaltAndPepperNoiser(randomizer, 0.20f, new RandomRange(randomizer)),
-                new GaussNoiser(0.175f, false, new RandomRange(randomizer)),
-                new MultiplierNoiser(randomizer, 0.75f, new RandomRange(randomizer)),
+                new ZeroMaskingNoiser(randomizer, 0.15f, new RandomRange(randomizer)),
+                new SaltAndPepperNoiser(randomizer, 0.15f, new RandomRange(randomizer)),
+                new GaussNoiser(0.15f, false, new RandomRange(randomizer)),
+                new MultiplierNoiser(randomizer, 0.5f, new RandomRange(randomizer)),
                 new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer))
                 );
 
-            var depthNot0Noiser = new AllNoisers(
-                randomizer,
-                new SaltAndPepperNoiser(randomizer, 0.15f, new RandomRange(randomizer)),
-                new GaussNoiser(0.5f, false, new RandomRange(randomizer)),
-                new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer))
-                );
+            //var depthNot0Noiser = new AllNoisers(
+            //    randomizer,
+            //    new SaltAndPepperNoiser(randomizer, 0.15f, new RandomRange(randomizer)),
+            //    new GaussNoiser(0.5f, false, new RandomRange(randomizer)),
+            //    new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer))
+            //    );
 
             //var noised = trainData.GetInputPart().Take(300).ToList().ConvertAll(j => noiser.ApplyNoise(j));
             //var v = new MNISTVisualizer();
@@ -80,26 +80,27 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
             //    noised);
 
             var scdae = new StackedClassificationAutoencoder(
-                new NvidiaOrAmdGPUDeviceChooser(),
+                //new NvidiaOrAmdGPUDeviceChooser(),
+                new IntelCPUDeviceChooser(), 
                 randomizer,
                 serialization,
                 (int depthIndex, DataSet td) =>
                 {
-                    if (depthIndex == 0)
-                    {
+                    //if (depthIndex == 0)
+                    //{
                         return
                             new NoiseDataProvider(
                                 td.ConvertToClassificationAutoencoder(),
                                 depth0Noiser);
-                    }
-                    else
-                    {
-                        return
-                            new NoiseDataProvider(
-                                td.ConvertToClassificationAutoencoder(),
-                                depthNot0Noiser);
-                                //depth0Noiser);
-                    }
+                    //}
+                    //else
+                    //{
+                    //    return
+                    //        new NoiseDataProvider(
+                    //            td.ConvertToClassificationAutoencoder(),
+                    //            depthNot0Noiser);
+                    //            //depth0Noiser);
+                    //}
                 },
                 (DataSet vd) =>
                 {
@@ -129,16 +130,18 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
 
                     return conf;
                 },
-                new GPUBackpropagationAlgorithmFactory(), //new OpenCLTransposeBackpropagationAlgorithmFactory(),
-                new GPUForwardPropagationFactory(),
-                new LayerInfo(firstLayerSize, new RLUFunction()),
-                new LayerInfo(800, new RLUFunction()),
-                new LayerInfo(800, new RLUFunction()),
-                new LayerInfo(1600, new RLUFunction())
-                //new LayerInfo(firstLayerSize, new SigmoidFunction(1f)),
-                //new LayerInfo(500, new SigmoidFunction(1f)),
-                //new LayerInfo(500, new SigmoidFunction(1f)),
-                //new LayerInfo(1200, new SigmoidFunction(1f))
+                //new GPUBackpropagationAlgorithmFactory(),
+                new OpenCLBackpropagationAlgorithmFactory(),
+                //new GPUForwardPropagationFactory(),
+                new OpenCLForwardPropagationFactory(),
+                //new LayerInfo(firstLayerSize, new RLUFunction()),
+                //new LayerInfo(800, new RLUFunction()),
+                //new LayerInfo(800, new RLUFunction()),
+                //new LayerInfo(1600, new RLUFunction())
+                new LayerInfo(firstLayerSize, new SigmoidFunction(1f)),
+                new LayerInfo(1200, new SigmoidFunction(1f)),
+                new LayerInfo(1200, new SigmoidFunction(1f)),
+                new LayerInfo(2200, new RLUFunction())
                 );
 
             var root = "SCDAE" + DateTime.Now.ToString("yyyyMMddHHmmss");

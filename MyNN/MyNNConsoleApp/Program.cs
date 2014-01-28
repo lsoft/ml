@@ -30,13 +30,14 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                Thread.Sleep(1000);
-
                 //NvidiaForwardOptimizer.Optimize();
-                NvidiaBackpropOptimizer.Optimize();
+                //NvidiaBackpropOptimizer.Optimize();
                 //NvidiaTransposeBackpropOptimizer.Optimize();
+                //NvidiaBackpropSmallMLPOptimizer.Optimize();
+                NvidiaDoDfCalculatorOptimizer.Optimize();
                 //Console.ReadLine();
                 return;
+                //*/
 
                 /*
                 var seed = DateTime.Now.Millisecond;

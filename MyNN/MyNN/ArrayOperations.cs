@@ -96,6 +96,79 @@ namespace MyNN
 
             return r;
         }
+
+        public static bool ValuesAreEqual(int[] array0, int[] array1)
+        {
+            if (array0 == null && array1 == null)
+            {
+                return true;
+            }
+            if (array0 != null && array1 == null)
+            {
+                return false;
+            }
+            if (array0 == null && array1 != null)
+            {
+                return false;
+            }
+            if (array0.Length != array1.Length)
+            {
+                return false;
+            }
+
+            for (var index = array0.Length; index < array0.Length; index++)
+            {
+                if (array0[index] != array1[index])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool ValuesAreEqual(float[] array0, float[] array1, float epsilon, out float maxDiff)
+        {
+            if (array0 == null && array1 == null)
+            {
+                maxDiff = 0;
+                return true;
+            }
+            if (array0 != null && array1 == null)
+            {
+                maxDiff = float.MaxValue;
+                return false;
+            }
+            if (array0 == null && array1 != null)
+            {
+                maxDiff = float.MaxValue;
+                return false;
+            }
+            if (array0.Length != array1.Length)
+            {
+                maxDiff = float.MaxValue;
+                return false;
+            }
+
+            maxDiff = 0;
+            for (var index = 0; index < array0.Length; index++)
+            {
+                var currentDiff = (array0[index] >= array1[index] ? array0[index] - array1[index] : array1[index] - array0[index]);
+
+                if (currentDiff > maxDiff)
+                {
+                    maxDiff = currentDiff;
+                }
+            }
+
+            if (maxDiff > epsilon)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
     }
 
 }
