@@ -155,13 +155,30 @@ namespace OpenCL.Net.OpenCL
 
             Console.WriteLine("Supported extensions: " + "\r\n    " + Extensions.Replace(" ", "\r\n    "));
 
-            if (Extensions.Contains("cl_khr_fp64"))
+            if (Extensions.Contains("cl_khr_fp16"))
             {
-                Console.WriteLine("DOUBLES DOES SUPPORTED");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("HALVES DOES SUPPORTED");
+                Console.ResetColor();
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("HALVES DOES NOT SUPPORTED");
+                Console.ResetColor();
+            }
+
+            if (Extensions.Contains("cl_khr_fp64"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("DOUBLES DOES SUPPORTED");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("DOUBLES DOES NOT SUPPORTED");
+                Console.ResetColor();
             }
 
             Console.WriteLine("Preferred vector width float: " + PreferredFloat);

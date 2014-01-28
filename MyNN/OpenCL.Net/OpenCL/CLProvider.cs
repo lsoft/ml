@@ -239,6 +239,22 @@ namespace OpenCL.Net.OpenCL
             return memi;
         }
 
+        public MemHalf CreateHalfMem(
+            int arrayLength,
+            Cl.MemFlags flags)
+        {
+            var memh = new MemHalf(
+                _commandQueue,
+                _context,
+                arrayLength,
+                flags);
+
+            this._mems.Add(memh);
+
+            return memh;
+        }
+
+
         public MemFloat CreateFloatMem(
             int arrayLength,
             Cl.MemFlags flags)

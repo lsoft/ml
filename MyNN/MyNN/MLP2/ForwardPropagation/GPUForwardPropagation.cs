@@ -360,9 +360,8 @@ __kernel void ComputeLayerKernel(
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
-                var previousLayerNeuronTotalCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
-
-                var currentLayerNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
+                //var previousLayerNeuronTotalCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
+                //var currentLayerNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
 
                 const int szLocalWorkSize = 256;
                 int szGlobalWorkSize = 64 * _clProvider.Parameters.NumComputeUnits * szLocalWorkSize;

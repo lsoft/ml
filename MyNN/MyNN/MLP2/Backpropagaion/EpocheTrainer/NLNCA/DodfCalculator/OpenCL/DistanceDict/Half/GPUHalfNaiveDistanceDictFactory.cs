@@ -5,20 +5,20 @@ using MyNN.Data;
 using OpenCL.Net.OpenCL.DeviceChooser;
 using OpenCL.Net.Platform;
 
-namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict
+namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Half
 {
     /// <summary>
     /// 
     /// PS: To work correctly this kernel needs a disable Tdr:
     /// http://msdn.microsoft.com/en-us/library/windows/hardware/ff569918%28v=vs.85%29.aspx
     /// Set HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\GraphicsDrivers\TdrLevel = TdrLevelOff (0) - Detection disabled 
-    /// Otherwise, kernel will be aborted by Windows Video Driver Recovery Mechanism due to lack of response.
+    /// and reboot. Otherwise, kernel will be aborted by Windows Video Driver Recovery Mechanism due to lack of response.
     /// </summary>
-    public class GPUNaiveDistanceDictFactory : IDistanceDictFactory
+    public class GPUHalfNaiveDistanceDictFactory : IDistanceDictFactory
     {
         private readonly IDeviceChooser _deviceChooser;
 
-        public GPUNaiveDistanceDictFactory(
+        public GPUHalfNaiveDistanceDictFactory(
             IDeviceChooser deviceChooser)
         {
             if (deviceChooser == null)
@@ -43,7 +43,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 
             var inputLength = fxwList[0].Input.Length;
 
-            using (var clProvider = new DistanceDictCLProvider(_deviceChooser, true, fxwList))
+            using (var clProvider = new DistanceDictHalfCLProvider(_deviceChooser, true, fxwList))
             {
                 var distanceKernel = clProvider.CreateKernel(@"
 inline void WarpReductionToFirstElement(
@@ -102,7 +102,7 @@ inline void WarpReductionToFirstElement(
 }
 
 __kernel void DistanceKernel(
-    const __global float * fxwList,
+    const __global half * fxwList,
     __global float * distance,
     const __global int * indexes,
     __local float * local_results,
@@ -112,18 +112,48 @@ __kernel void DistanceKernel(
 {
     for (uint cc = get_group_id(0); cc < count; cc += get_num_groups(0))
     {
-        __global float * aElement = fxwList + cc * inputLength;
+        //__global half * aElement = fxwList + cc * inputLength;
+        uint aIndex = cc * inputLength;
+        uint aShift = aIndex % 2;
 
         for (int dd = cc + 1; dd < count; dd++)
         {
-            //GetExpDistanceDab
-            __global float * bElement = fxwList + dd * inputLength;
-            
+            //------------------------ GetExpDistanceDab ------------------------------
+
+//            __global half * bElement = fxwList + dd * inputLength ;
+//            
+//            float local_result = 0;
+//            for (int uu = get_local_id(0); uu < inputLength; uu += get_local_size(0))
+//            {
+//                float afloat = vload_half(uu, aElement);
+//                float bfloat = vload_half(uu, bElement);
+//                float diff = afloat - bfloat;
+//                local_result += diff * diff;
+//            }
+
+            uint bIndex = dd * inputLength;
+            uint bShift = bIndex % 2;
+
+            uint ostatok = inputLength % 2;
+
             float local_result = 0;
-            for (int uu = get_local_id(0); uu < inputLength; uu += get_local_size(0))
+            for (int uu = get_local_id(0) * 2; uu < inputLength - ostatok; uu += get_local_size(0) * 2)
             {
-                float diff = aElement[uu] - bElement[uu];
-                local_result += diff * diff;
+                float2 afloat2 = vload_half2((aIndex + uu) / 2, fxwList + aShift);
+                float2 bfloat2 = vload_half2((bIndex + uu) / 2, fxwList + bShift);
+                float2 diff = afloat2 - bfloat2;
+                local_result += diff.x * diff.x + diff.y * diff.y;
+            }
+
+            if(get_local_id(0) == 0)
+            {
+                if(ostatok > 0)
+                {
+                    float afloat = vload_half((cc + 1) * inputLength - 1, fxwList);
+                    float bfloat = vload_half((dd + 1) * inputLength - 1, fxwList);
+                    float diff = afloat - bfloat;
+                    local_result += diff * diff;
+                }
             }
 
             local_results[get_local_id(0)] = local_result;

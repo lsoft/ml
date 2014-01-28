@@ -64,10 +64,10 @@ __kernel void DistanceKernel(
                 // Make sure we're done with everything that's been requested before
                 clProvider.QueueFinish();
 
+                clProvider.DistanceMem.Read(BlockModeEnum.Blocking);
+
                 var after = DateTime.Now;
                 takenTime = (after - before);
-
-                clProvider.DistanceMem.Read(BlockModeEnum.Blocking);
 
                 //колбасим в диктионари
                 var pointer = 0;

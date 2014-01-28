@@ -9,6 +9,7 @@ using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Half;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
@@ -22,26 +23,35 @@ namespace MyNNConsoleApp.Nvidia
     {
         public static void Optimize()
         {
-            var trainData = MNISTDataProvider.GetDataSet(
-                "_MNIST_DATABASE/mnist/trainingset/",
-                //int.MaxValue
-                1000
-                );
-            trainData.Data.ForEach(item => item.Input.Transform((value) => value + 0.1f)); //чтобы не было нулей в датасете, а то вдруг алгоритм "забывает" например учесть последний флоат в датаитеме...
-            //trainData.Normalize();
-            //trainData = new DataSet(
-            //    trainData.Take(16).ToList(),
-            //    trainData.Visualizer);
+            const int DataItemCount = 10001;//10001;
+            const int DataItemLength = 787;//787;
 
-            Func<ILearningAlgorithmConfig> configProvider =
-                () =>
-                    new LearningAlgorithmConfig(
-                        new ConstLearningRate(0.0001f),
-                        1,
-                        0.0f,
-                        1,
-                        0.0001f,
-                        -1.0f);
+            int genSeed = DateTime.Now.Millisecond;
+            var genRandomizer = new DefaultRandomizer(ref genSeed);
+
+            var diList = new List<DataItem>();
+            for (var cc = 0; cc < DataItemCount; cc++)
+            {
+                var i = new float[DataItemLength];
+                var o = new float[1];
+
+                for (var dd = 0; dd < DataItemLength; dd++)
+                {
+                    i[dd] =
+                        //((dd%2) > 0) ? 1f : 0f;
+                        //dd / (float)DataItemLength + cc;
+                        //dd*0.015625f + cc;
+                        //genRandomizer.Next(10000) * 0.01f;
+                        //genRandomizer.Next(10000)*0.015625f;
+                        genRandomizer.Next(100);
+
+                }
+
+                var di = new DataItem(i, o);
+                diList.Add(di);
+            }
+
+            var dataset = new DataSet(diList);
 
             Dictionary<int, float[]> nvidiaResult;
             {
@@ -49,7 +59,7 @@ namespace MyNNConsoleApp.Nvidia
 
                 nvidiaResult = ProfileNvidiaGPU(
                     randomizer,
-                    trainData);
+                    dataset);
             }
 
             Dictionary<int, float[]> intelResult;
@@ -58,7 +68,7 @@ namespace MyNNConsoleApp.Nvidia
 
                 intelResult = ProfileIntelCPU(
                     randomizer,
-                    trainData);
+                    dataset);
             }
 
 
@@ -115,13 +125,15 @@ namespace MyNNConsoleApp.Nvidia
 
         private static Dictionary<int, float[]> ProfileNvidiaGPU(
             NoRandomRandomizer randomizer,
-            DataSet trainData)
+            DataSet dataset)
         {
-            var dd = new GPUNaiveDistanceDictFactory(
+            //var dd = new GPUNaiveDistanceDictFactory(
+            //    new NvidiaOrAmdGPUDeviceChooser());
+            var dd = new GPUHalfNaiveDistanceDictFactory(
                 new NvidiaOrAmdGPUDeviceChooser());
 
             TimeSpan takenTime;
-            var result = dd.CreateDistanceDict(trainData.Data, out takenTime);
+            var result = dd.CreateDistanceDict(dataset.Data, out takenTime);
 
             Console.WriteLine(
                 "NVIDIA TAKES {0}",
@@ -132,12 +144,12 @@ namespace MyNNConsoleApp.Nvidia
 
         private static Dictionary<int, float[]> ProfileIntelCPU(
             NoRandomRandomizer randomizer,
-            DataSet trainData)
+            DataSet dataset)
         {
             var dd = new VOpenCLDistanceDictFactory();
 
             TimeSpan takenTime;
-            var result = dd.CreateDistanceDict(trainData.Data, out takenTime);
+            var result = dd.CreateDistanceDict(dataset.Data, out takenTime);
 
             Console.WriteLine(
                 "INTEL  TAKES {0}",
