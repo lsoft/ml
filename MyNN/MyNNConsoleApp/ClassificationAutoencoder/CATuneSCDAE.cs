@@ -29,7 +29,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
     {
         public static void Tune()
         {
-            var rndSeed = 12323234;
+            var rndSeed = 12323235;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -52,19 +52,19 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
             var serialization = new SerializationHelper();
 
             var mlp = SerializationHelper.LoadFromFile<MLP>(
-                "SCDAE20140126124353/mlp20140126190531.scdae");
+                "SCDAE20140127180216/mlp20140128223317.scdae");
                 //"MLP20131218124915/epoche 42/20131219100700-perItemError=3,6219.mynn");
                 //"MLP20131219184828/epoche 28/20131220091649-perItemError=2,600619.mynn");
 
             Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
 
 
-            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(), false))
+            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(), false))
             {
-                const int epocheCount = 20;
+                const int epocheCount = 50;
 
                 var config = new LearningAlgorithmConfig(
-                    new LinearLearningRate(0.0003f, 0.99f),
+                    new LinearLearningRate(0.01f, 0.99f),
                     1,
                     0.0f,
                     epocheCount,
@@ -82,7 +82,8 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new GPUBackpropagationAlgorithm(
+                            new CPUBackpropagationAlgorithm(
+                                VectorizationSizeEnum.VectorizationMode16,
                                 currentMLP,
                                 currentConfig,
                                 clProvider),
@@ -93,7 +94,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                 Func<int, INoiser> noiserProvider =
                     (int epocheNumber) =>
                     {
-                        var coef = (epocheNumber >= epocheCount) ? 0f : ((epocheCount + 1 - epocheNumber) / (float)epocheCount);
+                        var coef = (epocheCount - epocheNumber)/(float) epocheCount;
 
                         var noiser = new AllNoisers(
                             randomizer,

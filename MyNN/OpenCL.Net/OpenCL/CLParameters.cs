@@ -20,12 +20,6 @@ namespace OpenCL.Net.OpenCL
             private set;
         }
 
-        public string Platform
-        {
-            get;
-            private set;
-        }
-
         public string OpenclVersion
         {
             get;
@@ -119,7 +113,6 @@ namespace OpenCL.Net.OpenCL
 
             DeviceName = Cl.GetDeviceInfo(device, Cl.DeviceInfo.Name, out error).ToString();
             Vendor = Cl.GetDeviceInfo(device, Cl.DeviceInfo.Vendor, out error).ToString();
-            Platform = Cl.GetDeviceInfo(device, Cl.DeviceInfo.Platform, out error).ToString();
             OpenclVersion = Cl.GetDeviceInfo(device, Cl.DeviceInfo.Version, out error).ToString();
             DriverVersion = Cl.GetDeviceInfo(device, Cl.DeviceInfo.DriverVersion, out error).ToString();
             GlobalMemorySize = Cl.GetDeviceInfo(device, Cl.DeviceInfo.GlobalMemSize, out error).CastTo<long>();
@@ -142,7 +135,6 @@ namespace OpenCL.Net.OpenCL
         {
             Console.WriteLine("OpenCL device: " + DeviceName);
             Console.WriteLine("OpenCL vendor: " + Vendor);
-            Console.WriteLine("OpenCL platform: " + Platform);
             Console.WriteLine("OpenCL version: " + OpenclVersion);
             Console.WriteLine("OpenCL driver version: " + DriverVersion);
             Console.WriteLine("Device global memory: {0} MB", (int) (GlobalMemorySize/1024/1024));

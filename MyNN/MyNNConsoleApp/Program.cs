@@ -30,6 +30,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+                
                 //NvidiaForwardOptimizer.Optimize();
                 //NvidiaBackpropOptimizer.Optimize();
                 //NvidiaTransposeBackpropOptimizer.Optimize();
@@ -142,8 +143,8 @@ namespace MyNNConsoleApp
                 //*/
 
                 /*
-                CATrainSCDAE.Train();
-                //CATuneSCDAE.Tune();
+                //CATrainSCDAE.Train();
+                CATuneSCDAE.Tune();
                 //CATrainMLPBasedOnSCDAE.Tune();
                 //*/
 
