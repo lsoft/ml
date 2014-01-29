@@ -172,6 +172,9 @@
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\GPUBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\OpenCLTransposeBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\DistanceDictHalfCLProvider.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\GPUHalfDistanceDictFactory.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\VOpenCLDistanceDictFactory.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Half\GPUHalfNaiveDistanceDictFactory.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Half\DistanceDictHalfCLProvider.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\GPUNaiveDistanceDictFactory.cs" />

@@ -71,14 +71,18 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             {
                 foreach (var i in fxwi.Input)
                 {
-                    FxwMem.Array[fxwIndex++] = i;
+                    FxwMem.Array[fxwIndex++] = new System.Half(i);
                 }
             }
 
             //IndexMem
-            for (var cc = 0; cc < _fxwList.Count; cc++) //!!! тут оптимизировать - чертовски неэффективно
+            var accum = 0;
+            var startCount = _fxwList.Count;
+            for (var cc = 0; cc < _fxwList.Count; cc++)
             {
-                IndexMem.Array[cc] = GetIndexCount(cc, _fxwList.Count);
+                IndexMem.Array[cc] = accum;
+                accum += startCount;
+                startCount--;
             }
         }
 
@@ -92,33 +96,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
                 _fxwList.Count,
                 Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
 
+            var totalCount = (_fxwList.Count + 1) * _fxwList.Count / 2;
+
             DistanceMem = this.CreateFloatMem(
-                GetTotalCount(_fxwList.Count),
+                totalCount,
                 Cl.MemFlags.CopyHostPtr | Cl.MemFlags.WriteOnly);
-        }
-
-        public static int GetIndexCount(int index, int count)
-        {
-            var result = 0;
-
-            for (var cc = 0; cc < index; cc++)
-            {
-                result += (count - cc);
-            }
-
-            return result;
-        }
-
-        public static int GetTotalCount(int count)
-        {
-            var result = 0;
-
-            for (var cc = count; cc > 0; cc--)
-            {
-                result += cc;
-            }
-
-            return result;
         }
     }
 }

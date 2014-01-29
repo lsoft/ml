@@ -1,24 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using Accord.Statistics;
 using MyNN.Data;
 using OpenCL.Net.OpenCL.DeviceChooser;
 using OpenCL.Net.Platform;
 
-namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict
+namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2
 {
     /// <summary>
     /// 
     /// PS: To work correctly this kernel needs a disabled Tdr:
     /// http://msdn.microsoft.com/en-us/library/windows/hardware/ff569918%28v=vs.85%29.aspx
     /// Set HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\GraphicsDrivers\TdrLevel = TdrLevelOff (0) - Detection disabled 
-    /// Otherwise, kernel will be aborted by Windows Video Driver Recovery Mechanism due to lack of response.
+    /// and reboot. Otherwise, kernel will be aborted by Windows Video Driver Recovery Mechanism due to lack of response.
     /// </summary>
-    public class GPUNaiveDistanceDictFactory : IDistanceDictFactory
+    public class GPUHalfDistanceDictFactory : IDistanceDictFactory
     {
+        private const int DistanceMemElementCount = 1024 * 1024 * 10;
+        private const float Threshold = 1e-15f;
+
         private readonly IDeviceChooser _deviceChooser;
 
-        public GPUNaiveDistanceDictFactory(
+        public GPUHalfDistanceDictFactory(
             IDeviceChooser deviceChooser)
         {
             if (deviceChooser == null)
@@ -43,7 +48,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 
             var inputLength = fxwList[0].Input.Length;
 
-            using (var clProvider = new DistanceDictCLProvider(_deviceChooser, true, fxwList))
+            using (var clProvider = new DistanceDictHalfCLProvider(_deviceChooser, true, fxwList, DistanceMemElementCount))
             {
                 var distanceKernel = clProvider.CreateKernel(@"
 inline void WarpReductionToFirstElement(
@@ -101,29 +106,68 @@ inline void WarpReductionToFirstElement(
 
 }
 
+inline int ObtainIndex(volatile __global int * indexArray)
+{
+    return
+        atomic_inc(indexArray);
+}
+
 __kernel void DistanceKernel(
-    const __global float * fxwList,
+    const __global half * fxwList,
     __global float * distance,
-    const __global int * indexes,
+    volatile __global int * indexArray,
     __local float * local_results,
 
+    float threshold,
+    int distanceMemLength,
+    
     int inputLength,
     int count)
 {
     for (uint cc = get_group_id(0); cc < count; cc += get_num_groups(0))
     {
-        __global float * aElement = fxwList + cc * inputLength;
+        //__global half * aElement = fxwList + cc * inputLength;
+        uint aIndex = cc * inputLength;
+        uint aShift = aIndex % 2;
 
         for (int dd = cc + 1; dd < count; dd++)
         {
-            //GetExpDistanceDab
-            __global float * bElement = fxwList + dd * inputLength;
-            
+            //------------------------ GetExpDistanceDab ------------------------------
+
+//            __global half * bElement = fxwList + dd * inputLength ;
+//            
+//            float local_result = 0;
+//            for (int uu = get_local_id(0); uu < inputLength; uu += get_local_size(0))
+//            {
+//                float afloat = vload_half(uu, aElement);
+//                float bfloat = vload_half(uu, bElement);
+//                float diff = afloat - bfloat;
+//                local_result += diff * diff;
+//            }
+
+            uint bIndex = dd * inputLength;
+            uint bShift = bIndex % 2;
+
+            uint ostatok = inputLength % 2;
+
             float local_result = 0;
-            for (int uu = get_local_id(0); uu < inputLength; uu += get_local_size(0))
+            for (int uu = get_local_id(0) * 2; uu < inputLength - ostatok; uu += get_local_size(0) * 2)
             {
-                float diff = aElement[uu] - bElement[uu];
-                local_result += diff * diff;
+                float2 afloat2 = vload_half2((aIndex + uu) / 2, fxwList + aShift);
+                float2 bfloat2 = vload_half2((bIndex + uu) / 2, fxwList + bShift);
+                float2 diff = afloat2 - bfloat2;
+                local_result += diff.x * diff.x + diff.y * diff.y;
+            }
+
+            if(get_local_id(0) == 0)
+            {
+                if(ostatok > 0)
+                {
+                    float afloat = vload_half((cc + 1) * inputLength - 1, fxwList);
+                    float bfloat = vload_half((dd + 1) * inputLength - 1, fxwList);
+                    float diff = afloat - bfloat;
+                    local_result += diff * diff;
+                }
             }
 
             local_results[get_local_id(0)] = local_result;
@@ -131,11 +175,20 @@ __kernel void DistanceKernel(
 
             WarpReductionToFirstElement(local_results);
             barrier(CLK_LOCAL_MEM_FENCE);
-            float result = local_results[0];
 
             if(get_local_id(0) == 0)
             {
-                distance[indexes[cc] + dd - cc] = exp(-result);
+                float result = local_results[0];
+                float exp_result = exp(-result);
+
+                //exp_result = 123;
+                if(exp_result >= threshold)
+                {
+                    int index = ObtainIndex(indexArray);
+                    distance[index * 3 + 0] = cc;
+                    distance[index * 3 + 1] = dd;
+                    distance[index * 3 + 2] = exp_result;
+                }
             }
 
             // Synchronize to make sure the first work-item is done with
@@ -145,20 +198,22 @@ __kernel void DistanceKernel(
     }
 }
 ",
-        "DistanceKernel");
+                    "DistanceKernel");
 
                 var before = DateTime.Now;
 
                 const int szLocalSize = 128;
-                int szGlobalSize = 16 * clProvider.Parameters.NumComputeUnits * szLocalSize;
+                int szGlobalSize = 16*clProvider.Parameters.NumComputeUnits*szLocalSize;
 
                 distanceKernel
                     .SetKernelArgMem(0, clProvider.FxwMem)
                     .SetKernelArgMem(1, clProvider.DistanceMem)
                     .SetKernelArgMem(2, clProvider.IndexMem)
-                    .SetKernelArgLocalMem(3, 4 * szLocalSize)
-                    .SetKernelArg(4, 4, inputLength)
-                    .SetKernelArg(5, 4, fxwList.Count)
+                    .SetKernelArgLocalMem(3, 4*szLocalSize)
+                    .SetKernelArg(4, 4, Threshold)
+                    .SetKernelArg(5, 4, DistanceMemElementCount)
+                    .SetKernelArg(6, 4, inputLength)
+                    .SetKernelArg(7, 4, fxwList.Count)
                     .EnqueueNDRangeKernel(
                         new int[]
                         {
@@ -168,34 +223,39 @@ __kernel void DistanceKernel(
                         {
                             szLocalSize
                         }
-                        );
+                    );
 
                 // Make sure we're done with everything that's been requested before
                 clProvider.QueueFinish();
 
                 clProvider.DistanceMem.Read(BlockModeEnum.Blocking);
+                clProvider.IndexMem.Read(BlockModeEnum.Blocking);
 
                 var after = DateTime.Now;
                 takenTime = (after - before);
 
                 //колбасим в диктионари
-                var pointer = 0;
                 for (var cc = 0; cc < fxwList.Count; cc++)
                 {
                     var iterSize = fxwList.Count - cc;
 
                     var array = new float[iterSize];
-                    Array.Copy(
-                        clProvider.DistanceMem.Array,
-                        pointer,
-                        array,
-                        0,
-                        iterSize);
-
                     result.Add(cc, array);
-
-                    pointer += iterSize;
                 }
+
+                for (var cc = 0; cc < DistanceMemElementCount; cc++)
+                {
+                    var distance = clProvider.DistanceMem.Array[cc * 3 + 2];
+                    if (distance > 0)
+                    {
+                        var aIndex = (int)clProvider.DistanceMem.Array[cc * 3 + 0];
+                        var bIndex = (int)clProvider.DistanceMem.Array[cc * 3 + 1];
+
+                        result[aIndex][bIndex - aIndex] = distance;
+                    }
+
+                }
+
             }
 
             return result;

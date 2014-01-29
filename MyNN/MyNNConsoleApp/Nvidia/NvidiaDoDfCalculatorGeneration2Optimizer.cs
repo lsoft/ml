@@ -7,9 +7,7 @@ using MyNN;
 using MyNN.Data;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Half;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
@@ -19,61 +17,55 @@ using OpenCL.Net.OpenCL.DeviceChooser;
 
 namespace MyNNConsoleApp.Nvidia
 {
-    public class NvidiaDoDfCalculatorOptimizer
+    public class NvidiaDoDfCalculatorGeneration2Optimizer
     {
         public static void Optimize()
         {
-            //const int DataItemCount = 10001;//10001;
-            //const int DataItemLength = 787;//787;
+            const int DataItemCount = 100;//10001;
+            const int DataItemLength = 787;//787;
 
-            //int genSeed = DateTime.Now.Millisecond;
-            //var genRandomizer = new DefaultRandomizer(ref genSeed);
+            int genSeed = DateTime.Now.Millisecond;
+            var genRandomizer = new DefaultRandomizer(ref genSeed);
 
-            //var diList = new List<DataItem>();
-            //for (var cc = 0; cc < DataItemCount; cc++)
-            //{
-            //    var i = new float[DataItemLength];
-            //    var o = new float[1];
+            var diList = new List<DataItem>();
+            for (var cc = 0; cc < DataItemCount; cc++)
+            {
+                var i = new float[DataItemLength];
+                var o = new float[1];
 
-            //    for (var dd = 0; dd < DataItemLength; dd++)
-            //    {
-            //        i[dd] =
-            //            //((dd%2) > 0) ? 1f : 0f;
-            //            //dd / (float)DataItemLength + cc;
-            //            //dd*0.015625f + cc;
-            //            //genRandomizer.Next(10000) * 0.01f;
-            //            //genRandomizer.Next(10000)*0.015625f;
-            //            genRandomizer.Next(100);
+                for (var dd = 0; dd < DataItemLength; dd++)
+                {
+                    i[dd] =
+                        //((dd%2) > 0) ? 1f : 0f;
+                        //dd / (float)DataItemLength + cc;
+                        //dd*0.015625f + cc;
+                        //genRandomizer.Next(10000) * 0.01f;
+                        //genRandomizer.Next(10000)*0.015625f;
+                        genRandomizer.Next(100);
 
-            //    }
+                }
 
-            //    var di = new DataItem(i, o);
-            //    diList.Add(di);
-            //}
+                var di = new DataItem(i, o);
+                diList.Add(di);
+            }
 
-            //var dataset = new DataSet(diList);
+            var dataset = new DataSet(diList);
 
-            var dataset = MNISTDataProvider.GetDataSet(
-                "_MNIST_DATABASE/mnist/trainingset/",
-                1000
-                );
-            dataset.Normalize();
+            //var dataset = MNISTDataProvider.GetDataSet(
+            //    "_MNIST_DATABASE/mnist/trainingset/",
+            //    1000
+            //    );
+            //dataset.Normalize();
 
             Dictionary<int, float[]> nvidiaResult;
             {
-                var randomizer = new NoRandomRandomizer();
-
                 nvidiaResult = ProfileNvidiaGPU(
-                    randomizer,
                     dataset);
             }
 
             Dictionary<int, float[]> intelResult;
             {
-                var randomizer = new NoRandomRandomizer();
-
                 intelResult = ProfileIntelCPU(
-                    randomizer,
                     dataset);
             }
 
@@ -130,12 +122,9 @@ namespace MyNNConsoleApp.Nvidia
         }
 
         private static Dictionary<int, float[]> ProfileNvidiaGPU(
-            NoRandomRandomizer randomizer,
             DataSet dataset)
         {
-            //var dd = new GPUNaiveDistanceDictFactory(
-            //    new NvidiaOrAmdGPUDeviceChooser());
-            var dd = new GPUHalfNaiveDistanceDictFactory(
+            var dd = new GPUHalfDistanceDictFactory(
                 new NvidiaOrAmdGPUDeviceChooser());
 
             TimeSpan takenTime;
@@ -149,7 +138,6 @@ namespace MyNNConsoleApp.Nvidia
         }
 
         private static Dictionary<int, float[]> ProfileIntelCPU(
-            NoRandomRandomizer randomizer,
             DataSet dataset)
         {
             var dd = new VOpenCLDistanceDictFactory();

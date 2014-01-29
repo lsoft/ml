@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Accord.Statistics;
 using MyNN.Data;
 using OpenCL.Net.OpenCL.DeviceChooser;
 using OpenCL.Net.Platform;
@@ -9,7 +10,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 {
     /// <summary>
     /// 
-    /// PS: To work correctly this kernel needs a disable Tdr:
+    /// PS: To work correctly this kernel needs a disabled Tdr:
     /// http://msdn.microsoft.com/en-us/library/windows/hardware/ff569918%28v=vs.85%29.aspx
     /// Set HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\GraphicsDrivers\TdrLevel = TdrLevelOff (0) - Detection disabled 
     /// and reboot. Otherwise, kernel will be aborted by Windows Video Driver Recovery Mechanism due to lack of response.
@@ -165,7 +166,7 @@ __kernel void DistanceKernel(
 
             if(get_local_id(0) == 0)
             {
-                distance[indexes[cc] + dd - cc] = result;//exp(-result);
+                distance[indexes[cc] + dd - cc] = exp(-result);
             }
 
             // Synchronize to make sure the first work-item is done with
@@ -205,13 +206,21 @@ __kernel void DistanceKernel(
 
                 clProvider.DistanceMem.Read(BlockModeEnum.Blocking);
 
+                var after = DateTime.Now;
+                takenTime = (after - before);
+
+                //var countGreatherThan1eM20 = clProvider.DistanceMem.Array.Sum(j => j >= 1e-15 ? 1 : 0);
                 //var min = clProvider.DistanceMem.Array.Min();
                 //var avg = clProvider.DistanceMem.Array.Average();
                 //var max = clProvider.DistanceMem.Array.Max();
-                //Console.WriteLine("min = {0}, avg = {1}, max = {2}", min, avg, max);
-
-                var after = DateTime.Now;
-                takenTime = (after - before);
+                //Console.WriteLine(
+                //    "min = {0}, avg = {1}, max = {2}, (count > 1e-15) = {3}% ({4}/{5})", 
+                //    min, 
+                //    avg, 
+                //    max, 
+                //    ((int)(countGreatherThan1eM20 * 10000f / (float)clProvider.DistanceMem.Array.Length)) / 100f,
+                //    countGreatherThan1eM20,
+                //    clProvider.DistanceMem.Array.Length);
 
                 //колбасим в диктионари
                 var pointer = 0;

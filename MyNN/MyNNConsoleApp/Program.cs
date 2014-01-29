@@ -34,7 +34,8 @@ namespace MyNNConsoleApp
                 //NvidiaBackpropOptimizer.Optimize();
                 //NvidiaTransposeBackpropOptimizer.Optimize();
                 //NvidiaBackpropSmallMLPOptimizer.Optimize();
-                NvidiaDoDfCalculatorOptimizer.Optimize();
+                //NvidiaDoDfCalculatorOptimizer.Optimize();
+                NvidiaDoDfCalculatorGeneration2Optimizer.Optimize();
                 //Console.ReadLine();
                 return;
                 //*/

@@ -130,6 +130,7 @@
     <Compile Include="MLP2\MLP2TuneSDAE.cs" />
     <Compile Include="MLP2\MLP2NLNCAAutoencoderTest.cs" />
     <Compile Include="MLP2\MLP2TrainStackedNLNCAAutoencoder.cs" />
+    <Compile Include="Nvidia\NvidiaDoDfCalculatorGeneration2Optimizer.cs" />
     <Compile Include="Nvidia\NvidiaBackpropSmallMLPOptimizer.cs" />
     <Compile Include="Nvidia\NvidiaDoDfCalculatorOptimizer.cs" />
     <Compile Include="Nvidia\NvidiaTransposeBackpropOptimizer.cs" />

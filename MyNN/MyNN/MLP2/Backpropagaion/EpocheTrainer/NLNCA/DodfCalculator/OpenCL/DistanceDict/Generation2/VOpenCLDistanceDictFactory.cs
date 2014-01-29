@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyNN.Data;
+using MyNN.OutputConsole;
 using OpenCL.Net.Platform;
 
-namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict
+namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2
 {
     public class VOpenCLDistanceDictFactory : IDistanceDictFactory
     {
+        private const float Threshold = 1e-15f;
+
         public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList)
         {
             TimeSpan takenTime;
@@ -17,6 +20,8 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 
         public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList, out TimeSpan takenTime)
         {
+            ConsoleAmbientContext.Console.WriteWarning("This implementation of dOdF distance dictionary is not allowed to use in large scale systems!");
+
             var result = new Dictionary<int, float[]>();
 
             var inputLength = fxwList[0].Input.Length;
@@ -125,6 +130,8 @@ __kernel void DistanceKernel(
 
                 var after = DateTime.Now;
                 takenTime = (after - before);
+
+                clProvider.DistanceMem.Array.Transform((a) => (a < Threshold ? 0f : a));
 
                 //колбасим в диктионари
                 var pointer = 0;
