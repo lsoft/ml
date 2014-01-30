@@ -333,17 +333,20 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
             var fxa = _fxwList[a];
             var fxb = _fxwList[b];
 
-            var result = 0f;
+            var sum = 0f;
 
             for (var cc = 0; cc < _inputLength; cc++)
             {
                 var diff = fxa.Input[cc] - fxb.Input[cc];
-                result += diff * diff;
+                sum += diff * diff;
             }
 
-            return
-                (float)(Math.Exp(-result));
-                //result;
+#if DODF_DISABLE_EXP
+            var result = -sum;
+#else
+            var result = (float)(Math.Exp(-sum));
+#endif
+            return result;
         }
 
         public void MADDab(
@@ -439,7 +442,6 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
 
             return
                 distance;
-                //(float)Math.Exp(-distance);
         }
     }
 }

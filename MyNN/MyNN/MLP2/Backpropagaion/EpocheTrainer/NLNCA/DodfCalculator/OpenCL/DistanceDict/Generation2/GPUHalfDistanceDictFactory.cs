@@ -51,7 +51,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 
             using (var clProvider = new DistanceDictHalfCLProvider(_deviceChooser, true, fxwList, DistanceMemElementCount))
             {
-                var distanceKernel = clProvider.CreateKernel(@"
+                var kernelText = @"
 inline void WarpReductionToFirstElement(
     __local float *partialDotProduct)
 {
@@ -145,6 +145,9 @@ inline int ObtainIndex(volatile __global int * indexArray)
 }
 //*/
 
+{DODF_DISABLE_EXP_DEFINE_CLAUSE}
+
+
 __kernel void DistanceKernel(
     const __global half * fxwList,
     __global float * distance,
@@ -221,16 +224,20 @@ __kernel void DistanceKernel(
             if(get_local_id(0) == 0)
             {
                 float result = local_results[0];
-                float exp_result = 
-                    //result;
-                    exp(-result);
+                
+#ifdef DODF_DISABLE_EXP
+                float write_result = -result;
+                //there is no needs in if clause due to 'debug' mode
+#else
+                float write_result = exp(-result);
+                if(write_result >= threshold)
+#endif
 
-                if(exp_result >= threshold)
                 {
                     int index = ObtainIndex(indexArray);
                     distance[index * 3 + 0] = cc;
                     distance[index * 3 + 1] = dd;
-                    distance[index * 3 + 2] = exp_result;
+                    distance[index * 3 + 2] = write_result;
                 }
             }
 
@@ -240,8 +247,15 @@ __kernel void DistanceKernel(
         }
     }
 }
-",
-                    "DistanceKernel");
+";
+
+#if DODF_DISABLE_EXP
+                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", "#define DODF_DISABLE_EXP");
+#else
+                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", string.Empty);
+#endif
+
+                var distanceKernel = clProvider.CreateKernel(kernelText, "DistanceKernel");
 
                 //создаем диктионари
                 for (var cc = 0; cc < fxwList.Count; cc++)

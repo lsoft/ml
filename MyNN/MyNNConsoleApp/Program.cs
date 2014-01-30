@@ -30,6 +30,8 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+
+
                 pabProfiler.Main2();
                 //NvidiaForwardOptimizer.Optimize();
                 //NvidiaBackpropOptimizer.Optimize();

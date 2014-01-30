@@ -324,8 +324,13 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
                 distance = _distanceDict[b][a];
             }
 
-            return
-                (float)Math.Exp(-distance);
+#if DODF_DISABLE_EXP
+            var result = -distance;
+#else
+            var result = (float)Math.Exp(-distance);
+#endif
+
+            return result;
         }
     }
 }

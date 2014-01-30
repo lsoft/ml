@@ -10,6 +10,8 @@ using MyNN.Data;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2;
+using OpenCL.Net.OpenCL.DeviceChooser;
 
 namespace MyNNConsoleApp
 {
@@ -27,7 +29,8 @@ namespace MyNNConsoleApp
             var beforeCreate1 = DateTime.Now;
             var dodf1 = new DodfCalculatorOpenCL(
                 data,
-                new VOpenCLDistanceDictFactory());
+                //new VOpenCLDistanceDictFactory());
+                new GPUHalfDistanceDictFactory(new NvidiaOrAmdGPUDeviceChooser()));
             var afterCreate1 = DateTime.Now;
 
             Console.WriteLine(
@@ -51,11 +54,11 @@ namespace MyNNConsoleApp
                 {
                     var diff = oldItem[cc] - newItem[cc];
 
-                    if (Math.Abs(diff) > 1e-5)
+                    if (Math.Abs(diff) > 1e-15)
                     {
                         throw new InvalidOperationException(
                             string.Format(
-                                "diff = {0} > 1e-5, left= {1}, right = {2}",
+                                "diff = {0} > 1e-15, left= {1}, right = {2}",
                                 Math.Abs(diff),
                                 oldItem[cc],
                                 newItem[cc]));
@@ -105,8 +108,8 @@ namespace MyNNConsoleApp
                 for (var dd = 0; dd < inputLength; dd++)
                 {
                     input[dd] =
-                        //rnd.Next(1000) * 0.015625f;
-                        (float) rnd.NextDouble();
+                        rnd.Next(1000) * 0.015625f;
+                        //(float) rnd.NextDouble();
                 }
 
                 output[rnd.Next(classesCount)] = 1f;

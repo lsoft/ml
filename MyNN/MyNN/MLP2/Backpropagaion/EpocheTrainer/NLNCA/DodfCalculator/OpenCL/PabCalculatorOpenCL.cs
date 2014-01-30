@@ -3,17 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MyNN.Data;
-#if PAB_DEBUG_CHECKS
-    #undef PAB_DEBUG_CHECKS
-#endif
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
 {
     public class PabCalculatorOpenCL 
     {
-        private readonly IDistanceDictFactory _createDistanceDictFactory;
-
         private readonly List<DataItem> _fxwList;
         private readonly int _inputLength;
 
@@ -35,26 +30,17 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
                 throw new ArgumentNullException("fxwList");
             }
 
-            _createDistanceDictFactory = createDistanceDictFactory;
             _fxwList = fxwList;
             _inputLength = _fxwList[0].Input.Length;
 
             #region считаем distance dict
 
-            //var x0 = DateTime.Now;
-            _expDistanceDict = _createDistanceDictFactory.CreateDistanceDict(_fxwList);
-            //var x1 = DateTime.Now;
-            //var diff1 = x1 - x0;
-            //ConsoleAmbientContext.Console.WriteLine(
-            //    "Считаем distanceDict методом {0} = {1}",
-            //    _createDistanceDictFactory.GetType().Name,
-            //    diff1);
+            _expDistanceDict = createDistanceDictFactory.CreateDistanceDict(_fxwList);
 
             #endregion
 
             #region считаем знаменатель
 
-            //var x2 = DateTime.Now;
             _znList = new float[_fxwList.Count].ToList();
 
             Parallel.For(0, _fxwList.Count, cc =>
@@ -64,15 +50,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
                 _znList[cc] = zn;
             }
             );//Parallel.For
-            //var x3 = DateTime.Now;
-            //var diff2 = x3 - x2;
-            //ConsoleAmbientContext.Console.WriteLine("считаем знаменатель = {0}", diff2);
 
             #endregion
 
             #region считаем pi, pi * di
 
-            //var x4 = DateTime.Now;
             var internalDict = new Dictionary<int, List<int>>();
             for (var cc = 0; cc < _fxwList.Count; cc++)
             {
@@ -85,11 +67,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
 
                 internalDict[key].Add(cc);
             }
-            //var x5 = DateTime.Now;
-            //var diff3 = x5 - x4;
-            //ConsoleAmbientContext.Console.WriteLine("считаем pi, pi * di #1 = {0}", diff3);
 
-            //var x6 = DateTime.Now;
             _piList = new List<float>();
             for (var l = 0; l < _fxwList.Count; l++)
             {
@@ -105,9 +83,6 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
 
                 _piList.Add(pi);
             }
-            //var x7 = DateTime.Now;
-            //var diff4 = x7 - x6;
-            //ConsoleAmbientContext.Console.WriteLine("считаем pi, pi * di #2 = {0}", diff4);
 
             #endregion
         }

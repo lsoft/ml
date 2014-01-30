@@ -179,8 +179,12 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
         {
             var distance = GetDab(fxwList, a, b);
 
-            return
-                (float)Math.Exp(-(distance.Sum(j => j * j)));
+#if DODF_DISABLE_EXP
+            var result = -(distance.Sum(j => j * j));
+#else
+            var result = (float)Math.Exp(-(distance.Sum(j => j * j)));
+#endif
+            return result;
         }
 
         private float[] GetDab(

@@ -50,16 +50,22 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             var fxa = fxwList[a];
             var fxb = fxwList[b];
 
-            var result = 0f;
+            var sum = 0f;
 
             for (var cc = 0; cc < inputLength; cc++)
             {
                 var diff = fxa.Input[cc] - fxb.Input[cc];
-                result += diff * diff;
+                sum += diff * diff;
             }
 
-            return
-                (float)(Math.Exp(-result));
+#if DODF_DISABLE_EXP
+            var result = -sum;
+#else
+            var result = (float)(Math.Exp(-sum));
+#endif
+
+            return result;
+
         }
 
     }

@@ -46,7 +46,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 
             using (var clProvider = new DistanceDictHalfCLProvider(_deviceChooser, true, fxwList))
             {
-                var distanceKernel = clProvider.CreateKernel(@"
+                var kernelText = @"
 inline void WarpReductionToFirstElement(
     __local float *partialDotProduct)
 {
@@ -101,6 +101,8 @@ inline void WarpReductionToFirstElement(
       }
 
 }
+
+{DODF_DISABLE_EXP_DEFINE_CLAUSE}
 
 __kernel void DistanceKernel(
     const __global half * fxwList,
@@ -166,7 +168,13 @@ __kernel void DistanceKernel(
 
             if(get_local_id(0) == 0)
             {
-                distance[indexes[cc] + dd - cc] = exp(-result);
+#ifdef DODF_DISABLE_EXP
+                float write_result = -result;
+#else
+                float write_result = exp(-result);
+#endif
+
+                distance[indexes[cc] + dd - cc] = write_result;
             }
 
             // Synchronize to make sure the first work-item is done with
@@ -175,8 +183,15 @@ __kernel void DistanceKernel(
         }
     }
 }
-",
-        "DistanceKernel");
+";
+
+#if DODF_DISABLE_EXP
+                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", "#define DODF_DISABLE_EXP");
+#else
+                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", string.Empty);
+#endif
+
+                var distanceKernel = clProvider.CreateKernel(kernelText, "DistanceKernel");
 
                 var before = DateTime.Now;
 

@@ -23,7 +23,9 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 
             using (var clProvider = new DistanceDictCLProvider(fxwList))
             {
-                var distanceKernel = clProvider.CreateKernel(@"
+                var kernelText = @"
+{DODF_DISABLE_EXP_DEFINE_CLAUSE}
+
 __kernel void DistanceKernel(
     __global float * fxwList,
     __global float * distance,
@@ -93,12 +95,25 @@ __kernel void DistanceKernel(
                 result += diff * diff;
             }
 
-            distance[indexes[cc] + dd - cc] = exp(-result);
+#ifdef DODF_DISABLE_EXP
+            float write_result = -result;
+#else
+            float write_result = exp(-result);
+#endif
+
+            distance[indexes[cc] + dd - cc] = write_result;
         }
     }
 }
-",
-        "DistanceKernel");
+";
+
+#if DODF_DISABLE_EXP
+                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", "#define DODF_DISABLE_EXP");
+#else
+                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", string.Empty);
+#endif
+
+                var distanceKernel = clProvider.CreateKernel(kernelText, "DistanceKernel");
 
                 var before = DateTime.Now;
 
