@@ -146,7 +146,7 @@ namespace MyNNConsoleApp.Nvidia
 
                 foreach (var pair in results)
                 {
-                    Console.Write("{0:D5}: ", pair.Key);
+                    Console.Write("{0:D7}: ", pair.Key);
 
                     for (var cc = 0; cc < maxLength - pair.Value.Length; cc++)
                     {

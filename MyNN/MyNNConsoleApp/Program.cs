@@ -32,13 +32,13 @@ namespace MyNNConsoleApp
             {
 
 
-                pabProfiler.Main2();
+                //pabProfiler.Main2();
                 //NvidiaForwardOptimizer.Optimize();
                 //NvidiaBackpropOptimizer.Optimize();
                 //NvidiaTransposeBackpropOptimizer.Optimize();
                 //NvidiaBackpropSmallMLPOptimizer.Optimize();
                 //NvidiaDoDfCalculatorOptimizer.Optimize();
-                //NvidiaDoDfCalculatorGeneration2Optimizer.Optimize();
+                NvidiaDoDfCalculatorGeneration2Optimizer.Optimize();
                 //Console.ReadLine();
                 return;
                 //*/

@@ -86,13 +86,13 @@ namespace MyNNConsoleApp
         {
             const int count =
                 //5;
-                150;
-                //1000;
+                //150;
+                157;
                 //3000;
                 //12000;
             const int inputLength =
-                50;
-                //100;
+                //50;
+                101;
                 //200;
             const int classesCount = 10;
 

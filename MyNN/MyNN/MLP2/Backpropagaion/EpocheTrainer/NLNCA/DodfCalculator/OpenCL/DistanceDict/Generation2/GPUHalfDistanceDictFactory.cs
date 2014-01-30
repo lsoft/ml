@@ -107,43 +107,11 @@ inline void WarpReductionToFirstElement(
 
 }
 
-/*
-inline int ObtainIndex(volatile __global int* indexArray)
-{
-    local int tmpSum[1];
-
-    if(get_local_id(0) == 0)
-    {
-        tmpSum[0] = 0;
-    }
-
-    barrier(CLK_LOCAL_MEM_FENCE);
-
-    int currentShift = atomic_inc(&tmpSum[0]);
-
-    barrier(CLK_LOCAL_MEM_FENCE);
-    
-    local int oldValue;
-
-    if(get_local_id(0) == 0)// == (get_local_size(0) - 1))
-    {
-        oldValue = atomic_add(indexArray, tmpSum[0]);
-    }
-
-    barrier(CLK_LOCAL_MEM_FENCE);
-
-    return
-        oldValue + currentShift;
-}
-//*/
-
-
 inline int ObtainIndex(volatile __global int * indexArray)
 {
     return
         atomic_inc(indexArray);
 }
-//*/
 
 {DODF_DISABLE_EXP_DEFINE_CLAUSE}
 
@@ -171,24 +139,12 @@ __kernel void DistanceKernel(
 
     for (uint cc = startRowIndex + get_group_id(0); cc < startRowIndex + processedRowCountPerKernelCall; cc += get_num_groups(0))
     {
-        //__global half * aElement = fxwList + cc * inputLength;
         uint aIndex = cc * inputLength;
         uint aShift = aIndex % 2;
 
         for (int dd = cc + 1; dd < count; dd++)
         {
             //------------------------ GetExpDistanceDab ------------------------------
-
-//            __global half * bElement = fxwList + dd * inputLength ;
-//            
-//            float local_result = 0;
-//            for (int uu = get_local_id(0); uu < inputLength; uu += get_local_size(0))
-//            {
-//                float afloat = vload_half(uu, aElement);
-//                float bfloat = vload_half(uu, bElement);
-//                float diff = afloat - bfloat;
-//                local_result += diff * diff;
-//            }
 
             uint bIndex = dd * inputLength;
             uint bShift = bIndex % 2;

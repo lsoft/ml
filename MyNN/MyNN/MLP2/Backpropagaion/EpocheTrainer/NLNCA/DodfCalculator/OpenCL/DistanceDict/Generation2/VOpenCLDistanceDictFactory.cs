@@ -146,7 +146,7 @@ __kernel void DistanceKernel(
                 var after = DateTime.Now;
                 takenTime = (after - before);
 
-                clProvider.DistanceMem.Array.Transform((a) => (a < Threshold ? 0f : a));
+                clProvider.DistanceMem.Array.Transform((a) => ((a > -Threshold  && a < Threshold) ? 0f : a));
 
                 //колбасим в диктионари
                 var pointer = 0;
