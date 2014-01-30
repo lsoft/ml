@@ -21,7 +21,7 @@ namespace MyNNConsoleApp.Nvidia
     {
         public static void Optimize()
         {
-            const int DataItemCount = 100;//10001;
+            const int DataItemCount = 10001;//10001;
             const int DataItemLength = 787;//787;
 
             int genSeed = DateTime.Now.Millisecond;
@@ -84,6 +84,14 @@ namespace MyNNConsoleApp.Nvidia
                 return;
             }
 
+            DumpDict(
+                "NVIDIA",
+                nvidiaResult);
+
+            DumpDict(
+                "INTEL",
+                intelResult);
+
             var intelkeys = intelResult.Keys.ToArray();
             var nvidiakeys = nvidiaResult.Keys.ToArray();
 
@@ -118,7 +126,46 @@ namespace MyNNConsoleApp.Nvidia
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("OK with MAXDIFF = {0}", maxDiff);
+            Console.ResetColor();
+        }
 
+        private static void DumpDict(
+            string vendor,
+            Dictionary<int, float[]> results)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            
+            Console.WriteLine(vendor);
+
+            var maxLength = results.Max(j => j.Value.Length);
+
+
+            if (results.Count <= 10 && maxLength <= 10)
+            {
+
+                foreach (var pair in results)
+                {
+                    Console.Write("{0:D5}: ", pair.Key);
+
+                    for (var cc = 0; cc < maxLength - pair.Value.Length; cc++)
+                    {
+                        Console.Write("          ");
+                    }
+
+                    foreach (var v in pair.Value)
+                    {
+                        Console.Write("{0:000000.00} ", v);
+                    }
+
+                    Console.WriteLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Too big size to diplay.");
+            }
+
+            Console.ResetColor();
         }
 
         private static Dictionary<int, float[]> ProfileNvidiaGPU(

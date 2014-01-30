@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Accord.Statistics;
 using MyNN.Data;
+using MyNN.OutputConsole;
 using OpenCL.Net.OpenCL.DeviceChooser;
 using OpenCL.Net.Platform;
 
@@ -19,7 +20,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
     public class GPUHalfDistanceDictFactory : IDistanceDictFactory
     {
         private const int DistanceMemElementCount = 1024 * 1024 * 10;
-        private const float Threshold = 1e-15f;
+        private const float Threshold = 1e-20f;
 
         private readonly IDeviceChooser _deviceChooser;
 
@@ -106,11 +107,43 @@ inline void WarpReductionToFirstElement(
 
 }
 
+/*
+inline int ObtainIndex(volatile __global int* indexArray)
+{
+    local int tmpSum[1];
+
+    if(get_local_id(0) == 0)
+    {
+        tmpSum[0] = 0;
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    int currentShift = atomic_inc(&tmpSum[0]);
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+    
+    local int oldValue;
+
+    if(get_local_id(0) == 0)// == (get_local_size(0) - 1))
+    {
+        oldValue = atomic_add(indexArray, tmpSum[0]);
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    return
+        oldValue + currentShift;
+}
+//*/
+
+
 inline int ObtainIndex(volatile __global int * indexArray)
 {
     return
         atomic_inc(indexArray);
 }
+//*/
 
 __kernel void DistanceKernel(
     const __global half * fxwList,
@@ -122,9 +155,18 @@ __kernel void DistanceKernel(
     int distanceMemLength,
     
     int inputLength,
+    int startRowIndex,
+    int processedRowCountPerKernelCall,
     int count)
 {
-    for (uint cc = get_group_id(0); cc < count; cc += get_num_groups(0))
+    if(get_global_id(0) == 0)
+    {
+        indexArray[0] = 0;
+    }
+
+    barrier(CLK_GLOBAL_MEM_FENCE | CLK_LOCAL_MEM_FENCE);
+
+    for (uint cc = startRowIndex + get_group_id(0); cc < startRowIndex + processedRowCountPerKernelCall; cc += get_num_groups(0))
     {
         //__global half * aElement = fxwList + cc * inputLength;
         uint aIndex = cc * inputLength;
@@ -179,9 +221,10 @@ __kernel void DistanceKernel(
             if(get_local_id(0) == 0)
             {
                 float result = local_results[0];
-                float exp_result = exp(-result);
+                float exp_result = 
+                    result;
+                    //exp(-result);
 
-                //exp_result = 123;
                 if(exp_result >= threshold)
                 {
                     int index = ObtainIndex(indexArray);
@@ -200,41 +243,7 @@ __kernel void DistanceKernel(
 ",
                     "DistanceKernel");
 
-                var before = DateTime.Now;
-
-                const int szLocalSize = 128;
-                int szGlobalSize = 16*clProvider.Parameters.NumComputeUnits*szLocalSize;
-
-                distanceKernel
-                    .SetKernelArgMem(0, clProvider.FxwMem)
-                    .SetKernelArgMem(1, clProvider.DistanceMem)
-                    .SetKernelArgMem(2, clProvider.IndexMem)
-                    .SetKernelArgLocalMem(3, 4*szLocalSize)
-                    .SetKernelArg(4, 4, Threshold)
-                    .SetKernelArg(5, 4, DistanceMemElementCount)
-                    .SetKernelArg(6, 4, inputLength)
-                    .SetKernelArg(7, 4, fxwList.Count)
-                    .EnqueueNDRangeKernel(
-                        new int[]
-                        {
-                            szGlobalSize
-                        }
-                        , new int[]
-                        {
-                            szLocalSize
-                        }
-                    );
-
-                // Make sure we're done with everything that's been requested before
-                clProvider.QueueFinish();
-
-                clProvider.DistanceMem.Read(BlockModeEnum.Blocking);
-                clProvider.IndexMem.Read(BlockModeEnum.Blocking);
-
-                var after = DateTime.Now;
-                takenTime = (after - before);
-
-                //колбасим в диктионари
+                //создаем диктионари
                 for (var cc = 0; cc < fxwList.Count; cc++)
                 {
                     var iterSize = fxwList.Count - cc;
@@ -243,18 +252,107 @@ __kernel void DistanceKernel(
                     result.Add(cc, array);
                 }
 
-                for (var cc = 0; cc < DistanceMemElementCount; cc++)
+                #region определяем параметры запуска кернела
+
+                //размер локальной группы вычислителей GPU
+                const int szLocalSize = 128;
+
+                //количество групп (настроено вручную согласно производительности NVidia GeForce 730M и AMD Radeon 7750
+                int szNumGroups = 16 * clProvider.Parameters.NumComputeUnits;
+
+                //глобальный размер
+                int szGlobalSize = szNumGroups * szLocalSize;
+
+                #endregion
+
+                var totalItemsCountProcessedByKernel = 0L;
+                var totalKernelExcutionCount = 0;
+
+                //Запускаем кернел
+                var before = DateTime.Now;
+
+                for (var startRowIndex = 0; startRowIndex < fxwList.Count; )
                 {
-                    var distance = clProvider.DistanceMem.Array[cc * 3 + 2];
-                    if (distance > 0)
+                    //количество строк, обрабатываемое за один вызов кернела (оно меняется от итерации к итерации из-за того, что крайние (нижние) строки короче
+                    int processedRowCountPerKernelCall = DistanceMemElementCount / (fxwList.Count - startRowIndex);
+
+                    if (processedRowCountPerKernelCall < 1)
                     {
+                        throw new InvalidOperationException(
+                            string.Format(
+                                "ProcessedRowCountPerKernelCall is zero due to too big value of fxwList.Count = {0}. Please increase DistanceMemElementCount as low as {0}.",
+                                fxwList.Count));
+                    }
+
+                    #region запуск кернела и ожидание результатов
+
+                    distanceKernel
+                        .SetKernelArgMem(0, clProvider.FxwMem)
+                        .SetKernelArgMem(1, clProvider.DistanceMem)
+                        .SetKernelArgMem(2, clProvider.IndexMem)
+                        .SetKernelArgLocalMem(3, 4*szLocalSize)
+                        .SetKernelArg(4, 4, Threshold)
+                        .SetKernelArg(5, 4, DistanceMemElementCount)
+                        .SetKernelArg(6, 4, inputLength)
+                        .SetKernelArg(7, 4, startRowIndex)
+                        .SetKernelArg(8, 4, processedRowCountPerKernelCall)
+                        .SetKernelArg(9, 4, fxwList.Count)
+                        .EnqueueNDRangeKernel(
+                            new int[]
+                            {
+                                szGlobalSize
+                            }
+                            , new int[]
+                            {
+                                szLocalSize
+                            }
+                        );
+
+
+                    clProvider.DistanceMem.Read(BlockModeEnum.NonBlocking);
+                    clProvider.IndexMem.Read(BlockModeEnum.NonBlocking);
+
+                    // Make sure we're done with everything that's been requested before
+                    clProvider.QueueFinish();
+
+                    #endregion
+
+                    totalKernelExcutionCount++;
+
+                    var itemsCountProcessedByKernel = clProvider.IndexMem.Array[0];
+                    totalItemsCountProcessedByKernel += itemsCountProcessedByKernel;
+
+                    #region заполняем диктионари
+
+                    for (var cc = 0; cc < itemsCountProcessedByKernel; cc++)
+                    {
+                        var distance = clProvider.DistanceMem.Array[cc * 3 + 2];
+
                         var aIndex = (int)clProvider.DistanceMem.Array[cc * 3 + 0];
                         var bIndex = (int)clProvider.DistanceMem.Array[cc * 3 + 1];
 
                         result[aIndex][bIndex - aIndex] = distance;
                     }
 
+                    #endregion
+                    
+                    //следующая итерация цикла
+                    startRowIndex += processedRowCountPerKernelCall;
                 }
+
+                var totalItemCount = (fxwList.Count + 1) * fxwList.Count / 2;
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    "fxwList count = {0}, total items {1}, processed items {2}, {3}%, others values are below threshold = {4}, with kernel execution count = {5}",
+                    fxwList.Count,
+                    totalItemCount,
+                    totalItemsCountProcessedByKernel,
+                    ((int)(totalItemsCountProcessedByKernel * 10000 / totalItemCount)) / 100f,
+                    Threshold,
+                    totalKernelExcutionCount);
+
+                var after = DateTime.Now;
+                takenTime = (after - before);
 
             }
 

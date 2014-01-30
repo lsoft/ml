@@ -8,7 +8,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 {
     public class VOpenCLDistanceDictFactory : IDistanceDictFactory
     {
-        private const float Threshold = 1e-15f;
+        private const float Threshold = 1e-20f;
 
         public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList)
         {
@@ -98,7 +98,9 @@ __kernel void DistanceKernel(
                 result += diff * diff;
             }
 
-            distance[indexes[cc] + dd - cc] = exp(-result);
+            distance[indexes[cc] + dd - cc] = 
+                result;
+                //exp(-result);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
     {
         public static void Tune()
         {
-            var rndSeed = 18890;
+            var rndSeed = 18891;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -47,7 +47,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
 
             var mlp = SerializationHelper.LoadFromFile<MLP>(
                 //"SCDAE20140117102818/mlp20140118003337.mynn");
-                "MLP20140126193312/epoche 17/20140126203515-(3,800932) 9754 correct out of 10000 - 97%.mynn");
+                "MLP20140129105235/epoche 49/20140130022618-(1,195425) 9883 correct out of 10000 - 98,83%.mynn");
 
             mlp.AutoencoderCutTail();
 
@@ -60,10 +60,10 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
             Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
 
 
-            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(), false))
+            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(), false))
             {
                 var config = new LearningAlgorithmConfig(
-                    new LinearLearningRate(0.004f, 0.98f),
+                    new LinearLearningRate(0.01f, 0.98f),
                     1,
                     0.0f,
                     50,
@@ -81,7 +81,8 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                     new BackpropagationAlgorithm(
                         randomizer,
                         (currentMLP, currentConfig) =>
-                            new GPUBackpropagationAlgorithm(
+                            new CPUBackpropagationAlgorithm(
+                                VectorizationSizeEnum.VectorizationMode16,
                                 currentMLP,
                                 currentConfig,
                                 clProvider),

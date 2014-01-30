@@ -246,7 +246,6 @@
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\WeightMask\BigArrayOpenCLWeightMaskContainer.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\WeightMask\IOpenCLWeightBitMaskContainer.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculator.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorMathNet.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorOld.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorVectorized.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorVectorizedDebug.cs" />
