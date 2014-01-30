@@ -51,21 +51,21 @@ namespace MyNNConsoleApp.MLP2
 
             var serialization = new SerializationHelper();
 
-            var noiser = new SetOfNoisers(
-                randomizer,
-                new Pair<float, INoiser>(0.33f, new ZeroMaskingNoiser(randomizer, 0.25f)),
-                new Pair<float, INoiser>(0.33f, new SaltAndPepperNoiser(randomizer, 0.25f)),
-                new Pair<float, INoiser>(0.34f, new GaussNoiser(0.20f, false))
-                );
-
-            //var noiser = new AllNoisers(
+            //var noiser = new SetOfNoisers(
             //    randomizer,
-            //    new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer)),
-            //    new SaltAndPepperNoiser(randomizer, 0.25f, new RandomRange(randomizer)),
-            //    new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
-            //    new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
-            //    new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer))
+            //    new Pair<float, INoiser>(0.33f, new ZeroMaskingNoiser(randomizer, 0.25f)),
+            //    new Pair<float, INoiser>(0.33f, new SaltAndPepperNoiser(randomizer, 0.25f)),
+            //    new Pair<float, INoiser>(0.34f, new GaussNoiser(0.20f, false))
             //    );
+
+            var noiser = new AllNoisers(
+                randomizer,
+                new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
+                new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
+                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer)),
+                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomRange(randomizer)),
+                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))
+                );
 
             //var noised = trainData.GetInputPart().Take(300).ToList().ConvertAll(j => noiser.ApplyNoise(j));
             //var v = new MNISTVisualizer();

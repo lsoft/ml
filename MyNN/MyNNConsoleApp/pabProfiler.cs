@@ -20,30 +20,32 @@ namespace MyNNConsoleApp
             var data = Generate();
 
             var beforeCreate0 = DateTime.Now;
-            var pabOld = new DodfCalculatorVectorized(data);
+            //var dodf0 = new DodfCalculatorVectorized(data);
+            var dodf0 = new DodfCalculatorOld(data);
             var afterCreate0 = DateTime.Now;
 
             var beforeCreate1 = DateTime.Now;
-            var pabNew = new DodfCalculatorOpenCL(
+            var dodf1 = new DodfCalculatorOpenCL(
                 data,
                 new VOpenCLDistanceDictFactory());
             var afterCreate1 = DateTime.Now;
 
             Console.WriteLine(
-                "OLD TAKES {0}",
+                "C# TAKES {0}",
                 (afterCreate0 - beforeCreate0));
             Console.WriteLine(
-                "NEW TAKES {0}",
+                "CPU OPENCL TAKES {0}",
                 (afterCreate1 - beforeCreate1));
 
             int index = 0;
 
             var beforeChecking = DateTime.Now;
-            Parallel.For(0, data.Count, dd =>
-            //for (var dd = 0; dd < data.Count; dd++)
+
+            //Parallel.For(0, data.Count, dd =>
+            for(var dd = 0; dd < data.Count; dd++)
             {
-                var oldItem = pabOld.CalculateDodf(dd);
-                var newItem = pabNew.CalculateDodf(dd);
+                var oldItem = dodf0.CalculateDodf(dd);
+                var newItem = dodf1.CalculateDodf(dd);
 
                 for (var cc = 0; cc < oldItem.Length; cc++)
                 {
@@ -66,8 +68,10 @@ namespace MyNNConsoleApp
                     Console.WriteLine("{0} out of {1}", newIndex, data.Count);
                 }
             }
-            );//Parallel.For
+            //);//Parallel.For
+
             var afterChecking = DateTime.Now;
+
             Console.WriteLine(
                 "CHECKING TAKES {0}",
                 (afterChecking - beforeChecking));
@@ -79,13 +83,14 @@ namespace MyNNConsoleApp
         {
             const int count =
                 //5;
+                150;
                 //1000;
                 //3000;
-                12000;
+                //12000;
             const int inputLength =
-                //50;
+                50;
                 //100;
-                200;
+                //200;
             const int classesCount = 10;
 
             var rnd = new Random(DateTime.Now.Millisecond);
@@ -99,7 +104,9 @@ namespace MyNNConsoleApp
 
                 for (var dd = 0; dd < inputLength; dd++)
                 {
-                    input[dd] = (float) rnd.NextDouble();
+                    input[dd] =
+                        //rnd.Next(1000) * 0.015625f;
+                        (float) rnd.NextDouble();
                 }
 
                 output[rnd.Next(classesCount)] = 1f;

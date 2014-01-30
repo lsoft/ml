@@ -30,13 +30,13 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                
+                pabProfiler.Main2();
                 //NvidiaForwardOptimizer.Optimize();
                 //NvidiaBackpropOptimizer.Optimize();
                 //NvidiaTransposeBackpropOptimizer.Optimize();
                 //NvidiaBackpropSmallMLPOptimizer.Optimize();
                 //NvidiaDoDfCalculatorOptimizer.Optimize();
-                NvidiaDoDfCalculatorGeneration2Optimizer.Optimize();
+                //NvidiaDoDfCalculatorGeneration2Optimizer.Optimize();
                 //Console.ReadLine();
                 return;
                 //*/
@@ -149,7 +149,7 @@ namespace MyNNConsoleApp
                 //*/
 
                 /*
-                //MLP2TrainStackedAutoencoder.Train();
+                MLP2TrainStackedAutoencoder.Train();
                 //MLP2TuneSDAE.Tune();
                 //MLP2TrainMLPBasedOnSDAE.Tune();
                 //*/

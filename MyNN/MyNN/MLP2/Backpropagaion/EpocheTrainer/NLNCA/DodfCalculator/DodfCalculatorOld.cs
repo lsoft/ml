@@ -124,7 +124,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
 
         private float _zn = 0.0f;
         private int _fixA = int.MinValue;
-        private List<DataItem> _fxwList;
+        private readonly List<DataItem> _fxwList;
 
         private void FixForA(
             List<DataItem> fxwList,
@@ -160,7 +160,16 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator
             //числитель
             var ch = GetExpDistanceab(fxwList, a, b);
 
-            return ch / _zn;
+            var result = 0f;
+
+            if (_zn <= -float.Epsilon || _zn >= float.Epsilon)
+            {
+                result = ch / _zn;
+            }
+
+            return
+                result;
+                //ch / _zn;
         }
 
         private float GetExpDistanceab(

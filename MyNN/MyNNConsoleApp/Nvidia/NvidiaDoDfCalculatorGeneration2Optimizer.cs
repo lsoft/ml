@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace MyNNConsoleApp.Nvidia
 
             //var dataset = MNISTDataProvider.GetDataSet(
             //    "_MNIST_DATABASE/mnist/trainingset/",
-            //    1000
+            //    2000
             //    );
             //dataset.Normalize();
 

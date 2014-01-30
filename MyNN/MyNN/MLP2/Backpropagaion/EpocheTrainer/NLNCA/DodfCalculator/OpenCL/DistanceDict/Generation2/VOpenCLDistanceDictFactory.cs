@@ -99,8 +99,8 @@ __kernel void DistanceKernel(
             }
 
             distance[indexes[cc] + dd - cc] = 
-                result;
-                //exp(-result);
+                //result;
+                exp(-result);
         }
     }
 }

@@ -222,8 +222,8 @@ __kernel void DistanceKernel(
             {
                 float result = local_results[0];
                 float exp_result = 
-                    result;
-                    //exp(-result);
+                    //result;
+                    exp(-result);
 
                 if(exp_result >= threshold)
                 {
@@ -258,7 +258,9 @@ __kernel void DistanceKernel(
                 const int szLocalSize = 128;
 
                 //количество групп (настроено вручную согласно производительности NVidia GeForce 730M и AMD Radeon 7750
-                int szNumGroups = 16 * clProvider.Parameters.NumComputeUnits;
+                int szNumGroups = 
+                    16 
+                    * clProvider.Parameters.NumComputeUnits;
 
                 //глобальный размер
                 int szGlobalSize = szNumGroups * szLocalSize;
