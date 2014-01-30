@@ -30,6 +30,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+                
                 //NvidiaForwardOptimizer.Optimize();
                 //NvidiaBackpropOptimizer.Optimize();
                 //NvidiaTransposeBackpropOptimizer.Optimize();

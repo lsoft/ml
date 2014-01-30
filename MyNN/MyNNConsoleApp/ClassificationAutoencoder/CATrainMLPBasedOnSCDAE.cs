@@ -23,7 +23,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
     {
         public static void Tune()
         {
-            var rndSeed = 18891;
+            var rndSeed = 18892;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -63,7 +63,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
             using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(), false))
             {
                 var config = new LearningAlgorithmConfig(
-                    new LinearLearningRate(0.01f, 0.98f),
+                    new LinearLearningRate(0.02f, 0.98f),
                     1,
                     0.0f,
                     50,

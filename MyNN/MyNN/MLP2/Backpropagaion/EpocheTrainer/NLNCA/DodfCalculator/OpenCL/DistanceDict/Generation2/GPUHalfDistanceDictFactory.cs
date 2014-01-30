@@ -269,7 +269,7 @@ __kernel void DistanceKernel(
                 var totalKernelExcutionCount = 0;
 
                 //Запускаем кернел
-                var before = DateTime.Now;
+                var totalTakenTime = new TimeSpan(0L);
 
                 for (var startRowIndex = 0; startRowIndex < fxwList.Count; )
                 {
@@ -283,6 +283,8 @@ __kernel void DistanceKernel(
                                 "ProcessedRowCountPerKernelCall is zero due to too big value of fxwList.Count = {0}. Please increase DistanceMemElementCount as low as {0}.",
                                 fxwList.Count));
                     }
+
+                    var before = DateTime.Now;
 
                     #region запуск кернела и ожидание результатов
 
@@ -316,6 +318,9 @@ __kernel void DistanceKernel(
                     clProvider.QueueFinish();
 
                     #endregion
+
+                    var after = DateTime.Now;
+                    totalTakenTime += (after - before);
 
                     totalKernelExcutionCount++;
 
@@ -351,9 +356,7 @@ __kernel void DistanceKernel(
                     Threshold,
                     totalKernelExcutionCount);
 
-                var after = DateTime.Now;
-                takenTime = (after - before);
-
+                takenTime = totalTakenTime;
             }
 
             return result;
