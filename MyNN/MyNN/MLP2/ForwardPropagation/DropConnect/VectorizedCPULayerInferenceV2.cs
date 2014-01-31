@@ -3,18 +3,20 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Accord.Math;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
+using MyNN.OutputConsole;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
+using Normal = MathNet.Numerics.Distributions.Normal;
 
 namespace MyNN.MLP2.ForwardPropagation.DropConnect
 {
-    public class OpenCLLayerInference : ILayerInference
+    public class VectorizedCPULayerInferenceV2 : ILayerInference
     {
-        private const int RandomCount = 131072;
 
         private readonly IRandomizer _randomizer;
         private readonly CLProvider _clProvider;
@@ -25,12 +27,13 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
         private readonly MemFloat _previousLayerStateMem;
         private readonly MemFloat _currentLayerStateMem;
         private readonly float _p;
+        private readonly int _randomCount;
 
         private MemFloat _randomMem;
         private Kernel _inferenceKernel;
 
 
-        public OpenCLLayerInference(
+        public VectorizedCPULayerInferenceV2(
             IRandomizer randomizer,
             CLProvider clProvider,
             int sampleCount,
@@ -73,13 +76,23 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
 
             _randomizer = randomizer;
             _clProvider = clProvider;
-            _sampleCount = sampleCount;
+            _sampleCount = sampleCount - sampleCount % 16;
             _previousLayer = previousLayer;
             _currentLayer = currentLayer;
             _weightMem = weightMem;
             _previousLayerStateMem = previousLayerStateMem;
             _currentLayerStateMem = currentLayerStateMem;
             _p = p;
+
+            _randomCount = (_sampleCount * 3) - (_sampleCount * 3) % 16;
+
+            if (_sampleCount != sampleCount)
+            {
+                ConsoleAmbientContext.Console.WriteLine(
+                    "Inferencer: Input sample count {0} has changed to {1} due to vectorization mode 16",
+                    sampleCount,
+                    _sampleCount);
+            }
 
             RegisterOpenCLComponents();
         }
@@ -88,21 +101,21 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
         {
             //создаем и заполняем хранилище рандомов
             _randomMem = _clProvider.CreateFloatMem(
-                RandomCount,
+                _randomCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
-            for (var cc = 0; cc < RandomCount; cc++)
-            {
-                _randomMem.Array[cc] = _randomizer.Next();
-            }
+            var normal = new Normal(0, 1);
+            normal.RandomSource = new Random(_randomizer.Next(1000000));
+
+            _randomMem.Array.Fill(() => (float)normal.Sample());
 
             _randomMem.Write(BlockModeEnum.NonBlocking);
 
             //создаем кернел выведения
-            var activationFunction = _currentLayer.LayerActivationFunction.GetOpenCLActivationFunction("grnd");
+            var activationFunction = _currentLayer.LayerActivationFunction.GetOpenCLActivationFunction("grnd16");
 
             var kernelSource = _inferenceKernelSource.Replace(
-                "<activationFunction_grnd>",
+                "<activationFunction_grnd16>",
                 activationFunction);
 
             _inferenceKernel = _clProvider.CreateKernel(
@@ -127,7 +140,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
             8   int sampleCount)
             //*/
 
-            var startRandomIndex = _randomizer.Next(RandomCount);
+            var startRandomIndex = _randomizer.Next(_randomCount);
 
             _inferenceKernel
                 .SetKernelArgMem(0, this._randomMem)
@@ -136,7 +149,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
                 .SetKernelArgMem(3, this._currentLayerStateMem)
                 .SetKernelArg(4, 4, this._p)
                 .SetKernelArg(5, 4, startRandomIndex)
-                .SetKernelArg(6, 4, RandomCount)
+                .SetKernelArg(6, 4, _randomCount)
                 .SetKernelArg(7, 4, this._previousLayer.Neurons.Length)
                 .SetKernelArg(8, 4, _sampleCount)
                 .EnqueueNDRangeKernel(_currentLayer.NonBiasNeuronCount);
@@ -147,39 +160,6 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
 
 
         private const string _inferenceKernelSource = @"
-//Box-Muller
-float SampleFromGaussian(float rnd1, float rnd2, float median, float sigma)
-{
-    float f = sqrt(-2 * log(rnd1)) * cos(2 * M_PI_F * rnd2);
-
-    float r = f * sigma + median;
-
-    return r;
-}
-
-float SampleFromGaussian2(
-    __global float * randomMem,
-    int * randomIndex,
-    int randomSize,
-    float median,
-    float sigma)
-{
-    int index = *randomIndex;
-
-    float rnd1 = randomMem[index];
-
-    index = (index + 1) % randomSize;
-
-    float rnd2 = randomMem[index];
-
-    index = (index + 1) % randomSize;
-
-    *randomIndex = index;
-
-    return
-        SampleFromGaussian(rnd1, rnd2, median, sigma);
-}
-
 int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
@@ -218,27 +198,66 @@ __kernel void
     wv_median *= p;
     wv_sigmasq *= p * (1 - p);
 
+    float wv_sigma = sqrt(wv_sigmasq);
+
     //начинаем семплировать из гауссианы и гнать через функцию активации
     int workStartRandomIndex = (startRandomIndex + neuronIndex * previousLayerNeuronCountTotal) % randomSize;
-    float lastStateSummator  = 0;
-    for(int sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++)
+
+    if((workStartRandomIndex + sampleCount) >= randomSize)
     {
-        float grnd = SampleFromGaussian2(
-            randomMem,
-            &workStartRandomIndex,
-            randomSize,
-            wv_median,
-            sqrt(wv_sigmasq));
+        if(workStartRandomIndex > sampleCount)
+        {
+            workStartRandomIndex -= sampleCount;
+        }
+        else
+        {
+            workStartRandomIndex = 0;
+        }
+    }
+
+    //float16 wv_sigma16 = (float16)wv_sigma;
+    //float16 wv_median16 = (float16)wv_median;
+
+    int workStartRandomIndexD16 = workStartRandomIndex / 16;
+    int ostatok = workStartRandomIndex % 16;
+
+    float16 lastStateSummator16 = 0;
+    for(int sampleIndex = workStartRandomIndexD16; sampleIndex < (workStartRandomIndexD16 + sampleCount / 16); sampleIndex++)
+    {
+        float16 ogrnd16 = vload16(sampleIndex, randomMem + ostatok);
+
+        float16 grnd16 = ogrnd16 * wv_sigma + wv_median;
+        //float16 grnd16 = mad(ogrnd16, wv_sigma16, wv_median);
 
         //compute last state
-        float lastState = <activationFunction_grnd>;
+        float16 lastState16 = <activationFunction_grnd16>;
 
-        lastStateSummator += lastState;
+        lastStateSummator16 += lastState16;
     }
+
+    float lastStateSummator = 
+          lastStateSummator16.s0 
+        + lastStateSummator16.s1 
+        + lastStateSummator16.s2 
+        + lastStateSummator16.s3
+        + lastStateSummator16.s4
+        + lastStateSummator16.s5
+        + lastStateSummator16.s6
+        + lastStateSummator16.s7
+        + lastStateSummator16.s8
+        + lastStateSummator16.s9
+        + lastStateSummator16.sa
+        + lastStateSummator16.sb
+        + lastStateSummator16.sc
+        + lastStateSummator16.sd
+        + lastStateSummator16.se
+        + lastStateSummator16.sf
+        ;
 
     //усредняем
     float result = lastStateSummator / sampleCount;
-    
+
+    //записываем обратно в хранилище
     currentLayerLastState[neuronIndex] = result;
 }
 

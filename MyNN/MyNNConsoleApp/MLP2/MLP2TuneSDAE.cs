@@ -27,7 +27,7 @@ namespace MyNNConsoleApp.MLP2
     {
         public static void Tune()
         {
-            var rndSeed = 38779;
+            var rndSeed = 387780;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -50,7 +50,7 @@ namespace MyNNConsoleApp.MLP2
             var serialization = new SerializationHelper();
 
             var mlp = SerializationHelper.LoadFromFile<MLP>(
-                "SDAE20140113100839 MLP2/mlp20140114000706.mynn");
+                "SDAE20140130152633 MLP2/mlp20140131053808.sdae");
                 //"MLP20131218124915/epoche 42/20131219100700-perItemError=3,6219.mynn");
                 //"MLP20131219184828/epoche 28/20131220091649-perItemError=2,600619.mynn");
 
@@ -121,11 +121,13 @@ namespace MyNNConsoleApp.MLP2
                 //    new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer))
                 //    );
 
-                var noiser = new SetOfNoisers(
+                var noiser = new AllNoisers(
                     randomizer,
-                    new Pair<float, INoiser>(0.33f, new ZeroMaskingNoiser(randomizer, 0.25f)),
-                    new Pair<float, INoiser>(0.33f, new SaltAndPepperNoiser(randomizer, 0.25f)),
-                    new Pair<float, INoiser>(0.34f, new GaussNoiser(0.20f, false))
+                    new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
+                    new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
+                    new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer)),
+                    new SaltAndPepperNoiser(randomizer, 0.1f, new RandomRange(randomizer)),
+                    new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))
                     );
 
                 //обучение сети

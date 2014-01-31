@@ -13,7 +13,7 @@ using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.Autoencoders.BackpropagationFactory
 {
-    public class OpenCLBackpropagationAlgorithmFactory : IBackpropagationAlgorithmFactory
+    public class CPUBackpropagationAlgorithmFactory : IBackpropagationAlgorithmFactory
     {
         public BackpropagationAlgorithm GetBackpropagationAlgorithm(
             IRandomizer randomizer,

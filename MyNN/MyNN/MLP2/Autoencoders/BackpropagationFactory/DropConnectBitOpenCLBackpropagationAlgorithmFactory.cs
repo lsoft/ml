@@ -67,7 +67,7 @@ namespace MyNN.MLP2.Autoencoders.BackpropagationFactory
             var algo = new BackpropagationAlgorithm(
                 randomizer,
                 (processedMLP, processedConfig) =>
-                    new DropConnectBitOpenCLBackpropagationAlgorithm<OpenCLLayerInferenceNew16>(
+                    new DropConnectBitCPUBackpropagationAlgorithm<VectorizedCPULayerInferenceV2>(
                         randomizer,
                         VectorizationSizeEnum.VectorizationMode16,
                         net,

@@ -107,7 +107,7 @@ namespace MyNNConsoleApp.DropConnectInference
 
                 using (var clProvider = new CLProvider())
                 {
-                    var forward = new InferenceOpenCLForwardPropagation<OpenCLLayerInference>(
+                    var forward = new InferenceOpenCLForwardPropagation<CPULayerInference>(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
                         clProvider,
@@ -162,7 +162,7 @@ namespace MyNNConsoleApp.DropConnectInference
 
                 using (var clProvider = new CLProvider())
                 {
-                    var forward = new InferenceOpenCLForwardPropagation<OpenCLLayerInferenceNew>(
+                    var forward = new InferenceOpenCLForwardPropagation<CPULayerInferenceV2>(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
                         clProvider,
@@ -216,7 +216,7 @@ namespace MyNNConsoleApp.DropConnectInference
 
                 using (var clProvider = new CLProvider())
                 {
-                    var forward = new InferenceOpenCLForwardPropagation<OpenCLLayerInferenceNew16>(
+                    var forward = new InferenceOpenCLForwardPropagation<VectorizedCPULayerInferenceV2>(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
                         clProvider,

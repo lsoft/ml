@@ -133,7 +133,7 @@ namespace MyNN.MLP2.ForwardPropagation
                     _p
                     );
 
-                //var inferencer = new OpenCLLayerInference(
+                //var inferencer = new CPULayerInference(
                 //    _randomizer,
                 //    _clProvider,
                 //    _sampleCount,

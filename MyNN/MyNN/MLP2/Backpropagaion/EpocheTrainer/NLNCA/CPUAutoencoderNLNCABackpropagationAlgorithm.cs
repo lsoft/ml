@@ -17,7 +17,7 @@ using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
 {
-    public class OpenCLNLNCABackpropagationAlgorithm: IEpocheTrainer
+    public class CPUAutoencoderNLNCABackpropagationAlgorithm: IEpocheTrainer
     {
         private readonly MLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
@@ -25,8 +25,25 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
         private readonly CLProvider _clProvider;
         private readonly Func<List<DataItem>, IDodfCalculator> _dodfCalculatorFactory;
 
+        /// <summary>
+        /// Номер слоя, на который оказывается давление NCA
+        /// </summary>
+        private readonly int _ncaLayerIndex;
+
+        /// <summary>
+        /// Коэффициент регуляризации NCA
+        /// </summary>
+        private readonly float _lambda;
+
+        /// <summary>
+        /// Количество нейронов на коротком слое на которые оказывается давление NCA
+        /// </summary>
+        private readonly int _takeIntoAccount;
+
         private MemFloat[] _deDz;
         private MemFloat[] _nablaWeights;
+        
+        private MemFloat _dodfMem;
         private MemFloat _desiredOutput;
 
         private Kernel[] _hiddenKernelIncrement, _hiddenKernelOverwrite;
@@ -34,6 +51,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
         private Kernel _updateWeightKernel;
 
         private readonly CPUForwardPropagation _forwardPropagation;
+
         public IForwardPropagation ForwardPropagation
         {
             get
@@ -43,13 +61,15 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
             }
         }
 
-        public OpenCLNLNCABackpropagationAlgorithm(
+        public CPUAutoencoderNLNCABackpropagationAlgorithm(
             VectorizationSizeEnum vse,
             MLP mlp,
             ILearningAlgorithmConfig config,
             CLProvider clProvider,
-            Func<List<DataItem>, IDodfCalculator> dodfCalculatorFactory
-            )
+            Func<List<DataItem>, IDodfCalculator> dodfCalculatorFactory,
+            int ncaLayerIndex,
+            float lambda,
+            int takeIntoAccount)
         {
             if (mlp == null)
             {
@@ -72,14 +92,19 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
             _config = config;
             _clProvider = clProvider;
             _dodfCalculatorFactory = dodfCalculatorFactory;
+            _ncaLayerIndex = ncaLayerIndex;
+            _lambda = lambda;
+            _takeIntoAccount = takeIntoAccount;
+
 
             var allowedLayerActivationFunctionList = new List<Type>
             {
                 typeof(LinearFunction),
-                typeof(RLUFunction)
+                typeof(RLUFunction),
+                typeof(IRLUFunction)
             };
 
-            var ncaLayerFunctionType = _mlp.Layers.Last().LayerActivationFunction.GetType();
+            var ncaLayerFunctionType = _mlp.Layers[_ncaLayerIndex].LayerActivationFunction.GetType();
             if (!allowedLayerActivationFunctionList.Contains(ncaLayerFunctionType))
             {
                 throw new InvalidOperationException(
@@ -111,11 +136,16 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
         {
             _nablaWeights = new MemFloat[_mlp.Layers.Length];
             _deDz = new MemFloat[_mlp.Layers.Length];
+
+            _dodfMem = _clProvider.CreateFloatMem(
+                _mlp.Layers[_ncaLayerIndex].NonBiasNeuronCount,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+
         }
 
         private void LoadPrograms()
         {
-            var kg = new NLNCAKernelConstructor(
+            var kg = new AutoendoderNLNCAKernelConstructor(
                 _mlp,
                 _config);
 
@@ -189,6 +219,10 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
             {
                 throw new ArgumentNullException("epocheRoot");
             }
+            if (data.IsAuencoderDataSet)
+            {
+                throw new InvalidOperationException("Датасет для данного алгоритма не должен быть автоенкодерным");
+            }
 
             #region one epoche
 
@@ -215,17 +249,13 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
             {
                 #region obtain dodf calculator
 
-                var nlncaOutput = _forwardPropagation.ComputeOutput(data);
-
-                var uzkii = new List<DataItem>();
-                var uzkiiIndex = 0;
-                foreach (var d in nlncaOutput)
-                {
-                    uzkii.Add(
-                        new DataItem(d.State, data[uzkiiIndex].Output));
-
-                    uzkiiIndex++;
-                }
+                List<DataItem> uzkii;
+                List<int> uzSootv;
+                
+                this.ObtainUzkiiData(
+                    data,
+                    out uzSootv,
+                    out uzkii);
 
                 var dodfCalculator = _dodfCalculatorFactory(uzkii);
 
@@ -244,13 +274,18 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
 
                     //---------------------------- backward pass, error propagation ----------------------------
 
-                    //производная по компонентам близости
-                    var dodf = dodfCalculator.CalculateDodf(inBatchIndex);
+                    //производная по компонентам близости (если итем с меткой)
+                    if (trainData.OutputIndex >= 0)
+                    {
+                        var uzIndex = uzSootv[inBatchIndex];
+                        var dodf = dodfCalculator.CalculateDodf(uzIndex);
 
-                    //формируем желаемые выводы
-                    dodf.CopyTo(_desiredOutput.Array, 0);
+                        dodf.CopyTo(_dodfMem.Array, 0);
+                        _dodfMem.Write(BlockModeEnum.Blocking);
+                    }
 
                     //отправляем на OpenCL желаемые выходы
+                    trainData.Input.CopyTo(_desiredOutput.Array, 0); //инпут, так как, несмотря на то, что это автоенкодер, нам требуются и labels и датасет не автоенкодерный
                     _desiredOutput.Write(BlockModeEnum.Blocking);
 
                     //output layer
@@ -260,6 +295,13 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
                     var preOutputLayer = _mlp.Layers[outputLayerIndex - 1];
 
                     var outputNablaLayer = _nablaWeights[outputLayerIndex];
+
+                    //если итем с меткой, применяем NLNCA коэффициент
+                    var outputLambda = 1f;
+                    if (trainData.OutputIndex >= 0)
+                    {
+                        outputLambda = (1f - _lambda);
+                    }
 
                     if (batchIndex == 0)
                     {
@@ -275,9 +317,10 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
                             .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
                             .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
                             .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
-                            .SetKernelArg(11, 4, learningRate)
-                            .SetKernelArg(12, 4, _config.RegularizationFactor)
-                            .SetKernelArg(13, 4, (float)(data.Count))
+                            .SetKernelArg(11, 4, outputLambda)
+                            .SetKernelArg(12, 4, learningRate)
+                            .SetKernelArg(13, 4, _config.RegularizationFactor)
+                            .SetKernelArg(14, 4, (float)(data.Count))
                             .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
                     }
                     else
@@ -294,9 +337,10 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
                             .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
                             .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
                             .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
-                            .SetKernelArg(11, 4, learningRate)
-                            .SetKernelArg(12, 4, _config.RegularizationFactor)
-                            .SetKernelArg(13, 4, (float)(data.Count))
+                            .SetKernelArg(11, 4, outputLambda)
+                            .SetKernelArg(12, 4, learningRate)
+                            .SetKernelArg(13, 4, _config.RegularizationFactor)
+                            .SetKernelArg(14, 4, (float)(data.Count))
                             .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
                     }
 
@@ -311,6 +355,19 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
                         var currentLayer = _mlp.Layers[hiddenLayerIndex];
                         var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
 
+                        //если слой - слой для давления NCA и итем с меткой -
+                        //то оказываем давление NCA
+                        var hiddenLambda = 0f;
+                        if (hiddenLayerIndex == _ncaLayerIndex)
+                        {
+                            if (trainData.OutputIndex >= 0)
+                            {
+                                //канает по номеру слоя и по обрабатываемому итему
+                                //используем заданный коэффициент
+                                hiddenLambda = _lambda;
+                            }
+                        }
+
                         if (batchIndex == 0)
                         {
                             _hiddenKernelOverwrite[hiddenLayerIndex]
@@ -322,14 +379,17 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
                                 .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
                                 .SetKernelArgMem(6, _forwardPropagation.WeightMem[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
-                                .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
-                                .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
-                                .SetKernelArg(10, 4, prevLayer.Neurons.Length)
-                                .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
-                                .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
-                                .SetKernelArg(13, 4, learningRate)
-                                .SetKernelArg(14, 4, _config.RegularizationFactor)
-                                .SetKernelArg(15, 4, (float)(data.Count))
+                                .SetKernelArgMem(8, _dodfMem)
+                                .SetKernelArg(9, 4, prevLayer.Neurons.Length / 4)
+                                .SetKernelArg(10, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
+                                .SetKernelArg(11, 4, prevLayer.Neurons.Length)
+                                .SetKernelArg(12, 4, currentLayer.NonBiasNeuronCount)
+                                .SetKernelArg(13, 4, nextLayer.NonBiasNeuronCount)
+                                .SetKernelArg(14, 4, _takeIntoAccount)
+                                .SetKernelArg(15, 4, hiddenLambda)
+                                .SetKernelArg(16, 4, learningRate)
+                                .SetKernelArg(17, 4, _config.RegularizationFactor)
+                                .SetKernelArg(18, 4, (float)(data.Count))
                                 .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
                         }
                         else
@@ -343,14 +403,17 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
                                 .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
                                 .SetKernelArgMem(6, _forwardPropagation.WeightMem[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
-                                .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
-                                .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
-                                .SetKernelArg(10, 4, prevLayer.Neurons.Length)
-                                .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
-                                .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
-                                .SetKernelArg(13, 4, learningRate)
-                                .SetKernelArg(14, 4, _config.RegularizationFactor)
-                                .SetKernelArg(15, 4, (float)(data.Count))
+                                .SetKernelArgMem(8, _dodfMem)
+                                .SetKernelArg(9, 4, prevLayer.Neurons.Length / 4)
+                                .SetKernelArg(10, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
+                                .SetKernelArg(11, 4, prevLayer.Neurons.Length)
+                                .SetKernelArg(12, 4, currentLayer.NonBiasNeuronCount)
+                                .SetKernelArg(13, 4, nextLayer.NonBiasNeuronCount)
+                                .SetKernelArg(14, 4, _takeIntoAccount)
+                                .SetKernelArg(15, 4, hiddenLambda)
+                                .SetKernelArg(16, 4, learningRate)
+                                .SetKernelArg(17, 4, _config.RegularizationFactor)
+                                .SetKernelArg(18, 4, (float)(data.Count))
                                 .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
                         }
                     }
@@ -397,7 +460,6 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
                 // Make sure we're done with everything that's been requested before
                 _clProvider.QueueFinish();
 
-
                 #region записываем веса в весь, чтобы следующий цикл просчета uzkii не затер веса (он выполняет PushWeights)
 
                 //считываем веса с устройства
@@ -417,6 +479,42 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA
             ConsoleAmbientContext.Console.ReturnCarriage();
 
             //конец эпохи обучения
+        }
+
+        private void ObtainUzkiiData(
+            DataSet data,
+            out List<int> uzSootv,
+            out List<DataItem> uzkii)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+
+            uzSootv = new List<int>();
+            uzkii = new List<DataItem>();
+
+            var state = this._forwardPropagation.ComputeState(data);
+            var output = state.ConvertAll(j => j.State[_ncaLayerIndex]).ToList().ConvertAll(j => j.State);
+
+            for (var uzIndex = 0; uzIndex < data.Count; uzIndex++)
+            {
+                var d = data[uzIndex];
+
+                if (d.OutputIndex >= 0)
+                {
+                    uzkii.Add(
+                        new DataItem(
+                            output[uzIndex].Take(_takeIntoAccount).ToArray(),
+                            d.Output));
+
+                    uzSootv.Add(uzkii.Count - 1);
+                }
+                else
+                {
+                    uzSootv.Add(-1);
+                }
+            }
         }
 
         private void WritebackWeightsToMLP()

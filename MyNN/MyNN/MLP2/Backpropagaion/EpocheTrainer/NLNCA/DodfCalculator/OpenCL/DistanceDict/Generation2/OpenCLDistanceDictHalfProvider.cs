@@ -6,11 +6,12 @@ using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict
+namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2
 {
-    public class DistanceDictCLProvider : CLProvider
+    public class OpenCLDistanceDictHalfProvider : CLProvider
     {
         private readonly List<DataItem> _fxwList;
+        private readonly int _distanceMemElementCount;
 
         public MemInt IndexMem
         {
@@ -18,7 +19,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             private set;
         }
 
-        public MemFloat FxwMem
+        public MemHalf FxwMem
         {
             get;
             private set;
@@ -30,10 +31,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             private set;
         }
 
-        public DistanceDictCLProvider(
+        public OpenCLDistanceDictHalfProvider(
             IDeviceChooser deviceChooser, 
             bool silentStart, 
-            List<DataItem> fxwList)
+            List<DataItem> fxwList,
+            int distanceMemElementCount)
                 : base(deviceChooser, silentStart)
         {
             if (fxwList == null)
@@ -42,18 +44,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             }
 
             _fxwList = fxwList;
+            _distanceMemElementCount = distanceMemElementCount;
 
             this.GenerateMems();
             this.FillMems();
             this.WriteMems();
-        }
-
-        public DistanceDictCLProvider(List<DataItem> fxwList)
-            : this(
-                new IntelCPUDeviceChooser(),
-                true,
-                fxwList)
-        {
         }
 
         private void WriteMems()
@@ -76,30 +71,21 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             }
 
             //IndexMem
-            var accum = 0;
-            var startCount = _fxwList.Count;
-            for (var cc = 0; cc < _fxwList.Count; cc++)
-            {
-                IndexMem.Array[cc] = accum;
-                accum += startCount;
-                startCount--;
-            }
+            IndexMem.Array[0] = 0;
         }
 
         private void GenerateMems()
         {
-            FxwMem = this.CreateFloatMem(
+            FxwMem = this.CreateHalfMem(
                 _fxwList.Count * _fxwList[0].Input.Length,
                 MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
             IndexMem = this.CreateIntMem(
-                _fxwList.Count,
-                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
-
-            var totalCount = (_fxwList.Count + 1) * _fxwList.Count / 2;
+                1,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             DistanceMem = this.CreateFloatMem(
-                totalCount,
+                _distanceMemElementCount * 3,
                 MemFlags.CopyHostPtr | MemFlags.WriteOnly);
         }
     }

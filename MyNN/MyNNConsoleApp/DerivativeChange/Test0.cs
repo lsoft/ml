@@ -377,7 +377,7 @@ namespace MyNNConsoleApp.DerivativeChange
                         new BackpropagationAlgorithm(
                             randomizer,
                             (currentMLP, currentConfig) =>
-                                new DropConnectOpenCLBackpropagationAlgorithm<OpenCLLayerInferenceNew16>(
+                                new DropConnectCPUBackpropagationAlgorithm<VectorizedCPULayerInferenceV2>(
                                     randomizer,
                                     VectorizationSizeEnum.VectorizationMode16,
                                     currentMLP,

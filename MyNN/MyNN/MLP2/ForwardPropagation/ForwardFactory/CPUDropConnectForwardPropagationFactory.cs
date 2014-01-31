@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using MyNN.MLP2.ForwardPropagation.DropConnect;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
@@ -6,14 +7,21 @@ using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.ForwardPropagation.ForwardFactory
 {
-    public class OpenCLForwardPropagationFactory : IForwardPropagationFactory
+    public class CPUDropConnectForwardPropagationFactory<T> : IForwardPropagationFactory
+        where T : ILayerInference
     {
         private readonly VectorizationSizeEnum _vse;
+        private readonly int _sampleCount;
+        private readonly float _p;
 
-        public OpenCLForwardPropagationFactory(
-            VectorizationSizeEnum vse = VectorizationSizeEnum.VectorizationMode16)
+        public CPUDropConnectForwardPropagationFactory(
+            VectorizationSizeEnum vse = VectorizationSizeEnum.VectorizationMode16,
+            int sampleCount = 10000,
+            float p = 0.5f)
         {
             _vse = vse;
+            _sampleCount = sampleCount;
+            _p = p;
         }
 
         public IForwardPropagation Create(
@@ -33,11 +41,15 @@ namespace MyNN.MLP2.ForwardPropagation.ForwardFactory
             {
                 throw new ArgumentNullException("mlp");
             }
-            return 
-                new CPUForwardPropagation(
-                    _vse,
-                    mlp,
-                    clProvider);
+            var forwardPropagation = new InferenceOpenCLForwardPropagation<T>(
+                _vse,
+                mlp,
+                clProvider,
+                randomizer,
+                _sampleCount,
+                _p);
+
+            return forwardPropagation;
         }
     }
 }

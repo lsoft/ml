@@ -6,7 +6,6 @@ using System.Text;
 using Accord.Math;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
-using MyNN.OutputConsole;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
@@ -15,7 +14,7 @@ using Normal = MathNet.Numerics.Distributions.Normal;
 
 namespace MyNN.MLP2.ForwardPropagation.DropConnect
 {
-    public class OpenCLLayerInferenceNew16 : ILayerInference
+    public class CPULayerInferenceV2 : ILayerInference
     {
 
         private readonly IRandomizer _randomizer;
@@ -27,13 +26,13 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
         private readonly MemFloat _previousLayerStateMem;
         private readonly MemFloat _currentLayerStateMem;
         private readonly float _p;
-        private readonly int _randomCount;
+        private int _randomCount;
 
         private MemFloat _randomMem;
         private Kernel _inferenceKernel;
 
 
-        public OpenCLLayerInferenceNew16(
+        public CPULayerInferenceV2(
             IRandomizer randomizer,
             CLProvider clProvider,
             int sampleCount,
@@ -76,7 +75,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
 
             _randomizer = randomizer;
             _clProvider = clProvider;
-            _sampleCount = sampleCount - sampleCount % 16;
+            _sampleCount = sampleCount;
             _previousLayer = previousLayer;
             _currentLayer = currentLayer;
             _weightMem = weightMem;
@@ -84,15 +83,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
             _currentLayerStateMem = currentLayerStateMem;
             _p = p;
 
-            _randomCount = (_sampleCount * 3) - (_sampleCount * 3) % 16;
-
-            if (_sampleCount != sampleCount)
-            {
-                ConsoleAmbientContext.Console.WriteLine(
-                    "Inferencer: Input sample count {0} has changed to {1} due to vectorization mode 16",
-                    sampleCount,
-                    _sampleCount);
-            }
+            _randomCount = (sampleCount * 3) - (sampleCount * 3) % 16;
 
             RegisterOpenCLComponents();
         }
@@ -105,17 +96,20 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
                 MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
             var normal = new Normal(0, 1);
-            normal.RandomSource = new Random(_randomizer.Next(1000000));
-
-            _randomMem.Array.Fill(() => (float)normal.Sample());
+            normal.RandomSource = new Random(_randomizer.Next(100000));
+            
+            for (var cc = 0; cc < _randomCount; cc++)
+            {
+                _randomMem.Array[cc] = (float)normal.Sample();
+            }
 
             _randomMem.Write(BlockModeEnum.NonBlocking);
 
             //создаем кернел выведения
-            var activationFunction = _currentLayer.LayerActivationFunction.GetOpenCLActivationFunction("grnd16");
+            var activationFunction = _currentLayer.LayerActivationFunction.GetOpenCLActivationFunction("grnd");
 
             var kernelSource = _inferenceKernelSource.Replace(
-                "<activationFunction_grnd16>",
+                "<activationFunction_grnd>",
                 activationFunction);
 
             _inferenceKernel = _clProvider.CreateKernel(
@@ -215,44 +209,18 @@ __kernel void
         }
     }
 
-    //float16 wv_sigma16 = (float16)wv_sigma;
-    //float16 wv_median16 = (float16)wv_median;
 
-    int workStartRandomIndexD16 = workStartRandomIndex / 16;
-    int ostatok = workStartRandomIndex % 16;
-
-    float16 lastStateSummator16 = 0;
-    for(int sampleIndex = workStartRandomIndexD16; sampleIndex < (workStartRandomIndexD16 + sampleCount / 16); sampleIndex++)
+    float lastStateSummator  = 0;
+    for(int sampleIndex = workStartRandomIndex; sampleIndex < (workStartRandomIndex + sampleCount); sampleIndex++)
     {
-        float16 ogrnd16 = vload16(sampleIndex, randomMem + ostatok);
-
-        float16 grnd16 = ogrnd16 * wv_sigma + wv_median;
-        //float16 grnd16 = mad(ogrnd16, wv_sigma16, wv_median);
+        float ogrnd = randomMem[sampleIndex];
+        float grnd = ogrnd * wv_sigma + wv_median;
 
         //compute last state
-        float16 lastState16 = <activationFunction_grnd16>;
+        float lastState = <activationFunction_grnd>;
 
-        lastStateSummator16 += lastState16;
+        lastStateSummator += lastState;
     }
-
-    float lastStateSummator = 
-          lastStateSummator16.s0 
-        + lastStateSummator16.s1 
-        + lastStateSummator16.s2 
-        + lastStateSummator16.s3
-        + lastStateSummator16.s4
-        + lastStateSummator16.s5
-        + lastStateSummator16.s6
-        + lastStateSummator16.s7
-        + lastStateSummator16.s8
-        + lastStateSummator16.s9
-        + lastStateSummator16.sa
-        + lastStateSummator16.sb
-        + lastStateSummator16.sc
-        + lastStateSummator16.sd
-        + lastStateSummator16.se
-        + lastStateSummator16.sf
-        ;
 
     //усредняем
     float result = lastStateSummator / sampleCount;

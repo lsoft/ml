@@ -89,7 +89,7 @@ namespace MyNNConsoleApp.DropConnectInference
                     1,
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
-                var inf1 = new OpenCLLayerInference(
+                var inf1 = new CPULayerInference(
                     randomizer,
                     clProvider,
                     sampleCount,

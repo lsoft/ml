@@ -7,15 +7,17 @@ using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Autoencoders;
+using MyNN.MLP2.Autoencoders.BackpropagationFactory;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
+using MyNN.MLP2.ForwardPropagation.ForwardFactory;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 
-namespace MyNNConsoleApp.MLP2
+namespace MyNNConsoleApp.NLNCA
 {
     public class MLP2TrainStackedNLNCAAutoencoder
     {
@@ -23,7 +25,7 @@ namespace MyNNConsoleApp.MLP2
         {
             var root = "SDAE" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
-            var rndSeed = 7834;
+            var rndSeed = 7835;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -52,7 +54,9 @@ namespace MyNNConsoleApp.MLP2
             const float lambda = 0.1f;
             const float partTakeOfAccount = 0.5f;
 
-            var sa = new StackedNLNCAAutoencoder(
+            throw new NotImplementedException();
+
+            var sa = new StackedAutoencoder(
                 randomizer,
                 serialization,
                 (DataSet td) =>
@@ -86,8 +90,10 @@ namespace MyNNConsoleApp.MLP2
 
                     return conf;
                 },
-                lambda,
-                partTakeOfAccount,
+                //lambda,
+                //partTakeOfAccount,
+                new GPUBackpropagationAlgorithmFactory(), 
+                new GPUForwardPropagationFactory(),
                 new LayerInfo(firstLayerSize, new IRLUFunction()),
                 new LayerInfo(600, new IRLUFunction()),
                 new LayerInfo(600, new IRLUFunction()),
@@ -104,25 +110,6 @@ namespace MyNNConsoleApp.MLP2
                 trainData,
                 validationData
                 );
-
-            //combinedNet.SetComputer(new DefaultComputer(combinedNet));
-
-
-            //var x = MNISTDataProvider.GetDataSet(
-            //    "mnist/testset/",
-            //    10);
-            //x.Normalize();
-
-            //var o = combinedNet.ComputeOutput(x[0].Input);
-
-            //var mv = new MNISTVisualizer();
-            //mv.SaveAsPairList("_.bmp", new List<Pair<float[], float[]>>
-            //{
-            //    new Pair<float[], float[]>(x[0].Input, o)
-            //});
-
-            
-            int g = 0;
         }
     }
 }

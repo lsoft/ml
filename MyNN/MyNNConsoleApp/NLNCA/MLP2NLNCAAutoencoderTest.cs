@@ -11,7 +11,7 @@ using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using OpenCL.Net.Wrapper;
 
-namespace MyNNConsoleApp.MLP2
+namespace MyNNConsoleApp.NLNCA
 {
     /// <summary>
     /// тестирования обученного nlnca-автоенкодера

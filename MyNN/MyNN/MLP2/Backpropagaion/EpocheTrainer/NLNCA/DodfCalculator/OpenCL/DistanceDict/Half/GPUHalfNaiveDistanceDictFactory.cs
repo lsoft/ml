@@ -45,7 +45,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 
             var inputLength = fxwList[0].Input.Length;
 
-            using (var clProvider = new DistanceDictHalfCLProvider(_deviceChooser, true, fxwList))
+            using (var clProvider = new OpenCLDistanceDictHalfProvider(_deviceChooser, true, fxwList))
             {
                 var kernelText = @"
 inline void WarpReductionToFirstElement(

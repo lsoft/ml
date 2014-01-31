@@ -13,6 +13,7 @@ using MyNN.MLP2.Autoencoders.BackpropagationFactory;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
+using MyNN.MLP2.ForwardPropagation.ForwardFactory;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Saver;
@@ -110,7 +111,8 @@ namespace MyNNConsoleApp.MLP2
 
                     return conf;
                 },
-                new OpenCLBackpropagationAlgorithmFactory(),
+                new CPUBackpropagationAlgorithmFactory(),
+                new CPUForwardPropagationFactory(),
                 new LayerInfo(firstLayerSize, new RLUFunction()),
                 new LayerInfo(1200, new RLUFunction()),
                 new LayerInfo(1200, new RLUFunction()),

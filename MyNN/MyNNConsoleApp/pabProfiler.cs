@@ -29,7 +29,7 @@ namespace MyNNConsoleApp
             var beforeCreate1 = DateTime.Now;
             var dodf1 = new DodfCalculatorOpenCL(
                 data,
-                //new VOpenCLDistanceDictFactory());
+                //new VectorizedCPUDistanceDictFactory());
                 new GPUHalfDistanceDictFactory(new NvidiaOrAmdGPUDeviceChooser()));
             var afterCreate1 = DateTime.Now;
 

@@ -8,7 +8,7 @@ using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Half
 {
-    public class DistanceDictHalfCLProvider : CLProvider
+    public class OpenCLDistanceDictHalfProvider : CLProvider
     {
         private readonly List<DataItem> _fxwList;
 
@@ -30,7 +30,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             private set;
         }
 
-        public DistanceDictHalfCLProvider(
+        public OpenCLDistanceDictHalfProvider(
             IDeviceChooser deviceChooser, 
             bool silentStart, 
             List<DataItem> fxwList)
@@ -48,7 +48,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             this.WriteMems();
         }
 
-        public DistanceDictHalfCLProvider(List<DataItem> fxwList)
+        public OpenCLDistanceDictHalfProvider(List<DataItem> fxwList)
             : this(
                 new IntelCPUDeviceChooser(),
                 true,

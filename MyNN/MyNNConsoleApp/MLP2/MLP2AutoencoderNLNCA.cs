@@ -79,43 +79,19 @@ namespace MyNNConsoleApp.MLP2
                 0.0001f,
                 -1.0f);
 
-            /*
-            using (var clProvider = new CLProvider())
-            {
-
-                var algo = new BackpropagationAlgorithm(
-                    (processedMLP, processedConfig) => new DropConnectOpenCLBackpropagationAlgorithm(
-                        CPUForwardPropagation.VectorizationSizeEnum.VectorizationMode16,
-                        processedMLP,
-                        processedConfig,
-                        clProvider),
-                    net,
-                    new AutoencoderValidation(
-                        new RMSE(),
-                        validationData.ConvertToAutoencoder(),
-                        300,
-                        100),
-                    config);
-
-                algo.Train(
-                    new NoDeformationTrainDataProvider(trainData.ConvertToAutoencoder()).GetDeformationDataSet);
-            }
-            //*/
-
-            
             using (var clProvider = new CLProvider())
             {
 
                 var algo = new BackpropagationAlgorithm(
                     randomizer,
-                    (processedMLP, processedConfig) => new OpenCLAutoencoderNLNCABackpropagationAlgorithm(
+                    (processedMLP, processedConfig) => new CPUAutoencoderNLNCABackpropagationAlgorithm(
                         VectorizationSizeEnum.VectorizationMode16,
                         processedMLP,
                         processedConfig,
                         clProvider,
                         (uzkii) => new DodfCalculatorOpenCL(
                             uzkii,
-                            new VOpenCLDistanceDictFactory()),
+                            new VectorizedCPUDistanceDictFactory()),
                         1,
                         0.9f,
                         50),

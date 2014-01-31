@@ -11,6 +11,7 @@ using MyNN.MLP2.Autoencoders;
 using MyNN.MLP2.Autoencoders.BackpropagationFactory;
 using MyNN.MLP2.Backpropagaion.Metrics;
 using MyNN.MLP2.Backpropagaion.Validation;
+using MyNN.MLP2.ForwardPropagation.ForwardFactory;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Saver;
@@ -109,6 +110,7 @@ namespace MyNNConsoleApp.DropConnectInference
                     return conf;
                 },
                 new DropConnectBitOpenCLBackpropagationAlgorithmFactory(sampleCount, p),
+                new CPUForwardPropagationFactory(),
                 new LayerInfo(firstLayerSize, new SigmoidFunction(1f)),
                 new LayerInfo(1500, new SigmoidFunction(1f)),
                 new LayerInfo(1500, new SigmoidFunction(1f)),

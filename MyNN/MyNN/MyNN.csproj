@@ -55,7 +55,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;DODF_DISABLE_EXP</DefineConstants>
+    <DefineConstants>TRACE;DODF_ENABLE_EXP</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -174,14 +174,14 @@
     <Compile Include="Boosting\SAMMEBoosting\SAMME.cs" />
     <Compile Include="Boosting\SAMMEBoosting\SAMMEClassifierSet.cs" />
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\GPUBackpropagationAlgorithmFactory.cs" />
-    <Compile Include="MLP2\Autoencoders\BackpropagationFactory\OpenCLTransposeBackpropagationAlgorithmFactory.cs" />
+    <Compile Include="MLP2\Autoencoders\BackpropagationFactory\CPUTransposeBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\DodfDictionary.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\DistanceDictHalfCLProvider.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\OpenCLDistanceDictHalfProvider.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\GPUHalfDistanceDictFactory.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\VOpenCLDistanceDictFactory.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\VectorizedCPUDistanceDictFactory.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Half\GPUHalfNaiveDistanceDictFactory.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Half\DistanceDictHalfCLProvider.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Half\OpenCLDistanceDictHalfProvider.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\GPUNaiveDistanceDictFactory.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Default\CPUBackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\OpenCL\CPU\Default\KernelConstructor.cs" />
@@ -199,9 +199,9 @@
     <Compile Include="MLP2\FeatureVisualization.cs" />
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\GPUForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagation\GPUForwardPropagation.cs" />
-    <Compile Include="MLP2\ForwardPropagation\ForwardFactory\DropConnectOpenCLForwardPropagationFactory.cs" />
+    <Compile Include="MLP2\ForwardPropagation\ForwardFactory\CPUDropConnectForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagation\ForwardFactory\IForwardPropagationFactory.cs" />
-    <Compile Include="MLP2\ForwardPropagation\ForwardFactory\OpenCLForwardPropagationFactory.cs" />
+    <Compile Include="MLP2\ForwardPropagation\ForwardFactory\CPUForwardPropagationFactory.cs" />
     <Compile Include="MLP2\Saver\ConsoleMLPSaver.cs" />
     <Compile Include="MLP2\Saver\FileSystemMLPSaver.cs" />
     <Compile Include="MLP2\Saver\IAccuracyRecord.cs" />
@@ -241,13 +241,13 @@
     <Compile Include="MLP2\Autoencoders\Autoencoder.cs" />
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\DropConnectBitOpenCLBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\IBackpropagationAlgorithmFactory.cs" />
-    <Compile Include="MLP2\Autoencoders\BackpropagationFactory\OpenCLBackpropagationAlgorithmFactory.cs" />
+    <Compile Include="MLP2\Autoencoders\BackpropagationFactory\CPUBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\StackedAutoencoder.cs" />
     <Compile Include="MLP2\Autoencoders\StackedNLNCAAutoencoder.cs" />
     <Compile Include="MLP2\Backpropagaion\BackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\DataSourceDelegate.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\DropConnectBitKernelConstructor.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\DropConnectBitOpenCLBackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\DropConnectBitCPUBackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\WeightMask\BigArrayOpenCLWeightMaskContainer.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnectBit\WeightMask\IOpenCLWeightBitMaskContainer.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculator.cs" />
@@ -256,24 +256,24 @@
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\DodfCalculatorVectorizedDebug.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\IDodfCalculator.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\CSharpDistanceDictFactory.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\DistanceDictCLProvider.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\OpenCLDistanceDictProvider.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\IDistanceDictFactory.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\OpenCLDistanceDictFactory.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\VOpenCLDistanceDictFactory.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\CPUDistanceDictFactory.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\VectorizedCPUDistanceDictFactory.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DodfCalculatorOpenCL.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\PabCalculatorOpenCL.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\DropConnectKernelConstructor.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\DropConnectOpenCLBackpropagationAlgorithm.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\BGOpenCLWeightMaskContainer.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\BigArrayOpenCLWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\DropConnectCPUBackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\BGWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\BigArrayWeightMaskContainer.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\IOpenCLWeightMaskContainer.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\IWeightMaskContainer.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\OpenCLWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\DropConnect\WeightMask\CPUWeightMaskContainer.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\IEpocheTrainer.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\AutoendoderNLNCAKernelConstructor.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\OpenCLAutoencoderNLNCABackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\CPUAutoencoderNLNCABackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\NLNCAKernelConstructor.cs" />
-    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\OpenCLNLNCABackpropagationAlgorithm.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\CPUNLNCABackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagaion\Metrics\HalfSquaredEuclidianDistance.cs" />
     <Compile Include="MLP2\Backpropagaion\Metrics\IMetrics.cs" />
     <Compile Include="MLP2\Backpropagaion\Metrics\Loglikelihood.cs" />
@@ -288,12 +288,11 @@
     <Compile Include="MLP2\ForwardPropagation\CCharpForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnectBitOpenCLForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnectOpenCLForwardPropagation.cs" />
-    <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInferenceMedian.cs" />
-    <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInferenceNew16.cs" />
-    <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInferenceNew.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnect\VectorizedCPULayerInferenceV2.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnect\CPULayerInferenceV2.cs" />
     <Compile Include="MLP2\ForwardPropagation\InferenceOpenCLForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\ILayerInference.cs" />
-    <Compile Include="MLP2\ForwardPropagation\DropConnect\OpenCLLayerInference.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnect\CPULayerInference.cs" />
     <Compile Include="MLP2\ForwardPropagation\IForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\CPUForwardPropagation.cs" />
     <Compile Include="MLP2\LearningConfig\ILearningAlgorithmConfig.cs" />

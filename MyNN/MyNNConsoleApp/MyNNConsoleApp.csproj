@@ -131,11 +131,11 @@
     <Compile Include="MLP2\MLP2TrainMLPBasedOnSDAE.cs" />
     <Compile Include="MLP2\MLP2AutoencoderNLNCA.cs" />
     <Compile Include="MLP2\MLP2Experiments.cs" />
-    <Compile Include="MLP2\MLP2NLNCA.cs" />
     <Compile Include="MLP2\MLP2TrainStackedAutoencoder.cs" />
     <Compile Include="MLP2\MLP2TuneSDAE.cs" />
-    <Compile Include="MLP2\MLP2NLNCAAutoencoderTest.cs" />
-    <Compile Include="MLP2\MLP2TrainStackedNLNCAAutoencoder.cs" />
+    <Compile Include="NLNCA\MLP2NLNCA.cs" />
+    <Compile Include="NLNCA\MLP2NLNCAAutoencoderTest.cs" />
+    <Compile Include="NLNCA\MLP2TrainStackedNLNCAAutoencoder.cs" />
     <Compile Include="Nvidia\NvidiaDoDfCalculatorGeneration2Optimizer.cs" />
     <Compile Include="Nvidia\NvidiaBackpropSmallMLPOptimizer.cs" />
     <Compile Include="Nvidia\NvidiaDoDfCalculatorOptimizer.cs" />

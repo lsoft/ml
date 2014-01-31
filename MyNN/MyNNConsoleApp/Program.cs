@@ -30,8 +30,6 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-
-
                 //pabProfiler.Main2();
                 //NvidiaForwardOptimizer.Optimize();
                 //NvidiaBackpropOptimizer.Optimize();
@@ -48,8 +46,8 @@ namespace MyNNConsoleApp
                 var fv = new FeatureVisualization(
                     new DefaultRandomizer(ref seed),
                     SerializationHelper.LoadFromFile<MLP>("temp/20140117112110-perItemError=5,645099.mynn"),
-                    //new DropConnectOpenCLForwardPropagationFactory<OpenCLLayerInferenceNew16>(VectorizationSizeEnum.VectorizationMode16, 2500, 0.5f),
-                    new OpenCLForwardPropagationFactory(), 
+                    //new CPUDropConnectForwardPropagationFactory<VectorizedCPULayerInferenceV2>(VectorizationSizeEnum.VectorizationMode16, 2500, 0.5f),
+                    new CPUForwardPropagationFactory(), 
                     5,
                     5f);
 
@@ -151,8 +149,8 @@ namespace MyNNConsoleApp
                 //*/
 
                 /*
-                MLP2TrainStackedAutoencoder.Train();
-                //MLP2TuneSDAE.Tune();
+                //MLP2TrainStackedAutoencoder.Train();
+                MLP2TuneSDAE.Tune();
                 //MLP2TrainMLPBasedOnSDAE.Tune();
                 //*/
 

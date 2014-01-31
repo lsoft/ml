@@ -8,7 +8,7 @@ using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect.WeightMask
 {
-    public class OpenCLWeightMaskContainer : IOpenCLWeightMaskContainer
+    public class CPUWeightMaskContainer : IOpenCLWeightMaskContainer
     {
         private readonly CLProvider _clProvider;
         private readonly MLP _mlp;
@@ -21,7 +21,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect.WeightMask
             private set;
         }
 
-        public OpenCLWeightMaskContainer(
+        public CPUWeightMaskContainer(
             CLProvider clProvider,
             MLP mlp,
             IRandomizer randomizer,

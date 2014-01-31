@@ -126,7 +126,7 @@ namespace MyNNConsoleApp.Nvidia
             NoRandomRandomizer randomizer,
             DataSet dataset)
         {
-            var dd = new VOpenCLDistanceDictFactory();
+            var dd = new VectorizedCPUDistanceDictFactory();
 
             TimeSpan takenTime;
             var result = dd.CreateDistanceDict(dataset.Data, out takenTime);

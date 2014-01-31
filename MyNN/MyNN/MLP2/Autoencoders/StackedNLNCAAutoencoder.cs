@@ -19,6 +19,7 @@ using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.Autoencoders
 {
+    /*
     public class StackedNLNCAAutoencoder
     {
         private readonly IRandomizer _randomizer;
@@ -142,7 +143,7 @@ namespace MyNN.MLP2.Autoencoders
                         _layerInfos[depthIndex].LayerSize
                     });
 
-                ConsoleAmbientContext.Console.WriteLine("Network does not found. Created with conf: " + net.DumpLayerInformation());
+                ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + net.DumpLayerInformation());
 
                 var trainDataProvider = _dataProviderFactory(processingTrainData);
                 var validation = _validationFactory(processingValidationData);
@@ -172,20 +173,14 @@ namespace MyNN.MLP2.Autoencoders
                 if (depthIndex < depth - 1)
                 {
                     //обновляем обучающие данные (от исходного множества, чтобы без применения возможных деформаций)
-                    //net.OverwriteLayers(
-                    //    new MLPLayer[]
-                    //    {
-                    //        net.Layers[0],
-                    //        net.Layers[1]
-                    //    });
                     net.AutoencoderCutTail();
 
-                    using (var universe = new CLProvider())
+                    using (var clProvider = new CLProvider())
                     {
                         var forward = new CPUForwardPropagation(
                             VectorizationSizeEnum.VectorizationMode16,
                             net,
-                            universe);
+                            clProvider);
 
                         var nextTrain = forward.ComputeOutput(processingTrainData);
                         var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.State), null);
@@ -253,14 +248,14 @@ namespace MyNN.MLP2.Autoencoders
                 var algo = new BackpropagationAlgorithm(
                     _randomizer,
                     (currentMLP, currentConfig) =>
-                        new OpenCLAutoencoderNLNCABackpropagationAlgorithm(
+                        new CPUAutoencoderNLNCABackpropagationAlgorithm(
                             VectorizationSizeEnum.VectorizationMode16,
                             currentMLP,
                             currentConfig,
                             clProvider,
                             (uzkii) => new DodfCalculatorOpenCL(
                                 uzkii,
-                                new VOpenCLDistanceDictFactory()),
+                                new VectorizedCPUDistanceDictFactory()),
                             1,
                             _lambda,
                             takeIntoAccount),
@@ -274,4 +269,5 @@ namespace MyNN.MLP2.Autoencoders
 
         }
     }
+     */
 }

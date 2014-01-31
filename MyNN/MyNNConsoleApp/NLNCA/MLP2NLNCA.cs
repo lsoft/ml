@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using MyNN;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
@@ -11,7 +8,6 @@ using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
 using MyNN.MLP2.Backpropagaion.Validation.NLNCA;
-using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
@@ -19,7 +15,7 @@ using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.Wrapper;
 
-namespace MyNNConsoleApp.MLP2
+namespace MyNNConsoleApp.NLNCA
 {
     public class MLP2NLNCA
     {
@@ -81,14 +77,14 @@ namespace MyNNConsoleApp.MLP2
 
                 var algo = new BackpropagationAlgorithm(
                     randomizer,
-                    (processedMLP, processedConfig) => new OpenCLNLNCABackpropagationAlgorithm(
+                    (processedMLP, processedConfig) => new CPUNLNCABackpropagationAlgorithm(
                         VectorizationSizeEnum.VectorizationMode16,
                         processedMLP,
                         processedConfig,
                         clProvider,
                         (uzkii) => new DodfCalculatorOpenCL(
                             uzkii,
-                            new VOpenCLDistanceDictFactory())),
+                            new VectorizedCPUDistanceDictFactory())),
                     net,
                     new NLNCAValidation(
                         serialization,

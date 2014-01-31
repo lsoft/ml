@@ -5,8 +5,12 @@ using MyNN.Data;
 using MyNN.Data.TrainDataProvider;
 using MyNN.MLP2.Autoencoders.BackpropagationFactory;
 using MyNN.MLP2.Backpropagaion;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.ForwardPropagation;
+using MyNN.MLP2.ForwardPropagation.ForwardFactory;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
@@ -25,6 +29,7 @@ namespace MyNN.MLP2.Autoencoders
         private readonly Func<DataSet, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
         private readonly IBackpropagationAlgorithmFactory _backpropagationAlgorithmFactory;
+        private readonly IForwardPropagationFactory _forwardPropagationFactory;
         private readonly LayerInfo[] _layerInfos;
 
         public MLP CombinedNet
@@ -40,6 +45,7 @@ namespace MyNN.MLP2.Autoencoders
             Func<DataSet, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
             IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
+            IForwardPropagationFactory forwardPropagationFactory,
             params LayerInfo[] layerInfos)
         {
             if (randomizer == null)
@@ -62,6 +68,10 @@ namespace MyNN.MLP2.Autoencoders
             {
                 throw new ArgumentNullException("configFactory");
             }
+            if (forwardPropagationFactory == null)
+            {
+                throw new ArgumentNullException("forwardPropagationFactory");
+            }
             if (layerInfos == null)
             {
                 throw new ArgumentNullException("layerInfos");
@@ -81,6 +91,7 @@ namespace MyNN.MLP2.Autoencoders
             _validationFactory = validationFactory;
             _configFactory = configFactory;
             _backpropagationAlgorithmFactory = backpropagationAlgorithmFactory;
+            _forwardPropagationFactory = forwardPropagationFactory;
             _layerInfos = layerInfos;
         }
 
@@ -137,40 +148,31 @@ namespace MyNN.MLP2.Autoencoders
                         _layerInfos[depthIndex].LayerSize
                     });
                 
-                //var pp = string.Empty;
-                //var net = SerializationHelper.LoadFromFile<MLP>(pp);
-
                 ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + net.DumpLayerInformation());
 
                 var trainDataProvider = _dataProviderFactory(processingTrainData);
-                var validationDataProvider = _validationFactory(processingValidationData);
+                var validation = _validationFactory(processingValidationData);
 
-                using (var clProvider = new CLProvider())
+                var config = _configFactory(depthIndex);
+
+                this.Train3LayerAutoencoder(
+                    net,
+                    config,
+                    validation,
+                    trainDataProvider);
+
+                //добавляем в итоговый автоенкодер слои
+                var cloned = _serialization.DeepClone(net);
+                if (depthIndex == 0)
                 {
-                    var config = _configFactory(depthIndex);
-
-                    var algo = _backpropagationAlgorithmFactory.GetBackpropagationAlgorithm(
-                        _randomizer,
-                        clProvider,
-                        net,
-                        validationDataProvider,
-                        config);
-
-                    algo.Train(trainDataProvider.GetDeformationDataSet);
-
-                    //добавляем в итоговый автоенкодер слои
-                    var cloned = _serialization.DeepClone(net);
-                    if (depthIndex == 0)
-                    {
-                        layerList[0] = cloned.Layers[0];
-                        layerList[1] = cloned.Layers[1];
-                        layerList[layerListCount - 1] = cloned.Layers[2];
-                    }
-                    else
-                    {
-                        layerList[depthIndex + 1] = cloned.Layers[1];
-                        layerList[layerListCount - 1 - depthIndex] = cloned.Layers[2];
-                    }
+                    layerList[0] = cloned.Layers[0];
+                    layerList[1] = cloned.Layers[1];
+                    layerList[layerListCount - 1] = cloned.Layers[2];
+                }
+                else
+                {
+                    layerList[depthIndex + 1] = cloned.Layers[1];
+                    layerList[layerListCount - 1 - depthIndex] = cloned.Layers[2];
                 }
 
                 if (depthIndex < depth - 1)
@@ -180,10 +182,11 @@ namespace MyNN.MLP2.Autoencoders
 
                     using (var clProvider = new CLProvider())
                     {
-                        var forward = new CPUForwardPropagation(
-                            VectorizationSizeEnum.VectorizationMode16,
-                            net,
-                            clProvider);
+                        //var forward = new CPUForwardPropagation(
+                        //    VectorizationSizeEnum.VectorizationMode16,
+                        //    net,
+                        //    clProvider);
+                        var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, net);
 
                         var nextTrain = forward.ComputeOutput(processingTrainData);
                         var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.State), null);
@@ -214,10 +217,11 @@ namespace MyNN.MLP2.Autoencoders
 
             using (var clProvider = new CLProvider())
             {
-                var forward = new CPUForwardPropagation(
-                    VectorizationSizeEnum.VectorizationMode16,
-                    this.CombinedNet,
-                    clProvider);
+                //var forward = new CPUForwardPropagation(
+                //    VectorizationSizeEnum.VectorizationMode16,
+                //    this.CombinedNet,
+                //    clProvider);
+                var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, this.CombinedNet);
 
                 //валидируем его
                 var finalValidation = _validationFactory(validationData);
@@ -236,6 +240,55 @@ namespace MyNN.MLP2.Autoencoders
             return
                 this.CombinedNet;
         }
+
+        private void Train3LayerAutoencoder(
+            MLP net,
+            ILearningAlgorithmConfig config,
+            IValidation validation,
+            ITrainDataProvider trainDataProvider)
+        {
+            using (var clProvider = new CLProvider())
+            {
+                var algo = _backpropagationAlgorithmFactory.GetBackpropagationAlgorithm(
+                    _randomizer,
+                    clProvider,
+                    net,
+                    validation,
+                    config);
+
+                algo.Train(trainDataProvider.GetDeformationDataSet);
+
+            }
+
+            //var takeIntoAccount = (int)(_partTakeOfAccount * net.Layers[1].NonBiasNeuronCount);
+
+            //using (var clProvider = new CLProvider())
+            //{
+
+            //    var algo = new BackpropagationAlgorithm(
+            //        _randomizer,
+            //        (currentMLP, currentConfig) =>
+            //            new CPUAutoencoderNLNCABackpropagationAlgorithm(
+            //                VectorizationSizeEnum.VectorizationMode16,
+            //                currentMLP,
+            //                currentConfig,
+            //                clProvider,
+            //                (uzkii) => new DodfCalculatorOpenCL(
+            //                    uzkii,
+            //                    new VectorizedCPUDistanceDictFactory()),
+            //                1,
+            //                _lambda,
+            //                takeIntoAccount),
+            //        net,
+            //        validation,
+            //        config);
+
+            //    algo.Train(trainDataProvider.GetDeformationDataSet);
+
+            //}
+
+        }
+
 
     }
 }

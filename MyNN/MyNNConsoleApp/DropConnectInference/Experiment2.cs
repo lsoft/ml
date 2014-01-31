@@ -88,7 +88,7 @@ namespace MyNNConsoleApp.DropConnectInference
 
                 using (var clProvider = new CLProvider())
                 {
-                    var forward = new InferenceOpenCLForwardPropagation<OpenCLLayerInference>(
+                    var forward = new InferenceOpenCLForwardPropagation<CPULayerInference>(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
                         clProvider,

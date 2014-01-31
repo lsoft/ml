@@ -96,7 +96,7 @@ namespace MyNNConsoleApp.DropConnectInference
                         new BackpropagationAlgorithm(
                             randomizer,
                             (currentMLP, currentConfig) =>
-                                new DropConnectOpenCLBackpropagationAlgorithm<OpenCLLayerInferenceNew16>(
+                                new DropConnectCPUBackpropagationAlgorithm<VectorizedCPULayerInferenceV2>(
                                     randomizer,
                                     VectorizationSizeEnum.VectorizationMode16,
                                     currentMLP,
@@ -157,7 +157,7 @@ namespace MyNNConsoleApp.DropConnectInference
                         new BackpropagationAlgorithm(
                             randomizer,
                             (currentMLP, currentConfig) =>
-                                new DropConnectBitOpenCLBackpropagationAlgorithm<OpenCLLayerInferenceNew16>(
+                                new DropConnectBitCPUBackpropagationAlgorithm<VectorizedCPULayerInferenceV2>(
                                     randomizer,
                                     VectorizationSizeEnum.VectorizationMode16,
                                     currentMLP,

@@ -6,7 +6,7 @@ using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict
 {
-    public class VOpenCLDistanceDictFactory : IDistanceDictFactory
+    public class VectorizedCPUDistanceDictFactory : IDistanceDictFactory
     {
         public DodfDictionary CreateDistanceDict(List<DataItem> fxwList)
         {
@@ -22,7 +22,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 
             var inputLength = fxwList[0].Input.Length;
 
-            using (var clProvider = new DistanceDictCLProvider(fxwList))
+            using (var clProvider = new OpenCLDistanceDictProvider(fxwList))
             {
                 var kernelText = @"
 {DODF_DISABLE_EXP_DEFINE_CLAUSE}

@@ -16,7 +16,7 @@ using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.Wrapper.DeviceChooser;
-using VOpenCLDistanceDictFactory = MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2.VOpenCLDistanceDictFactory;
+using VectorizedCPUDistanceDictFactory = MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2.VectorizedCPUDistanceDictFactory;
 
 namespace MyNNConsoleApp.Nvidia
 {
@@ -168,7 +168,7 @@ namespace MyNNConsoleApp.Nvidia
         private static DodfDictionary ProfileIntelCPU(
             DataSet dataset)
         {
-            var dd = new VOpenCLDistanceDictFactory();
+            var dd = new VectorizedCPUDistanceDictFactory();
 
             TimeSpan takenTime;
             var result = dd.CreateDistanceDict(dataset.Data, out takenTime);

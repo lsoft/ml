@@ -15,7 +15,7 @@ using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit.WeightMask
 {
-    public class BigArrayOpenCLWeightBitMaskContainer : IOpenCLWeightBitMaskContainer
+    public class BigArrayWeightBitMaskContainer : IOpenCLWeightBitMaskContainer
     {
         private const int TotalIterationCount = 10000;
         private const int AdditionalPartSize = 100000;
@@ -56,7 +56,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnectBit.WeightMask
 
         private Thread _workThread;
 
-        public BigArrayOpenCLWeightBitMaskContainer(
+        public BigArrayWeightBitMaskContainer(
             CLProvider clProvider,
             MLP mlp,
             IRandomizer randomizer,
