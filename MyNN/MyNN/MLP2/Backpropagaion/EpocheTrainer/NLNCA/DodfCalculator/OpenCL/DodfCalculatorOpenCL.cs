@@ -17,9 +17,10 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
         private readonly Dictionary<int, List<int>> _fxwDict;
         private readonly PabCalculatorOpenCL _pabCalculator;
 
+
         public DodfCalculatorOpenCL(
             List<DataItem> fxwList,
-            IDistanceDictFactory concreteDistanceDictFactory = null)
+            IDistanceDictFactory distanceDictFactory)
         {
             #region validate
 
@@ -27,13 +28,15 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
             {
                 throw new ArgumentNullException("fxwList");
             }
-            //concreteDistanceDictFactory allowed to be null
+            if (distanceDictFactory == null)
+            {
+                throw new ArgumentNullException("distanceDictFactory");
+            }
 
             #endregion
 
             _fxwList = fxwList;
             _len = _fxwList[0].Input.Length;
-            _chooseDistanceDictFactory = concreteDistanceDictFactory;
 
             #region Заполняем _fxwDict
 
@@ -58,49 +61,9 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
 
             #endregion
 
-            var distanceDictFactory = ChooseDistanceDictFactory(_fxwList);
-
             _pabCalculator = new PabCalculatorOpenCL(
                 distanceDictFactory, 
                 _fxwList);
-        }
-
-        /// <summary>
-        /// Выбираем метод калькулирования (изза статика - один раз за запуск приложения)
-        /// </summary>
-        private static IDistanceDictFactory _chooseDistanceDictFactory;
-        private IDistanceDictFactory ChooseDistanceDictFactory(List<DataItem> fxwList)
-        {
-            if (_chooseDistanceDictFactory == null)
-            {
-                var before = DateTime.Now;
-
-                var csharp = new CSharpDistanceDictFactory();
-                csharp.CreateDistanceDict(fxwList);
-
-                var middle = DateTime.Now;
-
-                var opencl = new VOpenCLDistanceDictFactory();
-                opencl.CreateDistanceDict(fxwList);
-
-                var after = DateTime.Now;
-
-                var diff0 = middle - before;
-                var diff1 = after - middle;
-
-                _chooseDistanceDictFactory =
-                    diff1 < diff0
-                        ? (IDistanceDictFactory) opencl
-                        : (IDistanceDictFactory) csharp;
-
-                ConsoleAmbientContext.Console.WriteLine(
-                    "Choosed {0}",
-                    _chooseDistanceDictFactory.GetType().Name);
-            }
-
-            return
-                _chooseDistanceDictFactory;
-
         }
 
         public float[] CalculateDodf(int a)

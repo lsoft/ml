@@ -35,7 +35,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             _deviceChooser = deviceChooser;
         }
 
-        public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList)
+        public DodfDictionary CreateDistanceDict(List<DataItem> fxwList)
         {
             TimeSpan takenTime;
 
@@ -43,9 +43,9 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
                 CreateDistanceDict(fxwList, out takenTime);
         }
 
-        public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList, out TimeSpan takenTime)
+        public DodfDictionary CreateDistanceDict(List<DataItem> fxwList, out TimeSpan takenTime)
         {
-            var result = new Dictionary<int, float[]>();
+            var result = new DodfDictionary(fxwList.Count);
 
             var inputLength = fxwList[0].Input.Length;
 
@@ -213,14 +213,14 @@ __kernel void DistanceKernel(
 
                 var distanceKernel = clProvider.CreateKernel(kernelText, "DistanceKernel");
 
-                //создаем диктионари
-                for (var cc = 0; cc < fxwList.Count; cc++)
-                {
-                    var iterSize = fxwList.Count - cc;
+                ////создаем диктионари
+                //for (var cc = 0; cc < fxwList.Count; cc++)
+                //{
+                //    var iterSize = fxwList.Count - cc;
 
-                    var array = new float[iterSize];
-                    result.Add(cc, array);
-                }
+                //    var array = new float[iterSize];
+                //    result.Add(cc, array);
+                //}
 
                 #region определяем параметры запуска кернела
 
@@ -303,12 +303,11 @@ __kernel void DistanceKernel(
 
                     for (var cc = 0; cc < itemsCountProcessedByKernel; cc++)
                     {
-                        var distance = clProvider.DistanceMem.Array[cc * 3 + 2];
-
                         var aIndex = (int)clProvider.DistanceMem.Array[cc * 3 + 0];
                         var bIndex = (int)clProvider.DistanceMem.Array[cc * 3 + 1];
+                        var distance = clProvider.DistanceMem.Array[cc * 3 + 2];
 
-                        result[aIndex][bIndex - aIndex] = distance;
+                        result.AddValue(aIndex, bIndex, distance);
                     }
 
                     #endregion
@@ -317,14 +316,14 @@ __kernel void DistanceKernel(
                     startRowIndex += processedRowCountPerKernelCall;
                 }
 
-                var totalItemCount = (fxwList.Count + 1) * fxwList.Count / 2;
+                var totalItemCount = (long)(fxwList.Count + 1) * fxwList.Count / 2;
 
                 ConsoleAmbientContext.Console.WriteLine(
                     "fxwList count = {0}, total items {1}, processed items {2}, {3}%, others values are below threshold = {4}, with kernel execution count = {5}",
                     fxwList.Count,
                     totalItemCount,
                     totalItemsCountProcessedByKernel,
-                    ((int)(totalItemsCountProcessedByKernel * 10000 / totalItemCount)) / 100f,
+                    totalItemsCountProcessedByKernel * 10000.0 / totalItemCount / (long)100,
                     Threshold,
                     totalKernelExcutionCount);
 

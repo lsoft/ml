@@ -7,7 +7,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 {
     public class OpenCLDistanceDictFactory : IDistanceDictFactory
     {
-        public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList)
+        public DodfDictionary CreateDistanceDict(List<DataItem> fxwList)
         {
             TimeSpan takenTime;
 
@@ -15,9 +15,9 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
                 CreateDistanceDict(fxwList, out takenTime);
         }
 
-        public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList, out TimeSpan takenTime)
+        public DodfDictionary CreateDistanceDict(List<DataItem> fxwList, out TimeSpan takenTime)
         {
-            var result = new Dictionary<int, float[]>();
+            var result = new DodfDictionary(fxwList.Count);
 
             var inputLength = fxwList[0].Input.Length;
 
@@ -86,21 +86,16 @@ __kernel void DistanceKernel(
 
                 //колбасим в диктионари
                 var pointer = 0;
-                for (var cc = 0; cc < fxwList.Count; cc++)
+                for (var cc = 0; cc < fxwList.Count - 1; cc++)
                 {
-                    var iterSize = fxwList.Count - cc;
+                    pointer++; //correct for dd start value (not cc, but cc + 1)
 
-                    var array = new float[iterSize];
-                    Array.Copy(
-                        clProvider.DistanceMem.Array,
-                        pointer,
-                        array,
-                        0,
-                        iterSize);
+                    for (var dd = cc + 1; dd < fxwList.Count; dd++)
+                    {
+                        result.AddValue(cc, dd, clProvider.DistanceMem.Array[pointer]);
 
-                    result.Add(cc, array);
-
-                    pointer += iterSize;
+                        pointer++;
+                    }
                 }
             }
 

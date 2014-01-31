@@ -59,7 +59,7 @@ namespace MyNNConsoleApp.Nvidia
                 );
             dataset.Normalize();
 
-            Dictionary<int, float[]> nvidiaResult;
+            DodfDictionary nvidiaResult;
             {
                 var randomizer = new NoRandomRandomizer();
 
@@ -68,7 +68,7 @@ namespace MyNNConsoleApp.Nvidia
                     dataset);
             }
 
-            Dictionary<int, float[]> intelResult;
+            DodfDictionary intelResult;
             {
                 var randomizer = new NoRandomRandomizer();
 
@@ -78,58 +78,32 @@ namespace MyNNConsoleApp.Nvidia
             }
 
 
-            if (intelResult == null || nvidiaResult == null)
+            if (nvidiaResult.Count != intelResult.Count)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Fail to obtain results!");
+                Console.WriteLine("Intel sizes != Nvidia sizes");
                 return;
             }
 
-            if (intelResult.Count != nvidiaResult.Count)
+            float maxDiff = float.MinValue;
+            for (var cc = 0; cc < nvidiaResult.Count; cc++)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Intel size {0} != Nvidia size {1}", intelResult.Count, nvidiaResult.Count);
-                return;
-            }
-
-            var intelkeys = intelResult.Keys.ToArray();
-            var nvidiakeys = nvidiaResult.Keys.ToArray();
-
-            if (!ArrayOperations.ValuesAreEqual(intelkeys, nvidiakeys))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Intel keys != Nvidia keys");
-                return;
-            }
-
-            var maxDiff = float.MinValue;
-            for (var index = 0; index < intelResult.Count; index++)
-            {
-                var key = intelResult.Keys.ToArray()[index];
-
-                var intelValues = intelResult[key];
-                var nvidiaValues = nvidiaResult[key];
-
-                float diff;
-                if (!ArrayOperations.ValuesAreEqual(intelValues, nvidiaValues, 1e-7f, out diff))
+                for (var dd = cc; dd < nvidiaResult.Count; dd++)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Intel value != Nvidia value with DIFF = {0}", diff);
-                    return;
+                    var diff = Math.Abs(nvidiaResult.GetDistance(cc, dd) - intelResult.GetDistance(cc, dd));
+
+                    maxDiff = Math.Max(maxDiff, diff);
                 }
 
-                if (diff > maxDiff)
-                {
-                    maxDiff = diff;
-                }
+                Console.WriteLine();
             }
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("OK with MAXDIFF = {0}", maxDiff);
-
+            Console.ForegroundColor = Math.Abs(maxDiff) > 1e-7 ? ConsoleColor.Red : ConsoleColor.Green;
+            Console.WriteLine("Finished with MAXDIFF = {0}", maxDiff);
+            Console.ResetColor();
         }
 
-        private static Dictionary<int, float[]> ProfileNvidiaGPU(
+        private static DodfDictionary ProfileNvidiaGPU(
             NoRandomRandomizer randomizer,
             DataSet dataset)
         {
@@ -148,7 +122,7 @@ namespace MyNNConsoleApp.Nvidia
             return result;
         }
 
-        private static Dictionary<int, float[]> ProfileIntelCPU(
+        private static DodfDictionary ProfileIntelCPU(
             NoRandomRandomizer randomizer,
             DataSet dataset)
         {

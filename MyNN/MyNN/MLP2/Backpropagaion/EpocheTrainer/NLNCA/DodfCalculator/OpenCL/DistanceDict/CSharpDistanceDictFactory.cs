@@ -9,7 +9,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 {
     public class CSharpDistanceDictFactory : IDistanceDictFactory
     {
-        public Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList)
+        public DodfDictionary CreateDistanceDict(List<DataItem> fxwList)
         {
             var inputLength = fxwList[0].Input.Length;
 
@@ -36,8 +36,22 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
             }
             ); //Parallel.For
 
+
+            throw new Exception("Этот код не проверен, необходимо убрать этот ексцепшен и проверить, что он корректен");
+
+            //колбасим в диктионари
+            var resultD = new DodfDictionary(fxwList.Count);
+
+            for (var cc = 0; cc < fxwList.Count - 1; cc++)
+            {
+                for (var dd = cc + 1; dd < fxwList.Count; dd++)
+                {
+                    resultD.AddValue(cc, dd, distanceDict[cc][dd - cc]);
+                }
+            }
+
             return
-                distanceDict.ToDictionary(j => j.Key, k => k.Value);
+                resultD; //distanceDict.ToDictionary(j => j.Key, k => k.Value);
         }
 
 

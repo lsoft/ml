@@ -155,15 +155,15 @@ namespace OpenCL.Net.Platform
             clevent.Dispose();
         }
 
-        public static void ReadDoubleArray(this Cl.Mem mem, Cl.CommandQueue commandQueue, double[] array, BlockModeEnum blockMode)
-        {
-            mem.Read(commandQueue, sizeof(double) * array.Length, array, blockMode);
-        }
+        //public static void ReadDoubleArray(this Cl.Mem mem, Cl.CommandQueue commandQueue, double[] array, BlockModeEnum blockMode)
+        //{
+        //    mem.Read(commandQueue, sizeof(double) * array.Length, array, blockMode);
+        //}
 
-        public static void ReadFloatArray(this Cl.Mem mem, Cl.CommandQueue commandQueue, float[] array, BlockModeEnum blockMode)
-        {
-            mem.Read(commandQueue, sizeof(float) * array.Length, array, blockMode);
-        }
+        //public static void ReadFloatArray(this Cl.Mem mem, Cl.CommandQueue commandQueue, float[] array, BlockModeEnum blockMode)
+        //{
+        //    mem.Read(commandQueue, sizeof(float) * array.Length, array, blockMode);
+        //}
 
         public static void Write(this Cl.Mem mem, Cl.CommandQueue commandQueue, int size, object data, BlockModeEnum blockMode)
         {
@@ -176,15 +176,15 @@ namespace OpenCL.Net.Platform
             clevent.Dispose();
         }
 
-        public static void WriteDoubleArray(this Cl.Mem mem, Cl.CommandQueue commandQueue, double[] array, BlockModeEnum blockMode)
-        {
-            mem.Write(commandQueue, sizeof(double) * array.Length, array, blockMode);
-        }
+        //public static void WriteDoubleArray(this Cl.Mem mem, Cl.CommandQueue commandQueue, double[] array, BlockModeEnum blockMode)
+        //{
+        //    mem.Write(commandQueue, sizeof(double) * array.Length, array, blockMode);
+        //}
 
-        public static void WriteFloatArray(this Cl.Mem mem, Cl.CommandQueue commandQueue, float[] array, BlockModeEnum blockMode)
-        {
-            mem.Write(commandQueue, sizeof(float) * array.Length, array, blockMode);
-        }
+        //public static void WriteFloatArray(this Cl.Mem mem, Cl.CommandQueue commandQueue, float[] array, BlockModeEnum blockMode)
+        //{
+        //    mem.Write(commandQueue, sizeof(float) * array.Length, array, blockMode);
+        //}
 
         public static Cl.Mem AllocateArray<T>(
             this Cl.Context context, 

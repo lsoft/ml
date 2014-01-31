@@ -5,6 +5,6 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
 {
     public interface IDistanceDictFactory
     {
-        Dictionary<int, float[]> CreateDistanceDict(List<DataItem> fxwList);
+        DodfDictionary CreateDistanceDict(List<DataItem> fxwList);
     }
 }

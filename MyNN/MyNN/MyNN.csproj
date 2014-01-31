@@ -55,7 +55,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;DODF_DISABLE_EXP</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -172,6 +172,7 @@
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\GPUBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\BackpropagationFactory\OpenCLTransposeBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
+    <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\DodfDictionary.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\DistanceDictHalfCLProvider.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\GPUHalfDistanceDictFactory.cs" />
     <Compile Include="MLP2\Backpropagaion\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\VOpenCLDistanceDictFactory.cs" />

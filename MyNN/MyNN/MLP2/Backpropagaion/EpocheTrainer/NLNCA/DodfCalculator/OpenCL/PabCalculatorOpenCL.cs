@@ -12,7 +12,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
         private readonly List<DataItem> _fxwList;
         private readonly int _inputLength;
 
-        private readonly Dictionary<int, float[]> _expDistanceDict;
+        private readonly DodfDictionary _expDistanceDict;
         private readonly List<float> _piList;
 
         private readonly List<float> _znList;
@@ -192,14 +192,16 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
                 throw new InvalidOperationException("a == b");
             }
 
-            if (b > a)
-            {
-                distance = _expDistanceDict[a][b - a];
-            }
-            else if (b < a)
-            {
-                distance = _expDistanceDict[b][a - b];
-            }
+            distance = _expDistanceDict.GetDistance(a, b);
+
+            //if (b > a)
+            //{
+            //    distance = _expDistanceDict[a][b - a];
+            //}
+            //else if (b < a)
+            //{
+            //    distance = _expDistanceDict[b][a - b];
+            //}
 
             return
                 distance;

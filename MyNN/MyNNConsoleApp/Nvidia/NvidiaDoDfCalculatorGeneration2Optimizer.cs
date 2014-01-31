@@ -8,6 +8,7 @@ using MyNN;
 using MyNN.Data;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
+using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2;
 using MyNN.MLP2.Backpropagaion.Validation;
 using MyNN.MLP2.LearningConfig;
@@ -15,6 +16,7 @@ using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.OpenCL.DeviceChooser;
+using VOpenCLDistanceDictFactory = MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2.VOpenCLDistanceDictFactory;
 
 namespace MyNNConsoleApp.Nvidia
 {
@@ -22,66 +24,58 @@ namespace MyNNConsoleApp.Nvidia
     {
         public static void Optimize()
         {
-            const int DataItemCount = 10001;//10001;
-            const int DataItemLength = 787;//787;
+            //const int DataItemCount = 10001;//10001;
+            //const int DataItemLength = 787;//787;
 
-            int genSeed = DateTime.Now.Millisecond;
-            var genRandomizer = new DefaultRandomizer(ref genSeed);
+            //int genSeed = DateTime.Now.Millisecond;
+            //var genRandomizer = new DefaultRandomizer(ref genSeed);
 
-            var diList = new List<DataItem>();
-            for (var cc = 0; cc < DataItemCount; cc++)
-            {
-                var i = new float[DataItemLength];
-                var o = new float[1];
+            //var diList = new List<DataItem>();
+            //for (var cc = 0; cc < DataItemCount; cc++)
+            //{
+            //    var i = new float[DataItemLength];
+            //    var o = new float[1];
 
-                for (var dd = 0; dd < DataItemLength; dd++)
-                {
-                    i[dd] =
-                        //((dd%2) > 0) ? 1f : 0f;
-                        //dd / (float)DataItemLength + cc;
-                        //dd*0.015625f + cc;
-                        //genRandomizer.Next(10000) * 0.01f;
-                        //genRandomizer.Next(10000)*0.015625f;
-                        genRandomizer.Next(100);
+            //    for (var dd = 0; dd < DataItemLength; dd++)
+            //    {
+            //        i[dd] =
+            //            //((dd%2) > 0) ? 1f : 0f;
+            //            //dd / (float)DataItemLength + cc;
+            //            //dd*0.015625f + cc;
+            //            //genRandomizer.Next(10000) * 0.01f;
+            //            //genRandomizer.Next(10000)*0.015625f;
+            //            genRandomizer.Next(100);
 
-                }
+            //    }
 
-                var di = new DataItem(i, o);
-                diList.Add(di);
-            }
+            //    var di = new DataItem(i, o);
+            //    diList.Add(di);
+            //}
 
-            var dataset = new DataSet(diList);
+            //var dataset = new DataSet(diList);
 
-            //var dataset = MNISTDataProvider.GetDataSet(
-            //    "_MNIST_DATABASE/mnist/trainingset/",
-            //    2000
-            //    );
-            //dataset.Normalize();
+            var dataset = MNISTDataProvider.GetDataSet(
+                "_MNIST_DATABASE/mnist/trainingset/",
+                int.MaxValue
+                );
+            dataset.Normalize();
 
-            Dictionary<int, float[]> nvidiaResult;
+            DodfDictionary nvidiaResult;
             {
                 nvidiaResult = ProfileNvidiaGPU(
                     dataset);
             }
-
-            Dictionary<int, float[]> intelResult;
+            
+            DodfDictionary intelResult;
             {
                 intelResult = ProfileIntelCPU(
                     dataset);
             }
 
-
             if (intelResult == null || nvidiaResult == null)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Fail to obtain results!");
-                return;
-            }
-
-            if (intelResult.Count != nvidiaResult.Count)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Intel size {0} != Nvidia size {1}", intelResult.Count, nvidiaResult.Count);
                 return;
             }
 
@@ -93,69 +87,55 @@ namespace MyNNConsoleApp.Nvidia
                 "INTEL",
                 intelResult);
 
-            var intelkeys = intelResult.Keys.ToArray();
-            var nvidiakeys = nvidiaResult.Keys.ToArray();
+            //if (nvidiaResult.Count != intelResult.Count || nvidiaResult.Length != intelResult.Length)
+            //{
+            //    Console.ForegroundColor = ConsoleColor.Red;
+            //    Console.WriteLine("Intel sizes != Nvidia sizes");
+            //    return;
+            //}
 
-            if (!ArrayOperations.ValuesAreEqual(intelkeys, nvidiakeys))
+            float maxDiff = float.MinValue;
+            for (var cc = 0; cc < nvidiaResult.Count; cc++)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Intel keys != Nvidia keys");
-                return;
-            }
-
-            var maxDiff = float.MinValue;
-            for (var index = 0; index < intelResult.Count; index++)
-            {
-                var key = intelResult.Keys.ToArray()[index];
-
-                var intelValues = intelResult[key];
-                var nvidiaValues = nvidiaResult[key];
-
-                float diff;
-                if (!ArrayOperations.ValuesAreEqual(intelValues, nvidiaValues, 1e-7f, out diff))
+                for (var dd = cc; dd < nvidiaResult.Count; dd++)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Intel value != Nvidia value with DIFF = {0}", diff);
-                    return;
-                }
+                    var diff = Math.Abs(nvidiaResult.GetDistance(cc, dd) - intelResult.GetDistance(cc, dd));
 
-                if (diff > maxDiff)
-                {
-                    maxDiff = diff;
+                    maxDiff = Math.Max(maxDiff, diff);
                 }
             }
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("OK with MAXDIFF = {0}", maxDiff);
+            Console.ForegroundColor = Math.Abs(maxDiff) > 1e-7 ? ConsoleColor.Red : ConsoleColor.Green;
+            Console.WriteLine("Finished with MAXDIFF = {0}", maxDiff);
             Console.ResetColor();
         }
 
         private static void DumpDict(
             string vendor,
-            Dictionary<int, float[]> results)
+            DodfDictionary results)
         {
             Console.ForegroundColor = ConsoleColor.Red;
             
             Console.WriteLine(vendor);
 
-            var maxLength = results.Max(j => j.Value.Length);
-
-
-            if (results.Count <= 10 && maxLength <= 10)
+            if (results.Count <= 10)
             {
-
-                foreach (var pair in results)
+                for (var cc = 0; cc < results.Count; cc++)
                 {
-                    Console.Write("{0:D7}: ", pair.Key);
+                    Console.Write("{0:D7}: ", cc);
 
-                    for (var cc = 0; cc < maxLength - pair.Value.Length; cc++)
+                    for (var dd = cc; dd < results.Count; dd++)
                     {
-                        Console.Write("          ");
-                    }
+                        var distance = results.GetDistance(cc, dd);
 
-                    foreach (var v in pair.Value)
-                    {
-                        Console.Write("{0:000000.00} ", v);
+                        Console.SetCursorPosition(dd * 11 + 10, Console.CursorTop);
+
+                        if (distance >= 0)
+                        {
+                            Console.Write(" ");
+                        }
+
+                        Console.Write("{0:000000.00}", distance);
                     }
 
                     Console.WriteLine();
@@ -169,7 +149,7 @@ namespace MyNNConsoleApp.Nvidia
             Console.ResetColor();
         }
 
-        private static Dictionary<int, float[]> ProfileNvidiaGPU(
+        private static DodfDictionary ProfileNvidiaGPU(
             DataSet dataset)
         {
             var dd = new GPUHalfDistanceDictFactory(
@@ -185,7 +165,7 @@ namespace MyNNConsoleApp.Nvidia
             return result;
         }
 
-        private static Dictionary<int, float[]> ProfileIntelCPU(
+        private static DodfDictionary ProfileIntelCPU(
             DataSet dataset)
         {
             var dd = new VOpenCLDistanceDictFactory();
