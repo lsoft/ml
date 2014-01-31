@@ -1,14 +1,14 @@
-﻿using OpenCL.Net.Platform;
+﻿
 
-namespace OpenCL.Net.OpenCL.Mem
+namespace OpenCL.Net.Wrapper.Mem
 {
     public class MemInt: Mem<int>
     {
         public MemInt(
-            Cl.CommandQueue commandQueue,
-            Cl.Context context,
+            CommandQueue commandQueue,
+            Context context,
             int arrayLength,
-            Cl.MemFlags flags)
+            MemFlags flags)
             : base(commandQueue, context, arrayLength, 4, flags)
         {
         }

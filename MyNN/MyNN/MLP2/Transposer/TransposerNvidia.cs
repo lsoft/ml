@@ -1,7 +1,8 @@
 ﻿using System;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
+using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP2.Transposer
 {
@@ -55,7 +56,7 @@ namespace MyNN.MLP2.Transposer
         {
             _destination = _clProvider.CreateFloatMem(
                 _width * _height,
-                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             _destination.Write(BlockModeEnum.Blocking);
 

@@ -15,7 +15,7 @@ using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
-using OpenCL.Net.OpenCL;
+using OpenCL.Net.Wrapper;
 
 namespace MyNNConsoleApp.DropConnectInference
 {

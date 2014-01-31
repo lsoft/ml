@@ -14,6 +14,8 @@
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -91,6 +93,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\MyNN\NCA\Linear\Libraries\Math.NET\MathNet.Numerics.dll</HintPath>
     </Reference>
+    <Reference Include="OpenCL.Net, Version=2.2.9.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
+    </Reference>
     <Reference Include="OpenCvSharp">
       <HintPath>..\OpenCVSharp\OpenCvSharp.dll</HintPath>
     </Reference>
@@ -159,14 +165,15 @@
       <Project>{67074E3D-0BF2-4E4A-A5EB-EDF74F33A5AC}</Project>
       <Name>MyNN</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OpenCL.Net\OpenCL.Net.csproj">
-      <Project>{70AC8A83-9850-4F73-B7BC-541EB2505BE6}</Project>
-      <Name>OpenCL.Net</Name>
+    <ProjectReference Include="..\OpenCL.Net.Wrapper\OpenCL.Net.Wrapper.csproj">
+      <Project>{a405c95d-fece-488d-a6a4-b8c6fa184880}</Project>
+      <Name>OpenCL.Net.Wrapper</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -174,6 +181,15 @@
     <PostBuildEvent>xcopy /Y $(ProjectDir)\..\OpenCV\*.*  $(TargetDir)
 xcopy /Y $(ProjectDir)\..\OpenCVSharp\*.*  $(TargetDir)</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
+  </Target>
+  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

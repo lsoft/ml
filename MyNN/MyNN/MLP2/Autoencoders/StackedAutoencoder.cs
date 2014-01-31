@@ -13,7 +13,7 @@ using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
-using OpenCL.Net.OpenCL;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.Autoencoders
 {

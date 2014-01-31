@@ -13,9 +13,9 @@ using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.DeviceChooser;
 using MyNN.MLP2.ForwardPropagation.ForwardFactory;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNN.MLP2.Autoencoders
 {

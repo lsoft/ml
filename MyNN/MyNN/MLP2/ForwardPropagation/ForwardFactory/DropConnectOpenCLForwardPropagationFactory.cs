@@ -3,7 +3,7 @@ using MyNN.MLP2.ForwardPropagation.DropConnect;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
-using OpenCL.Net.OpenCL;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.ForwardPropagation.ForwardFactory
 {

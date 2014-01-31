@@ -15,7 +15,7 @@ using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
-using OpenCL.Net.OpenCL.DeviceChooser;
+using OpenCL.Net.Wrapper.DeviceChooser;
 using VOpenCLDistanceDictFactory = MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2.VOpenCLDistanceDictFactory;
 
 namespace MyNNConsoleApp.Nvidia
@@ -24,41 +24,41 @@ namespace MyNNConsoleApp.Nvidia
     {
         public static void Optimize()
         {
-            //const int DataItemCount = 10001;//10001;
-            //const int DataItemLength = 787;//787;
+            const int DataItemCount = 5;//10001;
+            const int DataItemLength = 17;//787;
 
-            //int genSeed = DateTime.Now.Millisecond;
-            //var genRandomizer = new DefaultRandomizer(ref genSeed);
+            int genSeed = 123;//DateTime.Now.Millisecond;
+            var genRandomizer = new DefaultRandomizer(ref genSeed);
 
-            //var diList = new List<DataItem>();
-            //for (var cc = 0; cc < DataItemCount; cc++)
-            //{
-            //    var i = new float[DataItemLength];
-            //    var o = new float[1];
+            var diList = new List<DataItem>();
+            for (var cc = 0; cc < DataItemCount; cc++)
+            {
+                var i = new float[DataItemLength];
+                var o = new float[1];
 
-            //    for (var dd = 0; dd < DataItemLength; dd++)
-            //    {
-            //        i[dd] =
-            //            //((dd%2) > 0) ? 1f : 0f;
-            //            //dd / (float)DataItemLength + cc;
-            //            //dd*0.015625f + cc;
-            //            //genRandomizer.Next(10000) * 0.01f;
-            //            //genRandomizer.Next(10000)*0.015625f;
-            //            genRandomizer.Next(100);
+                for (var dd = 0; dd < DataItemLength; dd++)
+                {
+                    i[dd] =
+                        //((dd%2) > 0) ? 1f : 0f;
+                        //dd / (float)DataItemLength + cc;
+                        //dd*0.015625f + cc;
+                        //genRandomizer.Next(10000) * 0.01f;
+                        //genRandomizer.Next(10000)*0.015625f;
+                        genRandomizer.Next(100);
 
-            //    }
+                }
 
-            //    var di = new DataItem(i, o);
-            //    diList.Add(di);
-            //}
+                var di = new DataItem(i, o);
+                diList.Add(di);
+            }
 
-            //var dataset = new DataSet(diList);
+            var dataset = new DataSet(diList);
 
-            var dataset = MNISTDataProvider.GetDataSet(
-                "_MNIST_DATABASE/mnist/trainingset/",
-                int.MaxValue
-                );
-            dataset.Normalize();
+            //var dataset = MNISTDataProvider.GetDataSet(
+            //    "_MNIST_DATABASE/mnist/trainingset/",
+            //    int.MaxValue
+            //    );
+            //dataset.Normalize();
 
             DodfDictionary nvidiaResult;
             {

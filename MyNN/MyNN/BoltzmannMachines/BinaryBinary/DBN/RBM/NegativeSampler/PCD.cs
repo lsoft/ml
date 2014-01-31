@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper.Mem;
+using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
 {
@@ -10,7 +10,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
     {
         private readonly IRestrictedBoltzmannMachine _rbm;
 
-        private List<Mem<float>> _pcdChainList;
+        private List<OpenCL.Net.Wrapper.Mem.Mem<float>> _pcdChainList;
 
         private readonly Kernel _updatePersistent;
 
@@ -41,10 +41,10 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
         {
             #region готовим pcd gibbs chains
 
-            _pcdChainList = new List<Mem<float>>();
+            _pcdChainList = new List<OpenCL.Net.Wrapper.Mem.Mem<float>>();
             for (var c = 0; c < batchSize; c++)
             {
-                var chain = _rbm.CLProvider.CreateFloatMem(_rbm.HiddenNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                var chain = _rbm.CLProvider.CreateFloatMem(_rbm.HiddenNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
                 //очищаем состояние
                 Array.Clear(chain.Array, 0, _rbm.HiddenNeuronCount);

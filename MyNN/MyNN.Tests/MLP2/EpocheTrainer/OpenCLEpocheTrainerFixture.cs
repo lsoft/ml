@@ -15,7 +15,7 @@ using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
-using OpenCL.Net.OpenCL;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.EpocheTrainer
 {

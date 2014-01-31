@@ -16,7 +16,7 @@ using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
-using OpenCL.Net.OpenCL;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers
 {

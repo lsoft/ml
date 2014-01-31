@@ -1,4 +1,4 @@
-﻿using OpenCL.Net.OpenCL.Mem;
+﻿using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect.WeightMask
 {

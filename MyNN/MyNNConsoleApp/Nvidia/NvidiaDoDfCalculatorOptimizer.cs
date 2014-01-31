@@ -15,7 +15,7 @@ using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
-using OpenCL.Net.OpenCL.DeviceChooser;
+using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.Nvidia
 {

@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Accord.Statistics;
 using MyNN.Data;
-using OpenCL.Net.OpenCL.DeviceChooser;
-using OpenCL.Net.Platform;
+
+using OpenCL.Net.Wrapper.DeviceChooser;
+using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Half
 {

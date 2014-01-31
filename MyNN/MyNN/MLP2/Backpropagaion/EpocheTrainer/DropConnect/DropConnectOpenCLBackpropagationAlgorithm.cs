@@ -9,9 +9,10 @@ using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.OutputConsole;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
+using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect
 {
@@ -177,11 +178,11 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect
 
                 _nablaWeights[i] = _clProvider.CreateFloatMem(
                     (_mlp.Layers[i].Neurons.Length - biasNeuronCount) * _mlp.Layers[i].Neurons[0].Weights.Length,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
                 _deDz[i] = _clProvider.CreateFloatMem(
                     _mlp.Layers[i].NonBiasNeuronCount,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             }
 
             var outputLength = _mlp.Layers.Last().NonBiasNeuronCount;
@@ -189,7 +190,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect
             //создаем объекты желаемых выходных данных (т.е. правильных ответов сети)
             _desiredOutput = _clProvider.CreateFloatMem(
                 outputLength,
-                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
+                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
         }
 
         public void TrainEpoche(

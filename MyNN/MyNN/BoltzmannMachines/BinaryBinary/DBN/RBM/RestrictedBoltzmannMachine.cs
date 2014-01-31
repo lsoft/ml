@@ -9,10 +9,10 @@ using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Data;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Randomizer;
-
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
+using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
 {
@@ -38,41 +38,41 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
             private set;
         }
 
-        private readonly Mem<float> _input;
-        private readonly Mem<float> _nabla;
+        private readonly OpenCL.Net.Wrapper.Mem.Mem<float> _input;
+        private readonly OpenCL.Net.Wrapper.Mem.Mem<float> _nabla;
 
-        public Mem<float> Visible
+        public OpenCL.Net.Wrapper.Mem.Mem<float> Visible
         {
             get;
             private set;
         }
 
-        public Mem<float> Hidden0
+        public OpenCL.Net.Wrapper.Mem.Mem<float> Hidden0
         {
             get;
             private set;
         }
 
-        public Mem<float> Hidden1
+        public OpenCL.Net.Wrapper.Mem.Mem<float> Hidden1
         {
             get;
             private set;
         }
         
-        public Mem<float> Weights
+        public OpenCL.Net.Wrapper.Mem.Mem<float> Weights
         {
             get;
             private set;
         }
         
-        public Mem<float> Randoms
+        public OpenCL.Net.Wrapper.Mem.Mem<float> Randoms
         {
             get;
             private set;
         }
 
-        private Mem<float> _inputBufferForVisibleFreeEnergy;
-        private Mem<float> _resultBufferForVisibleFreeEnergy;
+        private OpenCL.Net.Wrapper.Mem.Mem<float> _inputBufferForVisibleFreeEnergy;
+        private OpenCL.Net.Wrapper.Mem.Mem<float> _resultBufferForVisibleFreeEnergy;
 
         private const int SizeOfResultBufferForVisibleFreeEnergy = 500;
 
@@ -156,15 +156,15 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
             CLProvider = clProvider;
 
             //создаем массивы данных
-            _input = CLProvider.CreateFloatMem(VisibleNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
-            Visible = CLProvider.CreateFloatMem(VisibleNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
-            Hidden0 = CLProvider.CreateFloatMem(HiddenNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
-            Hidden1 = CLProvider.CreateFloatMem(HiddenNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
-            Weights = CLProvider.CreateFloatMem(VisibleNeuronCount * HiddenNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
-            Randoms = CLProvider.CreateFloatMem(RandomCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
-            _nabla = CLProvider.CreateFloatMem(VisibleNeuronCount * HiddenNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
-            _inputBufferForVisibleFreeEnergy = CLProvider.CreateFloatMem(VisibleNeuronCount * SizeOfResultBufferForVisibleFreeEnergy, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
-            _resultBufferForVisibleFreeEnergy = CLProvider.CreateFloatMem(SizeOfResultBufferForVisibleFreeEnergy, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+            _input = CLProvider.CreateFloatMem(VisibleNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadOnly);
+            Visible = CLProvider.CreateFloatMem(VisibleNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            Hidden0 = CLProvider.CreateFloatMem(HiddenNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            Hidden1 = CLProvider.CreateFloatMem(HiddenNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            Weights = CLProvider.CreateFloatMem(VisibleNeuronCount * HiddenNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            Randoms = CLProvider.CreateFloatMem(RandomCount, MemFlags.CopyHostPtr | MemFlags.ReadOnly);
+            _nabla = CLProvider.CreateFloatMem(VisibleNeuronCount * HiddenNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            _inputBufferForVisibleFreeEnergy = CLProvider.CreateFloatMem(VisibleNeuronCount * SizeOfResultBufferForVisibleFreeEnergy, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            _resultBufferForVisibleFreeEnergy = CLProvider.CreateFloatMem(SizeOfResultBufferForVisibleFreeEnergy, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             //модифицируем тексты кернелов
             this._kernelsSource = this._kernelsSource.Replace(
@@ -353,7 +353,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
                 {
                     #region очищаем наблу
 
-                    if (CLProvider.ChoosedDeviceType == Cl.DeviceType.Cpu)
+                    if (CLProvider.ChoosedDeviceType == DeviceType.Cpu)
                     {
                         const int perClearKernelFloats = 1500; //(должно быть кратно 4м!!!)
 
@@ -461,7 +461,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
 
                     _sampler.BatchFinished();
 
-                    if (CLProvider.ChoosedDeviceType == Cl.DeviceType.Cpu)
+                    if (CLProvider.ChoosedDeviceType == DeviceType.Cpu)
                     {
                         const int perUpdateKernelFloats = 1500;//(должно быть кратно 4м!!!)
 
@@ -817,8 +817,7 @@ Error: {7}
                 });
         }
 
-        public float CalculateFreeEnergySet(
-            Mem<float> weights,
+        public float CalculateFreeEnergySet(OpenCL.Net.Wrapper.Mem.Mem<float> weights,
             DataSet data)
         {
             #region validate
@@ -1157,7 +1156,7 @@ __kernel void CalculateEnergy(
             var calculateEnergy = u.CreateKernel(zKernel, "CalculateEnergy");
 
             //готовим массивы для Hidden (все возможные битовые варианты)
-            var hMem = u.CreateFloatMem((totalHiddenPixels + 1) * totalHiddenVariants, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+            var hMem = u.CreateFloatMem((totalHiddenPixels + 1) * totalHiddenVariants, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             for (long i = 0; i < totalHiddenVariants; i++)
             {
                 //пробиваем биты текущего варианта
@@ -1177,15 +1176,15 @@ __kernel void CalculateEnergy(
             var iBatchSize = 10000; //сколько хидден вариантов просчитывать за один запуск кернела
 
             //заполняем видимое и результаты (размер батча)
-            var vMemList = new List<Mem<float>>();
-            var hResultList = new List<Mem<float>>();
+            var vMemList = new List<OpenCL.Net.Wrapper.Mem.Mem<float>>();
+            var hResultList = new List<OpenCL.Net.Wrapper.Mem.Mem<float>>();
             for (var cc = 0; cc < iBatchSize; cc++)
             {
-                var vMem = u.CreateFloatMem(totalInputPixels + 1, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                var vMem = u.CreateFloatMem(totalInputPixels + 1, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
                 vMem.Array[totalInputPixels] = 1f; //bias
                 vMemList.Add(vMem);
 
-                var hResult = u.CreateFloatMem(totalHiddenVariants, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                var hResult = u.CreateFloatMem(totalHiddenVariants, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
                 hResult.Write(BlockModeEnum.Blocking);
                 hResultList.Add(hResult);
             }

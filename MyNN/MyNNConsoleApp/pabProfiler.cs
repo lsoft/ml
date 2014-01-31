@@ -11,7 +11,7 @@ using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2;
-using OpenCL.Net.OpenCL.DeviceChooser;
+using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp
 {

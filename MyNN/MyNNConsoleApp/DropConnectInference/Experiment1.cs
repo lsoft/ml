@@ -7,8 +7,9 @@ using MyNN.MLP2.ForwardPropagation.DropConnect;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNNConsoleApp.DropConnectInference
 {
@@ -69,7 +70,7 @@ namespace MyNNConsoleApp.DropConnectInference
             {
                 var prevLayerStateMem = clProvider.CreateFloatMem(
                     wv.Length,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
                 for (var cc = 0; cc < prevLayerStateMem.Array.Length; cc++)
                 {
@@ -79,14 +80,14 @@ namespace MyNNConsoleApp.DropConnectInference
 
                 var weightMem = clProvider.CreateFloatMem(
                     wv.Length,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
                 wv.CopyTo(weightMem.Array, 0);
                 weightMem.Write(BlockModeEnum.Blocking);
 
                 var currentLayerStateMem = clProvider.CreateFloatMem(
                     1,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
                 var inf1 = new OpenCLLayerInference(
                     randomizer,

@@ -20,7 +20,7 @@ using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.MLP2.ForwardPropagation.ForwardFactory;
-using OpenCL.Net.OpenCL.DeviceChooser;
+using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.ClassificationAutoencoder
 {

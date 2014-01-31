@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler.ParallelTempering;
 using MyNN.Data;
-
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper.Mem;
+using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
 {
@@ -41,11 +40,11 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
         }
         private readonly TemperatureApplyRuleEnum _temperatureApplyRule;
 
-        private Mem<float> _visibleForEnergy;
-        private Mem<float> _summatorForEnergy;
+        private OpenCL.Net.Wrapper.Mem.Mem<float> _visibleForEnergy;
+        private OpenCL.Net.Wrapper.Mem.Mem<float> _summatorForEnergy;
 
-        private List<Mem<float>> _ptChainList;
-        private List<Mem<float>> _ptWeightList;
+        private List<OpenCL.Net.Wrapper.Mem.Mem<float>> _ptChainList;
+        private List<OpenCL.Net.Wrapper.Mem.Mem<float>> _ptWeightList;
 
         private readonly Kernel _rescaleWeights, _copyAndScale, _sampleValues;
 
@@ -106,18 +105,18 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
 
             #endregion
 
-            _visibleForEnergy = _rbm.CLProvider.CreateFloatMem(_rbm.VisibleNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+            _visibleForEnergy = _rbm.CLProvider.CreateFloatMem(_rbm.VisibleNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             _visibleForEnergy.Write(BlockModeEnum.NonBlocking);
 
-            _summatorForEnergy = _rbm.CLProvider.CreateFloatMem(_rbm.VisibleNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+            _summatorForEnergy = _rbm.CLProvider.CreateFloatMem(_rbm.VisibleNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             _summatorForEnergy.Write(BlockModeEnum.NonBlocking);
 
             #region готовим pt gibbs chains
 
-            _ptChainList = new List<Mem<float>>();
+            _ptChainList = new List<OpenCL.Net.Wrapper.Mem.Mem<float>>();
             for (var c = 0; c < _temperatureCount; c++)
             {
-                var chain = _rbm.CLProvider.CreateFloatMem(_rbm.HiddenNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                var chain = _rbm.CLProvider.CreateFloatMem(_rbm.HiddenNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
                 //очищаем состояние
                 Array.Clear(chain.Array, 0, _rbm.HiddenNeuronCount);
@@ -140,10 +139,10 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
 
             #region Готовим мемы для весов
 
-            _ptWeightList = new List<Mem<float>>();
+            _ptWeightList = new List<OpenCL.Net.Wrapper.Mem.Mem<float>>();
             for (var ti = 0; ti < _temperatureCount; ti++)
             {
-                var weight = _rbm.CLProvider.CreateFloatMem(_rbm.HiddenNeuronCount * _rbm.VisibleNeuronCount, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                var weight = _rbm.CLProvider.CreateFloatMem(_rbm.HiddenNeuronCount * _rbm.VisibleNeuronCount, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
                 //очищаем состояние
                 Array.Clear(weight.Array, 0, weight.Array.Length);

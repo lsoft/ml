@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MyNN.Data;
-
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
+using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.KNN
 {
@@ -49,13 +49,13 @@ namespace MyNN.KNN
             //создаем массивы данных
             _dataMem = _clProvider.CreateFloatMem(
                 _dataCount * _coordinateCount,
-                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
+                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
             _itemMem = _clProvider.CreateFloatMem(
                 _coordinateCount,
-                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
+                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
             _resultMem = _clProvider.CreateFloatMem(
                 _dataCount,
-                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.WriteOnly);
+                MemFlags.CopyHostPtr | MemFlags.WriteOnly);
 
             this._kernelSource = this._kernelSource.Replace(
                 "{0}",

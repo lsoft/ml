@@ -6,7 +6,7 @@ using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Structure;
-using OpenCL.Net.OpenCL;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers.Classifiers
 {

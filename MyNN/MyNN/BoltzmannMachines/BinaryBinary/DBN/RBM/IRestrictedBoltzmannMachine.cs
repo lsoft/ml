@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using MyNN.Data;
-
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
 {

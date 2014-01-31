@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MyNN.MLP2.Transposer;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNNConsoleApp.TransposeExperiments
 {
@@ -23,7 +24,7 @@ namespace MyNNConsoleApp.TransposeExperiments
                     {
                         var source = clProvider.CreateFloatMem(
                             width*height,
-                            Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
+                            MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
                         for (var cc = 0; cc < source.Array.Length; cc++)
                         {

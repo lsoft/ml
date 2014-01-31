@@ -5,7 +5,7 @@ using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Structure;
 using MyNN.OutputConsole;
-using OpenCL.Net.OpenCL;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2
 {

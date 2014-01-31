@@ -6,8 +6,8 @@ using System.Text;
 using Accord.Math;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
 using Normal = MathNet.Numerics.Distributions.Normal;
 
 namespace MyNN.MLP2.ForwardPropagation.DropConnect

@@ -1,4 +1,4 @@
-﻿namespace OpenCL.Net.Platform
+﻿namespace OpenCL.Net.Wrapper.Mem
 {
     public enum BlockModeEnum
     {

@@ -6,9 +6,10 @@ using System.Text;
 using Accord.Math;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
+using Kernel = OpenCL.Net.Wrapper.Kernel;
 using Normal = MathNet.Numerics.Distributions.Normal;
 
 namespace MyNN.MLP2.ForwardPropagation.DropConnect
@@ -92,7 +93,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect
             //создаем и заполняем хранилище рандомов
             _randomMem = _clProvider.CreateFloatMem(
                 _randomCount,
-                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
+                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
             var normal = new Normal(0, 1);
             normal.RandomSource = new Random(_randomizer.Next(100000));

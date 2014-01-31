@@ -1,23 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using OpenCL.Net.OpenCL.DeviceChooser;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net.Extensions;
+using OpenCL.Net.Wrapper.DeviceChooser;
+using OpenCL.Net.Wrapper.Mem;
 
-namespace OpenCL.Net.OpenCL
+namespace OpenCL.Net.Wrapper
 {
     public class CLProvider : IDisposable
     {
         private readonly IDeviceChooser _deviceChooser;
-        private Cl.Device _device;
-        private Cl.Context _context;
-        private Cl.CommandQueue _commandQueue;
+        private Device _device;
+        private Context _context;
+        private CommandQueue _commandQueue;
 
-        private readonly List<BaseMem> _mems;
+        private readonly List<IMemWrapper> _mems;
         private readonly List<Kernel> _kernels;
 
-        public Cl.Device ChoosedDevice
+        public Device ChoosedDevice
         {
             get
             {
@@ -26,7 +25,7 @@ namespace OpenCL.Net.OpenCL
             }
         }
 
-        public Cl.DeviceType ChoosedDeviceType
+        public DeviceType ChoosedDeviceType
         {
             get;
             private set;
@@ -67,7 +66,7 @@ namespace OpenCL.Net.OpenCL
             CreateCommandQueue();
 
             //создаем пустые структуры
-            _mems = new List<BaseMem>();
+            _mems = new List<IMemWrapper>();
             _kernels = new List<Kernel>();
         }
 
@@ -81,10 +80,10 @@ namespace OpenCL.Net.OpenCL
 
         private void CreateCommandQueue()
         {
-            Cl.ErrorCode error;
+            ErrorCode error;
 
-            _commandQueue = Cl.CreateCommandQueue(_context, _device, (Cl.CommandQueueProperties)0, out error);
-            if (error != Cl.ErrorCode.Success)
+            _commandQueue = Cl.CreateCommandQueue(_context, _device, (CommandQueueProperties)0, out error);
+            if (error != ErrorCode.Success)
             {
                 throw new InvalidProgramException(string.Format("Unable to CreateCommandQueue: {0}!", error));
             }
@@ -92,11 +91,11 @@ namespace OpenCL.Net.OpenCL
 
         private void CreateContext()
         {
-            Cl.ErrorCode error;
+            ErrorCode error;
 
             _context = Cl.CreateContext(null, 1, new[] { _device }, null, IntPtr.Zero, out error);
 
-            if (error != Cl.ErrorCode.Success)
+            if (error != ErrorCode.Success)
             {
                 throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Context, error was: {0}!", error));
             }
@@ -104,23 +103,23 @@ namespace OpenCL.Net.OpenCL
 
         private void ChooseDevice()
         {
-            //Cl.ErrorCode error;
+            //ErrorCode error;
 
             //var platforms = Cl.GetPlatformIDs(out error);
-            //if (error != Cl.ErrorCode.Success)
+            //if (error != ErrorCode.Success)
             //{
             //    throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Device, error was: {0}!", error));
             //}
 
-            //Cl.Device? device = null;
+            //Device? device = null;
 
-            //Cl.DeviceType[] devicePriority =
+            //DeviceType[] devicePriority =
             //{
-            //    //Cl.DeviceType.Cpu, //!!!
-            //    Cl.DeviceType.Gpu, 
-            //    Cl.DeviceType.Accelerator, 
-            //    Cl.DeviceType.All, 
-            //    Cl.DeviceType.Cpu
+            //    //DeviceType.Cpu, //!!!
+            //    DeviceType.Gpu, 
+            //    DeviceType.Accelerator, 
+            //    DeviceType.All, 
+            //    DeviceType.Cpu
             //};
 
             //foreach (var deviceType in devicePriority)
@@ -143,12 +142,12 @@ namespace OpenCL.Net.OpenCL
             //    }
             //}
 
-            //if (error != Cl.ErrorCode.Success)
+            //if (error != ErrorCode.Success)
             //{
             //    throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Device, error was: {0}!", error));
             //}
 
-            Cl.DeviceType choosedDeviceType;
+            DeviceType choosedDeviceType;
             _deviceChooser.ChooseDevice(out choosedDeviceType, out _device);
 
             this.ChoosedDeviceType = choosedDeviceType;
@@ -165,10 +164,10 @@ namespace OpenCL.Net.OpenCL
             string source,
             string kernelName)
         {
-            Cl.ErrorCode error;
+            ErrorCode error;
 
             var program = Cl.CreateProgramWithSource(_context, 1, new[] { source }, null, out error);
-            if (error != Cl.ErrorCode.Success)
+            if (error != ErrorCode.Success)
             {
                 throw new InvalidProgramException(string.Format("Unable to run Cl.CreateProgramWithSource for program: {0}!", error));
             }
@@ -184,17 +183,17 @@ namespace OpenCL.Net.OpenCL
                 //"-cl-mad-enable",
                 null,
                 IntPtr.Zero);
-            if (error != Cl.ErrorCode.Success)
+            if (error != ErrorCode.Success)
             {
-                var infoBuffer = new Cl.InfoBuffer(new IntPtr(90000));
+                var infoBuffer = new InfoBuffer(new IntPtr(90000));
                 IntPtr retSize;
-                Cl.GetProgramBuildInfo(program, _device, Cl.ProgramBuildInfo.Log, new IntPtr(90000), infoBuffer, out retSize);
+                Cl.GetProgramBuildInfo(program, _device, ProgramBuildInfo.Log, new IntPtr(90000), infoBuffer, out retSize);
 
                 throw new InvalidProgramException("Error building program:\n" + infoBuffer.ToString());
             }
 
-            var buildStatus = Cl.GetProgramBuildInfo(program, _device, Cl.ProgramBuildInfo.Status, out error).CastTo<Cl.BuildStatus>();
-            if (buildStatus != Cl.BuildStatus.Success)
+            var buildStatus = Cl.GetProgramBuildInfo(program, _device, ProgramBuildInfo.Status, out error).CastTo<BuildStatus>();
+            if (buildStatus != BuildStatus.Success)
             {
                 throw new InvalidProgramException(string.Format("GetProgramBuildInfo returned {0} for program!", buildStatus));
             }
@@ -211,7 +210,7 @@ namespace OpenCL.Net.OpenCL
 
         public MemUint CreateUintMem(
             int arrayLength,
-            Cl.MemFlags flags)
+            MemFlags flags)
         {
             var memi = new MemUint(
                 _commandQueue,
@@ -226,7 +225,7 @@ namespace OpenCL.Net.OpenCL
 
         public MemInt CreateIntMem(
             int arrayLength,
-            Cl.MemFlags flags)
+            MemFlags flags)
         {
             var memi = new MemInt(
                 _commandQueue,
@@ -241,7 +240,7 @@ namespace OpenCL.Net.OpenCL
 
         public MemHalf CreateHalfMem(
             int arrayLength,
-            Cl.MemFlags flags)
+            MemFlags flags)
         {
             var memh = new MemHalf(
                 _commandQueue,
@@ -257,7 +256,7 @@ namespace OpenCL.Net.OpenCL
 
         public MemFloat CreateFloatMem(
             int arrayLength,
-            Cl.MemFlags flags)
+            MemFlags flags)
         {
             var memf = new MemFloat(
                 _commandQueue,
@@ -272,7 +271,7 @@ namespace OpenCL.Net.OpenCL
 
         public MemDouble CreateDoubleMem(
             int arrayLength,
-            Cl.MemFlags flags)
+            MemFlags flags)
         {
             var memd = new MemDouble(
                 _commandQueue,

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyNN.Data;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.DeviceChooser;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.DeviceChooser;
+using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2
 {
@@ -78,15 +78,15 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Dis
         {
             FxwMem = this.CreateHalfMem(
                 _fxwList.Count * _fxwList[0].Input.Length,
-                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadOnly);
+                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
             IndexMem = this.CreateIntMem(
                 1,
-                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             DistanceMem = this.CreateFloatMem(
                 _distanceMemElementCount * 3,
-                Cl.MemFlags.CopyHostPtr | Cl.MemFlags.WriteOnly);
+                MemFlags.CopyHostPtr | MemFlags.WriteOnly);
         }
     }
 }

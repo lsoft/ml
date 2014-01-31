@@ -2,9 +2,9 @@
 using AForge;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect.WeightMask
 {
@@ -59,7 +59,7 @@ namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.DropConnect.WeightMask
             {
                 MaskMem[cc] = _clProvider.CreateFloatMem(
                     _mlp.Layers[cc].NonBiasNeuronCount * _mlp.Layers[cc].Neurons[0].Weights.Length, //without bias neuron at current layer, but include bias neuron at previous layer
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             }
         }
 

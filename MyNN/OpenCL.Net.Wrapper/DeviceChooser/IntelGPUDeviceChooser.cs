@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Linq;
-using OpenCL.Net.Platform;
 
-namespace OpenCL.Net.OpenCL.DeviceChooser
+
+namespace OpenCL.Net.Wrapper.DeviceChooser
 {
     public class IntelGPUDeviceChooser : IDeviceChooser
     {
         public void ChooseDevice(
-            out Cl.DeviceType choosedDeviceType,
-            out Cl.Device choosedDevice)
+            out DeviceType choosedDeviceType,
+            out Device choosedDevice)
         {
-            Cl.ErrorCode error;
+            ErrorCode error;
 
             var platforms = Cl.GetPlatformIDs(out error);
-            if (error != Cl.ErrorCode.Success)
+            if (error != ErrorCode.Success)
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -23,12 +23,12 @@ namespace OpenCL.Net.OpenCL.DeviceChooser
 
             foreach (var platform in platforms)
             {
-                var deviceIds = Cl.GetDeviceIDs(platform, Cl.DeviceType.Gpu, out error);
+                var deviceIds = Cl.GetDeviceIDs(platform, DeviceType.Gpu, out error);
                 if (deviceIds.Any())
                 {
                     foreach (var device in deviceIds)
                     {
-                        var vendor = Cl.GetDeviceInfo(device, Cl.DeviceInfo.Vendor, out error).ToString();
+                        var vendor = Cl.GetDeviceInfo(device, DeviceInfo.Vendor, out error).ToString();
                         var uvendor = vendor.ToUpper();
 
                         //Console.WriteLine(uvendor);
@@ -40,7 +40,7 @@ namespace OpenCL.Net.OpenCL.DeviceChooser
                                 uvendor);
 
                             choosedDevice = deviceIds.First();
-                            choosedDeviceType = Cl.DeviceType.Gpu;
+                            choosedDeviceType = DeviceType.Gpu;
                             return;
                         }
                     }

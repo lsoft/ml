@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using MyNN.Data;
 using MyNN.OutputConsole;
-using OpenCL.Net.Platform;
+using OpenCL.Net.Wrapper.Mem;
+
 
 namespace MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2
 {

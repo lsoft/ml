@@ -4,9 +4,10 @@ using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Structure;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.OpenCL.Mem;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
+using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP2.ForwardPropagation
 {
@@ -98,13 +99,13 @@ namespace MyNN.MLP2.ForwardPropagation
 
                 var netMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
                 netMem.Write(BlockModeEnum.Blocking);
                 NetMem[cc] = netMem;
 
                 var stateMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
                 stateMem.Write(BlockModeEnum.Blocking);
                 StateMem[cc] = stateMem;
             }
@@ -117,7 +118,7 @@ namespace MyNN.MLP2.ForwardPropagation
 
                 var weightMem = _clProvider.CreateFloatMem(
                     currentLayerNeuronCount * previousLayerNeuronCount,
-                    Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
                 weightMem.Write(BlockModeEnum.Blocking);
                 WeightMem[cc] = weightMem;
             }

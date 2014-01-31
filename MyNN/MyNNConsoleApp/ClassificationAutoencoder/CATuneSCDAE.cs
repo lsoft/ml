@@ -19,9 +19,9 @@ using MyNN.MLP2.OpenCL;
 using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
-using OpenCL.Net.OpenCL;
 using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.GPU.Default;
-using OpenCL.Net.OpenCL.DeviceChooser;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.ClassificationAutoencoder
 {

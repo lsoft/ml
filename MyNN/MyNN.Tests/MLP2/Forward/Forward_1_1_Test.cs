@@ -4,7 +4,7 @@ using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
-using OpenCL.Net.OpenCL;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.Forward
 {

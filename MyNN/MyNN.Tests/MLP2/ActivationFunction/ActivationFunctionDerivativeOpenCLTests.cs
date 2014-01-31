@@ -1,8 +1,9 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Structure.Neurons.Function;
-using OpenCL.Net.OpenCL;
-using OpenCL.Net.Platform;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.Tests.MLP2.ActivationFunction
 {
@@ -33,7 +34,7 @@ namespace MyNN.Tests.MLP2.ActivationFunction
 
                 var count = (int)((right - left) / step);
 
-                var diffMem = clProvider.CreateFloatMem(count, Cl.MemFlags.CopyHostPtr | Cl.MemFlags.ReadWrite);
+                var diffMem = clProvider.CreateFloatMem(count, MemFlags.CopyHostPtr | MemFlags.ReadWrite);
                 diffMem.Write(BlockModeEnum.Blocking);
 
 
