@@ -6,7 +6,7 @@ using System.Linq;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.BoltzmannMachines.LinearNReLU.RBM;
 using MyNN.Data;
-using MyNN.MLP2.Randomizer;
+using MyNN.Randomizer;
 
 
 namespace MyNN.BoltzmannMachines.LinearNReLU

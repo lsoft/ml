@@ -6,6 +6,13 @@ namespace OpenCL.Net.Wrapper.DeviceChooser
 {
     public class NvidiaOrAmdGPUDeviceChooser : IDeviceChooser
     {
+        private readonly bool _showSelectedVendor;
+
+        public NvidiaOrAmdGPUDeviceChooser(bool showSelectedVendor = true)
+        {
+            _showSelectedVendor = showSelectedVendor;
+        }
+
         public void ChooseDevice(
             out DeviceType choosedDeviceType,
             out Device choosedDevice)
@@ -31,13 +38,14 @@ namespace OpenCL.Net.Wrapper.DeviceChooser
                         var vendor = Cl.GetDeviceInfo(device, DeviceInfo.Vendor, out error).ToString();
                         var uvendor = vendor.ToUpper();
 
-                        //Console.WriteLine(uvendor);
-
                         if (uvendor.Contains("NVIDIA") || uvendor.Contains("ADVANCED MICRO DEVICES"))
                         {
-                            Console.WriteLine(
-                                "Choosed vendor: {0}",
-                                uvendor);
+                            if (_showSelectedVendor)
+                            {
+                                Console.WriteLine(
+                                    "Choosed vendor: {0}",
+                                    uvendor);
+                            }
 
                             choosedDevice = deviceIds.First();
                             choosedDeviceType = DeviceType.Gpu;

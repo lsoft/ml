@@ -106,6 +106,7 @@
     <Compile Include="MLP2\ActivationFunction\SigmoidOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\SparsifierFixture.cs" />
     <Compile Include="MLP2\EpocheTrainer\EpocheTrainerValidation.cs" />
+    <Compile Include="MLP2\EpocheTrainer\EpocheTrainer_1_1_Test.cs" />
     <Compile Include="MLP2\EpocheTrainer\OpenCLEpocheTrainerFixture.cs" />
     <Compile Include="MLP2\Forward\Forward_1_1_Test.cs" />
     <Compile Include="MLP2\Forward\OpenCLForwardFixture.cs">

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MyNN.MLP2.Backpropagaion.Validation;
+using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.ForwardPropagation;
 
 namespace MyNN.Tests.MLP2.EpocheTrainer

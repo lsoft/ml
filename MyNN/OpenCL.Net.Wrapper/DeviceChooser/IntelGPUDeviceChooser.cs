@@ -6,6 +6,13 @@ namespace OpenCL.Net.Wrapper.DeviceChooser
 {
     public class IntelGPUDeviceChooser : IDeviceChooser
     {
+        private readonly bool _showSelectedVendor;
+
+        public IntelGPUDeviceChooser(bool showSelectedVendor = true)
+        {
+            _showSelectedVendor = showSelectedVendor;
+        }
+
         public void ChooseDevice(
             out DeviceType choosedDeviceType,
             out Device choosedDevice)
@@ -35,9 +42,12 @@ namespace OpenCL.Net.Wrapper.DeviceChooser
 
                         if (uvendor.Contains("INTEL"))
                         {
-                            Console.WriteLine(
-                                "Choosed vendor: {0}",
-                                uvendor);
+                            if (_showSelectedVendor)
+                            {
+                                Console.WriteLine(
+                                    "Choosed vendor: {0}",
+                                    uvendor);
+                            }
 
                             choosedDevice = deviceIds.First();
                             choosedDeviceType = DeviceType.Gpu;

@@ -7,14 +7,13 @@ using MyNN;
 using MyNN.Data;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Half;
-using MyNN.MLP2.Backpropagaion.Validation;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation1;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2;
 using MyNN.MLP2.LearningConfig;
-using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.Nvidia
@@ -59,7 +58,7 @@ namespace MyNNConsoleApp.Nvidia
                 );
             dataset.Normalize();
 
-            DodfDictionary nvidiaResult;
+            DodfDistanceContainer nvidiaResult;
             {
                 var randomizer = new NoRandomRandomizer();
 
@@ -68,7 +67,7 @@ namespace MyNNConsoleApp.Nvidia
                     dataset);
             }
 
-            DodfDictionary intelResult;
+            DodfDistanceContainer intelResult;
             {
                 var randomizer = new NoRandomRandomizer();
 
@@ -103,13 +102,13 @@ namespace MyNNConsoleApp.Nvidia
             Console.ResetColor();
         }
 
-        private static DodfDictionary ProfileNvidiaGPU(
+        private static DodfDistanceContainer ProfileNvidiaGPU(
             NoRandomRandomizer randomizer,
             DataSet dataset)
         {
-            //var dd = new GPUNaiveDistanceDictFactory(
+            //var dd = new GpuNaiveDistanceDictCalculator(
             //    new NvidiaOrAmdGPUDeviceChooser());
-            var dd = new GPUHalfNaiveDistanceDictFactory(
+            var dd = new GpuHalfNaiveDistanceDictCalculator(
                 new NvidiaOrAmdGPUDeviceChooser());
 
             TimeSpan takenTime;
@@ -122,11 +121,11 @@ namespace MyNNConsoleApp.Nvidia
             return result;
         }
 
-        private static DodfDictionary ProfileIntelCPU(
+        private static DodfDistanceContainer ProfileIntelCPU(
             NoRandomRandomizer randomizer,
             DataSet dataset)
         {
-            var dd = new VectorizedCPUDistanceDictFactory();
+            var dd = new VectorizedCpuDistanceDictCalculator();
 
             TimeSpan takenTime;
             var result = dd.CreateDistanceDict(dataset.Data, out takenTime);

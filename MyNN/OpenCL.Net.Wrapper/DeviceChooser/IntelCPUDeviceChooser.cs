@@ -6,6 +6,13 @@ namespace OpenCL.Net.Wrapper.DeviceChooser
 {
     public class IntelCPUDeviceChooser : IDeviceChooser
     {
+        private readonly bool _showSelectedVendor;
+
+        public IntelCPUDeviceChooser(bool showSelectedVendor = true)
+        {
+            _showSelectedVendor = showSelectedVendor;
+        }
+
         public void ChooseDevice(
             out DeviceType choosedDeviceType,
             out Device choosedDevice)
@@ -31,9 +38,12 @@ namespace OpenCL.Net.Wrapper.DeviceChooser
                         var vendor = Cl.GetDeviceInfo(device, DeviceInfo.Vendor, out error).ToString();
                         if (vendor.ToUpper().Contains("INTEL"))
                         {
-                            Console.WriteLine(
-                                "Choosed vendor: {0}",
-                                vendor.ToUpper());
+                            if (_showSelectedVendor)
+                            {
+                                Console.WriteLine(
+                                    "Choosed vendor: {0}",
+                                    vendor.ToUpper());
+                            }
 
                             choosedDevice = deviceIds.First();
                             choosedDeviceType = DeviceType.Cpu;

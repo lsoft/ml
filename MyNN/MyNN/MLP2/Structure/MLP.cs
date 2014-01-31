@@ -8,10 +8,10 @@ using System.Linq;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure.Neurons;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
+using MyNN.Randomizer;
 
 namespace MyNN.MLP2.Structure
 {

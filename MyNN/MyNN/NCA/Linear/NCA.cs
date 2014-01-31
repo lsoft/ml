@@ -11,32 +11,6 @@ namespace MyNN.NCA.Linear
 {
     #region support classes
 
-    public class DataVector
-    {
-        public int ClassId
-        {
-            get;
-            private set;
-        }
-
-        public DenseVector Data
-        {
-            get;
-            private set;
-        }
-
-        public DataVector(int classId, DenseVector data)
-        {
-            if (data == null)
-            {
-                throw new ArgumentNullException("data");
-            }
-
-            ClassId = classId;
-            Data = data;
-        }
-    }
-
     #endregion
 
     public class NCA

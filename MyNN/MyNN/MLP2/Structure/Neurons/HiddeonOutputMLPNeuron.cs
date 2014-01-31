@@ -1,6 +1,6 @@
 ﻿using System;
-using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Randomizer;
 
 namespace MyNN.MLP2.Structure.Neurons
 {

@@ -7,10 +7,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MyNN.Data;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation2;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSharp;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp
@@ -29,8 +28,8 @@ namespace MyNNConsoleApp
             var beforeCreate1 = DateTime.Now;
             var dodf1 = new DodfCalculatorOpenCL(
                 data,
-                //new VectorizedCPUDistanceDictFactory());
-                new GPUHalfDistanceDictFactory(new NvidiaOrAmdGPUDeviceChooser()));
+                //new VectorizedCpuDistanceDictCalculator());
+                new GpuHalfDistanceDictCalculator(new NvidiaOrAmdGPUDeviceChooser()));
             var afterCreate1 = DateTime.Now;
 
             Console.WriteLine(

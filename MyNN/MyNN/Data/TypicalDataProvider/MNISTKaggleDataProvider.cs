@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using MyNN.MLP2.Randomizer;
 
 namespace MyNN.Data.TypicalDataProvider
 {

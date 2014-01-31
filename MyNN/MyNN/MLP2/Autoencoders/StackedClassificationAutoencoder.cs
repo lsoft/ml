@@ -3,17 +3,16 @@ using System.IO;
 using System.Linq;
 using MyNN.Data;
 using MyNN.Data.TrainDataProvider;
-using MyNN.MLP2.Autoencoders.BackpropagationFactory;
-using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.Validation;
+using MyNN.MLP2.Backpropagation.Validation;
+using MyNN.MLP2.BackpropagationFactory;
 using MyNN.MLP2.ForwardPropagation;
+using MyNN.MLP2.ForwardPropagationFactory;
 using MyNN.MLP2.LearningConfig;
-using MyNN.MLP2.OpenCL;
-using MyNN.MLP2.Randomizer;
+
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
-using MyNN.MLP2.ForwardPropagation.ForwardFactory;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 

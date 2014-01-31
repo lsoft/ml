@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.ForwardPropagation.DropConnect;
-using MyNN.MLP2.OpenCL;
-using MyNN.MLP2.Randomizer;
+using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU;
+using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer;
+using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
 namespace MyNNConsoleApp.DropConnectInference
@@ -88,7 +89,7 @@ namespace MyNNConsoleApp.DropConnectInference
 
                 using (var clProvider = new CLProvider())
                 {
-                    var forward = new InferenceOpenCLForwardPropagation<CPULayerInference>(
+                    var forward = new InferenceOpenCLForwardPropagation<NaiveLayerInference>(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
                         clProvider,

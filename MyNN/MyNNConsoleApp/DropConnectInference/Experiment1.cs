@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Text;
-using MyNN.MLP2.ForwardPropagation.DropConnect;
-using MyNN.MLP2.Randomizer;
+using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Randomizer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
@@ -89,7 +89,7 @@ namespace MyNNConsoleApp.DropConnectInference
                     1,
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
-                var inf1 = new CPULayerInference(
+                var inf1 = new NaiveLayerInference(
                     randomizer,
                     clProvider,
                     sampleCount,

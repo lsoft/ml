@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Data.Visualizer;
-using MyNN.MLP2.Randomizer;
+using MyNN.Randomizer;
 
 namespace MyNN.Data
 {

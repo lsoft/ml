@@ -1,5 +1,5 @@
 ﻿using System;
-using MyNN.MLP2.Randomizer;
+using MyNN.Randomizer;
 
 namespace MyNN.Data.TrainDataProvider.Noiser.Range
 {

@@ -8,7 +8,7 @@ using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.SamplerProvider;
 using MyNN.Data;
 using MyNN.LearningRateController;
-using MyNN.MLP2.Randomizer;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.BoltzmannMachines.BinaryBinary.DBN

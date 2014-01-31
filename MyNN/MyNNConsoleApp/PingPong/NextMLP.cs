@@ -9,17 +9,18 @@ using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Autoencoders;
-using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.OpenCL.CPU.Default;
-using MyNN.MLP2.Backpropagaion.Metrics;
-using MyNN.MLP2.Backpropagaion.Validation;
+using MyNN.MLP2.Backpropagation;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
+using MyNN.MLP2.Backpropagation.Metrics;
+using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
-using MyNN.MLP2.OpenCL;
-using MyNN.MLP2.Randomizer;
+
+using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
 namespace MyNNConsoleApp.PingPong

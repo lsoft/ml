@@ -31,7 +31,7 @@ namespace MyNN.MLP2.LearningConfig
         }
 
         /// <summary>
-        /// If cumulative error for all training examples is less then MinError, then algorithm stops 
+        /// If cumulative error for all training examples is less than MinError, then algorithm stops 
         /// </summary>
         float MinError
         {
@@ -39,7 +39,7 @@ namespace MyNN.MLP2.LearningConfig
         }
 
         /// <summary>
-        /// If cumulative error change for all training examples is less then MinErrorChange, then algorithm stops 
+        /// If cumulative error change for all training examples is less than MinErrorChange, then algorithm stops 
         /// </summary>
         float MinErrorChange
         {

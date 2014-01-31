@@ -7,12 +7,11 @@ using System.Text;
 using MyNN.Data;
 using MyNN.Data.Visualizer;
 using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.ForwardPropagation.DropConnect;
-using MyNN.MLP2.ForwardPropagation.ForwardFactory;
-using MyNN.MLP2.OpenCL;
-using MyNN.MLP2.Randomizer;
+using MyNN.MLP2.ForwardPropagationFactory;
+
 using MyNN.MLP2.Structure;
 using MyNN.OutputConsole;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2

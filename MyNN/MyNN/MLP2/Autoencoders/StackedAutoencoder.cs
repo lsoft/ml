@@ -3,20 +3,16 @@ using System.IO;
 using System.Linq;
 using MyNN.Data;
 using MyNN.Data.TrainDataProvider;
-using MyNN.MLP2.Autoencoders.BackpropagationFactory;
-using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
-using MyNN.MLP2.Backpropagaion.Validation;
+using MyNN.MLP2.Backpropagation.Validation;
+using MyNN.MLP2.BackpropagationFactory;
 using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.ForwardPropagation.ForwardFactory;
+using MyNN.MLP2.ForwardPropagationFactory;
 using MyNN.MLP2.LearningConfig;
-using MyNN.MLP2.OpenCL;
-using MyNN.MLP2.Randomizer;
+
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.Autoencoders
@@ -275,7 +271,7 @@ namespace MyNN.MLP2.Autoencoders
             //                clProvider,
             //                (uzkii) => new DodfCalculatorOpenCL(
             //                    uzkii,
-            //                    new VectorizedCPUDistanceDictFactory()),
+            //                    new VectorizedCpuDistanceDictCalculator()),
             //                1,
             //                _lambda,
             //                takeIntoAccount),

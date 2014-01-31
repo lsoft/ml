@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MathNet.Numerics.Distributions;
 using MyNN.Data;
-using MyNN.MLP2.Randomizer;
+using MyNN.Randomizer;
 
 
 namespace MyNN.BoltzmannMachines.LinearNReLU.RBM

@@ -7,16 +7,14 @@ using MyNN;
 using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.MLP2;
-using MyNN.MLP2.ForwardPropagation.DropConnect;
-using MyNN.MLP2.ForwardPropagation.ForwardFactory;
-using MyNN.MLP2.OpenCL;
-using MyNN.MLP2.Randomizer;
+
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNNConsoleApp.ClassificationAutoencoder;
 using MyNNConsoleApp.DerivativeChange;
 using MyNNConsoleApp.DropConnectInference;
 using MyNNConsoleApp.MLP2;
+using MyNNConsoleApp.NLNCA;
 using MyNNConsoleApp.Nvidia;
 using MyNNConsoleApp.PingPong;
 using MyNNConsoleApp.TransposeExperiments;
@@ -30,6 +28,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+                /*
                 //pabProfiler.Main2();
                 //NvidiaForwardOptimizer.Optimize();
                 //NvidiaBackpropOptimizer.Optimize();
@@ -163,7 +162,7 @@ namespace MyNNConsoleApp
 
 
                 //MLP2NLNCA.TrainNLNCA();
-                //MLP2AutoencoderNLNCA.TrainAutoencoderNLNCA();
+                MLP2AutoencoderNLNCA.TrainAutoencoderNLNCA();
                 //MLP2NLNCAAutoencoderTest.Test();
                 //MLP2TrainStackedNLNCAAutoencoder.Train();
 

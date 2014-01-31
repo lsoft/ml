@@ -6,6 +6,9 @@ using MyNN.MLP2.Structure;
 
 namespace MyNN.MLP2.ForwardPropagation
 {
+    /// <summary>
+    /// MLP forward propagation interface
+    /// </summary>
     public interface IForwardPropagation
     {
         /// <summary>

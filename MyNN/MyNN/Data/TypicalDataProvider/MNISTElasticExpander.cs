@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN.Data.TrainDataProvider.Noiser;
-using MyNN.MLP2.Randomizer;
+using MyNN.Randomizer;
 using OpenCvSharp;
 
 namespace MyNN.Data.TypicalDataProvider

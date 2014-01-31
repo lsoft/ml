@@ -3,16 +3,17 @@ using MyNN;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
-using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
-using MyNN.MLP2.Backpropagaion.Validation.NLNCA;
+using MyNN.MLP2.Backpropagation;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.OpenCL.CPU;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation1;
+using MyNN.MLP2.Backpropagation.Validation.NLNCA;
 using MyNN.MLP2.LearningConfig;
-using MyNN.MLP2.OpenCL;
-using MyNN.MLP2.Randomizer;
+
+using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
 namespace MyNNConsoleApp.NLNCA
@@ -23,17 +24,15 @@ namespace MyNNConsoleApp.NLNCA
         public static void TrainNLNCA()
         {
             var trainData = MNISTDataProvider.GetDataSet(
-                "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
-                //"_MNIST_DATABASE/mnist/trainingset/",
+                "_MNIST_DATABASE/mnist/trainingset/",
                 //int.MaxValue
-                100
+                500
                 );
             trainData.Normalize();
             //trainData = trainData.ConvertToAutoencoder();
 
             var validationData = MNISTDataProvider.GetDataSet(
-                "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
-                //"_MNIST_DATABASE/mnist/testset/",
+                "_MNIST_DATABASE/mnist/testset/",
                 //int.MaxValue
                 100
                 );
@@ -41,7 +40,7 @@ namespace MyNNConsoleApp.NLNCA
 
             var serialization = new SerializationHelper();
 
-            int rndSeed = 453123;
+            int rndSeed = 453124;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var root = ".";
@@ -66,7 +65,7 @@ namespace MyNNConsoleApp.NLNCA
 
             var config = new LearningAlgorithmConfig(
                 new LinearLearningRate(0.5f, 0.99f),
-                100,
+                500,
                 0.0f,
                 1000,
                 0.0001f,
@@ -84,7 +83,7 @@ namespace MyNNConsoleApp.NLNCA
                         clProvider,
                         (uzkii) => new DodfCalculatorOpenCL(
                             uzkii,
-                            new VectorizedCPUDistanceDictFactory())),
+                            new VectorizedCpuDistanceDictCalculator())),
                     net,
                     new NLNCAValidation(
                         serialization,

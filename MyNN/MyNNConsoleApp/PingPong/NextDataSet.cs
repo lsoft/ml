@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using MyNN;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.OpenCL;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
+using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
 using OpenCL.Net.Wrapper;
 

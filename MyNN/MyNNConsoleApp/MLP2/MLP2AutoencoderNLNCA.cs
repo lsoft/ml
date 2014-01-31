@@ -6,20 +6,20 @@ using MyNN;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
-using MyNN.MLP2.Backpropagaion;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
-using MyNN.MLP2.Backpropagaion.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
-using MyNN.MLP2.Backpropagaion.Metrics;
-using MyNN.MLP2.Backpropagaion.Validation;
-using MyNN.MLP2.Backpropagaion.Validation.NLNCA;
+using MyNN.MLP2.Backpropagation;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CPU;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation1;
+using MyNN.MLP2.Backpropagation.Metrics;
+using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.LearningConfig;
-using MyNN.MLP2.OpenCL;
-using MyNN.MLP2.Randomizer;
+
+using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
 namespace MyNNConsoleApp.MLP2
@@ -30,17 +30,15 @@ namespace MyNNConsoleApp.MLP2
         public static void TrainAutoencoderNLNCA()
         {
             var trainData = MNISTDataProvider.GetDataSet(
-                "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
-                //"_MNIST_DATABASE/mnist/trainingset/",
+                "_MNIST_DATABASE/mnist/trainingset/",
                 //int.MaxValue
-                1000
+                500
                 );
             trainData.Normalize();
             //trainData = trainData.ConvertToAutoencoder();
 
             var validationData = MNISTDataProvider.GetDataSet(
-                "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
-                //"_MNIST_DATABASE/mnist/testset/",
+                "_MNIST_DATABASE/mnist/testset/",
                 //int.MaxValue
                 1000
                 );
@@ -73,7 +71,7 @@ namespace MyNNConsoleApp.MLP2
 
             var config = new LearningAlgorithmConfig(
                 new LinearLearningRate(0.2f, 0.99f),
-                25,
+                100,
                 0.0f,
                 50,
                 0.0001f,
@@ -91,7 +89,7 @@ namespace MyNNConsoleApp.MLP2
                         clProvider,
                         (uzkii) => new DodfCalculatorOpenCL(
                             uzkii,
-                            new VectorizedCPUDistanceDictFactory()),
+                            new VectorizedCpuDistanceDictCalculator()),
                         1,
                         0.9f,
                         50),

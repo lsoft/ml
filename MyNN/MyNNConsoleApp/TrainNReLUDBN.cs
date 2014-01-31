@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using MyNN.BoltzmannMachines.LinearNReLU;
 using MyNN.Data.TypicalDataProvider;
-using MyNN.MLP2.Randomizer;
+using MyNN.Randomizer;
 
 namespace MyNNConsoleApp
 {

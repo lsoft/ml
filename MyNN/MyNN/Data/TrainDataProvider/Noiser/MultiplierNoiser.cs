@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MyNN.Data.TrainDataProvider.Noiser.Range;
-using MyNN.MLP2.Randomizer;
+using MyNN.Randomizer;
 
 namespace MyNN.Data.TrainDataProvider.Noiser
 {
