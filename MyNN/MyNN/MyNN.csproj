@@ -55,7 +55,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;DODF_ENABLE_EXP</DefineConstants>
+    <DefineConstants>TRACE;DODF_DISABLE_EXP</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -173,11 +173,13 @@
     <Compile Include="Boosting\SAMMEBoosting\IEpocheTrainer.cs" />
     <Compile Include="Boosting\SAMMEBoosting\SAMME.cs" />
     <Compile Include="Boosting\SAMMEBoosting\SAMMEClassifierSet.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\NoNoiser.cs" />
     <Compile Include="ISerializationHelper.cs" />
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\DodfDistanceContainer.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\OpenCLDistanceDictHalfProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\GpuHalfDistanceDictCalculator.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\OpenCLDistanceDictProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\VectorizedCpuDistanceDictCalculator.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\GpuHalfNaiveDistanceDictCalculator.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\OpenCLDistanceDictHalfProvider.cs" />
@@ -218,6 +220,7 @@
     <Compile Include="MLP2\ForwardPropagation\DropConnect\Inference\ILayerInference.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\Inference\OpenCL\CPU\Inferencer\VectorizedCPULayerInferenceV2.cs" />
     <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\GPU\GPUForwardPropagation.cs" />
+    <Compile Include="MLP2\Randomizer\DefaultRandomizer.cs" />
     <Compile Include="MLP2\Saver\ConsoleMLPSaver.cs" />
     <Compile Include="MLP2\Saver\FileSystemMLPSaver.cs" />
     <Compile Include="MLP2\Saver\IAccuracyRecord.cs" />

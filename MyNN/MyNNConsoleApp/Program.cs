@@ -28,7 +28,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                /*
+                
                 //pabProfiler.Main2();
                 //NvidiaForwardOptimizer.Optimize();
                 //NvidiaBackpropOptimizer.Optimize();
@@ -149,8 +149,8 @@ namespace MyNNConsoleApp
 
                 /*
                 //MLP2TrainStackedAutoencoder.Train();
-                MLP2TuneSDAE.Tune();
-                //MLP2TrainMLPBasedOnSDAE.Tune();
+                //MLP2TuneSDAE.Tune();
+                MLP2TrainMLPBasedOnSDAE.Tune();
                 //*/
 
                 /*
@@ -160,12 +160,13 @@ namespace MyNNConsoleApp
                 //NextMLP2.Execute();
                 //*/
 
-
+                /*
                 //MLP2NLNCA.TrainNLNCA();
-                MLP2AutoencoderNLNCA.TrainAutoencoderNLNCA();
+                //MLP2AutoencoderNLNCA.TrainAutoencoderNLNCA();
                 //MLP2NLNCAAutoencoderTest.Test();
                 //MLP2TrainStackedNLNCAAutoencoder.Train();
-
+                //*/
+                
                 Console.WriteLine(".......... press any key to exit");
                 Console.ReadLine();
             }

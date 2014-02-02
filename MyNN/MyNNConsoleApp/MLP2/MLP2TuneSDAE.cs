@@ -28,7 +28,7 @@ namespace MyNNConsoleApp.MLP2
     {
         public static void Tune()
         {
-            var rndSeed = 387780;
+            var rndSeed = 387781;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -60,11 +60,13 @@ namespace MyNNConsoleApp.MLP2
 
             using (var clProvider = new CLProvider())
             {
+                const int epocheCount = 50;
+
                 var config = new LearningAlgorithmConfig(
                     new LinearLearningRate(0.001f, 0.99f),
                     1,
                     0.0f,
-                    50,
+                    epocheCount,
                     0.0001f,
                     -1.0f);
 
@@ -88,53 +90,42 @@ namespace MyNNConsoleApp.MLP2
                         validation,
                         config);
 
-                //var noiser = new SetOfNoisers(
-                //    randomizer,
-                //    new Pair<float, INoiser>(0.25f, new ZeroMaskingNoiser(randomizer, 0.25f)),
-                //    new Pair<float, INoiser>(0.25f, new SaltAndPepperNoiser(randomizer, 0.25f)),
-                //    new Pair<float, INoiser>(0.25f, new GaussNoiser(0.2f, false)),
-                //    new Pair<float, INoiser>(0.25f, new MultiplierNoiser(randomizer, 1f))
-                //    );
+                Func<int, INoiser> noiserProvider =
+                    (int epocheNumber) =>
+                    {
+                        if (epocheCount == epocheNumber)
+                        {
+                            return
+                                new NoNoiser();
+                        }
 
-                //var noiser = new SetOfNoisers2(
-                //    randomizer,
-                //    new Pair<float, INoiser>(0.25f, new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))),
-                //    new Pair<float, INoiser>(0.25f, new SaltAndPepperNoiser(randomizer, 0.25f, new RandomRange(randomizer))),
-                //    new Pair<float, INoiser>(0.25f, new GaussNoiser(0.2f, false, new RandomRange(randomizer))),
-                //    new Pair<float, INoiser>(0.25f, new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)))
-                //    );
+                        var coef = (epocheCount - epocheNumber) / (float)epocheCount;
+
+                        var noiser = new AllNoisers(
+                            randomizer,
+                            new GaussNoiser(coef * 0.20f, false, new RandomRange(randomizer)),
+                            new MultiplierNoiser(randomizer, coef * 1f, new RandomRange(randomizer)),
+                            new DistanceChangeNoiser(randomizer, coef * 1f, 3, new RandomRange(randomizer)),
+                            new SaltAndPepperNoiser(randomizer, coef * 0.1f, new RandomRange(randomizer)),
+                            new ZeroMaskingNoiser(randomizer, coef * 0.25f, new RandomRange(randomizer))
+                            );
+
+                        return noiser;
+                    };
+
 
                 //var noiser = new AllNoisers(
                 //    randomizer,
-                //    new ZeroMaskingNoiser(randomizer, 0.15f, new RandomRange(randomizer)),
-                //    new SaltAndPepperNoiser(randomizer, 0.15f, new RandomRange(randomizer)),
-                //    new GaussNoiser(0.10f, false, new RandomRange(randomizer)),
-                //    new MultiplierNoiser(randomizer, 0.3f, new RandomRange(randomizer)),
-                //    new DistanceChangeNoiser(randomizer, 0.3f, 2, new RandomRange(randomizer))
-                //    );
-
-                //var noiser = new AllNoisers(
-                //    randomizer,
-                //    new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer)),
-                //    new SaltAndPepperNoiser(randomizer, 0.25f, new RandomRange(randomizer)),
                 //    new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
                 //    new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
-                //    new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer))
+                //    new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer)),
+                //    new SaltAndPepperNoiser(randomizer, 0.1f, new RandomRange(randomizer)),
+                //    new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))
                 //    );
-
-                var noiser = new AllNoisers(
-                    randomizer,
-                    new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
-                    new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
-                    new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer)),
-                    new SaltAndPepperNoiser(randomizer, 0.1f, new RandomRange(randomizer)),
-                    new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))
-                    );
 
                 //обучение сети
                 alg.Train(
-                    //new NoDeformationTrainDataProvider(trainData.ConvertToAutoencoder()).GetDeformationDataSet);
-                    new NoiseDataProvider(trainData.ConvertToAutoencoder(), noiser).GetDeformationDataSet);
+                    new NoiseDataProvider(trainData.ConvertToAutoencoder(), noiserProvider).GetDeformationDataSet);
             }
 
 

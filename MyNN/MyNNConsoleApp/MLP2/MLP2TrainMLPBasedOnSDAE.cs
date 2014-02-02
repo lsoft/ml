@@ -28,7 +28,7 @@ namespace MyNNConsoleApp.MLP2
     {
         public static void Tune()
         {
-            var rndSeed = 74785;
+            var rndSeed = 74787;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -51,8 +51,8 @@ namespace MyNNConsoleApp.MLP2
             var serialization = new SerializationHelper();
 
             var mlp = SerializationHelper.LoadFromFile<MLP>(
-                //"MLP20140114083833/epoche 33/20140114190922-perItemError=2,411267.mynn");
-                "SDAE20140113100839 MLP2/MLP20140113100840/epoche 44/20140113121811-perItemError=2,562213.mynn");
+                "MLP20140201224821/epoche 49/20140202141949-(1,95896).mynn");
+                //"SDAE20140113100839 MLP2/MLP20140113100840/epoche 44/20140113121811-perItemError=2,562213.mynn");
 
             mlp.AutoencoderCutTail();
 

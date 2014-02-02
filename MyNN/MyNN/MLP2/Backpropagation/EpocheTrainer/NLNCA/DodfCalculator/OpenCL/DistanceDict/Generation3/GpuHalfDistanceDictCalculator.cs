@@ -316,7 +316,7 @@ __kernel void DistanceKernel(
                 var totalItemCount = (long)(fxwList.Count + 1) * fxwList.Count / 2;
 
                 ConsoleAmbientContext.Console.WriteLine(
-                    "fxwList count = {0}, total items {1}, processed items {2}, {3}%, others values are below threshold = {4}, with kernel execution count = {5}",
+                    "GPU: fxwList count = {0}, total items {1}, processed items {2}, {3}%, others values are below threshold = {4}, with kernel execution count = {5}",
                     fxwList.Count,
                     totalItemCount,
                     totalItemsCountProcessedByKernel,

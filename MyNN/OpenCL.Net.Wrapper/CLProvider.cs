@@ -183,6 +183,7 @@ namespace OpenCL.Net.Wrapper
                 //"-cl-mad-enable",
                 null,
                 IntPtr.Zero);
+
             if (error != ErrorCode.Success)
             {
                 var infoBuffer = new InfoBuffer(new IntPtr(90000));

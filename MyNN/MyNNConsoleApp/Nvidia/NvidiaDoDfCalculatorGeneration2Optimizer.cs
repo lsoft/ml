@@ -13,6 +13,7 @@ using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Distan
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.OutputConsole;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
@@ -22,10 +23,12 @@ namespace MyNNConsoleApp.Nvidia
     {
         public static void Optimize()
         {
-            const int DataItemCount = 5;//10001;
-            const int DataItemLength = 17;//787;
+            float maxDiff = float.MinValue;
 
-            int genSeed = 123;//DateTime.Now.Millisecond;
+            const int DataItemCount = 10001;
+            const int DataItemLength = 787;
+
+            int genSeed = 123; //DateTime.Now.Millisecond;
             var genRandomizer = new DefaultRandomizer(ref genSeed);
 
             var diList = new List<DataItem>();
@@ -58,48 +61,58 @@ namespace MyNNConsoleApp.Nvidia
             //    );
             //dataset.Normalize();
 
-            DodfDistanceContainer nvidiaResult;
+            for (var iteration = 0; iteration < 1; iteration++)
             {
-                nvidiaResult = ProfileNvidiaGPU(
-                    dataset);
-            }
-            
-            DodfDistanceContainer intelResult;
-            {
-                intelResult = ProfileIntelCPU(
-                    dataset);
-            }
+                ConsoleAmbientContext.Console.WriteLine("\r\n-----------------------Iteration {0} --------------------------", iteration);
 
-            if (intelResult == null || nvidiaResult == null)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Fail to obtain results!");
-                return;
-            }
-
-            DumpDict(
-                "NVIDIA",
-                nvidiaResult);
-
-            DumpDict(
-                "INTEL",
-                intelResult);
-
-            //if (nvidiaResult.Count != intelResult.Count || nvidiaResult.Length != intelResult.Length)
-            //{
-            //    Console.ForegroundColor = ConsoleColor.Red;
-            //    Console.WriteLine("Intel sizes != Nvidia sizes");
-            //    return;
-            //}
-
-            float maxDiff = float.MinValue;
-            for (var cc = 0; cc < nvidiaResult.Count; cc++)
-            {
-                for (var dd = cc; dd < nvidiaResult.Count; dd++)
+                DodfDistanceContainer nvidiaResult;
                 {
-                    var diff = Math.Abs(nvidiaResult.GetDistance(cc, dd) - intelResult.GetDistance(cc, dd));
+                    nvidiaResult = ProfileNvidiaGPU(
+                        dataset);
+                }
 
-                    maxDiff = Math.Max(maxDiff, diff);
+                DodfDistanceContainer intelResult;
+                {
+                    intelResult = ProfileIntelCPU(
+                        dataset);
+                }
+
+                if (intelResult == null || nvidiaResult == null)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Fail to obtain results!");
+                    return;
+                }
+
+                DumpDict(
+                    "NVIDIA",
+                    nvidiaResult);
+
+                DumpDict(
+                    "INTEL",
+                    intelResult);
+
+                //if (nvidiaResult.Count != intelResult.Count || nvidiaResult.Length != intelResult.Length)
+                //{
+                //    Console.ForegroundColor = ConsoleColor.Red;
+                //    Console.WriteLine("Intel sizes != Nvidia sizes");
+                //    return;
+                //}
+
+                maxDiff = float.MinValue;
+                for (var cc = 0; cc < nvidiaResult.Count; cc++)
+                {
+                    for (var dd = cc; dd < nvidiaResult.Count; dd++)
+                    {
+                        var diff = Math.Abs(nvidiaResult.GetDistance(cc, dd) - intelResult.GetDistance(cc, dd));
+
+                        maxDiff = Math.Max(maxDiff, diff);
+                    }
+                }
+
+                if (maxDiff > 0f)
+                {
+                    break;
                 }
             }
 
