@@ -81,7 +81,6 @@ __kernel void DistanceKernel(
     int processedRowCountPerKernelCall,
     int count)
 {
-
     for (
         uint cc = startRowIndex + get_global_id(0);
         cc < min(count, startRowIndex + processedRowCountPerKernelCall);
@@ -96,56 +95,57 @@ __kernel void DistanceKernel(
 
             //------------------------ GetExpDistanceDab ------------------------------
 
-//            float result = 0;
-//            
-//            for (int uu = 0; uu < inputLength; uu++)
-//            {
-//                float diff = fxwList[cc * inputLength + uu] - fxwList[dd * inputLength + uu];
-//                result += diff * diff;
-//            }
+//////////            float result = 0;
+//////////            
+//////////            for (int uu = 0; uu < inputLength; uu++)
+//////////            {
+//////////                float diff = fxwList[cc * inputLength + uu] - fxwList[dd * inputLength + uu];
+//////////                result += diff * diff;
+//////////            }
 
             int ddTail = (dd * inputLength) % 16;
             __global float * fxwDD = fxwList + ddTail;
 
+            //нельзя выносить наружу, так как переменные изменяются в цикле ниже
+            uint cci = (cc * inputLength) >> 4;
+            uint ddi = (dd * inputLength) >> 4;
+
             //GetExpDistanceDab vectorized
             float16 result16 = 0;
 
-//            uint uu = 0;
-//            for (; uu < inputLength / 16; uu++)
-//            {
-//                ///int ccindex = cc * inputLength + uu;
-//
-//                float16 fxwA = vload16(
-//                    uu, 
-//                    fxwCC);
-//    
-//                //int ddindex = dd * inputLength + uu;
-//                float16 fxwB = vload16(
-//                    dd, 
-//                    fxwDD);
-//    
-//                float16 diff16 = fxwA - fxwB;
-//                result16 += diff16 * diff16;
-//            }
-//            uu = uu << 4;
-
             uint uu = 0;
-            for (; uu < inputLength - inputLength % 16; uu+=16)
+            for (; uu < inputLength >> 4; uu++, cci++, ddi++)
             {
-                int ccindex = cc * inputLength + uu;
-
                 float16 fxwA = vload16(
-                    ccindex >> 4, 
+                    cci, 
                     fxwCC);
-    
-                int ddindex = dd * inputLength + uu;
+
                 float16 fxwB = vload16(
-                    ddindex >> 4, 
+                    ddi, 
                     fxwDD);
     
                 float16 diff16 = fxwA - fxwB;
                 result16 += diff16 * diff16;
             }
+            uu = inputLength - inputLength % 16;
+
+//            uint uu = 0;
+//            for (; uu < inputLength - inputLength % 16; uu+=16)
+//            {
+//                int ccindex = cc * inputLength + uu;
+//
+//                float16 fxwA = vload16(
+//                    ccindex >> 4, 
+//                    fxwCC);
+//    
+//                int ddindex = dd * inputLength + uu;
+//                float16 fxwB = vload16(
+//                    ddindex >> 4, 
+//                    fxwDD);
+//    
+//                float16 diff16 = fxwA - fxwB;
+//                result16 += diff16 * diff16;
+//            }
     
             float result = 
                 result16.s0 +
