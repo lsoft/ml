@@ -55,7 +55,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;DODF_DISABLE_EXP</DefineConstants>
+    <DefineConstants>TRACE;DODF_ENABLE_EXP</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -176,11 +176,12 @@
     <Compile Include="Data\TrainDataProvider\Noiser\NoNoiser.cs" />
     <Compile Include="ISerializationHelper.cs" />
     <Compile Include="MLP2\Autoencoders\StackedClassificationAutoencoder.cs" />
+    <Compile Include="MLP2\BackpropagationFactory\Classic\OpenCL\CPU\CPUNLNCABackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\DodfDistanceContainer.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\OpenCLDistanceDictHalfProvider.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\GpuHalfDistanceDictCalculator.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\OpenCLDistanceDictProvider.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\VectorizedCpuDistanceDictCalculator.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\Float\OpenCLDistanceDictProvider.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\Float\VectorizedCpuDistanceDictCalculator.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\Half\GpuHalfDistanceDictCalculator.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\Half\OpenCLDistanceDictHalfProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\GpuHalfNaiveDistanceDictCalculator.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\OpenCLDistanceDictHalfProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation1\GpuNaiveDistanceDictCalculator.cs" />
@@ -189,6 +190,8 @@
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculator.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculatorVectorized.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculatorVectorizedDebug.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation4\GpuHalfDistanceDictCalculator.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation4\OpenCLDistanceDictHalfProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic2\OpenCL\CPU\CPUTranspose2BackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic2\OpenCL\CPU\Transpose2KernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\CPUTransposeBackpropagationAlgorithm.cs" />

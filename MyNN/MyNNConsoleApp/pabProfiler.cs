@@ -10,6 +10,7 @@ using MyNN.Data;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSharp;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3.Half;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp

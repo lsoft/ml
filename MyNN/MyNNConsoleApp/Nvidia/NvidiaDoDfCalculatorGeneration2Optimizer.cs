@@ -10,6 +10,8 @@ using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3.Float;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3.Half;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
@@ -25,48 +27,52 @@ namespace MyNNConsoleApp.Nvidia
         {
             float maxDiff = float.MinValue;
 
-            const int DataItemCount = 10001;
-            const int DataItemLength = 787;
+            //const int DataItemCount = 10001;
+            //const int DataItemLength = 787;
 
-            int genSeed = 123; //DateTime.Now.Millisecond;
-            var genRandomizer = new DefaultRandomizer(ref genSeed);
+            //int genSeed = 123; //DateTime.Now.Millisecond;
+            //var genRandomizer = new DefaultRandomizer(ref genSeed);
 
-            var diList = new List<DataItem>();
-            for (var cc = 0; cc < DataItemCount; cc++)
-            {
-                var i = new float[DataItemLength];
-                var o = new float[1];
+            //var diList = new List<DataItem>();
+            //for (var cc = 0; cc < DataItemCount; cc++)
+            //{
+            //    var i = new float[DataItemLength];
+            //    var o = new float[1];
 
-                for (var dd = 0; dd < DataItemLength; dd++)
-                {
-                    i[dd] =
-                        //((dd%2) > 0) ? 1f : 0f;
-                        //dd / (float)DataItemLength + cc;
-                        //dd*0.015625f + cc;
-                        //genRandomizer.Next(10000) * 0.01f;
-                        //genRandomizer.Next(10000)*0.015625f;
-                        genRandomizer.Next(100);
+            //    for (var dd = 0; dd < DataItemLength; dd++)
+            //    {
+            //        i[dd] =
+            //            //((dd%2) > 0) ? 1f : 0f;
+            //            //dd / (float)DataItemLength + cc;
+            //            //dd*0.015625f + cc;
+            //            //genRandomizer.Next(10000) * 0.01f;
+            //            //genRandomizer.Next(10000)*0.015625f;
+            //            genRandomizer.Next(100);
 
-                }
+            //    }
 
-                var di = new DataItem(i, o);
-                diList.Add(di);
-            }
+            //    var di = new DataItem(i, o);
+            //    diList.Add(di);
+            //}
 
-            var dataset = new DataSet(diList);
+            //var dataset = new DataSet(diList);
 
-            //var dataset = MNISTDataProvider.GetDataSet(
-            //    "_MNIST_DATABASE/mnist/trainingset/",
-            //    int.MaxValue
-            //    );
-            //dataset.Normalize();
+            var dataset = MNISTDataProvider.GetDataSet(
+                "_MNIST_DATABASE/mnist/trainingset/",
+                //int.MaxValue
+                1000
+                );
+            dataset.Normalize();
+
+            dataset.Data.ForEach(j => j.Input.Transform((a) => ((int)(a  * 256)) / 256f));
 
             for (var iteration = 0; iteration < 1; iteration++)
             {
-                ConsoleAmbientContext.Console.WriteLine("\r\n-----------------------Iteration {0} --------------------------", iteration);
+                ConsoleAmbientContext.Console.WriteLine("\r\n----------------------- Iteration {0} --------------------------", iteration);
 
                 DodfDistanceContainer nvidiaResult;
                 {
+                    //nvidiaResult = null;
                     nvidiaResult = ProfileNvidiaGPU(
                         dataset);
                 }

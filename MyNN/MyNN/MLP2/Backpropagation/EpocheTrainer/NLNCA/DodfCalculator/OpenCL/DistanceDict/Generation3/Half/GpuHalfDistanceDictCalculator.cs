@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyNN.Data;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation1;
 using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3
+namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3.Half
 {
     /// <summary>
-    /// Distance factory for dOdF algorithm.
-    /// This implementation DOES NOT contains optimizations in memory consumption in distance table BUT introduce threshold in distance metric.
-    /// It uses for debug-purposes only!
+    /// Correct implementations of distance provider for dOdF algorithm that enables GPU-OpenCL with HALF input representation.
+    /// This implementation contains optimizations in memory consumption in distance table and introduce threshold in distance metric.
+    /// PS: To work correctly this kernel needs a disabled Tdr:
+    /// http://msdn.microsoft.com/en-us/library/windows/hardware/ff569918%28v=vs.85%29.aspx
+    /// Set HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\GraphicsDrivers\TdrLevel = TdrLevelOff (0) - Detection disabled 
+    /// and reboot. Otherwise, kernel will be aborted by Windows Video Driver Recovery Mechanism due to lack of response.
     /// </summary>
-    public class VectorizedCpuDistanceDictCalculator : IDistanceDictCalculator
+    public class GpuHalfDistanceDictCalculator : IDistanceDictCalculator
     {
-
-    
-            /// <summary>
+        /// <summary>
         /// Distance Mem object length in element (in bytes it will be bigger 12 times (4 byte per float * 3 float per element)
         /// </summary>
         private const int DistanceMemElementCount = 1024 * 1024 * 10;
@@ -28,11 +28,17 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
         /// </summary>
         private const float Threshold = 1e-20f;
 
-        
-        public VectorizedCpuDistanceDictCalculator(
-            )
+        private readonly IDeviceChooser _deviceChooser;
+
+        public GpuHalfDistanceDictCalculator(
+            IDeviceChooser deviceChooser)
         {
-        
+            if (deviceChooser == null)
+            {
+                throw new ArgumentNullException("deviceChooser");
+            }
+
+            _deviceChooser = deviceChooser;
         }
 
         public DodfDistanceContainer CalculateDistances(List<DataItem> fxwList)
@@ -49,10 +55,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
 
             var inputLength = fxwList[0].Input.Length;
 
-            using (var clProvider = new OpenCLDistanceDictProvider(new IntelCPUDeviceChooser(), true, fxwList, DistanceMemElementCount))
+            using (var clProvider = new OpenCLDistanceDictHalfProvider(_deviceChooser, true, fxwList, DistanceMemElementCount))
             {
                 var kernelText = @"
-
 inline int ObtainIndex(volatile __global int * indexArray)
 {
     return
@@ -62,16 +67,11 @@ inline int ObtainIndex(volatile __global int * indexArray)
 {DODF_DISABLE_EXP_DEFINE_CLAUSE}
 
 
-__kernel void ClearIndexKernel(
-        volatile __global int * indexArray)
-{
-    indexArray[0] = 0;
-}
-
 __kernel void DistanceKernel(
-    const __global float * fxwList,
+    const __global half * fxwList,
     __global float * distance,
     volatile __global int * indexArray,
+    __local float * local_results,
 
     float threshold,
     int distanceMemLength,
@@ -81,112 +81,76 @@ __kernel void DistanceKernel(
     int processedRowCountPerKernelCall,
     int count)
 {
-    for (
-        uint cc = startRowIndex + get_global_id(0);
-        cc < min(count, startRowIndex + processedRowCountPerKernelCall);
-        cc += get_global_size(0))
+    if(get_global_id(0) == 0)
     {
-        int ccTail = (cc * inputLength) % 16;
-        __global float * fxwCC = fxwList + ccTail;
+        indexArray[0] = 0;
+    }
 
-        for (uint dd = cc + 1; dd < count; dd++)
+    barrier(CLK_GLOBAL_MEM_FENCE | CLK_LOCAL_MEM_FENCE);
+
+    for (uint cc = startRowIndex + get_group_id(0); cc < startRowIndex + processedRowCountPerKernelCall; cc += get_num_groups(0))
+    {
+        uint aIndex = cc * inputLength;
+        uint aShift = aIndex % 2;
+
+        for (int dd = cc + 1; dd < count; dd++)
         {
-            //printf(""cc = %i, dd = %i\r\n"", cc, dd);
-
             //------------------------ GetExpDistanceDab ------------------------------
 
-//////////            float result = 0;
-//////////            
-//////////            for (int uu = 0; uu < inputLength; uu++)
-//////////            {
-//////////                float diff = fxwList[cc * inputLength + uu] - fxwList[dd * inputLength + uu];
-//////////                result += diff * diff;
-//////////            }
+            uint bIndex = dd * inputLength;
+            uint bShift = bIndex % 2;
 
-            int ddTail = (dd * inputLength) % 16;
-            __global float * fxwDD = fxwList + ddTail;
+            uint ostatok = inputLength % 2;
 
-            //нельзя выносить наружу, так как переменные изменяются в цикле ниже
-            uint cci = (cc * inputLength) >> 4;
-            uint ddi = (dd * inputLength) >> 4;
-
-            //GetExpDistanceDab vectorized
-            float16 result16 = 0;
-
-            uint uu = 0;
-            for (; uu < inputLength >> 4; uu++, cci++, ddi++)
+            float local_result = 0;
+            for (int uu = get_local_id(0) * 2; uu < inputLength - ostatok; uu += get_local_size(0) * 2)
             {
-                float16 fxwA = vload16(
-                    cci, 
-                    fxwCC);
-
-                float16 fxwB = vload16(
-                    ddi, 
-                    fxwDD);
-    
-                float16 diff16 = fxwA - fxwB;
-                result16 += diff16 * diff16;
-            }
-            uu = inputLength - inputLength % 16;
-
-//            uint uu = 0;
-//            for (; uu < inputLength - inputLength % 16; uu+=16)
-//            {
-//                int ccindex = cc * inputLength + uu;
-//
-//                float16 fxwA = vload16(
-//                    ccindex >> 4, 
-//                    fxwCC);
-//    
-//                int ddindex = dd * inputLength + uu;
-//                float16 fxwB = vload16(
-//                    ddindex >> 4, 
-//                    fxwDD);
-//    
-//                float16 diff16 = fxwA - fxwB;
-//                result16 += diff16 * diff16;
-//            }
-    
-            float result = 
-                result16.s0 +
-                result16.s1 +
-                result16.s2 +
-                result16.s3 +
-                result16.s4 +
-                result16.s5 +
-                result16.s6 +
-                result16.s7 +
-                result16.s8 +
-                result16.s9 +
-                result16.sa +
-                result16.sb +
-                result16.sc +
-                result16.sd +
-                result16.se +
-                result16.sf;
-    
-            for (; uu < inputLength; uu++)
-            {
-                float diff = fxwList[cc * inputLength + uu] - fxwList[dd * inputLength + uu];
-                result += diff * diff;
+                float2 afloat2 = vload_half2((aIndex + uu) / 2, fxwList + aShift);
+                float2 bfloat2 = vload_half2((bIndex + uu) / 2, fxwList + bShift);
+                float2 diff = afloat2 - bfloat2;
+                local_result += diff.x * diff.x + diff.y * diff.y;
             }
 
+            if(get_local_id(0) == 0)
+            {
+                if(ostatok > 0)
+                {
+                    float afloat = vload_half((cc + 1) * inputLength - 1, fxwList);
+                    float bfloat = vload_half((dd + 1) * inputLength - 1, fxwList);
+                    float diff = afloat - bfloat;
+                    local_result += diff * diff;
+                }
+            }
+
+            local_results[get_local_id(0)] = local_result;
+            barrier(CLK_LOCAL_MEM_FENCE);
+
+            WarpReductionToFirstElement(local_results);
+            barrier(CLK_LOCAL_MEM_FENCE);
+
+            if(get_local_id(0) == 0)
+            {
+                float result = local_results[0];
+                
 #ifdef DODF_DISABLE_EXP
-            float write_result = -result;
-            //there is no needs in if clause due to 'debug' mode
+                float write_result = -result;
+                //there is no needs in if clause due to 'debug' mode
 #else
-            float write_result = exp(-result);
-            if(write_result >= threshold)
+                float write_result = exp(-result);
+                if(write_result >= threshold)
 #endif
 
-            {
-                //printf(""cc = %i, dd = %i\r\n"", cc, dd);
-
-                int index = ObtainIndex(indexArray);
-                distance[index * 3 + 0] = cc;
-                distance[index * 3 + 1] = dd;
-                distance[index * 3 + 2] = write_result;
+                {
+                    int index = ObtainIndex(indexArray);
+                    distance[index * 3 + 0] = cc;
+                    distance[index * 3 + 1] = dd;
+                    distance[index * 3 + 2] = write_result;
+                }
             }
+
+            // Synchronize to make sure the first work-item is done with
+            // reading partialDotProduct
+            barrier(CLK_LOCAL_MEM_FENCE);
         }
     }
 }
@@ -199,12 +163,19 @@ __kernel void DistanceKernel(
 #endif
 
                 var distanceKernel = clProvider.CreateKernel(kernelText, "DistanceKernel");
-                var clearKernel = clProvider.CreateKernel(kernelText, "ClearIndexKernel");
 
                 #region определяем параметры запуска кернела
 
+                //размер локальной группы вычислителей GPU
+                const int szLocalSize = 128;
+
+                //количество групп (настроено вручную согласно производительности NVidia GeForce 730M и AMD Radeon 7750
+                int szNumGroups = 
+                    16 
+                    * clProvider.Parameters.NumComputeUnits;
+
                 //глобальный размер
-                int szGlobalSize = clProvider.Parameters.NumComputeUnits;
+                int szGlobalSize = szNumGroups * szLocalSize;
 
                 #endregion
 
@@ -231,23 +202,28 @@ __kernel void DistanceKernel(
 
                     #region запуск кернела и ожидание результатов
 
-                    clearKernel
-                        .SetKernelArgMem(0, clProvider.IndexMem)
-                        .EnqueueNDRangeKernel(1);
-
                     distanceKernel
                         .SetKernelArgMem(0, clProvider.FxwMem)
                         .SetKernelArgMem(1, clProvider.DistanceMem)
                         .SetKernelArgMem(2, clProvider.IndexMem)
-                        .SetKernelArg(3, 4, Threshold)
-                        .SetKernelArg(4, 4, DistanceMemElementCount)
-                        .SetKernelArg(5, 4, inputLength)
-                        .SetKernelArg(6, 4, startRowIndex)
-                        .SetKernelArg(7, 4, processedRowCountPerKernelCall)
-                        .SetKernelArg(8, 4, fxwList.Count)
+                        .SetKernelArgLocalMem(3, 4*szLocalSize)
+                        .SetKernelArg(4, 4, Threshold)
+                        .SetKernelArg(5, 4, DistanceMemElementCount)
+                        .SetKernelArg(6, 4, inputLength)
+                        .SetKernelArg(7, 4, startRowIndex)
+                        .SetKernelArg(8, 4, processedRowCountPerKernelCall)
+                        .SetKernelArg(9, 4, fxwList.Count)
                         .EnqueueNDRangeKernel(
+                            new int[]
+                            {
                                 szGlobalSize
+                            }
+                            , new int[]
+                            {
+                                szLocalSize
+                            }
                         );
+
 
                     clProvider.DistanceMem.Read(BlockModeEnum.NonBlocking);
                     clProvider.IndexMem.Read(BlockModeEnum.NonBlocking);
@@ -285,7 +261,7 @@ __kernel void DistanceKernel(
                 var totalItemCount = (long)(fxwList.Count + 1) * fxwList.Count / 2;
 
                 ConsoleAmbientContext.Console.WriteLine(
-                    "CPU: fxwList count = {0}, total items {1}, processed items {2}, {3}%, others values are below threshold = {4}, with kernel execution count = {5}",
+                    "GPU: fxwList count = {0}, total items {1}, processed items {2}, {3}%, others values are below threshold = {4}, with kernel execution count = {5}",
                     fxwList.Count,
                     totalItemCount,
                     totalItemsCountProcessedByKernel,
@@ -301,6 +277,5 @@ __kernel void DistanceKernel(
 
 
 
-    
     }
 }

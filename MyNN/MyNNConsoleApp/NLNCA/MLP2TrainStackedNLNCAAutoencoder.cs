@@ -4,13 +4,19 @@ using MyNN;
 using MyNN.Data;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TrainDataProvider.Noiser;
+using MyNN.Data.TrainDataProvider.Noiser.Range;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Autoencoders;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3.Float;
 using MyNN.MLP2.Backpropagation.Metrics;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.BackpropagationFactory;
+using MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.GPU;
+using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.GPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Saver;
@@ -24,9 +30,9 @@ namespace MyNNConsoleApp.NLNCA
     {
         public static void Train()
         {
-            var root = "SDAE" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            var root = "SDAE" + DateTime.Now.ToString("yyyyMMddHHmmss") + " NLNCA";
 
-            var rndSeed = 7835;
+            var rndSeed = 7836;
             var randomizer = new DefaultRandomizer(ref rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
@@ -41,11 +47,13 @@ namespace MyNNConsoleApp.NLNCA
                 100,
                 true);
 
-            var noiser = new SetOfNoisers2(
+            var noiser = new AllNoisers(
                 randomizer,
-                new Pair<float, INoiser>(0.33f, new ZeroMaskingNoiser(randomizer, 0.30f)),
-                new Pair<float, INoiser>(0.33f, new SaltAndPepperNoiser(randomizer, 0.30f)),
-                new Pair<float, INoiser>(0.34f, new GaussNoiser(0.25f, false))
+                new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
+                new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
+                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer)),
+                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomRange(randomizer)),
+                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))
                 );
 
             var firstLayerSize = trainData[0].Input.Length;
@@ -54,8 +62,6 @@ namespace MyNNConsoleApp.NLNCA
 
             const float lambda = 0.1f;
             const float partTakeOfAccount = 0.5f;
-
-            throw new NotImplementedException();
 
             var sa = new StackedAutoencoder(
                 randomizer,
@@ -79,26 +85,35 @@ namespace MyNNConsoleApp.NLNCA
                 },
                 (int depthIndex) =>
                 {
-                    var lr = 0.0005f;
+                    var lr =
+                        depthIndex == 0
+                            ? 0.005f
+                            : 0.001f;
 
                     var conf = new LearningAlgorithmConfig(
                         new LinearLearningRate(lr, 0.99f),
-                        100,
+                        2500,
                         0.0f,
-                        100,
+                        50,
                         0f,
-                        -0.001f);
+                        -0.0025f);
 
                     return conf;
                 },
-                //lambda,
-                //partTakeOfAccount,
-                new GPUBackpropagationAlgorithmFactory(), 
-                new GPUForwardPropagationFactory(),
-                new LayerInfo(firstLayerSize, new IRLUFunction()),
-                new LayerInfo(600, new IRLUFunction()),
-                new LayerInfo(600, new IRLUFunction()),
-                new LayerInfo(2200, new IRLUFunction())
+                new CPUNLNCABackpropagationAlgorithmFactory(
+                    (data) => 
+                        new DodfCalculatorOpenCL(
+                            data,
+                            new VectorizedCpuDistanceDictCalculator() //generation 3
+                            ),
+                    1,
+                    lambda,
+                    partTakeOfAccount), 
+                new CPUForwardPropagationFactory(),
+                new LayerInfo(firstLayerSize, new RLUFunction()),
+                new LayerInfo(600, new RLUFunction()),
+                new LayerInfo(600, new RLUFunction()),
+                new LayerInfo(2200, new RLUFunction())
                 );
 
             if (!Directory.Exists(root))

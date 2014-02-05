@@ -298,12 +298,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CP
                         var dodf = dodfCalculator.CalculateDodf(uzIndex);
 
                         dodf.CopyTo(_dodfMem.Array, 0);
-                        _dodfMem.Write(BlockModeEnum.Blocking);
+                        _dodfMem.Write(BlockModeEnum.NonBlocking);
                     }
 
                     //отправляем на OpenCL желаемые выходы
                     trainData.Input.CopyTo(_desiredOutput.Array, 0); //инпут, так как, несмотря на то, что это автоенкодер, нам требуются и labels и датасет не автоенкодерный
-                    _desiredOutput.Write(BlockModeEnum.Blocking);
+                    _desiredOutput.Write(BlockModeEnum.NonBlocking);
 
                     //output layer
                     var outputLayerIndex = _mlp.Layers.Length - 1;
@@ -448,6 +448,10 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CP
 
                         ConsoleAmbientContext.Console.ReturnCarriage();
                     }
+
+
+                    // Make sure we're done with everything that's been requested before
+                    _clProvider.QueueFinish();
                 }
 
                 //update weights and bias into opencl memory wrappers
@@ -477,7 +481,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CP
                 // Make sure we're done with everything that's been requested before
                 _clProvider.QueueFinish();
 
-                #region записываем веса в весь, чтобы следующий цикл просчета uzkii не затер веса (он выполняет PushWeights)
+                #region записываем веса в сеть, чтобы следующий цикл просчета uzkii не затер веса (он выполняет PushWeights)
 
                 //считываем веса с устройства
                 PopWeights();

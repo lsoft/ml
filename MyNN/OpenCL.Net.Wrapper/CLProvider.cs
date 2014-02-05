@@ -1,5 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using OpenCL.Net.Extensions;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
@@ -155,18 +160,57 @@ namespace OpenCL.Net.Wrapper
 
         #endregion
 
+
+        private string GetResourceFile(string resourceName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            //var resourceName = "MyCompany.MyProduct.MyFile.txt";
+
+            var names = assembly.GetManifestResourceNames().ToList();
+
+            //names.ForEach(j => Console.WriteLine(j));
+
+            var stream = assembly.GetManifestResourceStream(resourceName);
+
+            if (stream != null)
+            {
+                try
+                {
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var result = reader.ReadToEnd();
+                        return result;
+                    }
+                }
+                finally
+                {
+                    stream.Dispose();
+                }
+            }
+
+            return null;
+
+        }
+
         /// <summary>
         /// загружаем программу и параметры
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="kernelName"></param>
+        /// <param name="source">Текст кернела (или кернелов)</param>
+        /// <param name="kernelName">Имя кернела</param>
         public Kernel CreateKernel(
             string source,
             string kernelName)
         {
+            var fullTextStringBuilder = new StringBuilder();
+            fullTextStringBuilder.Append(
+                GetResourceFile("OpenCL.Net.Wrapper.KernelLibrary.WarpReduction.cl"));
+            fullTextStringBuilder.Append(source);
+
+            var fullText = fullTextStringBuilder.ToString();
+
             ErrorCode error;
 
-            var program = Cl.CreateProgramWithSource(_context, 1, new[] { source }, null, out error);
+            var program = Cl.CreateProgramWithSource(_context, 1, new[] { fullText }, null, out error);
             if (error != ErrorCode.Success)
             {
                 throw new InvalidProgramException(string.Format("Unable to run Cl.CreateProgramWithSource for program: {0}!", error));

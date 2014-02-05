@@ -36,7 +36,6 @@ namespace MyNNConsoleApp
                 //NvidiaBackpropSmallMLPOptimizer.Optimize();
                 //NvidiaDoDfCalculatorOptimizer.Optimize();
                 NvidiaDoDfCalculatorGeneration2Optimizer.Optimize();
-                //Console.ReadLine();
                 return;
                 //*/
 
@@ -164,7 +163,7 @@ namespace MyNNConsoleApp
                 //MLP2NLNCA.TrainNLNCA();
                 //MLP2AutoencoderNLNCA.TrainAutoencoderNLNCA();
                 //MLP2NLNCAAutoencoderTest.Test();
-                //MLP2TrainStackedNLNCAAutoencoder.Train();
+                MLP2TrainStackedNLNCAAutoencoder.Train();
                 //*/
                 
                 Console.WriteLine(".......... press any key to exit");
