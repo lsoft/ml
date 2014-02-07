@@ -12,12 +12,16 @@ using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Distan
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3.Float;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3.Half;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
 using MyNN.MLP2.LearningConfig;
+using MyNN.MLP2.Randomizer;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
+using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
+using DefaultRandomizer = MyNN.Randomizer.DefaultRandomizer;
 
 namespace MyNNConsoleApp.Nvidia
 {
@@ -59,10 +63,57 @@ namespace MyNNConsoleApp.Nvidia
 
             var dataset = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                //int.MaxValue
-                1000
+                int.MaxValue
+                //100
                 );
             dataset.Normalize();
+
+
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            //////////int seed = 1;
+            //////////var mlp = new MLP(
+            //////////    new DefaultRandomizer(ref seed),
+            //////////    null,
+            //////////    null,
+            //////////    new IFunction[]
+            //////////    {
+            //////////        null,
+            //////////        new HyperbolicTangensFunction(), 
+            //////////    },
+            //////////    new int[]
+            //////////    {
+            //////////        28*28,
+            //////////        500
+            //////////    });
+
+            //////////using (var cl = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(), true))
+            //////////{
+            //////////    var forward = new GPUForwardPropagation(
+            //////////        mlp,
+            //////////        cl);
+
+            //////////    var output = forward.ComputeOutput(dataset);
+
+            //////////    var dd = new GpuHalfDistanceDictCalculator(
+            //////////        new NvidiaOrAmdGPUDeviceChooser());
+
+            //////////    TimeSpan takenTime;
+
+            //////////    var result = dd.CreateDistanceDict(
+            //////////        output.ConvertAll(j => new DataItem(j.State, new float[1])),
+            //////////        out takenTime);
+
+            //////////    Console.WriteLine(
+            //////////        "TEST TAKES {0}",
+            //////////        takenTime);
+            //////////}
+
+            //////////return;
+
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
             dataset.Data.ForEach(j => j.Input.Transform((a) => ((int)(a  * 256)) / 256f));
 
