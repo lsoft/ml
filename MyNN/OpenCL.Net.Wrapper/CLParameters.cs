@@ -17,6 +17,12 @@ namespace OpenCL.Net.Wrapper
             private set;
         }
 
+        public int VendorId
+        {
+            get;
+            private set;
+        }
+
         public string OpenclVersion
         {
             get;
@@ -103,6 +109,33 @@ namespace OpenCL.Net.Wrapper
             private set;
         }
 
+        public bool IsVendorIntel
+        {
+            get
+            {
+                return
+                    VendorId == 32902;
+            }
+        }
+
+        public bool IsVendorAMD
+        {
+            get
+            {
+                return
+                    VendorId == 4098;
+            }
+        }
+
+        public bool IsVendorNvidia
+        {
+            get
+            {
+                return
+                    VendorId == 4318;
+            }
+        }
+
         public CLParameters(
             Device device)
         {
@@ -110,6 +143,7 @@ namespace OpenCL.Net.Wrapper
 
             DeviceName = Cl.GetDeviceInfo(device, DeviceInfo.Name, out error).ToString();
             Vendor = Cl.GetDeviceInfo(device, DeviceInfo.Vendor, out error).ToString();
+            VendorId = Cl.GetDeviceInfo(device, DeviceInfo.VendorId, out error).CastTo<int>();
             OpenclVersion = Cl.GetDeviceInfo(device, DeviceInfo.Version, out error).ToString();
             DriverVersion = Cl.GetDeviceInfo(device, DeviceInfo.DriverVersion, out error).ToString();
             GlobalMemorySize = Cl.GetDeviceInfo(device, DeviceInfo.GlobalMemSize, out error).CastTo<long>();
@@ -131,8 +165,8 @@ namespace OpenCL.Net.Wrapper
         public void DumpToConsole()
         {
             Console.WriteLine("OpenCL device: " + DeviceName);
-            Console.WriteLine("OpenCL vendor: " + Vendor);
-            Console.WriteLine("OpenCL version: " + OpenclVersion);
+            Console.WriteLine("OpenCL vendor: [{0}] {1}", VendorId, Vendor);
+            Console.WriteLine("OpenCL version:  " + OpenclVersion);
             Console.WriteLine("OpenCL driver version: " + DriverVersion);
             Console.WriteLine("Device global memory: {0} MB", (int) (GlobalMemorySize/1024/1024));
             Console.WriteLine("Device local memory: {0} KB", (int)(LocalMemorySize / 1024));

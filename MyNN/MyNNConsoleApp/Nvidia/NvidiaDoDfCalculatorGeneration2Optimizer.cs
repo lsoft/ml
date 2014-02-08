@@ -63,8 +63,8 @@ namespace MyNNConsoleApp.Nvidia
 
             var dataset = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                int.MaxValue
-                //100
+                //int.MaxValue
+                1000
                 );
             dataset.Normalize();
 
