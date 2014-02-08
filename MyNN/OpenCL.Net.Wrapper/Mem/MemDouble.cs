@@ -7,7 +7,7 @@ namespace OpenCL.Net.Wrapper.Mem
         public MemDouble(
             CommandQueue commandQueue,
             Context context,
-            int arrayLength,
+            long arrayLength,
             MemFlags flags)
             : base(commandQueue, context, arrayLength, 8, flags)
         {

@@ -220,7 +220,7 @@ namespace MyNNConsoleApp.Nvidia
         private static DodfDistanceContainer ProfileNvidiaGPU(
             DataSet dataset)
         {
-            var dd = new GpuHalfDistanceDictCalculator(
+            var dd = new MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4.GpuHalfDistanceDictCalculator(
                 new NvidiaOrAmdGPUDeviceChooser());
 
             TimeSpan takenTime;

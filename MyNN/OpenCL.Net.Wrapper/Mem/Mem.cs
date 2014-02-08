@@ -23,7 +23,7 @@ namespace OpenCL.Net.Wrapper.Mem
         protected Mem(
             CommandQueue commandQueue,
             Context context,
-            int arrayLength,
+            long arrayLength,
             int sizeOfT,
             MemFlags flags)
         {
@@ -32,7 +32,7 @@ namespace OpenCL.Net.Wrapper.Mem
 
             Array = new T[arrayLength];
 
-            _mem = context.CreateBuffer(Array);
+            _mem = context.CreateBuffer(Array, flags);
             //_mem = context.AllocateArray<T>(Array, _sizeOfT, flags);
         }
 

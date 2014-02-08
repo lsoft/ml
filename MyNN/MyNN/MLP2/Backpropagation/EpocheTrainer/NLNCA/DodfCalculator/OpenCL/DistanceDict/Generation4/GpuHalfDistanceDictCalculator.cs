@@ -5,10 +5,10 @@ using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4.Half
+namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4
 {
     /// <summary>
-    /// Correct implementations of distance provider for dOdF algorithm that enables GPU-OpenCL with HALF input representation.
+    /// Correct implementation of distance provider for dOdF algorithm that enables GPU-OpenCL with HALF input representation.
     /// This implementation contains optimizations in memory consumption in distance table and introduce threshold in distance metric.
     /// PS: To work correctly this kernel needs a disabled Tdr:
     /// http://msdn.microsoft.com/en-us/library/windows/hardware/ff569918%28v=vs.85%29.aspx
@@ -55,9 +55,10 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
 
             var inputLength = fxwList[0].Input.Length;
 
-            using (var clProvider = new OpenCLDistanceDictHalfProvider(_deviceChooser, true, fxwList, DistanceMemElementCount))
+            using (var clProvider = new Generation4.OpenCLDistanceDictHalfProvider(_deviceChooser, true, fxwList, DistanceMemElementCount))
             {
                 var kernelText = @"
+
 inline int ObtainIndex(volatile __global int * indexArray)
 {
     return
@@ -154,6 +155,28 @@ __kernel void DistanceKernel(
         }
     }
 }
+
+__kernel void CopyToAccumKernel(
+    const __global float * distance,
+    __global float * accumulator,
+    __local float * local_results,
+    long accumShift,
+    long totalCount)
+{
+    //accumulator[get_global_id(0) + accumShift] = distance[get_global_id(0)];
+
+    if(get_global_id(0) < totalCount)
+    {
+        local_results[get_local_id(0)] = distance[get_global_id(0)];
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    if(get_global_id(0) < totalCount)
+    {
+        accumulator[get_global_id(0) + accumShift] = local_results[get_local_id(0)];
+    }
+}
 ";
 
 #if DODF_DISABLE_EXP
@@ -163,24 +186,47 @@ __kernel void DistanceKernel(
 #endif
 
                 var distanceKernel = clProvider.CreateKernel(kernelText, "DistanceKernel");
+                var copyToAccumKernel = clProvider.CreateKernel(kernelText, "CopyToAccumKernel");
 
                 #region определяем параметры запуска кернела
 
                 //размер локальной группы вычислителей GPU
-                const int szLocalSize = 128;
+                int szLocalSize;
 
-                //количество групп (настроено вручную согласно производительности NVidia GeForce 730M и AMD Radeon 7750
-                int szNumGroups = 
-                    16 
-                    * clProvider.Parameters.NumComputeUnits;
+                //количество групп 
+                int szNumGroups;
+
+                //настроено вручную согласно производительности NVidia GeForce 730M и AMD Radeon 7750
+                if (clProvider.Parameters.IsVendorAMD)
+                {
+                    szLocalSize = 64;
+                    szNumGroups =
+                        256
+                        * clProvider.Parameters.NumComputeUnits;
+
+                }
+                else
+                {
+                    //в том числе нвидия
+                    szLocalSize = 128;
+                    szNumGroups =
+                        16
+                        * clProvider.Parameters.NumComputeUnits;
+                }
 
                 //глобальный размер
-                int szGlobalSize = szNumGroups * szLocalSize;
+                var szGlobalSize = szNumGroups * szLocalSize;
 
                 #endregion
 
                 var totalItemsCountProcessedByKernel = 0L;
                 var totalKernelExcutionCount = 0;
+
+                //фактор заполнения массива вычисленными значениями (если вычисленных значений мало, массив clProvider.DistanceMem используется не полностью
+                //поэтому можно пропорционально увеличить число обрабатываемых строк за вызов кернела; предполагается, что статистически
+                //процент вычисленных значений будет примерно одинаков между строками);
+                var fillFactor = 1f;
+                var fillFactorCalculated = false;
 
                 //Запускаем кернел
                 var totalTakenTime = new TimeSpan(0L);
@@ -188,7 +234,7 @@ __kernel void DistanceKernel(
                 for (var startRowIndex = 0; startRowIndex < fxwList.Count; )
                 {
                     //количество строк, обрабатываемое за один вызов кернела (оно меняется от итерации к итерации из-за того, что крайние (нижние) строки короче
-                    int processedRowCountPerKernelCall = DistanceMemElementCount / (fxwList.Count - startRowIndex);
+                    int processedRowCountPerKernelCall = (int) (DistanceMemElementCount/(fxwList.Count - startRowIndex)/fillFactor);
 
                     if (processedRowCountPerKernelCall < 1)
                     {
@@ -206,7 +252,7 @@ __kernel void DistanceKernel(
                         .SetKernelArgMem(0, clProvider.FxwMem)
                         .SetKernelArgMem(1, clProvider.DistanceMem)
                         .SetKernelArgMem(2, clProvider.IndexMem)
-                        .SetKernelArgLocalMem(3, 4*szLocalSize)
+                        .SetKernelArgLocalMem(3, sizeof (float)*szLocalSize)
                         .SetKernelArg(4, 4, Threshold)
                         .SetKernelArg(5, 4, DistanceMemElementCount)
                         .SetKernelArg(6, 4, inputLength)
@@ -239,33 +285,89 @@ __kernel void DistanceKernel(
                     totalKernelExcutionCount++;
 
                     var itemsCountProcessedByKernel = clProvider.IndexMem.Array[0];
-                    totalItemsCountProcessedByKernel += itemsCountProcessedByKernel;
+
+                    if (itemsCountProcessedByKernel > DistanceMemElementCount)
+                    {
+                        throw new Exception("Число обработанных элементов превысило размер массива; результат такой операции не определен. Аварийный останов. Попробуйте отключить fillFactor.");
+                    }
 
                     #region заполняем диктионари
 
                     for (var cc = 0; cc < itemsCountProcessedByKernel; cc++)
                     {
-                        var aIndex = (int)clProvider.DistanceMem.Array[cc * 3 + 0];
-                        var bIndex = (int)clProvider.DistanceMem.Array[cc * 3 + 1];
-                        var distance = clProvider.DistanceMem.Array[cc * 3 + 2];
+                        var aIndex = (int) clProvider.DistanceMem.Array[cc*3 + 0];
+                        var bIndex = (int) clProvider.DistanceMem.Array[cc*3 + 1];
+                        var distance = clProvider.DistanceMem.Array[cc*3 + 2];
 
                         result.AddValue(aIndex, bIndex, distance);
                     }
 
                     #endregion
-                    
+
+                    #region обновляем фактор заполнения
+
+                    if (!fillFactorCalculated)
+                    {
+                        if (itemsCountProcessedByKernel > 0)
+                        {
+                            //20% запас на погрешность
+                            fillFactor = Math.Min(1.0f, 1.2f*itemsCountProcessedByKernel/(float) DistanceMemElementCount);
+
+                            fillFactorCalculated = true;
+                        }
+                    }
+
+                    #endregion
+
+                    #region работаем с аккулумятором
+
+                    if (fillFactorCalculated)
+                    {
+                        //если аккумулятора нет, то создаем его
+                        if (clProvider.AccumMem == null)
+                        {
+                            var prognosisAboutTotalSize = (long) (fillFactor*GetTotalItemCount(fxwList));
+
+                            clProvider.AllocateAccumulator(prognosisAboutTotalSize);
+                        }
+
+                        const int accumCopyLocalSize = 128;
+                        long totalCount = itemsCountProcessedByKernel*3;
+
+                        //выполняем кернел копирования
+                        copyToAccumKernel
+                            .SetKernelArgMem(0, clProvider.DistanceMem)
+                            .SetKernelArgMem(1, clProvider.AccumMem)
+                            .SetKernelArgLocalMem(2, sizeof(float) * accumCopyLocalSize)
+                            .SetKernelArg(3, 8, (long)(totalItemsCountProcessedByKernel * 3))
+                            .EnqueueNDRangeKernel(
+                                new int[]
+                                {
+                                    1//totalCount + (accumCopyLocalSize - totalCount % accumCopyLocalSize)
+                                },
+                                new int[]
+                                {
+                                    accumCopyLocalSize
+                                });
+
+                        clProvider.AccumMem.Read(BlockModeEnum.Blocking);
+                    }
+
+                    #endregion
+
                     //следующая итерация цикла
+                    totalItemsCountProcessedByKernel += itemsCountProcessedByKernel;
                     startRowIndex += processedRowCountPerKernelCall;
                 }
 
-                var totalItemCount = (long)(fxwList.Count + 1) * fxwList.Count / 2;
+                var totalItemCount = GetTotalItemCount(fxwList);
 
                 ConsoleAmbientContext.Console.WriteLine(
                     "GPU: fxwList count = {0}, total items {1}, processed items {2}, {3}%, others values are below threshold = {4}, with kernel execution count = {5}",
                     fxwList.Count,
                     totalItemCount,
                     totalItemsCountProcessedByKernel,
-                    totalItemsCountProcessedByKernel * 10000.0 / totalItemCount / (long)100,
+                    totalItemsCountProcessedByKernel * 10000.0 / totalItemCount / 100L,
                     Threshold,
                     totalKernelExcutionCount);
 
@@ -275,6 +377,16 @@ __kernel void DistanceKernel(
             return result;
         }
 
+        private long GetTotalItemCount(List<DataItem> fxwList)
+        {
+            if (fxwList == null)
+            {
+                throw new ArgumentNullException("fxwList");
+            }
+
+            return
+                (long)(fxwList.Count + 1) * fxwList.Count / 2;
+        }
 
 
     }

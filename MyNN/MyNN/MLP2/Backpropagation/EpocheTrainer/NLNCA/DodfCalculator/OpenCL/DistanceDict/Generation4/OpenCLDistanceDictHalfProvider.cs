@@ -6,7 +6,7 @@ using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4.Half
+namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4
 {
     /// <summary>
     /// Correct OpenCL provider for generation #4 distance providers that consumes HALF input representations.
@@ -34,12 +34,18 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
             private set;
         }
 
+        public MemFloat AccumMem
+        {
+            get;
+            private set;
+        }
+
         public OpenCLDistanceDictHalfProvider(
-            IDeviceChooser deviceChooser, 
-            bool silentStart, 
+            IDeviceChooser deviceChooser,
+            bool silentStart,
             List<DataItem> fxwList,
             int distanceMemElementCount)
-                : base(deviceChooser, silentStart)
+            : base(deviceChooser, silentStart)
         {
             if (fxwList == null)
             {
@@ -52,6 +58,19 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
             this.GenerateMems();
             this.FillMems();
             this.WriteMems();
+        }
+
+        public void AllocateAccumulator(
+            long accumulatorItemCount)
+        {
+            if (this.AccumMem != null)
+            {
+                throw new InvalidOperationException("Accumulator already allocated.");
+            }
+
+            this.AccumMem = this.CreateFloatMem(
+                accumulatorItemCount * 3,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
         }
 
         private void WriteMems()
@@ -90,6 +109,8 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
             DistanceMem = this.CreateFloatMem(
                 _distanceMemElementCount * 3,
                 MemFlags.CopyHostPtr | MemFlags.WriteOnly);
+
+            AccumMem = null;
         }
     }
 }

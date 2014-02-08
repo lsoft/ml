@@ -7,7 +7,7 @@ namespace OpenCL.Net.Wrapper.Mem
         public MemUint(
             CommandQueue commandQueue,
             Context context,
-            int arrayLength,
+            long arrayLength,
             MemFlags flags)
             : base(commandQueue, context, arrayLength, 4, flags)
         {

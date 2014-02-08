@@ -254,7 +254,7 @@ namespace OpenCL.Net.Wrapper
         }
 
         public MemUint CreateUintMem(
-            int arrayLength,
+            long arrayLength,
             MemFlags flags)
         {
             var memi = new MemUint(
@@ -269,7 +269,7 @@ namespace OpenCL.Net.Wrapper
         }
 
         public MemInt CreateIntMem(
-            int arrayLength,
+            long arrayLength,
             MemFlags flags)
         {
             var memi = new MemInt(
@@ -284,7 +284,7 @@ namespace OpenCL.Net.Wrapper
         }
 
         public MemHalf CreateHalfMem(
-            int arrayLength,
+            long arrayLength,
             MemFlags flags)
         {
             var memh = new MemHalf(
@@ -300,7 +300,7 @@ namespace OpenCL.Net.Wrapper
 
 
         public MemFloat CreateFloatMem(
-            int arrayLength,
+            long arrayLength,
             MemFlags flags)
         {
             var memf = new MemFloat(
@@ -315,7 +315,7 @@ namespace OpenCL.Net.Wrapper
         }
 
         public MemDouble CreateDoubleMem(
-            int arrayLength,
+            long arrayLength,
             MemFlags flags)
         {
             var memd = new MemDouble(
