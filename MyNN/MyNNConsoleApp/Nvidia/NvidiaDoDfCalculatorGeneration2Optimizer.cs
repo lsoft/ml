@@ -31,7 +31,7 @@ namespace MyNNConsoleApp.Nvidia
         {
             float maxDiff = float.MinValue;
 
-            //const int DataItemCount = 10001;
+            //const int DataItemCount = 3001;
             //const int DataItemLength = 787;
 
             //int genSeed = 123; //DateTime.Now.Millisecond;
@@ -127,7 +127,7 @@ namespace MyNNConsoleApp.Nvidia
                     nvidiaResult = ProfileNvidiaGPU(
                         dataset);
                 }
-
+                return;
                 DodfDistanceContainer intelResult;
                 {
                     intelResult = ProfileIntelCPU(
