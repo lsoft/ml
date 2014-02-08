@@ -5,6 +5,10 @@ namespace OpenCL.Net.Wrapper
 {
     public class CLParameters
     {
+        public const int IntelVendorId = 32902;
+        public const int NvidiaVendorId = 4318;
+        public const int AMDVendorId = 4098;
+
         public string DeviceName
         {
             get;
@@ -114,7 +118,7 @@ namespace OpenCL.Net.Wrapper
             get
             {
                 return
-                    VendorId == 32902;
+                    VendorId == IntelVendorId;
             }
         }
 
@@ -123,7 +127,7 @@ namespace OpenCL.Net.Wrapper
             get
             {
                 return
-                    VendorId == 4098;
+                    VendorId == AMDVendorId;
             }
         }
 
@@ -132,7 +136,7 @@ namespace OpenCL.Net.Wrapper
             get
             {
                 return
-                    VendorId == 4318;
+                    VendorId == NvidiaVendorId;
             }
         }
 

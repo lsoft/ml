@@ -127,7 +127,7 @@ namespace MyNNConsoleApp.Nvidia
                     nvidiaResult = ProfileNvidiaGPU(
                         dataset);
                 }
-                return;
+                //return;
                 DodfDistanceContainer intelResult;
                 {
                     intelResult = ProfileIntelCPU(

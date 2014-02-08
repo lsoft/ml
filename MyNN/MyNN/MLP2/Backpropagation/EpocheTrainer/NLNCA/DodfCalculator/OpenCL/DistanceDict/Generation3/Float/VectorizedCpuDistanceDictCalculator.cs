@@ -14,9 +14,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
     /// </summary>
     public class VectorizedCpuDistanceDictCalculator : IDistanceDictCalculator
     {
-
-    
-            /// <summary>
+        /// <summary>
         /// Distance Mem object length in element (in bytes it will be bigger 12 times (4 byte per float * 3 float per element)
         /// </summary>
         private const int DistanceMemElementCount = 1024 * 1024 * 10;
@@ -27,11 +25,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
         /// </summary>
         private const float Threshold = 1e-20f;
 
+        private readonly bool _fillFactorEnable;
         
         public VectorizedCpuDistanceDictCalculator(
-            )
+            bool fillFactorEnable = true)
         {
-        
+            _fillFactorEnable = fillFactorEnable;
         }
 
         public DodfDistanceContainer CalculateDistances(List<DataItem> fxwList)
@@ -210,13 +209,18 @@ __kernel void DistanceKernel(
                 var totalItemsCountProcessedByKernel = 0L;
                 var totalKernelExcutionCount = 0;
 
+                //фактор заполнения массива вычисленными значениями (если вычисленных значений мало, массив clProvider.DistanceMem используется не полностью
+                //поэтому можно пропорционально увеличить число обрабатываемых строк за вызов кернела; предполагается, что статистически
+                //процент вычисленных значений будет примерно одинаков между строками);
+                var fillFactor = 1f;
+
                 //Запускаем кернел
                 var totalTakenTime = new TimeSpan(0L);
 
                 for (var startRowIndex = 0; startRowIndex < fxwList.Count; )
                 {
                     //количество строк, обрабатываемое за один вызов кернела (оно меняется от итерации к итерации из-за того, что крайние (нижние) строки короче
-                    int processedRowCountPerKernelCall = DistanceMemElementCount / (fxwList.Count - startRowIndex);
+                    int processedRowCountPerKernelCall = (int)(DistanceMemElementCount / (fxwList.Count - startRowIndex) / fillFactor);
 
                     if (processedRowCountPerKernelCall < 1)
                     {
@@ -276,7 +280,23 @@ __kernel void DistanceKernel(
                     }
 
                     #endregion
-                    
+
+                    #region обновляем фактор заполнения
+
+                    if (_fillFactorEnable)
+                    {
+                        if (startRowIndex == 0)
+                        {
+                            if (itemsCountProcessedByKernel > 0)
+                            {
+                                //20% запас на погрешность
+                                fillFactor = Math.Min(1.0f, 1.2f * itemsCountProcessedByKernel / (float)DistanceMemElementCount);
+                            }
+                        }
+                    }
+
+                    #endregion
+
                     //следующая итерация цикла
                     startRowIndex += processedRowCountPerKernelCall;
                 }

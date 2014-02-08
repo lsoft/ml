@@ -35,14 +35,19 @@ namespace OpenCL.Net.Wrapper.DeviceChooser
                 {
                     foreach (var device in deviceIds)
                     {
-                        var vendor = Cl.GetDeviceInfo(device, DeviceInfo.Vendor, out error).ToString();
-                        if (vendor.ToUpper().Contains("INTEL"))
+                        //var vendor = Cl.GetDeviceInfo(device, DeviceInfo.Vendor, out error).ToString();
+                        //if (vendor.ToUpper().Contains("INTEL"))
+
+                        var vendorId = Cl.GetDeviceInfo(device, DeviceInfo.VendorId, out error).CastTo<int>();
+                        if (vendorId == CLParameters.IntelVendorId)
                         {
                             if (_showSelectedVendor)
                             {
+                                var deviceInfo = Cl.GetDeviceInfo(device, DeviceInfo.Name, out error).ToString();
+
                                 Console.WriteLine(
-                                    "Choosed vendor: {0}",
-                                    vendor.ToUpper());
+                                    "Choosed device: {0}",
+                                    deviceInfo);
                             }
 
                             choosedDevice = deviceIds.First();

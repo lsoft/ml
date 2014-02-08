@@ -171,15 +171,31 @@ __kernel void DistanceKernel(
                 #region определяем параметры запуска кернела
 
                 //размер локальной группы вычислителей GPU
-                const int szLocalSize = 64;
+                int szLocalSize;
 
-                //количество групп (настроено вручную согласно производительности NVidia GeForce 730M и AMD Radeon 7750
-                int szNumGroups = 
-                    256
-                    * clProvider.Parameters.NumComputeUnits;
+                //количество групп 
+                int szNumGroups;
+
+                //настроено вручную согласно производительности NVidia GeForce 730M и AMD Radeon 7750
+                if (clProvider.Parameters.IsVendorAMD)
+                {
+                    szLocalSize = 64;
+                    szNumGroups =
+                        256
+                        *clProvider.Parameters.NumComputeUnits;
+
+                }
+                else
+                {
+                    //в том числе нвидия
+                    szLocalSize = 128;
+                    szNumGroups =
+                        16
+                        * clProvider.Parameters.NumComputeUnits;
+                }
 
                 //глобальный размер
-                int szGlobalSize = szNumGroups * szLocalSize;
+                var szGlobalSize = szNumGroups * szLocalSize;
 
                 #endregion
 
@@ -268,7 +284,8 @@ __kernel void DistanceKernel(
 
                     #endregion
 
-                    //обновляем фактор заполнения
+                    #region обновляем фактор заполнения
+
                     if (_fillFactorEnable)
                     {
                         if (startRowIndex == 0)
@@ -280,6 +297,8 @@ __kernel void DistanceKernel(
                             }
                         }
                     }
+
+                    #endregion
 
                     //следующая итерация цикла
                     startRowIndex += processedRowCountPerKernelCall;
