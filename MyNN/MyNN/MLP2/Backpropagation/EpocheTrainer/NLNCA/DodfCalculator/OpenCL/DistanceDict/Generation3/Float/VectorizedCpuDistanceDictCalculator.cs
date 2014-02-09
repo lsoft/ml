@@ -202,7 +202,7 @@ __kernel void DistanceKernel(
                 #region определяем параметры запуска кернела
 
                 //глобальный размер
-                int szGlobalSize = clProvider.Parameters.NumComputeUnits;
+                uint szGlobalSize = clProvider.Parameters.NumComputeUnits;
 
                 #endregion
 

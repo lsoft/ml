@@ -30,9 +30,9 @@ namespace OpenCL.Net.Wrapper
             //_kernel = _program.CreateKernel(kernelName);
         }
 
-        public Kernel SetKernelArgLocalMem(uint argId, int size)
+        public Kernel SetKernelArgLocalMem(uint argId, uint size)
         {
-            var error = Cl.SetKernelArg(_kernel, argId, new IntPtr(size), null);
+            var error = Cl.SetKernelArg(_kernel, argId, new IntPtr((int)size), null);
 
             if (error != ErrorCode.Success)
             {
@@ -87,9 +87,40 @@ namespace OpenCL.Net.Wrapper
         /// <summary>
         /// without local work sizes
         /// </summary>
+        public void EnqueueNDRangeKernel(params ulong[] sizes)
+        {
+            Event clevent;
+
+            var error = Cl.EnqueueNDRangeKernel(
+                _commandQueue,
+                _kernel,
+                (uint)sizes.Length,
+                null,
+                sizes.ToList().Select(size => new IntPtr((long)size)).ToArray(),
+                null,
+                0,
+                null,
+                out clevent);
+
+            if (error != ErrorCode.Success)
+            {
+                throw new InvalidOperationException("EnqueueNDRangeKernel failed:" + error);
+            }
+
+            clevent.Dispose();
+        }
+
+        /// <summary>
+        /// without local work sizes
+        /// </summary>
         public void EnqueueNDRangeKernel(params int[] sizes)
         {
             Event clevent;
+
+            if (sizes.Any(j => j <= 0))
+            {
+                throw new ArgumentOutOfRangeException("sizes");
+            }
 
             var error = Cl.EnqueueNDRangeKernel(
                 _commandQueue,
@@ -108,8 +139,68 @@ namespace OpenCL.Net.Wrapper
             }
 
             clevent.Dispose();
+        }
 
-            //_kernel.EnqueueNDRangeKernel(_commandQueue, sizes);
+        /// <summary>
+        /// with local work sizes
+        /// </summary>
+        public void EnqueueNDRangeKernel(ulong[] globalSizes, ulong[] localSizes)
+        {
+            Event clevent;
+
+            if (globalSizes.Length != localSizes.Length)
+            {
+                throw new InvalidOperationException("globalSizes.Length != localSizes.Length");
+            }
+
+            var error = Cl.EnqueueNDRangeKernel(
+                _commandQueue,
+                _kernel,
+                (uint)globalSizes.Length,
+                null,
+                globalSizes.ToList().Select(size => new IntPtr((long)size)).ToArray(),
+                localSizes.ToList().Select(size => new IntPtr((long)size)).ToArray(),
+                0,
+                null,
+                out clevent);
+
+            if (error != ErrorCode.Success)
+            {
+                throw new InvalidOperationException("EnqueueNDRangeKernel failed:" + error);
+            }
+
+            clevent.Dispose();
+        }
+
+        /// <summary>
+        /// with local work sizes
+        /// </summary>
+        public void EnqueueNDRangeKernel(uint[] globalSizes, uint[] localSizes)
+        {
+            Event clevent;
+
+            if (globalSizes.Length != localSizes.Length)
+            {
+                throw new InvalidOperationException("globalSizes.Length != localSizes.Length");
+            }
+
+            var error = Cl.EnqueueNDRangeKernel(
+                _commandQueue,
+                _kernel,
+                (uint)globalSizes.Length,
+                null,
+                globalSizes.ToList().Select(size => new IntPtr((int)size)).ToArray(),
+                localSizes.ToList().Select(size => new IntPtr((int)size)).ToArray(),
+                0,
+                null,
+                out clevent);
+
+            if (error != ErrorCode.Success)
+            {
+                throw new InvalidOperationException("EnqueueNDRangeKernel failed:" + error);
+            }
+
+            clevent.Dispose();
         }
 
         /// <summary>
@@ -124,7 +215,18 @@ namespace OpenCL.Net.Wrapper
                 throw new InvalidOperationException("globalSizes.Length != localSizes.Length");
             }
 
-            ErrorCode error = Cl.EnqueueNDRangeKernel(
+            if (globalSizes.Any(j => j <= 0))
+            {
+                throw new ArgumentOutOfRangeException("globalSizes");
+            }
+
+            if (localSizes.Any(j => j <= 0))
+            {
+                throw new ArgumentOutOfRangeException("localSizes");
+            }
+
+
+            var error = Cl.EnqueueNDRangeKernel(
                 _commandQueue,
                 _kernel,
                 (uint)globalSizes.Length,
@@ -141,14 +243,8 @@ namespace OpenCL.Net.Wrapper
             }
 
             clevent.Dispose();
-
-            //_kernel.EnqueueNDRangeKernel(_commandQueue, globalSizes, localSizes);
         }
 
-        //public void Execute()
-        //{
-        //    _kernel.EnqueueTask(_commandQueue);
-        //}
 
         public void Dispose()
         {

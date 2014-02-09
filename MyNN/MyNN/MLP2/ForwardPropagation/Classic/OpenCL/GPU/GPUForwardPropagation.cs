@@ -366,8 +366,8 @@ __kernel void ComputeLayerKernel(
                 //var previousLayerNeuronTotalCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
                 //var currentLayerNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
 
-                const int szLocalWorkSize = 256;
-                int szGlobalWorkSize = 64 * _clProvider.Parameters.NumComputeUnits * szLocalWorkSize;
+                const uint szLocalWorkSize = 256;
+                uint szGlobalWorkSize = 64 * _clProvider.Parameters.NumComputeUnits * szLocalWorkSize;
 
                 _mulKernels[layerIndex]
                     .SetKernelArgMem(0, this.StateMem[layerIndex - 1])
@@ -376,11 +376,11 @@ __kernel void ComputeLayerKernel(
                     .SetKernelArgMem(3, this.WeightMem[layerIndex])
                     .SetKernelArgLocalMem(4, 4 * szLocalWorkSize)
                     .EnqueueNDRangeKernel(
-                        new int[]
+                        new []
                         {
                             szGlobalWorkSize
                         }
-                        , new int[]
+                        , new []
                         {
                             szLocalWorkSize
                         }

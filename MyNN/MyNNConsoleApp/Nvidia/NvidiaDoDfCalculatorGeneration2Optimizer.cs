@@ -12,6 +12,7 @@ using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Distan
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3.Float;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation3.Half;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4.Sorter;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Randomizer;
@@ -31,7 +32,7 @@ namespace MyNNConsoleApp.Nvidia
         {
             float maxDiff = float.MinValue;
 
-            //const int DataItemCount = 3001;
+            //const int DataItemCount = 1001;
             //const int DataItemLength = 787;
 
             //int genSeed = 123; //DateTime.Now.Millisecond;
@@ -221,7 +222,8 @@ namespace MyNNConsoleApp.Nvidia
             DataSet dataset)
         {
             var dd = new MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4.GpuHalfDistanceDictCalculator(
-                new NvidiaOrAmdGPUDeviceChooser());
+                new NvidiaOrAmdGPUDeviceChooser(),
+                new SorterFactory<AMDBitonicSorter>());
 
             TimeSpan takenTime;
             var result = dd.CreateDistanceDict(dataset.Data, out takenTime);

@@ -39,42 +39,41 @@ namespace OpenCL.Net.Wrapper
             private set;
         }
 
-        public long GlobalMemorySize
+        public ulong GlobalMemorySize
         {
             get;
             private set;
         }
 
-        public long LocalMemorySize
+        public ulong LocalMemorySize
         {
             get;
             private set;
         }
 
-        public int MaxSamplers
+        public uint MaxSamplers
         {
             get;
             private set;
         }
 
-        public int NumComputeUnits
+        public uint NumComputeUnits
         {
             get;
             private set;
         }
 
-        public int MaxMemAllocSize
+        public uint MaxMemAllocSize
         {
             get;
             private set;
         }
 
-        public int MaxWorkGroupSize
+        public uint MaxWorkGroupSize
         {
             get;
             private set;
         }
-
 
         public string Extensions
         {
@@ -82,32 +81,32 @@ namespace OpenCL.Net.Wrapper
             private set;
         }
 
-        public int PreferredFloat
+        public uint PreferredFloat
         {
             get;
             private set;
         }
 
 
-        public int PreferredDouble
+        public uint PreferredDouble
         {
             get;
             private set;
         }
 
-        public int PreferredShort
+        public uint PreferredShort
         {
             get;
             private set;
         }
 
-        public int PreferredInt
+        public uint PreferredInt
         {
             get;
             private set;
         }
 
-        public int PreferredLong
+        public uint PreferredLong
         {
             get;
             private set;
@@ -150,19 +149,19 @@ namespace OpenCL.Net.Wrapper
             VendorId = Cl.GetDeviceInfo(device, DeviceInfo.VendorId, out error).CastTo<int>();
             OpenclVersion = Cl.GetDeviceInfo(device, DeviceInfo.Version, out error).ToString();
             DriverVersion = Cl.GetDeviceInfo(device, DeviceInfo.DriverVersion, out error).ToString();
-            GlobalMemorySize = Cl.GetDeviceInfo(device, DeviceInfo.GlobalMemSize, out error).CastTo<long>();
-            LocalMemorySize = Cl.GetDeviceInfo(device, DeviceInfo.LocalMemSize, out error).CastTo<long>();
-            MaxSamplers = Cl.GetDeviceInfo(device, DeviceInfo.MaxSamplers, out error).CastTo<int>();
-            NumComputeUnits = Cl.GetDeviceInfo(device, DeviceInfo.MaxComputeUnits, out error).CastTo<int>();
-            MaxMemAllocSize = Cl.GetDeviceInfo(device, DeviceInfo.MaxMemAllocSize, out error).CastTo<int>();
-            MaxWorkGroupSize = Cl.GetDeviceInfo(device, DeviceInfo.MaxWorkGroupSize, out error).CastTo<int>();
+            GlobalMemorySize = Cl.GetDeviceInfo(device, DeviceInfo.GlobalMemSize, out error).CastTo<ulong>();
+            LocalMemorySize = Cl.GetDeviceInfo(device, DeviceInfo.LocalMemSize, out error).CastTo<ulong>();
+            MaxSamplers = Cl.GetDeviceInfo(device, DeviceInfo.MaxSamplers, out error).CastTo<uint>();
+            NumComputeUnits = Cl.GetDeviceInfo(device, DeviceInfo.MaxComputeUnits, out error).CastTo<uint>();
+            MaxMemAllocSize = Cl.GetDeviceInfo(device, DeviceInfo.MaxMemAllocSize, out error).CastTo<uint>();
+            MaxWorkGroupSize = Cl.GetDeviceInfo(device, DeviceInfo.MaxWorkGroupSize, out error).CastTo<uint>();
 
             Extensions = Cl.GetDeviceInfo(device, DeviceInfo.Extensions, out error).ToString();
-            PreferredFloat = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthFloat, out error).CastTo<int>();
-            PreferredDouble = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthDouble, out error).CastTo<int>();
-            PreferredShort = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthShort, out error).CastTo<int>();
-            PreferredInt = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthInt, out error).CastTo<int>();
-            PreferredLong = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthLong, out error).CastTo<int>();
+            PreferredFloat = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthFloat, out error).CastTo<uint>();
+            PreferredDouble = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthDouble, out error).CastTo<uint>();
+            PreferredShort = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthShort, out error).CastTo<uint>();
+            PreferredInt = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthInt, out error).CastTo<uint>();
+            PreferredLong = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthLong, out error).CastTo<uint>();
         }
 
 

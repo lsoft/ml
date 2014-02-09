@@ -257,8 +257,8 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
 
                     var outputNablaLayer = _nablaWeights[outputLayerIndex];
 
-                    const int OutputLocalGroupSize = 256;
-                    int OutputGlobalGroupSize = 128 * _clProvider.Parameters.NumComputeUnits * OutputLocalGroupSize;
+                    const uint OutputLocalGroupSize = 256;
+                    uint OutputGlobalGroupSize = 128 * _clProvider.Parameters.NumComputeUnits * OutputLocalGroupSize;
 
                     if (inBatchIndex == 0)
                     {
@@ -280,11 +280,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
                             .SetKernelArg(11, 4, (float)(data.Count))
                             //.EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
                             .EnqueueNDRangeKernel(
-                                new int[]
+                                new []
                                 {
                                     OutputGlobalGroupSize
                                 },
-                                new int[]
+                                new []
                                 {
                                     OutputLocalGroupSize
                                 });
@@ -306,11 +306,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
                             .SetKernelArg(11, 4, (float)(data.Count))
                             //.EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
                             .EnqueueNDRangeKernel(
-                                new int[]
+                                new []
                                 {
                                     OutputGlobalGroupSize
                                 },
-                                new int[]
+                                new []
                                 {
                                     OutputLocalGroupSize
                                 });
@@ -328,8 +328,8 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
                         var currentLayer = _mlp.Layers[hiddenLayerIndex];
                         var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
 
-                        const int HiddenLocalGroupSize = 128;
-                        int HiddenGlobalGroupSize = 8 * _clProvider.Parameters.NumComputeUnits * HiddenLocalGroupSize;
+                        const uint HiddenLocalGroupSize = 128;
+                        uint HiddenGlobalGroupSize = 8 * _clProvider.Parameters.NumComputeUnits * HiddenLocalGroupSize;
 
                         if (inBatchIndex == 0)
                         {
@@ -351,12 +351,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
                                 .SetKernelArgLocalMem(14, 4 * HiddenLocalGroupSize)
                                 //.EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
                                 .EnqueueNDRangeKernel(
-                                    new int[]
+                                    new []
                                     {
                                         HiddenGlobalGroupSize
                                         //currentLayer.NonBiasNeuronCount + (LocalGroupSize -  currentLayer.NonBiasNeuronCount % LocalGroupSize)
                                     },
-                                    new int[]
+                                    new []
                                     {
                                         HiddenLocalGroupSize
                                         //LocalGroupSize
@@ -382,12 +382,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
                                 .SetKernelArgLocalMem(14, 4 * HiddenLocalGroupSize)
                                 //.EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
                                 .EnqueueNDRangeKernel(
-                                    new int[]
+                                    new []
                                     {
                                         HiddenGlobalGroupSize
                                         //currentLayer.NonBiasNeuronCount + (LocalGroupSize -  currentLayer.NonBiasNeuronCount % LocalGroupSize)
                                     },
-                                    new int[]
+                                    new []
                                     {
                                         HiddenLocalGroupSize
                                         //LocalGroupSize

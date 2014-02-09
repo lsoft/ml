@@ -192,6 +192,10 @@
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculatorVectorizedDebug.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation4\GpuHalfDistanceDictCalculator.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation4\OpenCLDistanceDictHalfProvider.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation4\Sorter\AMDBitonicSorter.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation4\Sorter\ISorter.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation4\Sorter\ISorterFactory.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation4\Sorter\SorterFactory.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic2\OpenCL\CPU\CPUTranspose2BackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic2\OpenCL\CPU\Transpose2KernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\CPUTransposeBackpropagationAlgorithm.cs" />

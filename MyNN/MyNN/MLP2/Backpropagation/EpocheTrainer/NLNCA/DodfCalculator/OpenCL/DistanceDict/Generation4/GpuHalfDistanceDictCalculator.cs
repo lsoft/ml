@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Accord.Statistics.Kernels;
 using MyNN.Data;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4.Sorter;
 using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
@@ -18,9 +20,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
     public class GpuHalfDistanceDictCalculator : IDistanceDictCalculator
     {
         /// <summary>
-        /// Distance Mem object length in element (in bytes it will be bigger 12 times (4 byte per float * 3 float per element)
+        /// Distance Mem object length in element (in bytes it will be bigger 12 times (see StructureSizeOf)
         /// </summary>
-        private const int DistanceMemElementCount = 1024 * 1024 * 10;
+        private const uint DistanceMemElementCount = 1024 * 1024 * 10;
 
         /// <summary>
         /// Threshold for distance.
@@ -28,17 +30,29 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
         /// </summary>
         private const float Threshold = 1e-20f;
 
+        /// <summary>
+        /// Sizeof of calculated structure
+        /// </summary>
+        private const uint StructureSizeOf = (sizeof(uint) * 2 + sizeof(float));
+
         private readonly IDeviceChooser _deviceChooser;
+        private readonly ISorterFactory _sorterFactory;
 
         public GpuHalfDistanceDictCalculator(
-            IDeviceChooser deviceChooser)
+            IDeviceChooser deviceChooser,
+            ISorterFactory sorterFactory)
         {
             if (deviceChooser == null)
             {
                 throw new ArgumentNullException("deviceChooser");
             }
+            if (sorterFactory == null)
+            {
+                throw new ArgumentNullException("sorterFactory");
+            }
 
             _deviceChooser = deviceChooser;
+            _sorterFactory = sorterFactory;
         }
 
         public DodfDistanceContainer CalculateDistances(List<DataItem> fxwList)
@@ -59,7 +73,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
             {
                 var kernelText = @"
 
-inline int ObtainIndex(volatile __global int * indexArray)
+inline uint ObtainIndex(volatile __global uint * indexArray)
 {
     return
         atomic_inc(indexArray);
@@ -68,10 +82,18 @@ inline int ObtainIndex(volatile __global int * indexArray)
 {DODF_DISABLE_EXP_DEFINE_CLAUSE}
 
 
+typedef struct
+{
+    uint AIndex;
+    uint BIndex;
+    float Distance;
+} Item;
+
+
 __kernel void DistanceKernel(
     const __global half * fxwList,
-    __global float * distance,
-    volatile __global int * indexArray,
+    __global Item * distance,
+    volatile __global uint * indexArray,
     __local float * local_results,
 
     float threshold,
@@ -143,9 +165,9 @@ __kernel void DistanceKernel(
 
                 {
                     int index = ObtainIndex(indexArray);
-                    distance[index * 3 + 0] = cc;
-                    distance[index * 3 + 1] = dd;
-                    distance[index * 3 + 2] = write_result;
+                    distance[index].AIndex = cc;
+                    distance[index].BIndex = dd;
+                    distance[index].Distance = write_result;
                 }
             }
 
@@ -157,25 +179,16 @@ __kernel void DistanceKernel(
 }
 
 __kernel void CopyToAccumKernel(
-    const __global float * distance,
-    __global float * accumulator,
-    __local float * local_results,
-    long accumShift,
-    long totalCount)
+    const __global Item * distance,
+    __global Item * accumulator,
+    ulong accumShift,
+    ulong totalCount)
 {
-    //accumulator[get_global_id(0) + accumShift] = distance[get_global_id(0)];
-
     if(get_global_id(0) < totalCount)
     {
-        local_results[get_local_id(0)] = distance[get_global_id(0)];
+        accumulator[get_global_id(0) + accumShift] = distance[get_global_id(0)];
     }
 
-    barrier(CLK_LOCAL_MEM_FENCE);
-
-    if(get_global_id(0) < totalCount)
-    {
-        accumulator[get_global_id(0) + accumShift] = local_results[get_local_id(0)];
-    }
 }
 ";
 
@@ -191,10 +204,10 @@ __kernel void CopyToAccumKernel(
                 #region определяем параметры запуска кернела
 
                 //размер локальной группы вычислителей GPU
-                int szLocalSize;
+                uint szLocalSize;
 
                 //количество групп 
-                int szNumGroups;
+                uint szNumGroups;
 
                 //настроено вручную согласно производительности NVidia GeForce 730M и AMD Radeon 7750
                 if (clProvider.Parameters.IsVendorAMD)
@@ -219,8 +232,8 @@ __kernel void CopyToAccumKernel(
 
                 #endregion
 
-                var totalItemsCountProcessedByKernel = 0L;
-                var totalKernelExcutionCount = 0;
+                ulong totalItemsCountProcessedByKernel = 0L;
+                uint totalKernelExcutionCount = 0;
 
                 //фактор заполнения массива вычисленными значениями (если вычисленных значений мало, массив clProvider.DistanceMem используется не полностью
                 //поэтому можно пропорционально увеличить число обрабатываемых строк за вызов кернела; предполагается, что статистически
@@ -235,6 +248,8 @@ __kernel void CopyToAccumKernel(
                 {
                     //количество строк, обрабатываемое за один вызов кернела (оно меняется от итерации к итерации из-за того, что крайние (нижние) строки короче
                     int processedRowCountPerKernelCall = (int) (DistanceMemElementCount/(fxwList.Count - startRowIndex)/fillFactor);
+                    processedRowCountPerKernelCall = Math.Min(processedRowCountPerKernelCall, fxwList.Count - startRowIndex);
+                    ulong processedElementCount = GetTotalItemCount(fxwList.Count - startRowIndex) - GetTotalItemCount(fxwList.Count - (startRowIndex + processedRowCountPerKernelCall));
 
                     if (processedRowCountPerKernelCall < 1)
                     {
@@ -260,11 +275,11 @@ __kernel void CopyToAccumKernel(
                         .SetKernelArg(8, 4, processedRowCountPerKernelCall)
                         .SetKernelArg(9, 4, fxwList.Count)
                         .EnqueueNDRangeKernel(
-                            new int[]
+                            new []
                             {
                                 szGlobalSize
                             }
-                            , new int[]
+                            , new []
                             {
                                 szLocalSize
                             }
@@ -279,9 +294,6 @@ __kernel void CopyToAccumKernel(
 
                     #endregion
 
-                    var after = DateTime.Now;
-                    totalTakenTime += (after - before);
-
                     totalKernelExcutionCount++;
 
                     var itemsCountProcessedByKernel = clProvider.IndexMem.Array[0];
@@ -291,19 +303,6 @@ __kernel void CopyToAccumKernel(
                         throw new Exception("Число обработанных элементов превысило размер массива; результат такой операции не определен. Аварийный останов. Попробуйте отключить fillFactor.");
                     }
 
-                    #region заполняем диктионари
-
-                    for (var cc = 0; cc < itemsCountProcessedByKernel; cc++)
-                    {
-                        var aIndex = (int) clProvider.DistanceMem.Array[cc*3 + 0];
-                        var bIndex = (int) clProvider.DistanceMem.Array[cc*3 + 1];
-                        var distance = clProvider.DistanceMem.Array[cc*3 + 2];
-
-                        result.AddValue(aIndex, bIndex, distance);
-                    }
-
-                    #endregion
-
                     #region обновляем фактор заполнения
 
                     if (!fillFactorCalculated)
@@ -311,7 +310,7 @@ __kernel void CopyToAccumKernel(
                         if (itemsCountProcessedByKernel > 0)
                         {
                             //20% запас на погрешность
-                            fillFactor = Math.Min(1.0f, 1.2f*itemsCountProcessedByKernel/(float) DistanceMemElementCount);
+                            fillFactor = (float)Math.Min(1.0, 1.2 * itemsCountProcessedByKernel / (double)processedElementCount);
 
                             fillFactorCalculated = true;
                         }
@@ -326,41 +325,93 @@ __kernel void CopyToAccumKernel(
                         //если аккумулятора нет, то создаем его
                         if (clProvider.AccumMem == null)
                         {
-                            var prognosisAboutTotalSize = (long) (fillFactor*GetTotalItemCount(fxwList));
+                            var prognosisAboutTotalSize = (ulong) (fillFactor*GetTotalItemCount(fxwList.Count));
 
-                            clProvider.AllocateAccumulator(prognosisAboutTotalSize);
+                            var log2d = Math.Log(prognosisAboutTotalSize, 2);
+                            var log2 = ((log2d%1) > double.Epsilon) ? (ulong) (log2d + 1) : (ulong) log2d;
+
+                            var powerOf2AbovePrognosis = (ulong) Math.Pow(2, log2);
+
+                            clProvider.AllocateAccumulator(powerOf2AbovePrognosis);
                         }
 
-                        const int accumCopyLocalSize = 128;
-                        long totalCount = itemsCountProcessedByKernel*3;
+                        const uint accumCopyLocalSize = 128;
+                        ulong totalCount = itemsCountProcessedByKernel;
 
                         //выполняем кернел копирования
                         copyToAccumKernel
                             .SetKernelArgMem(0, clProvider.DistanceMem)
                             .SetKernelArgMem(1, clProvider.AccumMem)
-                            .SetKernelArgLocalMem(2, sizeof(float) * accumCopyLocalSize)
-                            .SetKernelArg(3, 8, (long)(totalItemsCountProcessedByKernel * 3))
+                            .SetKernelArg(2, sizeof(ulong), totalItemsCountProcessedByKernel)
+                            .SetKernelArg(3, sizeof(ulong), totalCount)
                             .EnqueueNDRangeKernel(
-                                new int[]
+                                new []
                                 {
-                                    1//totalCount + (accumCopyLocalSize - totalCount % accumCopyLocalSize)
-                                },
-                                new int[]
+                                    (ulong)(totalCount + (accumCopyLocalSize - totalCount % accumCopyLocalSize))
+                                }
+                                ,new []
                                 {
-                                    accumCopyLocalSize
-                                });
-
-                        clProvider.AccumMem.Read(BlockModeEnum.Blocking);
+                                    (ulong)accumCopyLocalSize
+                                }
+                                );
                     }
 
                     #endregion
+
+                    var after = DateTime.Now;
+                    totalTakenTime += (after - before);
 
                     //следующая итерация цикла
                     totalItemsCountProcessedByKernel += itemsCountProcessedByKernel;
                     startRowIndex += processedRowCountPerKernelCall;
                 }
 
-                var totalItemCount = GetTotalItemCount(fxwList);
+                #region сортировка
+
+                var sorter = _sorterFactory.CreateSorter(clProvider);
+
+                //sorter.Sort(
+                //    clProvider.AccumMem,
+                //    clProvider.AccumulatorActualItemCount
+                //    );
+
+                #endregion
+
+                #region читаем результат и заполняем диктионари
+
+                if (clProvider.AccumMem != null)
+                {
+                    clProvider.AccumMem.Read(BlockModeEnum.Blocking);
+
+                    var tmpArray = new byte[StructureSizeOf];
+                    for (ulong cc = 0; cc < totalItemsCountProcessedByKernel; cc++)
+                    {
+                        Array.Copy(clProvider.AccumMem.Array, (long)cc * StructureSizeOf, tmpArray, 0L, StructureSizeOf);
+
+                        var aIndex = BitConverter.ToUInt32(tmpArray, 0);
+                        var bIndex = BitConverter.ToUInt32(tmpArray, 4);
+                        var distance = BitConverter.ToSingle(tmpArray, 8);
+
+                        result.AddValue(
+                            (int)aIndex, 
+                            (int)bIndex,
+                            distance);
+                    }
+
+                    //for (var cc = 0; cc < totalItemsCountProcessedByKernel; cc++)
+                    //{
+                    //    var aIndex = BitConverter.ToInt32(clProvider.AccumMem.Array, cc*(sizeof(int) * 2 + sizeof(float)) + 0);
+                    //    var bIndex = BitConverter.ToInt32(clProvider.AccumMem.Array, cc * (sizeof(int) * 2 + sizeof(float)) + sizeof(int));
+                    //    var distance = BitConverter.ToSingle(clProvider.AccumMem.Array, cc * (sizeof(int) * 2 + sizeof(float)) + 2 * sizeof(int));
+
+                    //    result.AddValue(aIndex, bIndex, distance);
+                    //}
+                }
+
+                #endregion
+
+
+                var totalItemCount = GetTotalItemCount(fxwList.Count);
 
                 ConsoleAmbientContext.Console.WriteLine(
                     "GPU: fxwList count = {0}, total items {1}, processed items {2}, {3}%, others values are below threshold = {4}, with kernel execution count = {5}",
@@ -377,15 +428,19 @@ __kernel void CopyToAccumKernel(
             return result;
         }
 
-        private long GetTotalItemCount(List<DataItem> fxwList)
+        private ulong GetTotalItemCount(int count)
         {
-            if (fxwList == null)
+            //count == 0 is allowed value
+
+            if (count < 0)
             {
-                throw new ArgumentNullException("fxwList");
+                throw new ArgumentOutOfRangeException("count");
             }
+            
+            var ucount = (uint)count;
 
             return
-                (long)(fxwList.Count + 1) * fxwList.Count / 2;
+                (ulong)(ucount + 1) * ucount / 2;
         }
 
 

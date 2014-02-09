@@ -56,6 +56,7 @@
     <Compile Include="Mem\BlockModeEnum.cs" />
     <Compile Include="Mem\IMemWrapper.cs" />
     <Compile Include="Mem\Mem.cs" />
+    <Compile Include="Mem\MemByte.cs" />
     <Compile Include="Mem\MemDouble.cs" />
     <Compile Include="Mem\MemFloat.cs" />
     <Compile Include="Mem\MemHalf.cs" />

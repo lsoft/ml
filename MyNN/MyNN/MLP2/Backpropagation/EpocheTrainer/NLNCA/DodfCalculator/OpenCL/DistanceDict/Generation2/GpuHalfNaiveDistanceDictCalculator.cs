@@ -138,8 +138,8 @@ __kernel void DistanceKernel(
 
                 var before = DateTime.Now;
 
-                const int szLocalSize = 128;
-                int szGlobalSize = 16 * clProvider.Parameters.NumComputeUnits * szLocalSize;
+                const uint szLocalSize = 128;
+                uint szGlobalSize = 16 * clProvider.Parameters.NumComputeUnits * szLocalSize;
 
                 distanceKernel
                     .SetKernelArgMem(0, clProvider.FxwMem)
@@ -149,11 +149,11 @@ __kernel void DistanceKernel(
                     .SetKernelArg(4, 4, inputLength)
                     .SetKernelArg(5, 4, fxwList.Count)
                     .EnqueueNDRangeKernel(
-                        new int[]
+                        new []
                         {
                             szGlobalSize
                         }
-                        , new int[]
+                        , new []
                         {
                             szLocalSize
                         }

@@ -49,7 +49,7 @@ namespace MyNN.Tests.MLP2.Reduction
             var seed = DateTime.Now.Millisecond;
             var randomizer = new DefaultRandomizer(ref seed);
 
-            for (var size = 2; size < 64; size++)
+            for (uint size = 2; size < 64; size++)
             {
                 ConsoleAmbientContext.Console.WriteLine("size = {0}", size);
 
@@ -103,8 +103,8 @@ __kernel void TestReductionKernel(
                         .SetKernelArgMem(0, m)
                         .SetKernelArgLocalMem(1, size)
                         .EnqueueNDRangeKernel(
-                            new[] {size},
-                            new int[] {size});
+                            new [] { size },
+                            new [] { size });
 
                     m.Read(BlockModeEnum.Blocking);
 

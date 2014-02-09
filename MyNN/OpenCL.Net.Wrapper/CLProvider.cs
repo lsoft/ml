@@ -257,6 +257,26 @@ namespace OpenCL.Net.Wrapper
             long arrayLength,
             MemFlags flags)
         {
+            if (arrayLength <= 0L)
+            {
+                throw new ArgumentOutOfRangeException("arrayLength");
+            }
+
+            var memi = new MemUint(
+                _commandQueue,
+                _context,
+                (ulong)arrayLength,
+                flags);
+
+            this._mems.Add(memi);
+
+            return memi;
+        }
+
+        public MemUint CreateUintMem(
+            ulong arrayLength,
+            MemFlags flags)
+        {
             var memi = new MemUint(
                 _commandQueue,
                 _context,
@@ -270,6 +290,27 @@ namespace OpenCL.Net.Wrapper
 
         public MemInt CreateIntMem(
             long arrayLength,
+            MemFlags flags)
+        {
+            if (arrayLength <= 0L)
+            {
+                throw new ArgumentOutOfRangeException("arrayLength");
+            }
+
+            var memi = new MemInt(
+                _commandQueue,
+                _context,
+                (ulong)arrayLength,
+                flags);
+
+            this._mems.Add(memi);
+
+            return memi;
+        }
+
+
+        public MemInt CreateIntMem(
+            ulong arrayLength,
             MemFlags flags)
         {
             var memi = new MemInt(
@@ -287,6 +328,26 @@ namespace OpenCL.Net.Wrapper
             long arrayLength,
             MemFlags flags)
         {
+            if (arrayLength <= 0L)
+            {
+                throw new ArgumentOutOfRangeException("arrayLength");
+            }
+
+            var memh = new MemHalf(
+                _commandQueue,
+                _context,
+                (ulong)arrayLength,
+                flags);
+
+            this._mems.Add(memh);
+
+            return memh;
+        }
+
+        public MemHalf CreateHalfMem(
+            ulong arrayLength,
+            MemFlags flags)
+        {
             var memh = new MemHalf(
                 _commandQueue,
                 _context,
@@ -299,8 +360,43 @@ namespace OpenCL.Net.Wrapper
         }
 
 
+        public MemByte CreateByteMem(
+            ulong arrayLength,
+            MemFlags flags)
+        {
+            var memb = new MemByte(
+                _commandQueue,
+                _context,
+                arrayLength,
+                flags);
+
+            this._mems.Add(memb);
+
+            return memb;
+        }
+
         public MemFloat CreateFloatMem(
             long arrayLength,
+            MemFlags flags)
+        {
+            if (arrayLength <= 0L)
+            {
+                throw new ArgumentOutOfRangeException("arrayLength");
+            }
+
+            var memf = new MemFloat(
+                _commandQueue,
+                _context,
+                (ulong)arrayLength,
+                flags);
+
+            this._mems.Add(memf);
+
+            return memf;
+        }
+
+        public MemFloat CreateFloatMem(
+            ulong arrayLength,
             MemFlags flags)
         {
             var memf = new MemFloat(
@@ -315,7 +411,7 @@ namespace OpenCL.Net.Wrapper
         }
 
         public MemDouble CreateDoubleMem(
-            long arrayLength,
+            ulong arrayLength,
             MemFlags flags)
         {
             var memd = new MemDouble(

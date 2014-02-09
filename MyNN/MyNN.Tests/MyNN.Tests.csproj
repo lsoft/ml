@@ -113,6 +113,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MLP2\Reduction\WarpReductionFixture.cs" />
+    <Compile Include="MLP2\Sort\SortFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MLP2\ActivationFunction\SigmoidFixture.cs" />
     <Compile Include="TestOutputConsole.cs" />

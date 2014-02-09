@@ -8,7 +8,7 @@ namespace OpenCL.Net.Wrapper.Mem
         public MemHalf(
             CommandQueue commandQueue,
             Context context,
-            long arrayLength,
+            ulong arrayLength,
             MemFlags flags)
             : base(commandQueue, context, arrayLength, 2, flags)
         {

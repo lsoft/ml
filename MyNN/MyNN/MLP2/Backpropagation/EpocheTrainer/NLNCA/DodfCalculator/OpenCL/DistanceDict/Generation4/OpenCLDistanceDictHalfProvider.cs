@@ -14,9 +14,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
     public class OpenCLDistanceDictHalfProvider : CLProvider
     {
         private readonly List<DataItem> _fxwList;
-        private readonly int _distanceMemElementCount;
+        private readonly uint _distanceMemElementCount;
 
-        public MemInt IndexMem
+        public MemUint IndexMem
         {
             get;
             private set;
@@ -28,13 +28,19 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
             private set;
         }
 
-        public MemFloat DistanceMem
+        public MemByte DistanceMem
         {
             get;
             private set;
         }
 
-        public MemFloat AccumMem
+        public MemByte AccumMem
+        {
+            get;
+            private set;
+        }
+
+        public ulong AccumulatorActualItemCount
         {
             get;
             private set;
@@ -44,7 +50,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
             IDeviceChooser deviceChooser,
             bool silentStart,
             List<DataItem> fxwList,
-            int distanceMemElementCount)
+            uint distanceMemElementCount)
             : base(deviceChooser, silentStart)
         {
             if (fxwList == null)
@@ -61,15 +67,17 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
         }
 
         public void AllocateAccumulator(
-            long accumulatorItemCount)
+            ulong accumulatorItemCount)
         {
             if (this.AccumMem != null)
             {
                 throw new InvalidOperationException("Accumulator already allocated.");
             }
 
-            this.AccumMem = this.CreateFloatMem(
-                accumulatorItemCount * 3,
+            this.AccumulatorActualItemCount = accumulatorItemCount;
+
+            this.AccumMem = this.CreateByteMem(
+                accumulatorItemCount * (sizeof(int) * 2 + sizeof(float)),
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
         }
 
@@ -102,12 +110,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
                 _fxwList.Count * _fxwList[0].Input.Length,
                 MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
-            IndexMem = this.CreateIntMem(
+            IndexMem = this.CreateUintMem(
                 1,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
-            DistanceMem = this.CreateFloatMem(
-                _distanceMemElementCount * 3,
+            DistanceMem = this.CreateByteMem(
+                _distanceMemElementCount * (sizeof(int) *  2 + sizeof(float)),
                 MemFlags.CopyHostPtr | MemFlags.WriteOnly);
 
             AccumMem = null;

@@ -1,15 +1,13 @@
-﻿
-
-namespace OpenCL.Net.Wrapper.Mem
+﻿namespace OpenCL.Net.Wrapper.Mem
 {
-    public class MemInt : Mem<int>
+    public class MemByte : Mem<byte>
     {
-        public MemInt(
+        public MemByte(
             CommandQueue commandQueue,
             Context context,
             ulong arrayLength,
             MemFlags flags)
-            : base(commandQueue, context, arrayLength, 4, flags)
+            : base(commandQueue, context, arrayLength, 1, flags)
         {
         }
     }

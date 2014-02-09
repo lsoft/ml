@@ -23,7 +23,7 @@ namespace OpenCL.Net.Wrapper.Mem
         protected Mem(
             CommandQueue commandQueue,
             Context context,
-            long arrayLength,
+            ulong arrayLength,
             int sizeOfT,
             MemFlags flags)
         {

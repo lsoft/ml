@@ -171,10 +171,10 @@ __kernel void DistanceKernel(
                 #region определяем параметры запуска кернела
 
                 //размер локальной группы вычислителей GPU
-                int szLocalSize;
+                uint szLocalSize;
 
                 //количество групп 
-                int szNumGroups;
+                uint szNumGroups;
 
                 //настроено вручную согласно производительности NVidia GeForce 730M и AMD Radeon 7750
                 if (clProvider.Parameters.IsVendorAMD)
@@ -214,6 +214,8 @@ __kernel void DistanceKernel(
                 {
                     //количество строк, обрабатываемое за один вызов кернела (оно меняется от итерации к итерации из-за того, что крайние (нижние) строки короче
                     int processedRowCountPerKernelCall = (int)(DistanceMemElementCount / (fxwList.Count - startRowIndex) / fillFactor);
+                    processedRowCountPerKernelCall = Math.Min(processedRowCountPerKernelCall, fxwList.Count - startRowIndex);
+                    long processedElementCount = GetTotalItemCount(fxwList.Count - startRowIndex) - GetTotalItemCount(fxwList.Count - (startRowIndex + processedRowCountPerKernelCall));
 
                     if (processedRowCountPerKernelCall < 1)
                     {
@@ -239,11 +241,11 @@ __kernel void DistanceKernel(
                         .SetKernelArg(8, 4, processedRowCountPerKernelCall)
                         .SetKernelArg(9, 4, fxwList.Count)
                         .EnqueueNDRangeKernel(
-                            new int[]
+                            new []
                             {
                                 szGlobalSize
                             }
-                            , new int[]
+                            , new []
                             {
                                 szLocalSize
                             }
@@ -293,7 +295,7 @@ __kernel void DistanceKernel(
                             if (itemsCountProcessedByKernel > 0)
                             {
                                 //20% запас на погрешность
-                                fillFactor = Math.Min(1.0f, 1.2f * itemsCountProcessedByKernel / (float)DistanceMemElementCount);
+                                fillFactor = (float)Math.Min(1.0, 1.2 * itemsCountProcessedByKernel / (double)processedElementCount);
                             }
                         }
                     }
@@ -304,7 +306,7 @@ __kernel void DistanceKernel(
                     startRowIndex += processedRowCountPerKernelCall;
                 }
 
-                var totalItemCount = (long)(fxwList.Count + 1) * fxwList.Count / 2;
+                var totalItemCount = GetTotalItemCount(fxwList.Count);
 
                 ConsoleAmbientContext.Console.WriteLine(
                     "GPU: fxwList count = {0}, total items {1}, processed items {2}, {3}%, others values are below threshold = {4}, with kernel execution count = {5}",
@@ -321,6 +323,11 @@ __kernel void DistanceKernel(
             return result;
         }
 
+        private long GetTotalItemCount(long count)
+        {
+            return
+                (long)(count + 1) * count / 2;
+        }
 
 
     }
