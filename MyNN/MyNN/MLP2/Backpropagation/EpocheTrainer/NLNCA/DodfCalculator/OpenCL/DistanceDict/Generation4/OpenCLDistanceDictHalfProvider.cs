@@ -79,6 +79,8 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
             this.AccumMem = this.CreateByteMem(
                 accumulatorItemCount * (sizeof(int) * 2 + sizeof(float)),
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+
+            this.AccumMem.Array.Fill((byte)255);
         }
 
         private void WriteMems()

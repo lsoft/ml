@@ -333,6 +333,8 @@ __kernel void CopyToAccumKernel(
                             var powerOf2AbovePrognosis = (ulong) Math.Pow(2, log2);
 
                             clProvider.AllocateAccumulator(powerOf2AbovePrognosis);
+
+                            clProvider.AccumMem.Write(BlockModeEnum.Blocking);
                         }
 
                         const uint accumCopyLocalSize = 128;
@@ -370,10 +372,10 @@ __kernel void CopyToAccumKernel(
 
                 var sorter = _sorterFactory.CreateSorter(clProvider);
 
-                //sorter.Sort(
-                //    clProvider.AccumMem,
-                //    clProvider.AccumulatorActualItemCount
-                //    );
+                sorter.Sort(
+                    clProvider.AccumMem,
+                    clProvider.AccumulatorActualItemCount
+                    );
 
                 #endregion
 
