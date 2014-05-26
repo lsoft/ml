@@ -94,7 +94,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.OpenCL
             {
                 throw new InvalidOperationException(
                     string.Format(
-                        "Последний слой MLP не должен иметь функцию {0}",
+                        "Function {0} is not allowed for NLNCA layer.",
                         ncaLayerFunctionType.Name));
             }
 
@@ -203,6 +203,14 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.OpenCL
             if (epocheRoot == null)
             {
                 throw new ArgumentNullException("epocheRoot");
+            }
+
+            if (_config.BatchSize / (float)data.Count < 0.05f)
+            {
+                ConsoleAmbientContext.Console.WriteWarning(
+                    "Probably batch size = {0} is too low for train dataset with {1} items.",
+                    _config.BatchSize,
+                    data.Count);
             }
 
             #region one epoche

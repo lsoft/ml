@@ -28,7 +28,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                
+                /*
                 //pabProfiler.Main2();
                 //NvidiaForwardOptimizer.Optimize();
                 //NvidiaBackpropOptimizer.Optimize();
@@ -159,7 +159,7 @@ namespace MyNNConsoleApp
                 //NextMLP2.Execute();
                 //*/
 
-                /*
+                
                 //MLP2NLNCA.TrainNLNCA();
                 //MLP2AutoencoderNLNCA.TrainAutoencoderNLNCA();
                 //MLP2NLNCAAutoencoderTest.Test();

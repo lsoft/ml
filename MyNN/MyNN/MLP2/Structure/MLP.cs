@@ -223,7 +223,10 @@ namespace MyNN.MLP2.Structure
             }
 
             var lastl = this.Layers[this.Layers.Length - 1];
-            lastl.AddBiasNeuron();
+            if (!lastl.IsBiasNeuronExists)
+            {
+                lastl.AddBiasNeuron();
+            }
 
             var newl = new MLPLayer[this.Layers.Length + 1];
             this.Layers.CopyTo(newl, 0);

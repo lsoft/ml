@@ -167,9 +167,6 @@ int ComputeWeightIndex(
         previousLayerNeuronCount * neuronIndex;
 }
 
-//const __constant float _alpha = 0.2;
-//const __constant float _beta = 1.0;
-
 __kernel void HiddenLayerTrain(
     __global float * currentLayerNET,
 

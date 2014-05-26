@@ -20,8 +20,10 @@ using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
+using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
+using OpenCL.Net.Wrapper.Mem;
 using DefaultRandomizer = MyNN.Randomizer.DefaultRandomizer;
 
 namespace MyNNConsoleApp.Nvidia

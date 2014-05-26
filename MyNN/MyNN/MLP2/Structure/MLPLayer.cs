@@ -13,6 +13,15 @@ namespace MyNN.MLP2.Structure
         private bool _isNeedBiasNeuron;
         private readonly IRandomizer _randomizer;
 
+        public bool IsBiasNeuronExists
+        {
+            get
+            {
+                return
+                    _isNeedBiasNeuron;
+            }
+        }
+
         public int NonBiasNeuronCount
         {
             get

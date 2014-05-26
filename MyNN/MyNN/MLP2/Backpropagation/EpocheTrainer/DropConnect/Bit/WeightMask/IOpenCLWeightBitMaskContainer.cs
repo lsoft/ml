@@ -8,7 +8,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
     public interface IOpenCLWeightBitMaskContainer : IWeightMaskContainer
     {
         /// <summary>
-        /// Number of bit, used in current iteration ([0;31])
+        /// Bit mask, used in current iteration (from 2^0 to 2^32)
         /// </summary>
         uint BitMask
         {

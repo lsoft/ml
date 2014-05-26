@@ -90,22 +90,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
             #endregion
         }
         
-        private float CalculateZnamenatelForA(int a)
-        {
-            var zn = 0f;
-
-            for (var z = 0; z < _fxwList.Count; z++)
-            {
-                if (z != a)
-                {
-                    zn += ExtractExpDistanceabFromDictionary(a, z);
-                }
-            }
-
-            return zn;
-        }
-
-
         public float GetPl(int l)
         {
             return
@@ -121,7 +105,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
             var fxa = _fxwList[a];
             var fxb = _fxwList[b];
 
-            #region dab = fxa - fxb;
+            #region dab += (fxa - fxb) * p;
 
             for (var cc = 0; cc < _inputLength; cc++)
             {
@@ -184,6 +168,23 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
             return result;
         }
 
+        #region private methods
+
+        private float CalculateZnamenatelForA(int a)
+        {
+            var zn = 0f;
+
+            for (var z = 0; z < _fxwList.Count; z++)
+            {
+                if (z != a)
+                {
+                    zn += ExtractExpDistanceabFromDictionary(a, z);
+                }
+            }
+
+            return zn;
+        }
+
         private float ExtractExpDistanceabFromDictionary(
             int a,
             int b)
@@ -197,17 +198,10 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
 
             distance = _expDistanceDict.GetDistance(a, b);
 
-            //if (b > a)
-            //{
-            //    distance = _expDistanceDict[a][b - a];
-            //}
-            //else if (b < a)
-            //{
-            //    distance = _expDistanceDict[b][a - b];
-            //}
-
             return
                 distance;
         }
+
+        #endregion
     }
 }

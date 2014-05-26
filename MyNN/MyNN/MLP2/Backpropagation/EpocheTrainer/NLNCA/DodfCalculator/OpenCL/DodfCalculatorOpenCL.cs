@@ -43,8 +43,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
 
             #region Заполняем _fxwDict
 
-            //var x0 = DateTime.Now;
-
             _fxwDict = new Dictionary<int, List<int>>();
 
             var classDistinctList = (from x in _fxwList select x.OutputIndex).Distinct();
@@ -57,10 +55,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL
             {
                 _fxwDict[_fxwList[a].OutputIndex].Add(a);
             }
-
-            //var x1 = DateTime.Now;
-            //var diff = x1 - x0;
-            //ConsoleAmbientContext.Console.WriteLine("Заполняем _fxwDict = {0}", diff);
 
             #endregion
 

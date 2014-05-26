@@ -184,7 +184,7 @@ __kernel void
             int previousLayerNeuronCount1M1,
             int previousLayerNeuronCountTotal,
 
-            int bitmask)
+            uint bitmask)
 {
     //оригинальный алгоритм более чем в два раза медленен
 
@@ -222,7 +222,7 @@ __kernel void
             int previousLayerNeuronCount4M4,
             int previousLayerNeuronCountTotal,
 
-            int bitmask)
+            uint bitmask)
 {
     int neuronIndex = get_global_id(0);
 
@@ -284,7 +284,7 @@ __kernel void
             int previousLayerNeuronCount16M16,
             int previousLayerNeuronCountTotal,
 
-            int bitmask)
+            uint bitmask)
 {
     int neuronIndex = get_global_id(0);
 

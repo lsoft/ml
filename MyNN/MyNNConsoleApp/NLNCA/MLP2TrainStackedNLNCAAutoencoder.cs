@@ -44,7 +44,7 @@ namespace MyNNConsoleApp.NLNCA
             var validationData = MNISTDataProvider.GetDataSet(
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/testset/",
                 "_MNIST_DATABASE/mnist/testset/",
-                100,
+                int.MaxValue,
                 true);
 
             var noiser = new AllNoisers(
@@ -92,7 +92,7 @@ namespace MyNNConsoleApp.NLNCA
 
                     var conf = new LearningAlgorithmConfig(
                         new LinearLearningRate(lr, 0.99f),
-                        2500,
+                        500,
                         0.0f,
                         50,
                         0f,

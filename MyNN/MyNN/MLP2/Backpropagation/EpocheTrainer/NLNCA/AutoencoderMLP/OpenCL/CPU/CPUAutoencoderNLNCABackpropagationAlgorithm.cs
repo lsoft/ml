@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using AForge;
 using MyNN.Data;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator;
@@ -14,7 +16,9 @@ using MyNN.OutputConsole;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
+using System.Threading.Tasks;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
+
 
 namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CPU
 {
@@ -118,7 +122,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CP
             {
                 throw new InvalidOperationException(
                     string.Format(
-                        "Слой с давлением NCA должен не должен иметь функцию {0}",
+                        "Function {0} is not allowed for NLNCA layer.",
                         ncaLayerFunctionType.Name));
             }
 
@@ -241,6 +245,14 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CP
                 throw new InvalidOperationException("Датасет для данного алгоритма не должен быть автоенкодерным");
             }
 
+            if (_config.BatchSize/(float) data.Count < 0.05f)
+            {
+                ConsoleAmbientContext.Console.WriteWarning(
+                    "Probably batch size = {0} is too low for train dataset with {1} items.",
+                    _config.BatchSize,
+                    data.Count);
+            }
+
             #region one epoche
 
             //переносим веса сети в объекты OpenCL
@@ -278,6 +290,32 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CP
 
                 #endregion
 
+                //#region массово рассчитываем значения dOdF для батча
+
+                //var inBatchDict = new Dictionary<int, float[]>();
+                //for (int inBatchIndex = currentIndex, batchIndex = 0; inBatchIndex < currentIndex + _config.BatchSize && inBatchIndex < data.Count; ++inBatchIndex, ++batchIndex)
+                //{
+                //    //train data
+                //    var trainData = data[inBatchIndex];
+
+                //    if (trainData.OutputIndex >= 0)
+                //    {
+                //        inBatchDict.Add(inBatchIndex, new float[_dodfMem.Array.Length]);
+                //    }
+                //}
+
+                //System.Threading.Tasks.Parallel.ForEach(inBatchDict, pair =>
+                //{
+                //    var inBatchIndex = pair.Key;
+
+                //    var uzIndex = uzSootv[inBatchIndex];
+
+                //    var dodf = dodfCalculator.CalculateDodf(uzIndex);
+                //    dodf.CopyTo(pair.Value, 0L);
+                //});
+
+                //#endregion
+
 
                 //process one batch
                 for (int inBatchIndex = currentIndex, batchIndex = 0; inBatchIndex < currentIndex + _config.BatchSize && inBatchIndex < data.Count; ++inBatchIndex, ++batchIndex)
@@ -296,8 +334,10 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CP
                     {
                         var uzIndex = uzSootv[inBatchIndex];
                         var dodf = dodfCalculator.CalculateDodf(uzIndex);
-
                         dodf.CopyTo(_dodfMem.Array, 0);
+
+                        //inBatchDict[inBatchIndex].CopyTo(_dodfMem.Array, 0);
+
                         _dodfMem.Write(BlockModeEnum.NonBlocking);
                     }
 

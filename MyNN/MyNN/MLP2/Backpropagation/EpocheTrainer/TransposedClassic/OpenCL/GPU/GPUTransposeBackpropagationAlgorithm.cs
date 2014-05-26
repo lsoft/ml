@@ -78,7 +78,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
 
             if (config.BatchSize == 1)
             {
-                ConsoleAmbientContext.Console.WriteWarning("This backpropagation algorithm optimized to work in batch mode (typical with batch size = [25;100]). Online backpropagation is not an optimal choise. Try to use GPUBackpropagationAlgorithm.");
+               ConsoleAmbientContext.Console.WriteWarning("This backpropagation algorithm optimized to work in batch mode (typical with batch size = [25;100]). Online backpropagation is not an optimal choice. Try to use GPUBackpropagationAlgorithm.");
             }
 
             if (config.BatchSize > 1 && config.BatchSize < 25)
