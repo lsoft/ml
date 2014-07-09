@@ -27,7 +27,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
         private const int AdditionalPartSize = 100000;
 
         private readonly CLProvider _clProvider;
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly IRandomizer _randomizer;
         private readonly float _p;
 
@@ -71,7 +71,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
         public BigArrayWeightBitMaskContainer(
             CLProvider clProvider,
-            MLP mlp,
+            IMLP mlp,
             IRandomizer randomizer,
             float p = 0.5f)
         {

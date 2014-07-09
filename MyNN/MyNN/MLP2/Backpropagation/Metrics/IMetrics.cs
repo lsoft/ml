@@ -7,6 +7,6 @@ namespace MyNN.MLP2.Backpropagation.Metrics
         /// <summary>
         /// Calculate value of partial derivative by v2[v2Index]
         /// </summary>
-        float CalculatePartialDerivaitveByV2Index(float[] v1, float[] v2, int v2Index);
+        float CalculatePartialDerivativeByV2Index(float[] v1, float[] v2, int v2Index);
     }
 }

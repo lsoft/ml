@@ -9,11 +9,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CP
     /// </summary>
     public class AutoendoderNLNCAKernelConstructor
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
         public AutoendoderNLNCAKernelConstructor(
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config)
         {
             if (mlp == null)

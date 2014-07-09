@@ -15,7 +15,6 @@ namespace MyNN.Data.TrainDataProvider.Noiser
         private readonly IRandomizer _randomizer;
         private readonly INoiser[] _noiserList;
 
-
         public AllNoisers(
             IRandomizer randomizer,
             params INoiser[] noiserList)

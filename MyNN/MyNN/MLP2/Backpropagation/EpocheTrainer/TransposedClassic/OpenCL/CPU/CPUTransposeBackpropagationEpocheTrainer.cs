@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
@@ -6,21 +7,22 @@ using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Transposer;
 using MyNN.OutputConsole;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
-namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
+namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU
 {
     /// <summary>
-    /// Inefficient implementation of classic backpropagation with transposed weights.
-    /// It seems to be OBSOLETE today.
+    /// Classic backpropagation epoche trainer that enables CPU-OpenCL with transposed weights.
+    /// This implementation of classic backpropagation is optimized for training in batch-mode.
     /// </summary>
-    public class CPUTranspose2BackpropagationAlgorithm : IEpocheTrainer
+    public class CPUTransposeBackpropagationEpocheTrainer : IBackpropagationEpocheTrainer
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
         private readonly CLProvider _clProvider;
@@ -29,7 +31,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
         private MemFloat[] _nablaWeights;
         private MemFloat _desiredOutput;
 
-        private MemFloat[] _transposers;
+        private IOpenCLTransposer[] _transposers;
 
         private Kernel[] _hiddenKernelIncrement, _hiddenKernelOverwrite;
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
@@ -45,9 +47,16 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
             }
         }
 
-        public CPUTranspose2BackpropagationAlgorithm(
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="vse">Vectorization mode</param>
+        /// <param name="mlp">Trained MLP</param>
+        /// <param name="config">Learning config</param>
+        /// <param name="clProvider">OpenCL provider</param>
+        public CPUTransposeBackpropagationEpocheTrainer(
             VectorizationSizeEnum vse,
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config,
             CLProvider clProvider
             )
@@ -65,10 +74,14 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
                 throw new ArgumentNullException("clProvider");
             }
 
-            if (clProvider.ChoosedDeviceType == DeviceType.Cpu)
+            if (config.BatchSize == 1)
             {
-                ConsoleAmbientContext.Console.WriteLine("========================================= WARNING =========================================");
-                ConsoleAmbientContext.Console.WriteLine("This algorithm are so slow on CPU; it should test this algorithm on GPU hardware and delete it if it will be inferior than the default.");
+                ConsoleAmbientContext.Console.WriteWarning("This backpropagation algorithm optimized to work in batch mode (typical with batch size = [25;100]). Online backpropagation is not an optimal choise. Try to use CPUBackpropagationEpocheTrainer.");
+            }
+
+            if (config.BatchSize > 1 && config.BatchSize < 25)
+            {
+                ConsoleAmbientContext.Console.WriteWarning("Too low minibatch size ({0}) to achieve optimal performance. Try to increase batch size to 25 minimum.", config.BatchSize);
             }
 
             _mlp = mlp;
@@ -99,12 +112,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
             _nablaWeights = new MemFloat[_mlp.Layers.Length];
             _deDz = new MemFloat[_mlp.Layers.Length];
 
-            _transposers = new MemFloat[_mlp.Layers.Length];
+            _transposers = new IOpenCLTransposer[_mlp.Layers.Length];
         }
 
         private void LoadPrograms()
         {
-            var kg = new Transpose2KernelConstructor(
+            var kg = new TransposeKernelConstructor(
                 _mlp,
                 _config);
 
@@ -134,8 +147,8 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
 
             //определяем кернел обновления весов
             _updateWeightKernel = _clProvider.CreateKernel(
-                Transpose2KernelConstructor.UpdateWeightKernelSource,
-                "UpdateWeightAndTransposedWeightsKernel");
+                TransposeKernelConstructor.UpdateWeightKernelSource,
+                "UpdateWeightKernel");
         }
 
         #endregion
@@ -156,10 +169,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
                     _mlp.Layers[i].NonBiasNeuronCount,
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
-                _transposers[i] = _clProvider.CreateFloatMem(
-                    _mlp.Layers[i - 1].Neurons.Length * _mlp.Layers[i].NonBiasNeuronCount,
-                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-
+                _transposers[i] = new TransposerNvidia(
+                    _clProvider,
+                    _forwardPropagation.WeightMem[i],
+                    _mlp.Layers[i - 1].Neurons.Length,
+                    _mlp.Layers[i].NonBiasNeuronCount);
             }
 
             var outputLength = _mlp.Layers.Last().NonBiasNeuronCount;
@@ -189,40 +203,21 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
             //переносим веса сети в объекты OpenCL
             _forwardPropagation.PushWeights();
 
-            //очищаем и гоним на устройство
+            //гоним на устройство
             foreach (var nw in _nablaWeights)
             {
                 if (nw != null)
                 {
-                    Array.Clear(nw.Array, 0, nw.Array.Length);
                     nw.Write(BlockModeEnum.NonBlocking);
                 }
             }
 
             _forwardPropagation.ClearAndPushHiddenLayers();
 
-            // Make sure we're done with everything that's been requested before
-            _clProvider.QueueFinish();
-
             //транспонируем все веса вначале (так как повторно они транспонируются после батча)
-            //обычным методом обновления (при nabla равной нулю везде, таким образом
-            //веса не меняются)
             for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
             {
-                var weightMem = _forwardPropagation.WeightMem[layerIndex];
-                var nablaMem = _nablaWeights[layerIndex];
-
-                //обновляем веса и транспонированные веса
-                _updateWeightKernel
-                    .SetKernelArgMem(0, weightMem)
-                    .SetKernelArgMem(1, nablaMem)
-                    .SetKernelArgMem(2, _transposers[layerIndex])
-                    .SetKernelArg(3, 4, _mlp.Layers[layerIndex].NonBiasNeuronCount)
-                    .SetKernelArg(4, 4, _mlp.Layers[layerIndex - 1].Neurons.Length)
-                    .SetKernelArg(5, 4, (float)(_config.BatchSize))
-                    .EnqueueNDRangeKernel(
-                        _mlp.Layers[layerIndex].NonBiasNeuronCount,
-                        _mlp.Layers[layerIndex - 1].Neurons.Length);
+                _transposers[layerIndex].Transpose();
             }
 
             // Make sure we're done with everything that's been requested before
@@ -316,7 +311,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
                                 .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
                                 .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
-                                .SetKernelArgMem(6, _transposers[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(6, _transposers[hiddenLayerIndex + 1].Destination)
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
                                 .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
                                 .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
@@ -337,7 +332,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
                                 .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
                                 .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
                                 .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
-                                .SetKernelArgMem(6, _transposers[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(6, _transposers[hiddenLayerIndex + 1].Destination)
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
                                 .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
                                 .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
@@ -350,6 +345,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
                                 .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
                         }
                     }
+
+                    //// Make sure we're done with everything that's been requested before
+                    //_clProvider.QueueFinish();
 
                     int logStep = data.Count / 100;
                     if (logStep > 0 && currentIndex % logStep == 0)
@@ -370,20 +368,25 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
                     var weightMem = _forwardPropagation.WeightMem[layerIndex];
                     var nablaMem = _nablaWeights[layerIndex];
 
-                    //обновляем веса и транспонированные веса
+                    const int perKernelFloats = 1500; //по 1500 флоатов на кернел (должно быть кратно 4м!!!)
+
+                    var kernelCount = weightMem.Array.Length / perKernelFloats;
+                    if (weightMem.Array.Length % perKernelFloats > 0)
+                    {
+                        kernelCount++;
+                    }
+
+                    //обновляем веса
                     _updateWeightKernel
                         .SetKernelArgMem(0, weightMem)
                         .SetKernelArgMem(1, nablaMem)
-                        .SetKernelArgMem(2, _transposers[layerIndex])
-                        .SetKernelArg(3, 4, _mlp.Layers[layerIndex].NonBiasNeuronCount)
-                        .SetKernelArg(4, 4, _mlp.Layers[layerIndex - 1].Neurons.Length)
-                        .SetKernelArg(5, 4, (float)(_config.BatchSize))
-                        .EnqueueNDRangeKernel(
-                            new int[]
-                            {
-                                _mlp.Layers[layerIndex].NonBiasNeuronCount,
-                                _mlp.Layers[layerIndex - 1].Neurons.Length
-                            });
+                        .SetKernelArg(2, 4, weightMem.Array.Length)
+                        .SetKernelArg(3, 4, perKernelFloats)
+                        .SetKernelArg(4, 4, (float)(_config.BatchSize))
+                        .EnqueueNDRangeKernel(kernelCount);
+
+                    //транспонируем
+                    _transposers[layerIndex].Transpose();
                 }
 
                 // Make sure we're done with everything that's been requested before
@@ -426,6 +429,69 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
                 }
             }
 
+        }
+
+
+        private void CheckEquals(
+            float[] source,
+            float[] transposed,
+            int width,
+            int height)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
+            if (transposed == null)
+            {
+                throw new ArgumentNullException("transposed");
+            }
+
+            for (var h = 0; h < height; h++)
+            {
+                for (var w = 0; w < width; w++)
+                {
+                    var s = source[h * width + w];
+                    var d = transposed[w * height + h];
+
+                    var diff = s - d;
+
+                    if (Math.Abs(diff) >= float.Epsilon)
+                    {
+                        throw
+                            new Exception(diff.ToString());
+                    }
+                }
+            }
+        }
+
+        private void ConsoleDump(string name, float[] body, int width, int height)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
+            if (body == null)
+            {
+                throw new ArgumentNullException("body");
+            }
+
+            ConsoleAmbientContext.Console.WriteLine(name);
+
+            for (var h = 0; h < height; h++)
+            {
+                var listw = new List<float>();
+                for (var w = 0; w < width; w++)
+                {
+                    listw.Add(body[h * width + w]);
+                }
+
+                var s = string.Join(
+                    " ",
+                    listw.ConvertAll(j => DoubleConverter.ToExactString(j)).ToArray());
+
+                ConsoleAmbientContext.Console.WriteLine(s);
+            }
         }
 
     }

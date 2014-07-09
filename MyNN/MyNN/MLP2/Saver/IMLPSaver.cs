@@ -7,6 +7,6 @@ namespace MyNN.MLP2.Saver
         void Save(
             string epocheRoot,
             IAccuracyRecord accuracyRecord,
-            MLP mlp);
+            IMLP mlp);
     }
 }

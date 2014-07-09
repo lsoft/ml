@@ -45,7 +45,7 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU
         public BackpropagationAlgorithm GetBackpropagationAlgorithm(
             IRandomizer randomizer,
             CLProvider clProvider,
-            MLP net,
+            IMLP net,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config)
         {
@@ -74,10 +74,10 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU
 
             var algo = new BackpropagationAlgorithm(
                 randomizer,
-                (processedMLP, processedConfig) => new CPUAutoencoderNLNCABackpropagationAlgorithm(
+                new CPUAutoencoderNLNCABackpropagationEpocheTrainer(
                     VectorizationSizeEnum.VectorizationMode16,
-                    processedMLP,
-                    processedConfig,
+                    net,
+                    config,
                     clProvider,
                     _dodfCalculatorFactory,
                     _ncaLayerIndex,

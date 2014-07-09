@@ -3,10 +3,10 @@
 namespace MyNN.MLP2.Structure.Neurons.Function
 {
     [Serializable]
-    public class IRLUFunction : IFunction
+    public class DRLUFunction : IFunction
     {
 
-        public IRLUFunction()
+        public DRLUFunction()
         {
         }
 

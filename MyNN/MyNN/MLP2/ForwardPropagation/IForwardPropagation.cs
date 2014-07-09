@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using MyNN.Data;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Layer;
 
 namespace MyNN.MLP2.ForwardPropagation
 {
@@ -14,7 +15,7 @@ namespace MyNN.MLP2.ForwardPropagation
         /// <summary>
         /// Сеть, на которую настроен просчетчик
         /// </summary>
-        MLP MLP
+        IMLP MLP
         {
             get;
         }

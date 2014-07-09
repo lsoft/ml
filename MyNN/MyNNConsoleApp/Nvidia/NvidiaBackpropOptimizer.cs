@@ -16,7 +16,11 @@ using MyNN.MLP2.LearningConfig;
 
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
@@ -63,24 +67,34 @@ namespace MyNNConsoleApp.Nvidia
                 () =>
                     new TestPurposeValidation(validationData.ConvertToAutoencoder());
 
-            Func<MLP> mlpProvider = 
+            Func<IMLP> mlpProvider =
                 () =>
-                    new MLP(
-                        new NoRandomRandomizer(), 
-                        null,
-                        null,
-                        new IFunction[]
+                {
+                    var randomizer = new NoRandomRandomizer();
+
+                    var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+                    
+
+                    var mlpf = new MLPFactory(
+                        layerFactory
+                        );
+
+                    return mlpf.CreateMLP(
+                            null,
+                            null,
+                            new IFunction[]
                             {
                                 null,
-                                new RLUFunction(), 
+                                new RLUFunction(),
                                 new RLUFunction(),
                             },
-                        new[]
+                            new[]
                             {
                                 784,
-                                1200,//784 * 10,
+                                1200, //784 * 10,
                                 784
                             });
+                };
 
             var nvidiaTotalError = float.MinValue;
             var nvidiaResult = ulong.MinValue;
@@ -177,7 +191,7 @@ namespace MyNNConsoleApp.Nvidia
         private static void ProfileNvidiaGPU(
             IRandomizer randomizer,
             DataSet trainData,
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config,
             IValidation validation)
         {
@@ -188,25 +202,24 @@ namespace MyNNConsoleApp.Nvidia
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new GPUBackpropagationAlgorithm(
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new GPUBackpropagationEpocheTrainer(
+                            mlp,
+                            config,
+                            clProvider),
                         mlp,
                         validation,
                         config);
 
                 //обучение сети
                 alg.Train(
-                    new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainData));
             }
         }
 
         private static void ProfileIntelCPU(
             IRandomizer randomizer,
             DataSet trainData,
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config,
             IValidation validation)
         {
@@ -218,19 +231,18 @@ namespace MyNNConsoleApp.Nvidia
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new CPUBackpropagationEpocheTrainer(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
+                            config,
+                            clProvider),
                         mlp,
                         validation,
                         config);
 
                 //обучение сети
                 alg.Train(
-                    new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainData));
             }
         }
 

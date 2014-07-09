@@ -5,10 +5,27 @@ using MyNN.Randomizer;
 namespace MyNN.MLP2.Structure.Neurons
 {
     [Serializable]
-    public class HiddeonOutputMLPNeuron : 
-        TrainableMLPNeuron
+    public class HiddeonOutputMLPNeuron : INeuron
     {
-        private readonly IRandomizer _randomizer;
+        public float[] Weights
+        {
+            get;
+            private set;
+        }
+
+        public IFunction ActivationFunction
+        {
+            get;
+            private set;
+        }
+
+        public bool IsBiasNeuron
+        {
+            get
+            {
+                return false;
+            }
+        }
 
         public HiddeonOutputMLPNeuron(
             IFunction activationFunction,
@@ -21,21 +38,12 @@ namespace MyNN.MLP2.Structure.Neurons
             }
 
             this.ActivationFunction = activationFunction;
-            _randomizer = randomizer;
 
             //случайные веса
             this.Weights = new float[weightCount];
             for (var cc = 0; cc < weightCount; cc++)
             {
-                this.Weights[cc] = _randomizer.Next() * .2f - .1f;
-            }
-        }
-
-        public override bool IsBiasNeuron
-        {
-            get
-            {
-                return false;
+                this.Weights[cc] = randomizer.Next() * .2f - .1f;
             }
         }
     }

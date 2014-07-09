@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Layer;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.Randomizer;
 using OpenCL.Net;
@@ -18,7 +21,7 @@ namespace MyNNConsoleApp.DropConnectInference
         public static void Execute()
         {
             var rndSeed = 234;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var wv =
                 new[]
@@ -35,17 +38,17 @@ namespace MyNNConsoleApp.DropConnectInference
 
             const int sampleCount = 100000;
 
-            var prevLayer = new MLPLayer(
-                wv.Length - 1,
-                true);
+            var layerFactory = new LayerFactory(new NeuronFactory(
+                    randomizer));
 
-            var currentLayer = new MLPLayer(
+            var prevLayer = layerFactory.CreateInputLayer(wv.Length - 1);
+
+            var currentLayer = layerFactory.CreateLayer(
                 new LinearFunction(1f),
                 1,
                 prevLayer.NonBiasNeuronCount,
                 false,
-                true,
-                randomizer);
+                true);
 
 
             {

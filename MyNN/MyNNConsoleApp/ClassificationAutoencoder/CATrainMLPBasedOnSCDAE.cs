@@ -24,7 +24,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
         public static void Tune()
         {
             var rndSeed = 18892;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -53,11 +53,11 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
 
             mlp.AddLayer(
                 new SigmoidFunction(1f),
-                //new IRLUFunction(), 
+                //new DRLUFunction(), 
                 10,
                 false);
 
-            Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
+            Console.WriteLine("Network configuration: " + mlp.GetLayerInformation());
 
 
             using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(), false))
@@ -80,20 +80,18 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new CPUBackpropagationEpocheTrainer(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
+                            config,
+                            clProvider),
                         mlp,
                         validation,
                         config);
 
                 //обучение сети
                 alg.Train(
-                    new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
-                    //new NoiseDataProvider(trainData, noiser).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainData));
             }
 
 

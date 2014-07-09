@@ -19,7 +19,11 @@ using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
@@ -31,7 +35,7 @@ namespace MyNNConsoleApp.DropConnectInference
         {
             var rndSeed = 1872390;
             var randomizer = 
-                new DefaultRandomizer(ref rndSeed);
+                new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
@@ -53,8 +57,14 @@ namespace MyNNConsoleApp.DropConnectInference
 
             var folderName = "_DropConnectMLP" + DateTime.Now.ToString("yyyMMddHHmmss");
 
-            var mlp = new MLP(
-                randomizer,
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+            
+
+            var mlpf = new MLPFactory(
+                layerFactory
+                );
+
+            var mlp = mlpf.CreateMLP(
                 null,
                 folderName,
                 new IFunction[]
@@ -98,22 +108,21 @@ namespace MyNNConsoleApp.DropConnectInference
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new DropConnectBitCPUBackpropagationAlgorithm<VectorizedCPULayerInferenceV2>(
-                                randomizer,
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider,
-                                sampleCount,
-                                p),
+                        new DropConnectBitCPUBackpropagationEpocheTrainer<VectorizedCPULayerInferenceV2>(
+                            randomizer,
+                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
+                            config,
+                            clProvider,
+                            sampleCount,
+                            p),
                         mlp,
                         validation,
                         config);
 
                 //обучение сети
                 alg.Train(
-                    new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainData));
             }
 
             Console.WriteLine("Experiment #6 finished");

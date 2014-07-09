@@ -12,7 +12,12 @@ using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
 
 namespace MyNNConsoleApp.PingPong
@@ -22,7 +27,7 @@ namespace MyNNConsoleApp.PingPong
         public static void Execute()
         {
             var rndSeed = 665341;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -49,9 +54,17 @@ namespace MyNNConsoleApp.PingPong
             DataSet validationNext;
             NextDataSet.NextDataSets(mlpPath, trainData, validationData, out trainNext, out validationNext);
 
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+            
+
+            var mlpf = new MLPFactory(
+                layerFactory
+                );
+
             //обучаем автоенкодер
             var a = new Autoencoder(
                 randomizer,
+                mlpf, 
                 "PingPong/Experiment0",
                 null,
                 new LayerInfo[]

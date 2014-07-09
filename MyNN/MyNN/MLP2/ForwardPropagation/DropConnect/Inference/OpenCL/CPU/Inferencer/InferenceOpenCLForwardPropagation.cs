@@ -4,6 +4,7 @@ using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Layer;
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
 using OpenCL.Net;
@@ -21,9 +22,9 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferenc
         where T : ILayerInference
     {
         private readonly VectorizationSizeEnum _vse;
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
 
-        public MLP MLP
+        public IMLP MLP
         {
             get
             {
@@ -73,7 +74,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferenc
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
         public InferenceOpenCLForwardPropagation(
             VectorizationSizeEnum vse,
-            MLP mlp,
+            IMLP mlp,
             CLProvider clProvider,
             IRandomizer randomizer,
             int sampleCount = 10000,

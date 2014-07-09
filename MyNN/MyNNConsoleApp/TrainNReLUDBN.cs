@@ -14,7 +14,7 @@ namespace MyNNConsoleApp
         {
             //обучение Linear - NReLU DBN
             var rndSeed = 1923443;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "mnist/trainingset/",

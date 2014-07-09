@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MyNN;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TrainDataProvider.Noiser;
@@ -25,7 +26,7 @@ namespace MyNNConsoleApp.DropConnectInference
         public static void Tune()
         {
             var rndSeed = 88178;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -50,7 +51,7 @@ namespace MyNNConsoleApp.DropConnectInference
                 //"SDAE20131229105634 MLP2/mlp20131230080924.mynn");
                 "SDAE20131231204527 MLP2/mlp20140101203652.mynn");
 
-            Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
+            Console.WriteLine("Network configuration: " + mlp.GetLayerInformation());
 
 
             using (var clProvider = new CLProvider())
@@ -73,15 +74,14 @@ namespace MyNNConsoleApp.DropConnectInference
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new DropConnectBitCPUBackpropagationAlgorithm<VectorizedCPULayerInferenceV2>(
-                                randomizer,
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider,
-                                2500,
-                                0.5f),
+                        new DropConnectBitCPUBackpropagationEpocheTrainer<VectorizedCPULayerInferenceV2>(
+                            randomizer,
+                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
+                            config,
+                            clProvider,
+                            2500,
+                            0.5f),
                         mlp,
                         validation,
                         config);
@@ -97,7 +97,7 @@ namespace MyNNConsoleApp.DropConnectInference
 
                 //обучение сети
                 alg.Train(
-                    new NoiseDataProvider(trainData.ConvertToAutoencoder(), noiser).GetDeformationDataSet);
+                    new NoiseDataProvider(trainData.ConvertToAutoencoder(), noiser));
             }
 
 

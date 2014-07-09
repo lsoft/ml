@@ -1,4 +1,5 @@
 ﻿using MyNN;
+using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagation;
@@ -11,7 +12,11 @@ using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
@@ -22,10 +27,16 @@ namespace MyNNConsoleApp.MLP2
         public static void Train()
         {
             int rndSeed = 123;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
-            var mlp = new MLP(
-                randomizer,
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+            
+
+            var mlpf = new MLPFactory(
+                layerFactory
+                );
+
+            var mlp = mlpf.CreateMLP(
                 null,
                 null,
                 new IFunction[]
@@ -83,10 +94,10 @@ namespace MyNNConsoleApp.MLP2
             {
                 var algo = new BackpropagationAlgorithm(
                     randomizer,
-                    (processedMLP, processedConfig) => new CPUBackpropagationAlgorithm(
+                    new CPUBackpropagationEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16,
-                        processedMLP,
-                        processedConfig,
+                        mlp,
+                        config,
                         clProvider),
                     mlp,
                     new ClassificationValidation(
@@ -102,12 +113,7 @@ namespace MyNNConsoleApp.MLP2
                     config,
                     true);
 
-                algo.Train(
-                    (epocheNumber) =>
-                    {
-                        return
-                            trainData;
-                    });
+                algo.Train(new NoDeformationTrainDataProvider(trainData));
             }
 
         }

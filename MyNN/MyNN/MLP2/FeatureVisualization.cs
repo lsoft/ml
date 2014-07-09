@@ -18,7 +18,7 @@ namespace MyNN.MLP2
 {
     public class FeatureVisualization
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly IForwardPropagationFactory _forwardPropagationFactory;
         private readonly int _nonZeroCount;
         private readonly float _featureValue;
@@ -26,7 +26,7 @@ namespace MyNN.MLP2
 
         public FeatureVisualization(
             IRandomizer randomizer,
-            MLP mlp,
+            IMLP mlp,
             IForwardPropagationFactory forwardPropagationFactory,
             int nonZeroCount,
             float featureValue)
@@ -71,10 +71,10 @@ namespace MyNN.MLP2
             {
                 File.Delete(imagefilename);
             }
-
+            
             _mlp.AutoencoderCutHead();
 
-            ConsoleAmbientContext.Console.WriteLine(_mlp.DumpLayerInformation());
+            ConsoleAmbientContext.Console.WriteLine(_mlp.GetLayerInformation());
 
 
             using (var clProvider = new CLProvider())
@@ -125,7 +125,7 @@ namespace MyNN.MLP2
 
                 //if clamp is requested to do so
                 if (clampTo01)
-                {   
+                {
                     images.ForEach(j => j.Transform((f) => (f < 0f ? 0f : (f > 1f ? 1f : f))));
                 }
 

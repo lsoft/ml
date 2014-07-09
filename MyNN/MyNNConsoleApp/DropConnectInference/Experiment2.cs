@@ -9,7 +9,11 @@ using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
@@ -20,7 +24,7 @@ namespace MyNNConsoleApp.DropConnectInference
         public static void Execute()
         {
             var rndSeed = 234;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var wv =
                 new[]
@@ -37,11 +41,11 @@ namespace MyNNConsoleApp.DropConnectInference
 
             const int sampleCount = 100000;
 
-            //var prevLayer = new MLPLayer(
+            //var prevLayer = new Layer(
             //    wv.Length - 1,
             //    true);
 
-            //var currentLayer = new MLPLayer(
+            //var currentLayer = new Layer(
             //    new LinearFunction(1f),
             //    1,
             //    prevLayer.NonBiasNeuronCount,
@@ -70,8 +74,12 @@ namespace MyNNConsoleApp.DropConnectInference
             {
                 var folderName = "_DCMLP" + DateTime.Now.ToString("yyyMMddHHmmss");
 
-                var mlp = new MLP(
-                    randomizer,
+                var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+
+                var mlpf = new MLPFactory(
+                    layerFactory);
+
+                var mlp = mlpf.CreateMLP(
                     null,
                     folderName,
                     new IFunction[]

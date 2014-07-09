@@ -24,7 +24,7 @@ namespace MyNN.MLP2.Saver
         public void Save(
             string epocheRoot,
             IAccuracyRecord accuracyRecord,
-            MLP mlp)
+            IMLP mlp)
         {
             if (epocheRoot == null)
             {

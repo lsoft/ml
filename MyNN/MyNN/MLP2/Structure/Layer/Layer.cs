@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Linq;
 using MyNN.MLP2.Structure.Neurons;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
 
-
-namespace MyNN.MLP2.Structure
+namespace MyNN.MLP2.Structure.Layer
 {
     [Serializable]
-    public class MLPLayer
+    public class Layer : ILayer
     {
+        private readonly INeuronFactory _neuronFactory;
         private bool _isNeedBiasNeuron;
-        private readonly IRandomizer _randomizer;
 
         public bool IsBiasNeuronExists
         {
@@ -37,7 +38,7 @@ namespace MyNN.MLP2.Structure
             }
         }
 
-        public TrainableMLPNeuron[] Neurons
+        public INeuron[] Neurons
         {
             get;
             private set;
@@ -49,59 +50,65 @@ namespace MyNN.MLP2.Structure
             private set;
         }
 
-        /// <summary>
-        /// Конструктор скрытых и выходного слоя
-        /// </summary>
-        public MLPLayer(
-            TrainableMLPNeuron[] neuronList,
-            bool isNeedBiasNeuron)
-        {
-            if (neuronList == null)
-            {
-                throw new ArgumentNullException("neuronList");
-            }
+        ///// <summary>
+        ///// Конструктор скрытых и выходного слоя
+        ///// </summary>
+        //public Layer(
+        //    INeuron[] neuronList,
+        //    bool isNeedBiasNeuron)
+        //{
+        //    if (neuronList == null)
+        //    {
+        //        throw new ArgumentNullException("neuronList");
+        //    }
 
-            _isNeedBiasNeuron = isNeedBiasNeuron;
-            LayerActivationFunction = neuronList[0].ActivationFunction;
+        //    _isNeedBiasNeuron = isNeedBiasNeuron;
+        //    LayerActivationFunction = neuronList[0].ActivationFunction;
 
-            var totalNeuronCount = neuronList.Length + (isNeedBiasNeuron ? 1 : 0);
+        //    var totalNeuronCount = neuronList.Length + (isNeedBiasNeuron ? 1 : 0);
 
-            this.Neurons = new TrainableMLPNeuron[totalNeuronCount];
+        //    this.Neurons = new INeuron[totalNeuronCount];
 
-            for (var cc = 0; cc < this.Neurons.Length; cc++)
-            {
-                if (isNeedBiasNeuron && (cc == this.Neurons.Length - 1))
-                {
-                    this.Neurons[cc] = new BiasMLPNeuron();
-                }
-                else
-                {
-                    this.Neurons[cc] = neuronList[cc];
-                }
-            }
-        }
+        //    for (var cc = 0; cc < this.Neurons.Length; cc++)
+        //    {
+        //        if (isNeedBiasNeuron && (cc == this.Neurons.Length - 1))
+        //        {
+        //            this.Neurons[cc] = new BiasNeuron();
+        //        }
+        //        else
+        //        {
+        //            this.Neurons[cc] = neuronList[cc];
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Конструктор входного слоя
         /// </summary>
-        public MLPLayer(
-            int currentLayerNeuronCount,
-            bool isNeedBiasNeuron)
+        public Layer(
+            INeuronFactory neuronFactory,
+            int withoutBiasNeuronCount)
         {
-            _isNeedBiasNeuron = isNeedBiasNeuron;
+            if (neuronFactory == null)
+            {
+                throw new ArgumentNullException("neuronFactory");
+            }
 
-            var totalNeuronCount = currentLayerNeuronCount + (isNeedBiasNeuron ? 1 : 0);
+            _neuronFactory = neuronFactory;
+            
+            _isNeedBiasNeuron = true;
 
-            this.Neurons = new TrainableMLPNeuron[totalNeuronCount];
+            var totalNeuronCount = withoutBiasNeuronCount + 1;//(isNeedBiasNeuron ? 1 : 0);
+
+            this.Neurons = new INeuron[totalNeuronCount];
 
             for (var cc = 0; cc < this.Neurons.Length; cc++)
             {
-                this.Neurons[cc] = new InputMLPNeuron(
-                    cc);
+                this.Neurons[cc] = neuronFactory.CreateInputNeuron(cc);
 
-                if (isNeedBiasNeuron && (cc == this.Neurons.Length - 1))
+                if (cc == this.Neurons.Length - 1)
                 {
-                    this.Neurons[cc] = new BiasMLPNeuron();
+                    this.Neurons[cc] = neuronFactory.CreateBiasNeuron();
                 }
             }
         }
@@ -109,41 +116,40 @@ namespace MyNN.MLP2.Structure
         /// <summary>
         /// Конструктор скрытых и выходного слоя
         /// </summary>
-        public MLPLayer(
+        public Layer(
+            INeuronFactory neuronFactory,
             IFunction activationFunction,
             int currentLayerNeuronCount,
             int previousLayerNeuronCount,
             bool isNeedBiasNeuron,
-            bool isPreviousLayerHadBiasNeuron,
-            IRandomizer randomizer)
+            bool isPreviousLayerHadBiasNeuron)
         {
+            if (neuronFactory == null)
+            {
+                throw new ArgumentNullException("neuronFactory");
+            }
             if (activationFunction == null)
             {
                 throw new ArgumentNullException("activationFunction");
             }
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
-            }
 
+            _neuronFactory = neuronFactory;
             _isNeedBiasNeuron = isNeedBiasNeuron;
-            _randomizer = randomizer;
             LayerActivationFunction = activationFunction;
 
             var totalNeuronCount = currentLayerNeuronCount + (isNeedBiasNeuron ? 1 : 0);
 
-            this.Neurons = new TrainableMLPNeuron[totalNeuronCount];
+            this.Neurons = new INeuron[totalNeuronCount];
 
             for (var cc = 0; cc < this.Neurons.Length; cc++)
             {
-                this.Neurons[cc] = new HiddeonOutputMLPNeuron(
+                this.Neurons[cc] = neuronFactory.CreateTrainableNeuron(
                     activationFunction,
-                    previousLayerNeuronCount + (isPreviousLayerHadBiasNeuron ? 1 : 0),
-                    _randomizer);
+                    previousLayerNeuronCount + (isPreviousLayerHadBiasNeuron ? 1 : 0));
 
                 if (isNeedBiasNeuron && (cc == this.Neurons.Length - 1))
                 {
-                    this.Neurons[cc] = new BiasMLPNeuron();
+                    this.Neurons[cc] = neuronFactory.CreateBiasNeuron();
                 }
             }
         }
@@ -151,14 +157,14 @@ namespace MyNN.MLP2.Structure
         public void AddBiasNeuron()
         {
             var nln = this.Neurons.Last();
-            if (nln is BiasMLPNeuron)
+            if (nln.IsBiasNeuron)
             {
                 throw new Exception("Уже добавлен биас нейрон");
             }
 
-            var na = new TrainableMLPNeuron[this.NonBiasNeuronCount + 1];
+            var na = new INeuron[this.NonBiasNeuronCount + 1];
             Array.Copy(this.Neurons, na, this.NonBiasNeuronCount);
-            na[na.Length - 1] = new BiasMLPNeuron();
+            na[na.Length - 1] = _neuronFactory.CreateBiasNeuron();
 
             this.Neurons = na;
             this._isNeedBiasNeuron = true;
@@ -167,9 +173,9 @@ namespace MyNN.MLP2.Structure
         public void RemoveBiasNeuron()
         {
             var nln = this.Neurons.Last();
-            if (nln is BiasMLPNeuron)
+            if (nln.IsBiasNeuron)
             {
-                var na = new TrainableMLPNeuron[this.NonBiasNeuronCount];
+                var na = new INeuron[this.NonBiasNeuronCount];
                 Array.Copy(this.Neurons, na, this.NonBiasNeuronCount);
 
                 this.Neurons = na;
@@ -177,7 +183,7 @@ namespace MyNN.MLP2.Structure
             }
         }
 
-        public string DumpLayerInformation()
+        public string GetLayerInformation()
         {
             var neuronCount = this.Neurons.Length;
             var nonbiasNeuronCount = this.NonBiasNeuronCount;
@@ -194,6 +200,8 @@ namespace MyNN.MLP2.Structure
                         : "Input");
         }
 
+        //извлечь в спец вид фабрики ILayerFromRBMFactory
+        /*
         #region deep belief network related code
 
         /// <summary>
@@ -245,6 +253,6 @@ namespace MyNN.MLP2.Structure
         }
 
         #endregion
-
+        //*/
     }
 }

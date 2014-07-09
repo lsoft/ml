@@ -4,20 +4,19 @@ using MyNN.MLP2.Structure.Neurons.Function;
 namespace MyNN.MLP2.Structure.Neurons
 {
     [Serializable]
-    public class InputMLPNeuron : 
-        TrainableMLPNeuron
+    public class BiasNeuron :  INeuron
     {
-        private readonly int _thisIndex;
+        #region private class
 
         [Serializable]
-        private class InputFunction : IFunction
+        private class BiasConstFunction : IFunction
         {
             public string ShortName
             {
                 get
                 {
                     return
-                        "Input";
+                        "BCF1";
                 }
             }
 
@@ -43,22 +42,34 @@ namespace MyNN.MLP2.Structure.Neurons
             }
         }
 
-        public InputMLPNeuron(
-            int thisIndex)
-        {
-            this._thisIndex = thisIndex;
-            this.ActivationFunction = new InputFunction();
+        #endregion
 
-            //случайные веса
-            this.Weights = new float[0];
+        public float[] Weights
+        {
+            get;
+            private set;
         }
 
-        public override bool IsBiasNeuron
+        public IFunction ActivationFunction
+        {
+            get;
+            private set;
+        }
+
+        public bool IsBiasNeuron
         {
             get
             {
-                return false;
+                return true;
             }
+        }
+
+        public BiasNeuron()
+        {
+            this.ActivationFunction = new BiasConstFunction();
+
+            //случайные веса
+            this.Weights = new float[0];
         }
     }
 }

@@ -10,9 +10,6 @@ namespace MyNN.MLP2.Structure.Neurons.Function
         private readonly float _alpha = 0.0f;
         private readonly float _beta = 0.0f;
 
-        private readonly float _alphaSq = 0.0f;
-        private readonly float _betaSq = 0.0f;
-
         public string ShortName
         {
             get
@@ -30,9 +27,6 @@ namespace MyNN.MLP2.Structure.Neurons.Function
         {
             _alpha = alpha;
             _beta = beta;
-
-            _alphaSq = alpha*alpha;
-            _betaSq = beta*beta;
         }
 
         public float Compute(float x)

@@ -10,7 +10,7 @@ using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.KNN
 {
-    public class KNearest
+    public class CPUOpenCLKNearest : IKNearest
     {
         private readonly CLProvider _clProvider;
 
@@ -25,7 +25,7 @@ namespace MyNN.KNN
         private readonly Kernel _calculateDistanceKernel;
 
 
-        public KNearest(DataSet dataList)
+        public CPUOpenCLKNearest(DataSet dataList)
         {
             #region validate
 

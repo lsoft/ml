@@ -16,7 +16,11 @@ using MyNN.MLP2.LearningConfig;
 
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
@@ -48,7 +52,7 @@ namespace MyNNConsoleApp.Nvidia
             validationData.Normalize();
             validationData.Data.ForEach(item => item.Output = item.Output.Take(7).ToArray()); //чтобы не было нулей в датасете, а то вдруг алгоритм "забывает" например учесть последний флоат в датаитеме...
 
-            Func<ILearningAlgorithmConfig> configProvider = 
+            Func<ILearningAlgorithmConfig> configProvider =
                 () =>
                     new LearningAlgorithmConfig(
                         new ConstLearningRate(0.0001f),
@@ -60,30 +64,41 @@ namespace MyNNConsoleApp.Nvidia
 
             var serialization = new SerializationHelper();
 
-            Func<TestPurposeValidation> validationProvider = 
+            Func<TestPurposeValidation> validationProvider =
                 () =>
                     new TestPurposeValidation(validationData);
 
-            Func<MLP> mlpProvider = 
+            Func<IMLP> mlpProvider =
                 () =>
-                    new MLP(
-                        new NoRandomRandomizer(), 
-                        null,
-                        null,
-                        new IFunction[]
-                            {
-                                null,
-                                new RLUFunction(), 
-                                new RLUFunction(),
-                            },
-                        new[]
-                            {
-                                784,
-                                50,
-                                7
-                            });
+                    {
+                        var randomizer = new NoRandomRandomizer();
 
-            var nvidiaTotalError = float.MinValue;
+                        var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+                        
+
+                        var mlpf = new MLPFactory(
+                            layerFactory
+                            );
+
+                        return mlpf.CreateMLP(
+                                null,
+                                null,
+                                new IFunction[]
+                                {
+                                    null,
+                                    new RLUFunction(),
+                                    new RLUFunction(),
+                                },
+                                new[]
+                                {
+                                    784,
+                                    50,
+                                    7
+                                });
+                    };
+
+
+        var nvidiaTotalError = float.MinValue;
             var nvidiaResult = ulong.MinValue;
             {
                 var randomizer = new NoRandomRandomizer();
@@ -178,7 +193,7 @@ namespace MyNNConsoleApp.Nvidia
         private static void ProfileNvidiaGPU(
             IRandomizer randomizer,
             DataSet trainData,
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config,
             IValidation validation)
         {
@@ -189,25 +204,24 @@ namespace MyNNConsoleApp.Nvidia
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new GPUBackpropagationAlgorithm(
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new GPUBackpropagationEpocheTrainer(
+                            mlp,
+                            config,
+                            clProvider),
                         mlp,
                         validation,
                         config);
 
                 //обучение сети
                 alg.Train(
-                    new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainData));
             }
         }
 
         private static void ProfileIntelCPU(
             IRandomizer randomizer,
             DataSet trainData,
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config,
             IValidation validation)
         {
@@ -219,19 +233,18 @@ namespace MyNNConsoleApp.Nvidia
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new CPUBackpropagationEpocheTrainer(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
+                            config,
+                            clProvider),
                         mlp,
                         validation,
                         config);
 
                 //обучение сети
                 alg.Train(
-                    new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainData));
             }
         }
 

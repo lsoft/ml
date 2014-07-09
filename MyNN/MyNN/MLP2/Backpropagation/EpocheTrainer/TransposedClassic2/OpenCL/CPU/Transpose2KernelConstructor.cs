@@ -9,11 +9,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
     /// </summary>
     public class Transpose2KernelConstructor
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
         public Transpose2KernelConstructor(
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config)
         {
             if (mlp == null)

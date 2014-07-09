@@ -19,9 +19,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
     /// Classic backpropagation epoche trainer that enables GPU-OpenCL with transposed weights.
     /// This implementation of classic backpropagation is optimized for training in batch-mode.
     /// </summary>
-    public class GPUTransposeBackpropagationAlgorithm : IEpocheTrainer
+    public class GPUTransposeBackpropagationEpocheTrainer : IBackpropagationEpocheTrainer
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
         private readonly CLProvider _clProvider;
@@ -52,8 +52,8 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
         /// <param name="mlp">Trained MLP</param>
         /// <param name="config">Learning config</param>
         /// <param name="clProvider">OpenCL provider</param>
-        public GPUTransposeBackpropagationAlgorithm(
-            MLP mlp,
+        public GPUTransposeBackpropagationEpocheTrainer(
+            IMLP mlp,
             ILearningAlgorithmConfig config,
             CLProvider clProvider
             )
@@ -78,7 +78,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
 
             if (config.BatchSize == 1)
             {
-               ConsoleAmbientContext.Console.WriteWarning("This backpropagation algorithm optimized to work in batch mode (typical with batch size = [25;100]). Online backpropagation is not an optimal choice. Try to use GPUBackpropagationAlgorithm.");
+               ConsoleAmbientContext.Console.WriteWarning("This backpropagation algorithm optimized to work in batch mode (typical with batch size = [25;100]). Online backpropagation is not an optimal choice. Try to use GPUBackpropagationEpocheTrainer.");
             }
 
             if (config.BatchSize > 1 && config.BatchSize < 25)

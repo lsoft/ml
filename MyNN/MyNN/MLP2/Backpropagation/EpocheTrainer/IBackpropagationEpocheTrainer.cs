@@ -6,7 +6,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer
     /// <summary>
     /// Epoche trainer for backpropagation family algorithms
     /// </summary>
-    public interface IEpocheTrainer
+    public interface IBackpropagationEpocheTrainer
     {
         /// <summary>
         /// Forward propagator
@@ -17,7 +17,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer
         }
 
         /// <summary>
-        /// Prmary init
+        /// Primary init
         /// </summary>
         /// <param name="data">Train dataset</param>
         void PreTrainInit(DataSet data);

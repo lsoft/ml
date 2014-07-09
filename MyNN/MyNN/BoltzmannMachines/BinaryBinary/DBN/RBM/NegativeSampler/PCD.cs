@@ -72,7 +72,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
             //vhv
             for (var cdi = 0; cdi < maxGibbsChainLength; cdi++)
             {
-                var randomIndex = this._rbm.Random.Next(this._rbm.RandomCount);
+                var randomIndex = this._rbm.Randomizer.Next(this._rbm.RandomCount);
 
                 var ifFirst = cdi == 0;
                 var ifLast = cdi == (maxGibbsChainLength - 1);
@@ -131,7 +131,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
 
             #endregion
 
-            var randomIndex2 = this._rbm.Random.Next(this._rbm.RandomCount - this._rbm.HiddenNeuronCount - 1);
+            var randomIndex2 = this._rbm.Randomizer.Next(this._rbm.RandomCount - this._rbm.HiddenNeuronCount - 1);
 
             _updatePersistent
                 .SetKernelArgMem(0, this._rbm.Hidden1)

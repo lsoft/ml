@@ -21,7 +21,11 @@ using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.MLP2.Transposer;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
@@ -90,7 +94,7 @@ namespace MyNNConsoleApp.TransposeExperiments
 
             var serialization = new SerializationHelper();
 
-            MLP mlp1 = null;
+            IMLP mlp1 = null;
             {
                 Console.WriteLine("============================== OLD ==================================");
 
@@ -98,8 +102,14 @@ namespace MyNNConsoleApp.TransposeExperiments
 
                 var folderName = "_TransposeAutoencoder" + DateTime.Now.ToString("yyyyMMddHHmmss") + " MLP2";
 
-                mlp1 = new MLP(
-                    randomizer,
+                var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+                
+
+                var mlpf = new MLPFactory(
+                    layerFactory
+                    );
+
+                mlp1 = mlpf.CreateMLP(
                     ".",
                     folderName,
                     new IFunction[]
@@ -130,10 +140,10 @@ namespace MyNNConsoleApp.TransposeExperiments
                 {
                     var algo = new BackpropagationAlgorithm(
                         randomizer,
-                        (processedMLP, processedConfig) => new CPUBackpropagationAlgorithm(
+                        new CPUBackpropagationEpocheTrainer(
                             VectorizationSizeEnum.VectorizationMode16,
-                            processedMLP,
-                            processedConfig,
+                            mlp1,
+                            conf,
                             clProvider),
                         mlp1,
                         validation,
@@ -141,12 +151,11 @@ namespace MyNNConsoleApp.TransposeExperiments
                         true);
 
                     algo.Train(
-                        new NoDeformationTrainDataProvider(
-                            trainData.ConvertToAutoencoder()).GetDeformationDataSet);
+                        new NoDeformationTrainDataProvider(trainData.ConvertToAutoencoder()));
                 }
             }
 
-            MLP mlp2 = null;
+            IMLP mlp2 = null;
             {
                 Console.WriteLine("============================== NEW ==================================");
 
@@ -154,8 +163,14 @@ namespace MyNNConsoleApp.TransposeExperiments
 
                 var folderName = "_TransposeAutoencoder" + DateTime.Now.ToString("yyyyMMddHHmmss") + " MLP2";
 
-                mlp2 = new MLP(
-                    randomizer,
+                var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+                
+
+                var mlpf = new MLPFactory(
+                    layerFactory
+                    );
+
+                mlp2 = mlpf.CreateMLP(
                     ".",
                     folderName,
                     new IFunction[]
@@ -186,10 +201,10 @@ namespace MyNNConsoleApp.TransposeExperiments
                 {
                     var algo = new BackpropagationAlgorithm(
                         randomizer,
-                        (processedMLP, processedConfig) => new CPUTransposeBackpropagationAlgorithm(
+                        new CPUTransposeBackpropagationEpocheTrainer(
                             VectorizationSizeEnum.VectorizationMode16,
-                            processedMLP,
-                            processedConfig,
+                            mlp2,
+                            conf,
                             clProvider),
                         mlp2,
                         validation,
@@ -197,8 +212,7 @@ namespace MyNNConsoleApp.TransposeExperiments
                         true);
 
                     algo.Train(
-                        new NoDeformationTrainDataProvider(
-                            trainData.ConvertToAutoencoder()).GetDeformationDataSet);
+                        new NoDeformationTrainDataProvider(trainData.ConvertToAutoencoder()));
                 }
                 //*/
             }

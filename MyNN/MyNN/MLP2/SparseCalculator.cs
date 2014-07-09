@@ -15,14 +15,14 @@ namespace MyNN.MLP2
     /// </summary>
     public class SparseCalculator
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
 
         /// <summary>
         /// Конструктор
         /// </summary>
         /// <param name="mlp">Сеть, через которую прогоняются данные</param>
         public SparseCalculator(
-            MLP mlp)
+            IMLP mlp)
         {
             if (mlp == null)
             {
@@ -49,7 +49,7 @@ namespace MyNN.MLP2
                 throw new ArgumentNullException("testDataset");
             }
 
-            ConsoleAmbientContext.Console.WriteLine(_mlp.DumpLayerInformation());
+            ConsoleAmbientContext.Console.WriteLine(_mlp.GetLayerInformation());
 
             using (var clProvider = new CLProvider())
             {

@@ -6,6 +6,7 @@ using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Layer;
 using OpenCL.Net.Wrapper;
 
 namespace MyNNConsoleApp.PingPong
@@ -20,8 +21,10 @@ namespace MyNNConsoleApp.PingPong
             out DataSet validationNext)
         {
             var mlp = SerializationHelper.LoadFromFile<MLP>(mlpPath);
+
             mlp.CutLastLayer();
-            Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
+
+            Console.WriteLine("Network configuration: " + mlp.GetLayerInformation());
 
             List<ILayerState> trainOutput;
             List<ILayerState> validationOutput;

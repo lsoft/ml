@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4;
@@ -176,35 +175,6 @@ namespace MyNN.Tests.MLP2.Sort
 
                 Assert.AreEqual(orig.Distance, result[cc].Distance);
             }
-        }
-    }
-
-    [DebuggerDisplay("A = {AIndex}, B = {BIndex}, D = {Distance}")]
-    internal class SortItem
-    {
-        public uint AIndex
-        {
-            get;
-            private set;
-        }
-
-        public uint BIndex
-        {
-            get;
-            private set;
-        }
-
-        public float Distance
-        {
-            get;
-            private set;
-        }
-
-        public SortItem(uint aIndex, uint bIndex, float distance)
-        {
-            AIndex = aIndex;
-            BIndex = bIndex;
-            Distance = distance;
         }
     }
 }

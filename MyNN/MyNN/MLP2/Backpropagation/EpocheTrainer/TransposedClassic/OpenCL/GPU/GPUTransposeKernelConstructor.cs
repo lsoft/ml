@@ -9,11 +9,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
     /// </summary>
     public class GPUTransposeKernelConstructor
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
         public GPUTransposeKernelConstructor(
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config)
         {
             if (mlp == null)

@@ -9,11 +9,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
     /// </summary>
     public class DropConnectBitKernelConstructor
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
         public DropConnectBitKernelConstructor(
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config)
         {
             if (mlp == null)

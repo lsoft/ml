@@ -20,7 +20,11 @@ using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
@@ -76,16 +80,18 @@ namespace MyNNConsoleApp.DerivativeChange
                 );
             validationData.Normalize();
 
-            var serialization = new SerializationHelper();
-
             {
                 var randomizer =
                     new NoRandomRandomizer();
 
                 var folderName = "_DerivativeMLP" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
-                var mlp = new MLP(
-                    randomizer,
+                var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+
+                var mlpf = new MLPFactory(
+                    layerFactory);
+
+                var mlp = mlpf.CreateMLP(
                     null,
                     folderName,
                     new IFunction[]
@@ -122,19 +128,18 @@ namespace MyNNConsoleApp.DerivativeChange
                     var alg =
                         new BackpropagationAlgorithm(
                             randomizer,
-                            (currentMLP, currentConfig) =>
-                                new CPUBackpropagationAlgorithm(
-                                    VectorizationSizeEnum.VectorizationMode16,
-                                    currentMLP,
-                                    currentConfig,
-                                    clProvider),
+                            new CPUBackpropagationEpocheTrainer(
+                                VectorizationSizeEnum.VectorizationMode16,
+                                mlp,
+                                config,
+                                clProvider),
                             mlp,
                             validation,
                             config);
 
                     //обучение сети
                     alg.Train(
-                        new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                        new NoDeformationTrainDataProvider(trainData));
                 }
             }
         }
@@ -168,8 +173,12 @@ namespace MyNNConsoleApp.DerivativeChange
 
                 var folderName = "_DerivativeMLP" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
-                var mlp = new MLP(
-                    randomizer,
+                var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+
+                var mlpf = new MLPFactory(
+                    layerFactory);
+
+                var mlp = mlpf.CreateMLP(
                     null,
                     folderName,
                     new IFunction[]
@@ -206,19 +215,18 @@ namespace MyNNConsoleApp.DerivativeChange
                     var alg =
                         new BackpropagationAlgorithm(
                             randomizer,
-                            (currentMLP, currentConfig) =>
-                                new CPUTransposeBackpropagationAlgorithm(
-                                    VectorizationSizeEnum.VectorizationMode16,
-                                    currentMLP,
-                                    currentConfig,
-                                    clProvider),
+                            new CPUTransposeBackpropagationEpocheTrainer(
+                                VectorizationSizeEnum.VectorizationMode16,
+                                mlp,
+                                config,
+                                clProvider),
                             mlp,
                             validation,
                             config);
 
                     //обучение сети
                     alg.Train(
-                        new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                        new NoDeformationTrainDataProvider(trainData));
                 }
             }
         }
@@ -252,8 +260,12 @@ namespace MyNNConsoleApp.DerivativeChange
 
                 var folderName = "_DerivativeMLP" + DateTime.Now.ToString("yyyyMMddHHmmss");
 
-                var mlp = new MLP(
-                    randomizer,
+                var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+
+                var mlpf = new MLPFactory(
+                    layerFactory);
+
+                var mlp = mlpf.CreateMLP(
                     null,
                     folderName,
                     new IFunction[]
@@ -290,19 +302,18 @@ namespace MyNNConsoleApp.DerivativeChange
                     var alg =
                         new BackpropagationAlgorithm(
                             randomizer,
-                            (currentMLP, currentConfig) =>
-                                new CPUTranspose2BackpropagationAlgorithm(
-                                    VectorizationSizeEnum.VectorizationMode16,
-                                    currentMLP,
-                                    currentConfig,
-                                    clProvider),
+                            new CPUTranspose2BackpropagationEpocheTrainer(
+                                VectorizationSizeEnum.VectorizationMode16,
+                                mlp,
+                                config,
+                                clProvider),
                             mlp,
                             validation,
                             config);
 
                     //обучение сети
                     alg.Train(
-                        new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                        new NoDeformationTrainDataProvider(trainData));
                 }
             }
         }
@@ -339,8 +350,12 @@ namespace MyNNConsoleApp.DerivativeChange
 
                 var folderName = "_DropConnectMLP" + DateTime.Now.ToString("yyyMMddHHmmss");
 
-                var mlp = new MLP(
-                    randomizer,
+                var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+
+                var mlpf = new MLPFactory(
+                    layerFactory);
+
+                var mlp = mlpf.CreateMLP(
                     null,
                     folderName,
                     new IFunction[]
@@ -377,22 +392,21 @@ namespace MyNNConsoleApp.DerivativeChange
                     var alg =
                         new BackpropagationAlgorithm(
                             randomizer,
-                            (currentMLP, currentConfig) =>
-                                new DropConnectCPUBackpropagationAlgorithm<VectorizedCPULayerInferenceV2>(
-                                    randomizer,
-                                    VectorizationSizeEnum.VectorizationMode16,
-                                    currentMLP,
-                                    currentConfig,
-                                    clProvider,
-                                    sampleCount,
-                                    p),
+                            new DropConnectCPUBackpropagationEpocheTrainer<VectorizedCPULayerInferenceV2>(
+                                randomizer,
+                                VectorizationSizeEnum.VectorizationMode16,
+                                mlp,
+                                config,
+                                clProvider,
+                                sampleCount,
+                                p),
                             mlp,
                             validation,
                             config);
 
                     //обучение сети
                     alg.Train(
-                        new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                        new NoDeformationTrainDataProvider(trainData));
                 }
             }
         }

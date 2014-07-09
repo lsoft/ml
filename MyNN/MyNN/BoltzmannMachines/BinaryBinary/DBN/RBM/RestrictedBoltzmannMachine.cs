@@ -18,7 +18,11 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
 {
     public class RestrictedBoltzmannMachine : IRestrictedBoltzmannMachine
     {
-        private readonly IRandomizer _randomizer;
+        public IRandomizer Randomizer
+        {
+            get;
+            private set;
+        }
 
         public int VisibleNeuronCount
         {
@@ -112,12 +116,6 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
             private set;
         }
 
-        public Random Random
-        {
-            get;
-            private set;
-        }
-
         private IRBMNegativeSampler _sampler;
 
         public RestrictedBoltzmannMachine(
@@ -146,7 +144,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
 
             #endregion
 
-            _randomizer = randomizer;
+            Randomizer = randomizer;
 
             this.RandomCount = 16384;
 
@@ -186,7 +184,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
             //инициализируем веса
             for (var cc = 0; cc < Weights.Array.Length; cc++)
             {
-                Weights.Array[cc] = (float)Random.NextDouble() * 0.02f - 0.01f;
+                Weights.Array[cc] = Randomizer.Next() * 0.02f - 0.01f;
             }
 
             //заполняем bias входных объектов
@@ -200,7 +198,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
             //заполняем рандом
             for (var cc = 0; cc < Randoms.Array.Length; cc++)
             {
-                Randoms.Array[cc] = (float)Random.NextDouble();
+                Randoms.Array[cc] = Randomizer.Next();
             }
 
             //отправляем видимое (пустой массив + биас)
@@ -343,7 +341,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
                 #endregion
 
                 //обучаем
-                var enumerator = trainData.CreateShuffledDataSet(_randomizer).GetEnumerator();
+                var enumerator = trainData.CreateShuffledDataSet(Randomizer).GetEnumerator();
 
                 var begin = DateTime.Now;
 
@@ -403,7 +401,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
                         Array.Copy(trainItem.Input, _input.Array, VisibleNeuronCount - 1);
                         _input.Write(BlockModeEnum.Blocking);
 
-                        var randomIndex = Random.Next(RandomCount);
+                        var randomIndex = Randomizer.Next(RandomCount);
 
                         SampleHidden
                             .SetKernelArgMem(0, Hidden0)
@@ -817,7 +815,8 @@ Error: {7}
                 });
         }
 
-        public float CalculateFreeEnergySet(OpenCL.Net.Wrapper.Mem.Mem<float> weights,
+        public float CalculateFreeEnergySet(
+            OpenCL.Net.Wrapper.Mem.Mem<float> weights,
             DataSet data)
         {
             #region validate
@@ -843,14 +842,15 @@ Error: {7}
                 var factualBufferSize = 0;
                 for (var bi = 0; bi < Math.Min(data.Count, SizeOfResultBufferForVisibleFreeEnergy); bi++, factualBufferSize++)
                 {
-                    if(enumerator.MoveNext())
+                    if (enumerator.MoveNext())
                     {
                         var c = enumerator.Current;
 
                         c.Input.CopyTo(
                             _inputBufferForVisibleFreeEnergy.Array,
-                            this.VisibleNeuronCount*bi);
-                        _inputBufferForVisibleFreeEnergy.Array[this.VisibleNeuronCount*(bi + 1) - 1] = 1f;//bias
+                            this.VisibleNeuronCount * bi);
+
+                        _inputBufferForVisibleFreeEnergy.Array[this.VisibleNeuronCount * (bi + 1) - 1] = 1f;//bias
                     }
                     else
                     {
@@ -878,7 +878,7 @@ Error: {7}
                     CLProvider.QueueFinish();
 
                     _resultBufferForVisibleFreeEnergy.Read(BlockModeEnum.Blocking);
-                    
+
                     for (var cc = 0; cc < factualBufferSize; cc++)
                     {
                         sumFreeEnergy += _resultBufferForVisibleFreeEnergy.Array[cc];
@@ -889,10 +889,10 @@ Error: {7}
             return sumFreeEnergy;
         }
 
-        //это c# копия алгоритма, сделанного на opencl, проверял - результат вроде дают одинаковый
+        ////это c# копия алгоритма, сделанного на opencl, проверял - результат вроде дают одинаковый
         //public float CalculateFreeEnergySet(
-        //    Mem<float> weights,
-        //    List<DataItem> data)
+        //    OpenCL.Net.Wrapper.Mem.Mem<float> weights,
+        //    DataSet data)
         //{
         //    var sumFreeEnergy = 0f;
         //    foreach (var vd in data)
@@ -953,7 +953,7 @@ Error: {7}
 
             foreach (var data in trainData)
             {
-                var randomIndex = Random.Next(RandomCount);
+                var randomIndex = Randomizer.Next(RandomCount);
 
                 Array.Copy(data.Input, Visible.Array, data.Input.Length);
                 Visible.Write(BlockModeEnum.Blocking);
@@ -1373,7 +1373,7 @@ __kernel void CalculateEnergy(
             {
                 for (var gibbsIndex = 0; gibbsIndex < perImageGibbsSteps; gibbsIndex++)
                 {
-                    var randomIndex = Random.Next(RandomCount);
+                    var randomIndex = Randomizer.Next(RandomCount);
 
                     SampleHidden
                         .SetKernelArgMem(0, Hidden0)

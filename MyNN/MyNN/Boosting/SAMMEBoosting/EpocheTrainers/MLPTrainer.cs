@@ -5,6 +5,7 @@ using Accord.MachineLearning.DecisionTrees;
 using Accord.MachineLearning.DecisionTrees.Learning;
 using MyNN.Boosting.SAMMEBoosting.EpocheTrainers.Classifiers;
 using MyNN.Data;
+using MyNN.Data.TrainDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
@@ -15,6 +16,7 @@ using MyNN.MLP2.LearningConfig;
 
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
@@ -24,20 +26,22 @@ namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers
     public class MLPTrainer : IEpocheTrainer, IValidation
     {
         private readonly IRandomizer _randomizer;
+        private readonly IMLPFactory _mlpFactory;
         private readonly int _firstLayerNonBiasNeuronCount;
         private readonly int _hiddenLayerNonBiasNeuronCount;
         private readonly int _classesCount;
 
-        private MLP _net;
+        private IMLP _net;
         private DataSet _trainData;
         private DataSet _validationData;
 
         private int _bestCorrectCount;
         private float _bestTotalError;
-        private MLP _bestNetwork;
+        private IMLP _bestNetwork;
 
         public MLPTrainer(
             IRandomizer randomizer,
+            IMLPFactory mlpFactory,
             int firstLayerNonBiasNeuronCount,
             int hiddenLayerNonBiasNeuronCount,
             int classesCount)
@@ -46,8 +50,13 @@ namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers
             {
                 throw new ArgumentNullException("randomizer");
             }
+            if (mlpFactory == null)
+            {
+                throw new ArgumentNullException("mlpFactory");
+            }
 
             _randomizer = randomizer;
+            _mlpFactory = mlpFactory;
             _firstLayerNonBiasNeuronCount = firstLayerNonBiasNeuronCount;
             _hiddenLayerNonBiasNeuronCount = hiddenLayerNonBiasNeuronCount;
             _classesCount = classesCount;
@@ -61,8 +70,7 @@ namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers
             int outputLength,
             int inputLength)
         {
-            _net = new MLP(
-                _randomizer,
+            _net = _mlpFactory.CreateMLP(
                 null,
                 null,
                 new IFunction[]
@@ -108,22 +116,17 @@ namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers
                 var alg =
                     new BackpropagationAlgorithm(
                         _randomizer,
-                        (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new CPUBackpropagationEpocheTrainer(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            _net,
+                            conf,
+                            clProvider),
                         _net,
                         this,
                         conf);
 
                 //обучение сети
-                alg.Train(
-                    (int epocheNumber) =>
-                    {
-                        return _trainData;
-                    });
+                alg.Train(new NoDeformationTrainDataProvider(_trainData));
             }
 
             return
@@ -272,7 +275,7 @@ namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers
             return perItemError;
         }
 
-        private void StoreBestNetwork(MLP network)
+        private void StoreBestNetwork(IMLP network)
         {
             _bestNetwork = new SerializationHelper().DeepClone(network);
         }

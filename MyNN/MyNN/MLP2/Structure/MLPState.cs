@@ -1,4 +1,6 @@
-﻿namespace MyNN.MLP2.Structure
+﻿using MyNN.MLP2.Structure.Layer;
+
+namespace MyNN.MLP2.Structure
 {
     public class MLPState : IMLPState
     {

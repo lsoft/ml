@@ -114,7 +114,7 @@ namespace MyNN.MLP2.Autoencoders
             var processingValidationData = validationData;
 
             //итоговый автоенкодер
-            var layerList = new MLPLayer[_layerInfos.Length * 2 - 1];
+            var layerList = new Layer[_layerInfos.Length * 2 - 1];
             var layerListCount = layerList.Length;
 
             var depth = _layerInfos.Length - 1;
@@ -137,7 +137,7 @@ namespace MyNN.MLP2.Autoencoders
                         _layerInfos[depthIndex].LayerSize
                     });
 
-                ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + net.DumpLayerInformation());
+                ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + net.GetLayerInformation());
 
                 var trainDataProvider = _dataProviderFactory(processingTrainData);
                 var validation = _validationFactory(processingValidationData);
@@ -191,7 +191,7 @@ namespace MyNN.MLP2.Autoencoders
             //приделываем биас-нейроны
             for (var cc = (layerListCount + 1) / 2; cc < layerListCount - 1; cc++)
             {
-                layerList[cc] = new MLPLayer(
+                layerList[cc] = new Layer(
                     layerList[cc].Neurons,
                     true);
             }
@@ -242,7 +242,7 @@ namespace MyNN.MLP2.Autoencoders
                 var algo = new BackpropagationAlgorithm(
                     _randomizer,
                     (currentMLP, currentConfig) =>
-                        new CPUAutoencoderNLNCABackpropagationAlgorithm(
+                        new CPUAutoencoderNLNCABackpropagationEpocheTrainer(
                             VectorizationSizeEnum.VectorizationMode16,
                             currentMLP,
                             currentConfig,
@@ -257,7 +257,7 @@ namespace MyNN.MLP2.Autoencoders
                     validation, 
                     config);
 
-                algo.Train(trainDataProvider.GetDeformationDataSet);
+                algo.Train(trainDataProvider.GetDataSet);
 
             }
 

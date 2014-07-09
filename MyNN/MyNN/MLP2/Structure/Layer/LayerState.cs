@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace MyNN.MLP2.Structure
+namespace MyNN.MLP2.Structure.Layer
 {
     public class LayerState : ILayerState
     {

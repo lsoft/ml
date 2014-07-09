@@ -5,6 +5,7 @@ using MyNN.Data;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
@@ -19,9 +20,9 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.C
     public class DropConnectBitOpenCLForwardPropagation : IForwardPropagation
     {
         private readonly VectorizationSizeEnum _vse;
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
 
-        public MLP MLP
+        public IMLP MLP
         {
             get
             {
@@ -65,7 +66,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.C
         /// <param name="weightMaskContainer">Stochastic Bernoulli weight mask container with bit mask</param>
         public DropConnectBitOpenCLForwardPropagation(
             VectorizationSizeEnum vse,
-            MLP mlp,
+            IMLP mlp,
             CLProvider clProvider,
             IOpenCLWeightBitMaskContainer weightMaskContainer
             )

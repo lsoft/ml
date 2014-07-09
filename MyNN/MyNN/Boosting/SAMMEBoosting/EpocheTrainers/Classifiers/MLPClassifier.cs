@@ -7,15 +7,16 @@ using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Layer;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.Boosting.SAMMEBoosting.EpocheTrainers.Classifiers
 {
     internal class MLPClassifier : IEpocheClassifier
     {
-        private readonly MLP _network;
+        private readonly IMLP _network;
 
-        public MLPClassifier(MLP network)
+        public MLPClassifier(IMLP network)
         {
             if (network == null)
             {

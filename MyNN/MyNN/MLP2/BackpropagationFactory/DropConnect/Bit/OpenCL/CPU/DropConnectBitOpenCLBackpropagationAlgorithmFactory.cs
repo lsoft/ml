@@ -44,7 +44,7 @@ namespace MyNN.MLP2.BackpropagationFactory.DropConnect.Bit.OpenCL.CPU
         public BackpropagationAlgorithm GetBackpropagationAlgorithm(
             IRandomizer randomizer,
             CLProvider clProvider,
-            MLP net,
+            IMLP net,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config)
         {
@@ -71,15 +71,14 @@ namespace MyNN.MLP2.BackpropagationFactory.DropConnect.Bit.OpenCL.CPU
 
             var algo = new BackpropagationAlgorithm(
                 randomizer,
-                (processedMLP, processedConfig) =>
-                    new DropConnectBitCPUBackpropagationAlgorithm<VectorizedCPULayerInferenceV2>(
-                        randomizer,
-                        VectorizationSizeEnum.VectorizationMode16,
-                        net,
-                        config,
-                        clProvider,
-                        _sampleCount,
-                        _p),
+                new DropConnectBitCPUBackpropagationEpocheTrainer<VectorizedCPULayerInferenceV2>(
+                    randomizer,
+                    VectorizationSizeEnum.VectorizationMode16,
+                    net,
+                    config,
+                    clProvider,
+                    _sampleCount,
+                    _p),
                 net,
                 validationDataProvider,
                 config);

@@ -21,9 +21,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.OpenCL
     /// NLNCA backpropagation epoche trainer for classification MLP that enables CPU-OpenCL.
     /// For details please refer https://www.cs.toronto.edu/~hinton/absps/nonlinnca.pdf
     /// </summary>
-    public class CPUNLNCABackpropagationAlgorithm : IEpocheTrainer
+    public class CPUNLNCABackpropagationEpocheTrainer : IBackpropagationEpocheTrainer
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
         private readonly CLProvider _clProvider;
@@ -55,9 +55,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.OpenCL
         /// <param name="config">Learning config</param>
         /// <param name="clProvider">OpenCL provider</param>
         /// <param name="dodfCalculatorFactory">dOdF calculator factory (for details about dOdF please refer https://www.cs.toronto.edu/~hinton/absps/nonlinnca.pdf )</param>
-        public CPUNLNCABackpropagationAlgorithm(
+        public CPUNLNCABackpropagationEpocheTrainer(
             VectorizationSizeEnum vse,
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config,
             CLProvider clProvider,
             Func<List<DataItem>, IDodfCalculator> dodfCalculatorFactory
@@ -86,7 +86,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.OpenCL
                 {
                     typeof(LinearFunction),
                     typeof(RLUFunction),
-                    typeof(IRLUFunction)
+                    typeof(DRLUFunction)
                 };
 
             var ncaLayerFunctionType = mlp.Layers.Last().LayerActivationFunction.GetType();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using MyNN;
 using MyNN.Data;
@@ -21,8 +22,14 @@ using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.GPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
+using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.NLNCA
 {
@@ -33,7 +40,7 @@ namespace MyNNConsoleApp.NLNCA
             var root = "SDAE" + DateTime.Now.ToString("yyyyMMddHHmmss") + " NLNCA";
 
             var rndSeed = 7836;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -63,8 +70,17 @@ namespace MyNNConsoleApp.NLNCA
             const float lambda = 0.1f;
             const float partTakeOfAccount = 0.5f;
 
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+            
+
+            var mlpf = new MLPFactory(
+                layerFactory
+                );
+
             var sa = new StackedAutoencoder(
+                new IntelCPUDeviceChooser(), 
                 randomizer,
+                mlpf,
                 serialization,
                 (DataSet td) =>
                 {

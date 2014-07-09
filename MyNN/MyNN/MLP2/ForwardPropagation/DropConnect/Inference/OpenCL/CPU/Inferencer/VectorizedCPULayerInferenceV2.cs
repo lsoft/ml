@@ -1,6 +1,7 @@
 ﻿using System;
 using MathNet.Numerics.Distributions;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Layer;
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
 using OpenCL.Net;
@@ -21,8 +22,8 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferenc
         private readonly IRandomizer _randomizer;
         private readonly CLProvider _clProvider;
         private readonly int _sampleCount;
-        private readonly MLPLayer _previousLayer;
-        private readonly MLPLayer _currentLayer;
+        private readonly Layer _previousLayer;
+        private readonly Layer _currentLayer;
         private readonly MemFloat _weightMem;
         private readonly MemFloat _previousLayerStateMem;
         private readonly MemFloat _currentLayerStateMem;
@@ -49,8 +50,8 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferenc
             IRandomizer randomizer,
             CLProvider clProvider,
             int sampleCount,
-            MLPLayer previousLayer,
-            MLPLayer currentLayer,
+            Layer previousLayer,
+            Layer currentLayer,
             MemFloat weightMem,
             MemFloat previousLayerStateMem,
             MemFloat currentLayerStateMem,

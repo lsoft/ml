@@ -9,7 +9,7 @@ namespace MyNN.MLP2.Saver
         public void Save(
             string epocheRoot,
             IAccuracyRecord accuracyRecord,
-            MLP mlp)
+            IMLP mlp)
         {
             if (epocheRoot == null)
             {
@@ -26,7 +26,7 @@ namespace MyNN.MLP2.Saver
 
             ConsoleAmbientContext.Console.WriteLine(
                 "[ConsoleMLPSaver] MLP {0} must be saved {1}, validation per-item error = {2}, correct {3} out of {4}",
-                mlp.DumpLayerInformation(),
+                mlp.GetLayerInformation(),
                 epocheRoot,
                 accuracyRecord.ValidationPerItemError,
                 accuracyRecord.CorrectCount,

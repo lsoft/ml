@@ -10,6 +10,8 @@ using MyNN.MLP2.ForwardPropagationFactory;
 using MyNN.MLP2.LearningConfig;
 
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
@@ -18,10 +20,11 @@ using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNN.MLP2.Autoencoders
 {
-    public class StackedClassificationAutoencoder
+    public class StackedClassificationAutoencoder : IStackedAutoencoder
     {
         private readonly IDeviceChooser _deviceChooser;
         private readonly IRandomizer _randomizer;
+        private readonly IMLPFactory _mlpFactory;
         private readonly ISerializationHelper _serialization;
         private readonly Func<int, DataSet, ITrainDataProvider> _dataProviderFactory;
         private readonly Func<DataSet, IValidation> _validationFactory;
@@ -30,7 +33,7 @@ namespace MyNN.MLP2.Autoencoders
         private readonly IForwardPropagationFactory _forwardPropagationFactory;
         private readonly LayerInfo[] _layerInfos;
 
-        public MLP CombinedNet
+        public IMLP CombinedNet
         {
             get;
             private set;
@@ -39,6 +42,7 @@ namespace MyNN.MLP2.Autoencoders
         public StackedClassificationAutoencoder(
             IDeviceChooser deviceChooser,
             IRandomizer randomizer,
+            IMLPFactory mlpFactory,
             ISerializationHelper serialization,
             Func<int, DataSet, ITrainDataProvider> dataProviderFactory,
             Func<DataSet, IValidation> validationFactory,
@@ -54,6 +58,10 @@ namespace MyNN.MLP2.Autoencoders
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
+            }
+            if (mlpFactory == null)
+            {
+                throw new ArgumentNullException("mlpFactory");
             }
             if (serialization == null)
             {
@@ -94,6 +102,7 @@ namespace MyNN.MLP2.Autoencoders
 
             _deviceChooser = deviceChooser;
             _randomizer = randomizer;
+            _mlpFactory = mlpFactory;
             _serialization = serialization;
             _dataProviderFactory = dataProviderFactory;
             _validationFactory = validationFactory;
@@ -103,7 +112,7 @@ namespace MyNN.MLP2.Autoencoders
             _layerInfos = layerInfos;
         }
 
-        public MLP Train(
+        public IMLP Train(
             string root,
             DataSet trainData,
             DataSet validationData)
@@ -135,14 +144,13 @@ namespace MyNN.MLP2.Autoencoders
             var processingValidationData = validationData;
 
             //итоговый автоенкодер
-            var layerList = new MLPLayer[_layerInfos.Length * 2 - 1];
+            var layerList = new ILayer[_layerInfos.Length * 2 - 1];
             var layerListCount = layerList.Length;
 
             var depth = _layerInfos.Length - 1;
             for (var depthIndex = 0; depthIndex < depth; depthIndex++)
             {
-                var net = new MLP(
-                    _randomizer,
+                var net = _mlpFactory.CreateMLP(
                     root,
                     null,
                     new IFunction[3]
@@ -158,7 +166,7 @@ namespace MyNN.MLP2.Autoencoders
                         _layerInfos[depthIndex].LayerSize + classificationLength
                     });
 
-                ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + net.DumpLayerInformation());
+                ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + net.GetLayerInformation());
 
                 var trainDataProvider = _dataProviderFactory(depthIndex, processingTrainData);
                 var validationDataProvider = _validationFactory(processingValidationData);
@@ -174,7 +182,7 @@ namespace MyNN.MLP2.Autoencoders
                         validationDataProvider,
                         config);
 
-                    algo.Train(trainDataProvider.GetDeformationDataSet);
+                    algo.Train(trainDataProvider);
 
                     //добавляем в итоговый автоенкодер слои
                     var cloned = _serialization.DeepClone(net);
@@ -219,22 +227,26 @@ namespace MyNN.MLP2.Autoencoders
             //удаляем нейроны, которые отвечали за классификацию (кроме последнего слоя, так как все равно должен получиться SCDAE)
             for (var cc = (layerListCount + 1) / 2; cc < layerListCount - 1; cc++)
             {
-                layerList[cc] = new MLPLayer(
-                    layerList[cc].Neurons.GetSubArray(classificationLength),
-                    false);
+                throw new NotImplementedException("Эта операция должна делаться из MLPSurgeon!!! Переделать!");
+
+                //layerList[cc] = new Layer(
+                //    layerList[cc].Neurons.GetSubArray(classificationLength),
+                //    false);
             }
+
 
             //приделываем биас-нейроны
             for (var cc = (layerListCount + 1) / 2; cc < layerListCount - 1; cc++)
             {
-                layerList[cc] = new MLPLayer(
-                    layerList[cc].Neurons,
-                    true);
+                layerList[cc].AddBiasNeuron();
+
+                //layerList[cc] = new Layer(
+                //    layerList[cc].Neurons,
+                //    true);
             }
 
             //собираем итоговый автоенкодер
-            this.CombinedNet = new MLP(
-                _randomizer,
+            this.CombinedNet = _mlpFactory.CreateMLP(
                 root,
                 null,
                 layerList);

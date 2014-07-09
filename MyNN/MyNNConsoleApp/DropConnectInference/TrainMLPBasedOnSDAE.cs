@@ -24,7 +24,7 @@ namespace MyNNConsoleApp.DropConnectInference
         public static void Train()
         {
             var rndSeed = 574784;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -48,17 +48,16 @@ namespace MyNNConsoleApp.DropConnectInference
             var mlp = SerializationHelper.LoadFromFile<MLP>(
                 "MLP20140102014150/epoche 18/20140102111829-perItemError=4,627532.mynn");
                 //"MLP20131221192758/epoche 56/20131223081806-perItemError=3,892169.mynn");
-                
 
             mlp.AutoencoderCutTail();
 
             mlp.AddLayer(
                 new SigmoidFunction(1f),
-                //new IRLUFunction(), 
+                //new DRLUFunction(), 
                 10,
                 false);
 
-            Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
+            Console.WriteLine("Network configuration: " + mlp.GetLayerInformation());
 
 
             using (var clProvider = new CLProvider())
@@ -81,22 +80,21 @@ namespace MyNNConsoleApp.DropConnectInference
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new DropConnectBitCPUBackpropagationAlgorithm<VectorizedCPULayerInferenceV2>(
-                                randomizer,
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider,
-                                2500,
-                                0.5f),
+                        new DropConnectBitCPUBackpropagationEpocheTrainer<VectorizedCPULayerInferenceV2>(
+                            randomizer,
+                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
+                            config,
+                            clProvider,
+                            2500,
+                            0.5f),
                         mlp,
                         validation,
                         config);
 
                //обучение сети
                 alg.Train(
-                    new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainData));
             }
 
 

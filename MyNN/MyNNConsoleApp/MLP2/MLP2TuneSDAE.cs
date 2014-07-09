@@ -29,7 +29,7 @@ namespace MyNNConsoleApp.MLP2
         public static void Tune()
         {
             var rndSeed = 387781;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -55,7 +55,7 @@ namespace MyNNConsoleApp.MLP2
                 //"MLP20131218124915/epoche 42/20131219100700-perItemError=3,6219.mynn");
                 //"MLP20131219184828/epoche 28/20131220091649-perItemError=2,600619.mynn");
 
-            Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
+            Console.WriteLine("Network configuration: " + mlp.GetLayerInformation());
 
 
             using (var clProvider = new CLProvider())
@@ -80,12 +80,11 @@ namespace MyNNConsoleApp.MLP2
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new CPUBackpropagationEpocheTrainer(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
+                            config,
+                            clProvider),
                         mlp,
                         validation,
                         config);
@@ -125,7 +124,7 @@ namespace MyNNConsoleApp.MLP2
 
                 //обучение сети
                 alg.Train(
-                    new NoiseDataProvider(trainData.ConvertToAutoencoder(), noiserProvider).GetDeformationDataSet);
+                    new NoiseDataProvider(trainData.ConvertToAutoencoder(), noiserProvider));
             }
 
 

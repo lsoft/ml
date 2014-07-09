@@ -1,5 +1,6 @@
 using System;
 using MyNN.Data;
+using MyNN.Data.TrainDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
@@ -7,7 +8,11 @@ using MyNN.MLP2.LearningConfig;
 
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.EpocheTrainer
@@ -31,8 +36,14 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
 
             var randomizer = new ConstRandomizer(0.5f);
 
-            var mlp = new MLP(
-                randomizer,
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+            
+
+            var mlpf = new MLPFactory(
+                layerFactory
+                );
+
+            var mlp = mlpf.CreateMLP(
                 ".",
                 DateTime.Now.ToString("yyyyMMddHHmmss"),
                 new IFunction[]
@@ -65,17 +76,16 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.NoVectorization,
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new CPUBackpropagationEpocheTrainer(
+                            VectorizationSizeEnum.NoVectorization,
+                            mlp,
+                            config,
+                            clProvider),
                         mlp,
                         validation,
                         config);
 
-                alg.Train((epocheNumber) => dataset);
+                alg.Train(new NoDeformationTrainDataProvider(dataset));;
             }
 
         }

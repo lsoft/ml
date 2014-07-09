@@ -24,7 +24,7 @@ namespace MyNN.MLP2.BackpropagationFactory
         BackpropagationAlgorithm GetBackpropagationAlgorithm(
             IRandomizer randomizer,
             CLProvider clProvider,
-            MLP net,
+            IMLP net,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config);
     }

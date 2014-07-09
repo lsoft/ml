@@ -1,7 +1,7 @@
 ﻿using System;
 using MyNN.MLP2.Structure.Neurons.Function;
 
-namespace MyNN.MLP2.Structure
+namespace MyNN.MLP2.Structure.Layer
 {
     public class LayerInfo
     {

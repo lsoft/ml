@@ -15,6 +15,8 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN
 {
     public class DeepBeliefNetwork : IDisposable
     {
+        public const string RbmFolderName = "rbm_layer";
+
         private readonly IRandomizer _randomizer;
         private readonly int _imageWidth;
         private readonly int _imageHeight;
@@ -44,6 +46,10 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN
             if (layerSizes == null || layerSizes.Length < 2)
             {
                 throw new ArgumentException("layerSizes");
+            }
+            if (imageHeight*imageWidth != layerSizes[0])
+            {
+                throw new ArgumentException("imageHeight*imageWidth != layerSizes[0]");
             }
 
             _randomizer = randomizer;
@@ -113,7 +119,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN
                     learningRate,
                     errorThreshold,
                     epochThreshold,
-                    artifactFolderRoot + "/rbm_layer" + layerIndex,
+                    Path.Combine(artifactFolderRoot, DeepBeliefNetwork.RbmFolderName + layerIndex),
                     new DBNFeatureExtractor(layerIndex, _layerSizes[layerIndex + 1], _imageWidth, _imageHeight),
                     new DBNImageReconstructor(this, layerIndex, validationData, _reconstructedImageCount, _imageWidth, _imageHeight),
                     _reconstructedImageCount,

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MyNN.Data;
+using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 
@@ -23,7 +24,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
             get;
         }
 
-        Random Random
+        IRandomizer Randomizer
         {
             get;
         }

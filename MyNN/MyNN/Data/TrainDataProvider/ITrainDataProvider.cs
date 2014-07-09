@@ -12,6 +12,6 @@
             get;
         }
 
-        DataSet GetDeformationDataSet(int epocheNumber);
+        DataSet GetDataSet(int epocheNumber);
     }
 }

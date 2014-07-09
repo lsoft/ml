@@ -29,7 +29,7 @@ namespace MyNNConsoleApp.MLP2
         public static void Tune()
         {
             var rndSeed = 74787;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -58,11 +58,11 @@ namespace MyNNConsoleApp.MLP2
 
             mlp.AddLayer(
                 new SigmoidFunction(1f),
-                //new IRLUFunction(), 
+                //new DRLUFunction(), 
                 10,
                 false);
 
-            Console.WriteLine("Network configuration: " + mlp.DumpLayerInformation());
+            Console.WriteLine("Network configuration: " + mlp.GetLayerInformation());
 
 
             using (var clProvider = new CLProvider())
@@ -85,12 +85,11 @@ namespace MyNNConsoleApp.MLP2
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new CPUBackpropagationEpocheTrainer(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
+                            config,
+                            clProvider),
                         mlp,
                         validation,
                         config);
@@ -107,8 +106,7 @@ namespace MyNNConsoleApp.MLP2
 
                 //обучение сети
                 alg.Train(
-                    new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
-                    //new NoiseDataProvider(trainData, noiser).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainData));
             }
 
 

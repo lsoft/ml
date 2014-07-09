@@ -199,48 +199,48 @@ namespace MyNN.Data
                 this.Data.ConvertAll(j => j.Input);
         }
 
-        public void ExpandDataSet(
-            IRandomizer randomizer,
-            float scale,
-            int epocheCount)
-        {
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
-            }
+        //public void ExpandDataSet(
+        //    IRandomizer randomizer,
+        //    float scale,
+        //    int epocheCount)
+        //{
+        //    if (randomizer == null)
+        //    {
+        //        throw new ArgumentNullException("randomizer");
+        //    }
 
-            Console.WriteLine("Generate expanded set...");
+        //    Console.WriteLine("Generate expanded set...");
 
-            var resultData = new List<DataItem>();
+        //    var resultData = new List<DataItem>();
 
-            for (var epocheNumber = 0; epocheNumber < epocheCount; epocheNumber++)
-            {
-                Console.WriteLine("Generate expanded set, epoche " + epocheNumber);
+        //    for (var epocheNumber = 0; epocheNumber < epocheCount; epocheNumber++)
+        //    {
+        //        Console.WriteLine("Generate expanded set, epoche " + epocheNumber);
 
-                foreach (var d in this.Data)
-                {
-                    var inputd = new float[d.Input.Length];
-                    Array.Copy(d.Input, inputd, inputd.Length);
+        //        foreach (var d in this.Data)
+        //        {
+        //            var inputd = new float[d.Input.Length];
+        //            Array.Copy(d.Input, inputd, inputd.Length);
 
-                    var outputd = new float[d.Output.Length];
-                    Array.Copy(d.Output, outputd, outputd.Length);
+        //            var outputd = new float[d.Output.Length];
+        //            Array.Copy(d.Output, outputd, outputd.Length);
 
-                    for (var cc = 0; cc < inputd.Length; cc++)
-                    {
-                        var linearcoef = (1.0f - (randomizer.Next() * scale / 2.0f - scale));
-                        inputd[cc] *= linearcoef;
+        //            for (var cc = 0; cc < inputd.Length; cc++)
+        //            {
+        //                var linearcoef = (1.0f - (randomizer.Next() * scale / 2.0f - scale));
+        //                inputd[cc] *= linearcoef;
 
-                        var sincoef = (float)(Math.Sin(cc * 0.01f) * scale + 1.0f);
-                        inputd[cc] *= sincoef;
-                    }
+        //                var sincoef = (float)(Math.Sin(cc * 0.01f) * scale + 1.0f);
+        //                inputd[cc] *= sincoef;
+        //            }
 
-                    resultData.Add(
-                        new DataItem(inputd, outputd));
-                }
-            }
+        //            resultData.Add(
+        //                new DataItem(inputd, outputd));
+        //        }
+        //    }
 
-            this.Data.AddRange(resultData);
-        }
+        //    this.Data.AddRange(resultData);
+        //}
 
         /// <summary>
         /// Линейная нормализация [0;1]
@@ -368,7 +368,7 @@ namespace MyNN.Data
         /// Если данные не нормализованы в диапазон [0;1], генерируется исключение
         /// </summary>
         /// <returns></returns>
-        public DataSet CreateBinarizedDataSet(
+        public DataSet Binarize(
             IRandomizer randomizer)
         {
             if (randomizer == null)

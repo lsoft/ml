@@ -35,7 +35,7 @@ namespace MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.CPU
         public IForwardPropagation Create(
             IRandomizer randomizer,
             CLProvider clProvider,
-            MLP mlp)
+            IMLP mlp)
         {
             if (randomizer == null)
             {

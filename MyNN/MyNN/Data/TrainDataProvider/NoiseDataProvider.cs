@@ -64,7 +64,7 @@ namespace MyNN.Data.TrainDataProvider
             _noiserProvider = noiserProvider;
         }
 
-        public DataSet GetDeformationDataSet(int epocheNumber)
+        public DataSet GetDataSet(int epocheNumber)
         {
             var result = new List<DataItem>();
 

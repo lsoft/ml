@@ -18,7 +18,11 @@ using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
@@ -47,13 +51,19 @@ namespace MyNNConsoleApp.MLP2
             var serialization = new SerializationHelper();
 
             int rndSeed = 453123;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var root = ".";
             var folderName = "NLNCA Autoencoder" + DateTime.Now.ToString("yyyyMMddHHmmss") + " MLP2";
 
-            var net = new MLP(
-                randomizer,
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+            
+
+            var mlpf = new MLPFactory(
+                layerFactory
+                );
+
+            var mlp = mlpf.CreateMLP(
                 root,
                 folderName,
                 new IFunction[3]
@@ -82,10 +92,10 @@ namespace MyNNConsoleApp.MLP2
 
                 var algo = new BackpropagationAlgorithm(
                     randomizer,
-                    (processedMLP, processedConfig) => new CPUAutoencoderNLNCABackpropagationAlgorithm(
+                    new CPUAutoencoderNLNCABackpropagationEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16,
-                        processedMLP,
-                        processedConfig,
+                        mlp,
+                        config,
                         clProvider,
                         (uzkii) => new DodfCalculatorOpenCL(
                             uzkii,
@@ -93,7 +103,7 @@ namespace MyNNConsoleApp.MLP2
                         1,
                         0.9f,
                         50),
-                    net,
+                    mlp,
                     //new NLNCAValidation(
                     //    //new RMSE(),
                     //    trainData,
@@ -109,7 +119,7 @@ namespace MyNNConsoleApp.MLP2
                     config);
 
                 algo.Train(
-                    new NoDeformationTrainDataProvider(trainData).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainData));
             }
             //*/
 

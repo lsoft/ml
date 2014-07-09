@@ -87,7 +87,7 @@ namespace MyNN.BoltzmannMachines.LinearNReLU
             {
                 var rbmFolder = Path.Combine(
                     artifactFolderRoot,
-                    "rbm_layer" + cc);
+                    BinaryBinary.DBN.DeepBeliefNetwork.RbmFolderName + cc);
 
                 var rbm = new RestrictedBoltzmannMachine(
                     _randomizer,

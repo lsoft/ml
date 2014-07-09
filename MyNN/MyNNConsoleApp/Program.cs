@@ -14,6 +14,7 @@ using MyNNConsoleApp.ClassificationAutoencoder;
 using MyNNConsoleApp.DerivativeChange;
 using MyNNConsoleApp.DropConnectInference;
 using MyNNConsoleApp.MLP2;
+using MyNNConsoleApp.NExperiments.Example;
 using MyNNConsoleApp.NLNCA;
 using MyNNConsoleApp.Nvidia;
 using MyNNConsoleApp.PingPong;
@@ -28,6 +29,15 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+                using (var exp = new DBNExperiment0())
+                {
+                    exp.Bind();
+                    exp.Execute();
+                }
+
+                return;
+                
+
                 /*
                 //pabProfiler.Main2();
                 //NvidiaForwardOptimizer.Optimize();

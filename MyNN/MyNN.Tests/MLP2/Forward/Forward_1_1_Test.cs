@@ -3,7 +3,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.Forward
@@ -16,7 +20,7 @@ namespace MyNN.Tests.MLP2.Forward
             float weight0,
             float weight1,
             Func<IFunction> functionFactory,
-            Func<CLProvider, MLP, IForwardPropagation> forwardFactory)
+            Func<CLProvider, IMLP, IForwardPropagation> forwardFactory)
         {
             if (dataset == null)
             {
@@ -33,8 +37,14 @@ namespace MyNN.Tests.MLP2.Forward
 
             var randomizer = new ConstRandomizer(0.5f);
 
-            var mlp = new MLP(
-                randomizer,
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+            
+
+            var mlpf = new MLPFactory(
+                layerFactory
+                );
+
+            var mlp = mlpf.CreateMLP(
                 ".",
                 DateTime.Now.ToString("yyyyMMddHHmmss"),
                 new IFunction[]

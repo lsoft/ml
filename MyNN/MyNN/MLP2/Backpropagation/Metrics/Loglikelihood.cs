@@ -15,7 +15,7 @@ namespace MyNN.MLP2.Backpropagation.Metrics
             return -d;
         }
 
-        public float CalculatePartialDerivaitveByV2Index(float[] v1, float[] v2, int v2Index)
+        public float CalculatePartialDerivativeByV2Index(float[] v1, float[] v2, int v2Index)
         {
             return -(v1[v2Index] / v2[v2Index] - (1 - v1[v2Index]) / (1 - v2[v2Index]));
         }

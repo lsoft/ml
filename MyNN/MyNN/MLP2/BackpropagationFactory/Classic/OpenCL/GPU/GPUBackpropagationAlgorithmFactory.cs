@@ -17,7 +17,7 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.GPU
         public BackpropagationAlgorithm GetBackpropagationAlgorithm(
             IRandomizer randomizer,
             CLProvider clProvider,
-            MLP net,
+            IMLP net,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config)
         {
@@ -44,9 +44,9 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.GPU
 
             var algo = new BackpropagationAlgorithm(
                 randomizer,
-                (processedMLP, processedConfig) => new GPUBackpropagationAlgorithm(
-                    processedMLP,
-                    processedConfig,
+                new GPUBackpropagationEpocheTrainer(
+                    net,
+                    config,
                     clProvider),
                 net,
                 validationDataProvider,

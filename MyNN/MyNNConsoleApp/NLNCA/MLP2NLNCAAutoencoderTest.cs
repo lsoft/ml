@@ -22,7 +22,7 @@ namespace MyNNConsoleApp.NLNCA
         public static void Test()
         {
             var rndSeed = 8013947;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainDataSet = MNISTDataProvider.GetDataSet(
                 "C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -76,8 +76,8 @@ namespace MyNNConsoleApp.NLNCA
                 }
 
                 //инициализируем knn
-                var knn = new KNearest(new DataSet(knnTrainData));
-                var nknn = new KNearest(new DataSet(nknnTrainData));
+                var knn = new CPUOpenCLKNearest(new DataSet(knnTrainData));
+                var nknn = new CPUOpenCLKNearest(new DataSet(nknnTrainData));
 
                 var testOutput = forward.ComputeOutput(testDataSet);
 

@@ -8,10 +8,15 @@ namespace MyNN.Randomizer
         private readonly Random _random;
         private readonly object _lockObject = new object();
 
-        public DefaultRandomizer(ref int rndSeed)
+        public DefaultRandomizer(int rndSeed)
         {
-            _random = new Random(++rndSeed);
+            _random = new Random(rndSeed);
         }
+
+        //public DefaultRandomizer(ref int rndSeed)
+        //{
+        //    _random = new Random(++rndSeed);
+        //}
 
         public int Next(int maxValue)
         {

@@ -44,7 +44,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
             int batchIndex,
             int maxGibbsChainLength)
         {
-            var randomIndex = this._rbm.Random.Next(this._rbm.RandomCount);
+            var randomIndex = this._rbm.Randomizer.Next(this._rbm.RandomCount);
 
             //vhv
             for (var cdi = 0; cdi < maxGibbsChainLength; cdi++)

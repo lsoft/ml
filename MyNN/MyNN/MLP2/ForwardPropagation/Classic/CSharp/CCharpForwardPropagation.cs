@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Layer;
 using MyNN.MLP2.Structure.Neurons;
 
 namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
@@ -12,14 +13,14 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
     /// </summary>
     public class CCharpForwardPropagation : IForwardPropagation
     {
-        public MLP MLP
+        public IMLP MLP
         {
             get;
             private set;
         }
 
         public CCharpForwardPropagation(
-            MLP mlp)
+            IMLP mlp)
         {
             if (mlp == null)
             {
@@ -126,7 +127,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
         }
 
         private float[] ComputeLayer(
-            MLPLayer layer,
+            ILayer layer,
             float[] inputVector)
         {
             var lastOutput = new float[layer.Neurons.Length];
@@ -151,7 +152,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
         }
 
         private float Activate(
-            TrainableMLPNeuron neuron,
+            INeuron neuron,
             float[] inputVector)
         {
             var sum = this.ComputeNET(
@@ -170,7 +171,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
         /// <param name="inputVector">Input vector</param>
         /// <returns>Compute NET of neuron</returns>
         private float ComputeNET(
-            TrainableMLPNeuron neuron,
+            INeuron neuron,
             float[] inputVector)
         {
             var sum = 0.0f;

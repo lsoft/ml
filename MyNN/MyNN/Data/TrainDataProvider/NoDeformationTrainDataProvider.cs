@@ -31,7 +31,7 @@ namespace MyNN.Data.TrainDataProvider
             _trainData = trainData;
         }
 
-        public DataSet GetDeformationDataSet(int epocheNumber)
+        public DataSet GetDataSet(int epocheNumber)
         {
             return _trainData;
         }

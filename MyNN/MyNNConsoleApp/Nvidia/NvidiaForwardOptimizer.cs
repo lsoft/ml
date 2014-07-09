@@ -10,7 +10,12 @@ using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
@@ -24,7 +29,7 @@ namespace MyNNConsoleApp.Nvidia
         {
 
             var rndSeed = 1;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
             
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
@@ -34,8 +39,14 @@ namespace MyNNConsoleApp.Nvidia
             //trainData.Normalize();
             trainData = trainData.ConvertToAutoencoder();
 
-            var mlp = new MLP(
-                randomizer,
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+            
+
+            var mlpf = new MLPFactory(
+                layerFactory
+                );
+
+            var mlp = mlpf.CreateMLP(
                 null,
                 null,
                 new IFunction[]
@@ -72,7 +83,7 @@ namespace MyNNConsoleApp.Nvidia
         private static List<ILayerState> ProfileNvidiaGPU(
             DefaultRandomizer randomizer,
             DataSet trainData,
-            MLP mlp)
+            IMLP mlp)
         {
             using (var clProvider = new CLProvider(
                 new NvidiaOrAmdGPUDeviceChooser(),
@@ -97,7 +108,7 @@ namespace MyNNConsoleApp.Nvidia
         private static List<ILayerState> ProfileIntelCPU(
             DefaultRandomizer randomizer,
             DataSet trainData,
-            MLP mlp)
+            IMLP mlp)
         {
             using (var clProvider = new CLProvider(
                 new IntelCPUDeviceChooser(),

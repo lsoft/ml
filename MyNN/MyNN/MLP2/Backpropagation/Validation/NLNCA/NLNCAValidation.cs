@@ -12,7 +12,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA
 {
     public class NLNCAValidation : IValidation
     {
-        //private readonly IMetrics _errorMetrics;
+        private readonly IKNearestFactory _kNearestFactory;
         private readonly ISerializationHelper _serialization;
         private readonly DataSet _trainData;
         private readonly DataSet _validationData;
@@ -39,21 +39,21 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA
         }
 
         public NLNCAValidation(
-            //IMetrics errorMetrics,
+            IKNearestFactory kNearestFactory,
             ISerializationHelper serialization,
             DataSet trainData,
             DataSet validationData,
             IColorProvider colorProvider,
             int neighborCount)
         {
+            if (kNearestFactory == null)
+            {
+                throw new ArgumentNullException("kNearestFactory");
+            }
             if (serialization == null)
             {
                 throw new ArgumentNullException("serialization");
             }
-            //if (errorMetrics == null)
-            //{
-            //    throw new ArgumentNullException("errorMetrics");
-            //}
             if (trainData == null)
             {
                 throw new ArgumentNullException("trainData");
@@ -67,7 +67,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA
                 throw new ArgumentNullException("colorProvider");
             }
 
-            //_errorMetrics = errorMetrics;
+            _kNearestFactory = kNearestFactory;
             _serialization = serialization;
             _trainData = trainData;
             _validationData = validationData;
@@ -119,27 +119,6 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA
             #endregion
 
             var ntr = forwardPropagation.ComputeOutput(_validationData);
-
-            //#region считаем ошибку
-
-            //var totalError = 0f;
-
-            //var iterationIndex = 0;
-            //foreach (var netResult in ntr)
-            //{
-            //    var testItem = _validationData[iterationIndex++];
-
-            //    var err = _errorMetrics.Calculate(
-            //        netResult.State,
-            //        testItem.Output);
-
-            //    totalError += err;
-
-            //}
-
-            //var perItemError = totalError / _validationData.Count;
-
-            //#endregion
 
             #region выгружаем в файл
 
@@ -252,7 +231,8 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA
             }
 
             //инициализируем knn
-            var knn = new KNearest(new DataSet(forknn));
+            //var knn = new CPUOpenCLKNearest(new DataSet(forknn));
+            var knn = _kNearestFactory.CreateKNearest(new DataSet(forknn));
 
             //просчитываем валидационное множество
             var validationList = forwardPropagation.ComputeOutput(_validationData);

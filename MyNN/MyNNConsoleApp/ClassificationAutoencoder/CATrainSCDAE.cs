@@ -19,7 +19,12 @@ using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
@@ -31,7 +36,7 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
         {
 
             int rndSeed = 1888227;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
@@ -80,10 +85,13 @@ namespace MyNNConsoleApp.ClassificationAutoencoder
             //    "_allnoisers.bmp",
             //    noised);
 
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+
             var scdae = new StackedClassificationAutoencoder(
-                //new NvidiaOrAmdGPUDeviceChooser(),
                 new IntelCPUDeviceChooser(), 
                 randomizer,
+                new MLPFactory(
+                    layerFactory), 
                 serialization,
                 (int depthIndex, DataSet td) =>
                 {

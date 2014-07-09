@@ -30,7 +30,7 @@ namespace MyNNConsoleApp.PingPong
         public static void Execute()
         {
             var rndSeed = 654321;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 //"C:/projects/ml/MNIST/_MNIST_DATABASE/mnist/trainingset/",
@@ -66,7 +66,7 @@ namespace MyNNConsoleApp.PingPong
             var mlp_classifier = SerializationHelper.LoadFromFile<MLP>(
                 "PingPong/Experiment0/MLP20140115181834/epoche 45/20140116010720-perItemError=6,394673.mynn");
             mlp_classifier.SetRootFolder("PingPong/Experiment0");
-
+            
             mlp_classifier.AutoencoderCutTail();
 
             mlp_classifier.AddLayer(
@@ -74,7 +74,7 @@ namespace MyNNConsoleApp.PingPong
                 10,
                 false);
 
-            Console.WriteLine("Network configuration: " + mlp_classifier.DumpLayerInformation());
+            Console.WriteLine("Network configuration: " + mlp_classifier.GetLayerInformation());
 
             using (var clProvider = new CLProvider())
             {
@@ -96,19 +96,18 @@ namespace MyNNConsoleApp.PingPong
                 var alg =
                     new BackpropagationAlgorithm(
                         randomizer,
-                        (currentMLP, currentConfig) =>
-                            new CPUBackpropagationAlgorithm(
-                                VectorizationSizeEnum.VectorizationMode16,
-                                currentMLP,
-                                currentConfig,
-                                clProvider),
+                        new CPUBackpropagationEpocheTrainer(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp_classifier,
+                            config,
+                            clProvider),
                         mlp_classifier,
                         validation,
                         config);
 
                 //обучение сети
                 alg.Train(
-                    new NoDeformationTrainDataProvider(trainNext2).GetDeformationDataSet);
+                    new NoDeformationTrainDataProvider(trainNext2));
             }
         }
     }

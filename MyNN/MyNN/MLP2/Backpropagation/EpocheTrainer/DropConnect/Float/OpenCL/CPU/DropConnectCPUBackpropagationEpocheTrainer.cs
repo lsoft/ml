@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using MyNN.Data;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer;
-using MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.CPU;
+using MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Float.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
@@ -17,18 +17,17 @@ using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
-namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
-{    
-    
+namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.OpenCL.CPU
+{
     /// <summary>
-    /// Dropconnect backpropagation epoche trainer with bit mask that enables CPU-OpenCL
+    /// Dropconnect backpropagation epoche trainer with float mask that enables CPU-OpenCL
     /// </summary>
     /// <typeparam name="T">Type of dropconnect layer inferencer</typeparam>
-    public class DropConnectBitCPUBackpropagationAlgorithm<T> : IEpocheTrainer
+    public class DropConnectCPUBackpropagationEpocheTrainer<T> : IBackpropagationEpocheTrainer
         where T : ILayerInference
     {
         private readonly IRandomizer _randomizer;
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
         private readonly CLProvider _clProvider;
@@ -43,9 +42,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
         private Kernel _updateWeightKernel;
 
-        private IOpenCLWeightBitMaskContainer _weightMask;
+        private IOpenCLWeightMaskContainer _weightMask;
 
-        private readonly DropConnectBitOpenCLForwardPropagation _dropConnectForwardPropagation;
+        private readonly DropConnectOpenCLForwardPropagation _dropConnectForwardPropagation;
 
         public IForwardPropagation ForwardPropagation
         {
@@ -63,10 +62,10 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
         /// <param name="clProvider">OpenCL provider</param>
         /// <param name="sampleCount">Sample count per neuron per inference iteration (typically 1000 - 10000)</param>
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
-        public DropConnectBitCPUBackpropagationAlgorithm(
+        public DropConnectCPUBackpropagationEpocheTrainer(
             IRandomizer randomizer,
             VectorizationSizeEnum vse,
-            MLP mlp,
+            IMLP mlp,
             ILearningAlgorithmConfig config,
             CLProvider clProvider,
             int sampleCount = 5000,
@@ -115,7 +114,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
 
             this.PrepareInfrastructure();
 
-            _dropConnectForwardPropagation = new DropConnectBitOpenCLForwardPropagation(
+            _dropConnectForwardPropagation = new DropConnectOpenCLForwardPropagation(
                 vse,
                 _mlp,
                 _clProvider,
@@ -145,7 +144,13 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
 
         private void CreateMasks()
         {
-            _weightMask = new BigArrayWeightBitMaskContainer(
+            //_weightMask = new BGWeightMaskContainer(
+            //    _clProvider,
+            //    _mlp,
+            //    _randomizer,
+            //    _p);
+
+            _weightMask = new BigArrayWeightMaskContainer(
                 _clProvider,
                 _mlp,
                 _randomizer,
@@ -160,7 +165,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
 
         private void LoadPrograms()
         {
-            var kg = new DropConnectBitKernelConstructor(
+            var kg = new DropConnectKernelConstructor(
                 _mlp,
                 _config);
 
@@ -190,7 +195,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
 
             //определяем кернел обновления весов
             _updateWeightKernel = _clProvider.CreateKernel(
-                DropConnectBitKernelConstructor.UpdateWeightKernelSource,
+                DropConnectKernelConstructor.UpdateWeightKernelSource,
                 "UpdateWeightKernel");
         }
 
@@ -307,7 +312,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
                             .SetKernelArg(12, 4, learningRate)
                             .SetKernelArg(13, 4, _config.RegularizationFactor)
                             .SetKernelArg(14, 4, (float)(data.Count))
-                            .SetKernelArg(15, 4, _weightMask.BitMask)
                             .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
                     }
                     else
@@ -328,7 +332,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
                             .SetKernelArg(12, 4, learningRate)
                             .SetKernelArg(13, 4, _config.RegularizationFactor)
                             .SetKernelArg(14, 4, (float)(data.Count))
-                            .SetKernelArg(15, 4, _weightMask.BitMask)
                             .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
                     }
 
@@ -363,7 +366,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
                                 .SetKernelArg(14, 4, learningRate)
                                 .SetKernelArg(15, 4, _config.RegularizationFactor)
                                 .SetKernelArg(16, 4, (float)(data.Count))
-                                .SetKernelArg(17, 4, _weightMask.BitMask)
                                 .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
                         }
                         else
@@ -386,7 +388,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU
                                 .SetKernelArg(14, 4, learningRate)
                                 .SetKernelArg(15, 4, _config.RegularizationFactor)
                                 .SetKernelArg(16, 4, (float)(data.Count))
-                                .SetKernelArg(17, 4, _weightMask.BitMask)
                                 .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
                         }
                     }

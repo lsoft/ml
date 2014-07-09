@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
@@ -16,9 +17,9 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
     /// </summary>
     public class GPUForwardPropagation : IForwardPropagation
     {
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
 
-        public MLP MLP
+        public IMLP MLP
         {
             get
             {
@@ -53,7 +54,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
         private Kernel[] _mulKernels;
 
         public GPUForwardPropagation(
-            MLP mlp,
+            IMLP mlp,
             CLProvider clProvider
             )
         {

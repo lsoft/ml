@@ -10,6 +10,6 @@ namespace MyNN.MLP2.ForwardPropagationFactory
         IForwardPropagation Create(
             IRandomizer randomizer,
             CLProvider clProvider,
-            MLP mlp);
+            IMLP mlp);
     }
 }

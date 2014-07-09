@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using MyNN.Data.TrainDataProvider;
 using MyNN.MLP2.Backpropagation.EpocheTrainer;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.LearningConfig;
@@ -10,19 +11,19 @@ using MyNN.Randomizer;
 
 namespace MyNN.MLP2.Backpropagation
 {
-    public class BackpropagationAlgorithm
+    public class BackpropagationAlgorithm : IBackpropagationAlgorithm
     {
         private readonly IRandomizer _randomizer;
-        private readonly MLP _mlp;
+        private readonly IMLP _mlp;
         private readonly IValidation _validation;
         private readonly ILearningAlgorithmConfig _config;
         private readonly bool _enableErrorRecalculate;
-        private readonly IEpocheTrainer _epocheTrainer;
+        private readonly IBackpropagationEpocheTrainer _backpropagationEpocheTrainer;
 
         public BackpropagationAlgorithm(
             IRandomizer randomizer,
-            Func<MLP, ILearningAlgorithmConfig, IEpocheTrainer> epocheTrainerFactory,
-            MLP mlp,
+            IBackpropagationEpocheTrainer backpropagationEpocheTrainer,
+            IMLP mlp,
             IValidation validation,
             ILearningAlgorithmConfig config,
             bool enableErrorRecalculate = true)
@@ -31,9 +32,9 @@ namespace MyNN.MLP2.Backpropagation
             {
                 throw new ArgumentNullException("randomizer");
             }
-            if (epocheTrainerFactory == null)
+            if (backpropagationEpocheTrainer == null)
             {
-                throw new ArgumentNullException("epocheTrainerFactory");
+                throw new ArgumentNullException("backpropagationEpocheTrainer");
             }
             if (validation == null)
             {
@@ -41,32 +42,29 @@ namespace MyNN.MLP2.Backpropagation
             }
 
             _randomizer = randomizer;
+            _backpropagationEpocheTrainer = backpropagationEpocheTrainer;
             _mlp = mlp;
             _validation = validation;
             _config = config;
             _enableErrorRecalculate = enableErrorRecalculate;
 
-            _epocheTrainer = epocheTrainerFactory(_mlp, _config);
+            //_backpropagationEpocheTrainer = epocheTrainerFactory.CreateEpocheTrainer(_mlp, _config);
         }
 
-        public void Train(DataSourceDelegate dataSource)
+        public void Train(ITrainDataProvider trainDataProvider)
         {
-            ConsoleAmbientContext.Console.WriteLine(
-                "BACKPROPAGATION STARTED WITH {0}",
-                _mlp.DumpLayerInformation());
-            ConsoleAmbientContext.Console.WriteLine(
-                "EPOCHE TRAINER = {0}, VALIDATION = {1}",
-                this._epocheTrainer.GetType().Name,
-                this._validation.GetType().Name);
-
-            #region validate
-
-            if (dataSource == null)
+            if (trainDataProvider == null)
             {
-                throw new ArgumentNullException("dataSource");
+                throw new ArgumentNullException("trainDataProvider");
             }
 
-            #endregion
+            ConsoleAmbientContext.Console.WriteLine(
+                "BACKPROPAGATION STARTED WITH {0}",
+                _mlp.GetLayerInformation());
+            ConsoleAmbientContext.Console.WriteLine(
+                "EPOCHE TRAINER = {0}, VALIDATION = {1}",
+                this._backpropagationEpocheTrainer.GetType().Name,
+                this._validation.GetType().Name);
 
             #region валидируем дефолтовую сеть
 
@@ -78,7 +76,7 @@ namespace MyNN.MLP2.Backpropagation
             Directory.CreateDirectory(preTrainFolder);
             
             _validation.Validate(
-                _epocheTrainer.ForwardPropagation, 
+                _backpropagationEpocheTrainer.ForwardPropagation, 
                 preTrainFolder, 
                 false);
 
@@ -95,7 +93,7 @@ namespace MyNN.MLP2.Backpropagation
             ConsoleAmbientContext.Console.WriteLine("Predeformation...");
 
             //запрашиваем данные
-            var trainData = dataSource(epochNumber);
+            var trainData = trainDataProvider.GetDataSet(epochNumber);
 
             ConsoleAmbientContext.Console.WriteLine("Start training...");
 
@@ -105,7 +103,7 @@ namespace MyNN.MLP2.Backpropagation
             }
 
             //создаем массивы
-            this._epocheTrainer.PreTrainInit(trainData);
+            this._backpropagationEpocheTrainer.PreTrainInit(trainData);
 
             //цикл по эпохам
             do
@@ -134,7 +132,7 @@ namespace MyNN.MLP2.Backpropagation
                 var dtStart = DateTime.Now;
 
                 //обучаем эпоху
-                _epocheTrainer.TrainEpoche(shuffled, epocheRoot, learningRate);
+                _backpropagationEpocheTrainer.TrainEpoche(shuffled, epocheRoot, learningRate);
 
                 //сколько времени заняла эпоха обучения
                 var trainTimeEnd = DateTime.Now;
@@ -145,7 +143,7 @@ namespace MyNN.MLP2.Backpropagation
 
                 //внешняя функция для обсчета на тестовом множестве
                 currentError = _validation.Validate(
-                    _epocheTrainer.ForwardPropagation,
+                    _backpropagationEpocheTrainer.ForwardPropagation,
                     epocheRoot,
                     true);
 
@@ -173,7 +171,7 @@ namespace MyNN.MLP2.Backpropagation
 
                 var deformStart = DateTime.Now;
 
-                trainData = dataSource(epochNumber);
+                trainData = trainDataProvider.GetDataSet(epochNumber);
 
                 //сколько времени заняло искажение данных
                 var dtFinish = DateTime.Now;

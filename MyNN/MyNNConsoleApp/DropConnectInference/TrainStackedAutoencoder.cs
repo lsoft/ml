@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using MyNN;
 using MyNN.Data;
@@ -16,8 +17,14 @@ using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Saver;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
+using MyNN.MLP2.Structure.Layer;
+using MyNN.MLP2.Structure.Layer.Factory;
+using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+
 using MyNN.Randomizer;
+using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.DropConnectInference
 {
@@ -27,7 +34,7 @@ namespace MyNNConsoleApp.DropConnectInference
         {
 
             int rndSeed = 66677890;
-            var randomizer = new DefaultRandomizer(ref rndSeed);
+            var randomizer = new DefaultRandomizer(++rndSeed);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
@@ -65,8 +72,18 @@ namespace MyNNConsoleApp.DropConnectInference
             const int sampleCount = 2500;
             const float p = 0.5f;
 
+            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
+            
+
+            var mlpf = new MLPFactory(
+                layerFactory
+                );
+
+
             var sa = new StackedAutoencoder(
+                new IntelCPUDeviceChooser(), 
                 randomizer,
+                mlpf, 
                 serialization,
                 (DataSet td) =>
                 {
