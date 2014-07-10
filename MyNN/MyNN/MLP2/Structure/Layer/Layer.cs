@@ -50,38 +50,6 @@ namespace MyNN.MLP2.Structure.Layer
             private set;
         }
 
-        ///// <summary>
-        ///// Конструктор скрытых и выходного слоя
-        ///// </summary>
-        //public Layer(
-        //    INeuron[] neuronList,
-        //    bool isNeedBiasNeuron)
-        //{
-        //    if (neuronList == null)
-        //    {
-        //        throw new ArgumentNullException("neuronList");
-        //    }
-
-        //    _isNeedBiasNeuron = isNeedBiasNeuron;
-        //    LayerActivationFunction = neuronList[0].ActivationFunction;
-
-        //    var totalNeuronCount = neuronList.Length + (isNeedBiasNeuron ? 1 : 0);
-
-        //    this.Neurons = new INeuron[totalNeuronCount];
-
-        //    for (var cc = 0; cc < this.Neurons.Length; cc++)
-        //    {
-        //        if (isNeedBiasNeuron && (cc == this.Neurons.Length - 1))
-        //        {
-        //            this.Neurons[cc] = new BiasNeuron();
-        //        }
-        //        else
-        //        {
-        //            this.Neurons[cc] = neuronList[cc];
-        //        }
-        //    }
-        //}
-
         /// <summary>
         /// Конструктор входного слоя
         /// </summary>
@@ -98,7 +66,7 @@ namespace MyNN.MLP2.Structure.Layer
             
             _isNeedBiasNeuron = true;
 
-            var totalNeuronCount = withoutBiasNeuronCount + 1;//(isNeedBiasNeuron ? 1 : 0);
+            var totalNeuronCount = withoutBiasNeuronCount + 1;
 
             this.Neurons = new INeuron[totalNeuronCount];
 
@@ -199,60 +167,5 @@ namespace MyNN.MLP2.Structure.Layer
                         ? this.LayerActivationFunction.ShortName
                         : "Input");
         }
-
-        //извлечь в спец вид фабрики ILayerFromRBMFactory
-        /*
-        #region deep belief network related code
-
-        /// <summary>
-        /// Загружаем веса из предобученной rbm
-        /// </summary>
-        /// <param name="pathToWeightsFile">Путь к файлу weights.bin</param>
-        public void LoadWeightsFromRBM(
-            string pathToWeightsFile)
-        {
-            var weightFile = SerializationHelper.LoadFromFile<float[]>(pathToWeightsFile);
-            int lineIndex = 0;
-            for (int neuronIndex = 0; neuronIndex < this.Neurons.Length; neuronIndex++)
-            {
-                var neuron = this.Neurons[neuronIndex];
-
-                for (var weightIndex = 0; weightIndex < neuron.Weights.Length; weightIndex++, lineIndex++)
-                {
-                    if (neuron is HiddeonOutputMLPNeuron)
-                    {
-                        var weight = weightFile[lineIndex];
-                        neuron.Weights[weightIndex] = weight;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Загружаем веса из предобученной rbm в режиме автоенкодера ("наоборот")
-        /// </summary>
-        /// <param name="pathToWeightsFile">Путь к файлу weights.bin</param>
-        public void LoadAutoencoderWeightsFromRBM(
-            string pathToWeightsFile)
-        {
-            var weightFile = SerializationHelper.LoadFromFile<float[]>(pathToWeightsFile);
-
-            for (int neuronIndex = 0; neuronIndex < this.Neurons.Length; neuronIndex++)
-            {
-                var neuron = this.Neurons[neuronIndex];
-
-                if (neuron is HiddeonOutputMLPNeuron)
-                {
-                    for (var weightIndex = 0; weightIndex < neuron.Weights.Length; weightIndex++)
-                    {
-                        var weight = weightFile[weightIndex * (this.NonBiasNeuronCount + 1) + neuronIndex];
-                        neuron.Weights[weightIndex] = weight;
-                    }
-                }
-            }
-        }
-
-        #endregion
-        //*/
     }
 }

@@ -186,7 +186,7 @@ namespace MyNNConsoleApp.NExperiments.Example
             var mlpf = _kernel.Get<IMLPFactory>();
 
             var mlp = mlpf.CreateMLP(
-                "SmallDBN",
+                null,//"SmallDBN",
                 null,
                 null,
                 new IFunction[]
@@ -200,7 +200,7 @@ namespace MyNNConsoleApp.NExperiments.Example
             ConsoleAmbientContext.Console.WriteLine(mlp.GetLayerInformation());
 
             var autoencoder_mlp = mlpf.CreateAutoencoderMLP(
-                "SmallDBN",
+                null,//"SmallDBN",
                 null,
                 null,
                 new IFunction[]

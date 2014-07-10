@@ -159,48 +159,6 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN
                 "\r\n");
         }
 
-        public static List<int> ExtractLayersSizeFromDbnInfo(string pathToDbnInfo)
-        {
-            List<int> result = null;
-
-            if (File.Exists(pathToDbnInfo))
-            {
-                var lines = File.ReadAllLines(pathToDbnInfo);
-                if (lines.Length > 1)
-                {
-                    var layersLine = lines[1];
-
-                    if (!string.IsNullOrEmpty(layersLine) && layersLine.IndexOf(':') >= 0)
-                    {
-                        var layersString = layersLine.Substring(layersLine.IndexOf(':') + 1);
-
-                        if (!string.IsNullOrEmpty(layersString) && layersString.Contains('-'))
-                        {
-                            var layersArray = layersString.Split(new[] {"-"}, StringSplitOptions.RemoveEmptyEntries);
-                            
-                            result = new List<int>();
-                            foreach (var l in layersArray)
-                            {
-                                var size = 0;
-                                if (int.TryParse(l, out size))
-                                {
-                                    result.Add(size);
-                                }
-                                else
-                                {
-                                    result = null;
-                                    break;
-                                }
-                            }
-                        
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-
         public void Dispose()
         {
             _clProvider.Dispose();

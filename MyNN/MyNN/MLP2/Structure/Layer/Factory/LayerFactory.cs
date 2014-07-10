@@ -38,8 +38,6 @@ namespace MyNN.MLP2.Structure.Layer.Factory
             bool isPreviousLayerHadBiasNeuron
             )
         {
-            //weightLoader allowed to be null
-
             var result = new Layer(
                 _neuronFactory,
                 activationFunction,

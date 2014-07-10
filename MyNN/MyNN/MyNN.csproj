@@ -159,6 +159,8 @@
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\INegativeSamplerProvider.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\PCDBaseSamplerProvider.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\PTBaseSamplerProvider.cs" />
+    <Compile Include="BoltzmannMachines\DBNInfo\FileDBNInformation.cs" />
+    <Compile Include="BoltzmannMachines\DBNInfo\IDBNInformation.cs" />
     <Compile Include="BoltzmannMachines\IImageReconstructor.cs" />
     <Compile Include="BoltzmannMachines\LinearNReLU\DeepBeliefNetwork.cs" />
     <Compile Include="BoltzmannMachines\LinearNReLU\RBM\RestrictedBoltzmannMachine.cs" />
