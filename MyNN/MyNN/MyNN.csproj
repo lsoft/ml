@@ -376,6 +376,7 @@
     <Compile Include="Randomizer\NoRandomRandomizer.cs" />
     <Compile Include="rfloat.cs" />
     <Compile Include="SerializationHelper.cs" />
+    <Compile Include="SplitHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\csharp-half-code-2\System.Half\System.Half.csproj">
