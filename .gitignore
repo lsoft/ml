@@ -3,4 +3,5 @@ bin
 packages
 TestResults
 *.suo
-*.user
+x64
+x86
