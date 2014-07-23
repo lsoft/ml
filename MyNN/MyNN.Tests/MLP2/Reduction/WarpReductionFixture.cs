@@ -2,8 +2,8 @@
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.MLP2.Randomizer;
 using MyNN.OutputConsole;
+using MyNN.Randomizer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
@@ -47,7 +47,7 @@ namespace MyNN.Tests.MLP2.Reduction
             }
 
             var seed = DateTime.Now.Millisecond;
-            var randomizer = new DefaultRandomizer(ref seed);
+            var randomizer = new DefaultRandomizer(seed);
 
             for (uint size = 2; size < 64; size++)
             {

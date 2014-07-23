@@ -10,7 +10,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Di
     /// <summary>
     /// Distance factory for dOdF algorithm.
     /// This implementation DOES NOT contains optimizations in memory consumption in distance table BUT introduce threshold in distance metric.
-    /// It uses for debug-purposes only!
+    /// It should used for debug-purposes only!
     /// </summary>
     public class VectorizedCpuDistanceDictCalculator : IDistanceDictCalculator
     {

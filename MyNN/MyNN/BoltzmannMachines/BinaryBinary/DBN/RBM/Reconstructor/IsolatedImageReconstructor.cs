@@ -9,7 +9,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
 {
     public class IsolatedImageReconstructor : IImageReconstructor
     {
-        private readonly DataSet _trainData;
+        private readonly IDataSet _trainData;
         private readonly int _reconstructedCount;
         private readonly int _imageWidth;
         private readonly int _imageHeight;
@@ -18,7 +18,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
         private int _currentIndex = 0;
 
         public IsolatedImageReconstructor(
-            DataSet trainData,
+            IDataSet trainData,
             int reconstructedCount,
             int imageWidth,
             int imageHeight)

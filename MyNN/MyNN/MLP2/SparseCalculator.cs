@@ -39,7 +39,7 @@ namespace MyNN.MLP2
         /// <param name="avgNonZeroCountPerItem">Среднее количество не нулевых флоатов на один тестовый пример</param>
         /// <param name="avgValueOfNonZero">Среднее значение не нулевых флоатов</param>
         public void Calculate(
-            DataSet testDataset,
+            IDataSet testDataset,
             out float sparsePart,
             out float avgNonZeroCountPerItem,
             out float avgValueOfNonZero)

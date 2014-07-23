@@ -8,7 +8,7 @@ namespace MyNN.Data.TrainDataProvider
 {
     public class NoiseDataProvider : ITrainDataProvider
     {
-        private readonly DataSet _trainData;
+        private readonly IDataSet _trainData;
         private readonly INoiser _noiser;
         private readonly Func<int, INoiser> _noiserProvider;
 
@@ -20,16 +20,8 @@ namespace MyNN.Data.TrainDataProvider
             }
         }
 
-        public bool IsClassificationAuencoderDataSet
-        {
-            get
-            {
-                return this._trainData.IsClassificationAuencoderDataSet;
-            }
-        }
-
         public NoiseDataProvider(
-            DataSet trainData,
+            IDataSet trainData,
             INoiser noiser)
         {
             if (trainData == null)
@@ -47,7 +39,7 @@ namespace MyNN.Data.TrainDataProvider
         }
 
         public NoiseDataProvider(
-            DataSet trainData,
+            IDataSet trainData,
             Func<int, INoiser> noiserProvider)
         {
             if (trainData == null)
@@ -64,7 +56,7 @@ namespace MyNN.Data.TrainDataProvider
             _noiserProvider = noiserProvider;
         }
 
-        public DataSet GetDataSet(int epocheNumber)
+        public IDataSet GetDataSet(int epocheNumber)
         {
             var result = new List<DataItem>();
 
@@ -82,9 +74,7 @@ namespace MyNN.Data.TrainDataProvider
             }
 
             return 
-                new DataSet(
-                    result,
-                    this._trainData.Visualizer);
+                new DataSet(result);
         }
     }
 }

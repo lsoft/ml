@@ -8,7 +8,7 @@ namespace MyNN.Data.TypicalDataProvider
 {
     public class MNISTKaggleDataProvider
     {
-        public static DataSet GetDataSet(
+        public static IDataSet GetDataSet(
             string root,
             string filename,
             bool isTrainSet,
@@ -85,8 +85,7 @@ namespace MyNN.Data.TypicalDataProvider
 
             return
                 new DataSet(
-                    resultList,
-                    new MNISTVisualizer());
+                    resultList);
         }
     }
 }

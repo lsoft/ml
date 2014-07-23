@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using MyNN.Data.Visualizer;
@@ -12,11 +14,13 @@ namespace MyNN.Data.TypicalDataProvider
         private const int ImageWidth = 28;
         private const int ImageHeight = 28;
 
-        public void SaveAsGrid(string filepath, List<float[]> data)
+        public void SaveAsGrid(
+            Stream writeStream,
+            List<float[]> data)
         {
-            if (filepath == null)
+            if (writeStream == null)
             {
-                throw new ArgumentNullException("filepath");
+                throw new ArgumentNullException("writeStream");
             }
             if (data == null)
             {
@@ -40,14 +44,16 @@ namespace MyNN.Data.TypicalDataProvider
                 currentIndex++;
             }
 
-            bitmap.Save(filepath);
+            bitmap.Save(writeStream, System.Drawing.Imaging.ImageFormat.Bmp);
         }
 
-        public void SaveAsPairList(string filepath, List<Pair<float[], float[]>> data)
+        public void SaveAsPairList(
+            Stream writeStream,
+            List<Pair<float[], float[]>> data)
         {
-            if (filepath == null)
+            if (writeStream == null)
             {
-                throw new ArgumentNullException("filepath");
+                throw new ArgumentNullException("writeStream");
             }
             if (data == null)
             {
@@ -75,7 +81,7 @@ namespace MyNN.Data.TypicalDataProvider
                     d.Second);
             }
 
-            bitmap.Save(filepath);
+            bitmap.Save(writeStream, System.Drawing.Imaging.ImageFormat.Bmp);
         }
     }
 }

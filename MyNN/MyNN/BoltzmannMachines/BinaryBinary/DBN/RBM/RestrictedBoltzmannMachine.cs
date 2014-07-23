@@ -231,8 +231,8 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
         }
 
         public void Train(
-            DataSet trainData,
-            DataSet validationData,
+            IDataSet trainData,
+            IDataSet validationData,
             int batchSize,
             ILearningRate learningRateController,
             float errorThreshold,
@@ -274,8 +274,8 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
 
             #region формируем наборы для вычисления свободной энергии
 
-            DataSet trainFreeEnergySet = null;
-            DataSet validationFreeEnergySet = null;
+            IDataSet trainFreeEnergySet = null;
+            IDataSet validationFreeEnergySet = null;
 
             if (trainData.Count > validationData.Count)
             {
@@ -699,7 +699,7 @@ Error: {7}
 
             #endregion
 
-            var w = SerializationHelper.LoadFromFile<float[]>(filename);
+            var w = new SerializationHelper().LoadFromFile<float[]>(filename);
 
             if (w.Length != Weights.Array.Length)
             {
@@ -762,8 +762,8 @@ Error: {7}
         
         public void CalculateFreeEnergy(
             string artifactFolderRoot,
-            DataSet trainFreeEnergySet,
-            DataSet validationFreeEnergySet)
+            IDataSet trainFreeEnergySet,
+            IDataSet validationFreeEnergySet)
         {
             #region validate
 
@@ -817,7 +817,7 @@ Error: {7}
 
         public float CalculateFreeEnergySet(
             OpenCL.Net.Wrapper.Mem.Mem<float> weights,
-            DataSet data)
+            IDataSet data)
         {
             #region validate
 
@@ -938,7 +938,7 @@ Error: {7}
         //}
 
         public DataSet ExecuteSampleHidden(
-            DataSet trainData)
+            IDataSet trainData)
         {
             #region validate
 
@@ -1033,7 +1033,7 @@ Error: {7}
         /// <returns>Значение log-likelihood</returns>
         public double CalculateExactLogLikelihood(
             CLProvider u,
-            DataSet data,
+            IDataSet data,
             bool consoleLogEnabled = false)
         {
             #region validate

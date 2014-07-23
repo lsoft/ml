@@ -5,7 +5,7 @@ namespace MyNN.KNN
 {
     public class CPUOpenCLKNearestFactory : IKNearestFactory
     {
-        public IKNearest CreateKNearest(DataSet dataList)
+        public IKNearest CreateKNearest(IDataSet dataList)
         {
             if (dataList == null)
             {

@@ -118,6 +118,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MLP2\ActivationFunction\SigmoidFixture.cs" />
     <Compile Include="TestOutputConsole.cs" />
+    <Compile Include="TestPurposeValidation.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyNN\MyNN.csproj">

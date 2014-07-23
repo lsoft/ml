@@ -14,7 +14,7 @@ namespace MyNN.KNN
     {
         private readonly CLProvider _clProvider;
 
-        private readonly DataSet _dataList;
+        private readonly IDataSet _dataList;
         private readonly int _dataCount;
         private readonly int _coordinateCount;
 
@@ -25,7 +25,7 @@ namespace MyNN.KNN
         private readonly Kernel _calculateDistanceKernel;
 
 
-        public CPUOpenCLKNearest(DataSet dataList)
+        public CPUOpenCLKNearest(IDataSet dataList)
         {
             #region validate
 

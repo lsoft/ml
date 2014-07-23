@@ -20,8 +20,8 @@ namespace MyNN.BoltzmannMachines.LinearNReLU
         private int _imageWidth,
                     _imageHeight;
 
-        private DataSet _trainData;
-        private DataSet _validationData;
+        private IDataSet _trainData;
+        private IDataSet _validationData;
 
         public string Name
         {

@@ -33,7 +33,7 @@ namespace MyNN
             }
             if (max < min)
             {
-                throw new ArgumentOutOfRangeException("min - max");
+                throw new ArgumentOutOfRangeException("min < max");
             }
 
             _randomizer = randomizer;

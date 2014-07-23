@@ -21,54 +21,10 @@ namespace MyNN.MLP2.Structure
     [Serializable]
     public class MLP : IMLP
     {
-        [NonSerialized]
-        private string _root;
-        public string Root
+        public string Name
         {
-            get
-            {
-                if (string.IsNullOrEmpty(_root))
-                {
-                    _root = ".";
-                }
-
-                return _root;
-            }
-
-            private set
-            {
-                _root = value;
-            }
-        }
-
-        [NonSerialized]
-        private string _folderName;
-        public string FolderName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_folderName))
-                {
-                    _folderName = "MLP" + DateTime.Now.ToString("yyyyMMddHHmmss");
-                }
-
-                return
-                    _folderName;
-            }
-
-            private set
-            {
-                _folderName = value;
-            }
-        }
-
-        public string WorkFolderPath
-        {
-            get
-            {
-                return
-                    Path.Combine(Root, FolderName);
-            }
+            get;
+            private set;
         }
 
         private readonly ILayerFactory _layerFactory;
@@ -83,50 +39,28 @@ namespace MyNN.MLP2.Structure
         }
 
         public MLP(
+            string name,
             ILayerFactory layerFactory,
-            string root, 
-            string folderName,
             ILayer[] layerList)
         {
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
             if (layerFactory == null)
             {
                 throw new ArgumentNullException("layerFactory");
             }
-            //root, folderName allowed to be null
             if (layerList == null)
             {
                 throw new ArgumentNullException("layerList");
             }
 
+            Name = name;
             _layerFactory = layerFactory;
-
-            Root = root;
-            FolderName = folderName;
             
             //формируем слои
             this._layers = layerList;
-
-            this.CreateWorkFolderFolder();
-        }
-
-        public void SetRootFolder(string root)
-        {
-            if (root == null)
-            {
-                throw new ArgumentNullException("root");
-            }
-
-            this.Root = root;
-        }
-
-        private void CreateWorkFolderFolder()
-        {
-            var p = WorkFolderPath;
-
-            if (!Directory.Exists(p))
-            {
-                Directory.CreateDirectory(p);
-            }
         }
 
         public string GetLayerInformation()

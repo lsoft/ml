@@ -2,28 +2,32 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MyNN.MLP2.AccuracyRecord;
 using MyNN.MLP2.Backpropagation.Validation;
+using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation;
 
 namespace MyNN.Tests.MLP2.EpocheTrainer
 {
     internal class EpocheTrainerValidation : IValidation
     {
-        public float Validate(
+        public IAccuracyRecord Validate(
             IForwardPropagation forwardPropagation,
-            string epocheRoot,
-            bool allowToSave)
+            int? epocheNumber,
+            IMLPContainer epocheContainer
+            )
         {
             if (forwardPropagation == null)
             {
                 throw new ArgumentNullException("forwardPropagation");
             }
-            if (epocheRoot == null)
+            if (epocheContainer == null)
             {
-                throw new ArgumentNullException("epocheRoot");
+                throw new ArgumentNullException("epocheContainer");
             }
 
-            return 1f;
+            return
+                null;
         }
     }
 }

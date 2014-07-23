@@ -358,7 +358,7 @@ __kernel void
 
         #endregion
 
-        public List<ILayerState> ComputeOutput(DataSet dataSet)
+        public List<ILayerState> ComputeOutput(IDataSet dataSet)
         {
             TimeSpan propagationTime;
             var result = ComputeOutput(
@@ -368,7 +368,7 @@ __kernel void
             return result;
         }
 
-        public List<ILayerState> ComputeOutput(DataSet dataSet, out TimeSpan propagationTime)
+        public List<ILayerState> ComputeOutput(IDataSet dataSet, out TimeSpan propagationTime)
         {
             var result = new List<ILayerState>();
 
@@ -394,7 +394,7 @@ __kernel void
             return result;
         }
 
-        public List<IMLPState> ComputeState(DataSet dataSet)
+        public List<IMLPState> ComputeState(IDataSet dataSet)
         {
             var result = new List<IMLPState>();
 

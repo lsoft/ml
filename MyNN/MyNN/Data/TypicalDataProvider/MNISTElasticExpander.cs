@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Randomizer;
 using OpenCvSharp;
+using OpenCvSharp.Extensions;
 
 namespace MyNN.Data.TypicalDataProvider
 {
@@ -15,9 +16,9 @@ namespace MyNN.Data.TypicalDataProvider
     /// </summary>
     public class MNISTElasticExpander
     {
-        public DataSet GenerateExpandedSet(
+        public IDataSet GenerateExpandedSet(
             IRandomizer randomizer,
-            DataSet toDeformDataSet,
+            IDataSet toDeformDataSet,
             int deformationEpocheCount,
             int stepRefreshGaussMap)
         {
@@ -80,9 +81,7 @@ namespace MyNN.Data.TypicalDataProvider
             Console.WriteLine("Deformations finished...");
 
             return 
-                new DataSet(
-                    resultItemList,
-                    toDeformDataSet.Visualizer);
+                new DataSet(resultItemList);
         }
 
 
@@ -510,7 +509,7 @@ namespace MyNN.Data.TypicalDataProvider
             }
 
             //обработка буквы
-            using (var src = IplImage.FromBitmap(origImage))
+            using (var src = BitmapConverter.ToIplImage(origImage))
             {
                 //using (var w2 = new CvWindow("44"))
                 //{

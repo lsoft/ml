@@ -4,6 +4,7 @@ using MyNN.Data.TrainDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
+using MyNN.MLP2.Container;
 using MyNN.MLP2.LearningConfig;
 
 using MyNN.MLP2.OpenCLHelper;
@@ -44,7 +45,6 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                 );
 
             var mlp = mlpf.CreateMLP(
-                ".",
                 DateTime.Now.ToString("yyyyMMddHHmmss"),
                 new IFunction[]
                 {
@@ -81,6 +81,7 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                             mlp,
                             config,
                             clProvider),
+                        new FileSystemMLPContainer(".", new SerializationHelper()), //!!! переделать, нельзя использовать в тесте! 
                         mlp,
                         validation,
                         config);

@@ -6,13 +6,20 @@ namespace MyNN.MLP2.Structure.Layer.Factory.WeightLoader
     public class RBMAutoencoderWeightLoader : IWeightLoader
     {
         private readonly string _pathToWeightsFile;
+        private readonly ISerializationHelper _serializationHelper;
 
         public RBMAutoencoderWeightLoader(
-            string pathToWeightsFile)
+            string pathToWeightsFile,
+            ISerializationHelper serializationHelper
+            )
         {
             if (pathToWeightsFile == null)
             {
                 throw new ArgumentNullException("pathToWeightsFile");
+            }
+            if (serializationHelper == null)
+            {
+                throw new ArgumentNullException("serializationHelper");
             }
             if (string.IsNullOrEmpty(pathToWeightsFile))
             {
@@ -20,6 +27,7 @@ namespace MyNN.MLP2.Structure.Layer.Factory.WeightLoader
             }
 
             _pathToWeightsFile = pathToWeightsFile;
+            _serializationHelper = serializationHelper;
         }
 
         public void LoadWeights(ILayer layer)
@@ -29,7 +37,7 @@ namespace MyNN.MLP2.Structure.Layer.Factory.WeightLoader
                 throw new ArgumentNullException("layer");
             }
 
-            var weightFile = SerializationHelper.LoadFromFile<float[]>(_pathToWeightsFile);
+            var weightFile = _serializationHelper.LoadFromFile<float[]>(_pathToWeightsFile);
 
             for (var neuronIndex = 0; neuronIndex < layer.Neurons.Length; neuronIndex++)
             {

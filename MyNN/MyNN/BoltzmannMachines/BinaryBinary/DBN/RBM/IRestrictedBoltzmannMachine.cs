@@ -82,12 +82,12 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM
 
         void CalculateFreeEnergy(
             string artifactFolderRoot,
-            DataSet trainFreeEnergySet,
-            DataSet validationFreeEnergySet);
+            IDataSet trainFreeEnergySet,
+            IDataSet validationFreeEnergySet);
 
         float CalculateFreeEnergySet(
             Mem<float> weights,
-            DataSet data);
+            IDataSet data);
 
     }
 }

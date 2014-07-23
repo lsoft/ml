@@ -16,7 +16,7 @@ namespace MyNN.Tests.MLP2.Forward
     {
 
         public float ExecuteTest(
-            DataSet dataset,
+            IDataSet dataset,
             float weight0,
             float weight1,
             Func<IFunction> functionFactory,
@@ -45,7 +45,6 @@ namespace MyNN.Tests.MLP2.Forward
                 );
 
             var mlp = mlpf.CreateMLP(
-                ".",
                 DateTime.Now.ToString("yyyyMMddHHmmss"),
                 new IFunction[]
                 {

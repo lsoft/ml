@@ -4,6 +4,6 @@ namespace MyNN.KNN
 {
     public interface IKNearestFactory
     {
-        IKNearest CreateKNearest(DataSet dataList);
+        IKNearest CreateKNearest(IDataSet dataList);
     }
 }

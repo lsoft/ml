@@ -5,10 +5,10 @@ using MyNN.Data;
 using MyNN.Data.TrainDataProvider;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.BackpropagationFactory;
+using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagationFactory;
 using MyNN.MLP2.LearningConfig;
-
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Factory;
 using MyNN.MLP2.Structure.Layer;
@@ -25,27 +25,19 @@ namespace MyNN.MLP2.Autoencoders
         private readonly IDeviceChooser _deviceChooser;
         private readonly IRandomizer _randomizer;
         private readonly IMLPFactory _mlpFactory;
-        private readonly ISerializationHelper _serialization;
-        private readonly Func<DataSet, ITrainDataProvider> _dataProviderFactory;
-        private readonly Func<DataSet, IValidation> _validationFactory;
+        private readonly Func<IDataSet, ITrainDataProvider> _dataProviderFactory;
+        private readonly Func<IDataSet, IMLPContainer, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
         private readonly IBackpropagationAlgorithmFactory _backpropagationAlgorithmFactory;
         private readonly IForwardPropagationFactory _forwardPropagationFactory;
         private readonly LayerInfo[] _layerInfos;
 
-        public IMLP CombinedNet
-        {
-            get;
-            private set;
-        }
-
         public StackedAutoencoder(
             IDeviceChooser deviceChooser,
             IRandomizer randomizer,
             IMLPFactory mlpFactory,
-            ISerializationHelper serialization,
-            Func<DataSet, ITrainDataProvider> dataProviderFactory,
-            Func<DataSet, IValidation> validationFactory,
+            Func<IDataSet, ITrainDataProvider> dataProviderFactory,
+            Func<IDataSet, IMLPContainer, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
             IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
             IForwardPropagationFactory forwardPropagationFactory,
@@ -62,10 +54,6 @@ namespace MyNN.MLP2.Autoencoders
             if (mlpFactory == null)
             {
                 throw new ArgumentNullException("mlpFactory");
-            }
-            if (serialization == null)
-            {
-                throw new ArgumentNullException("serialization");
             }
             if (dataProviderFactory == null)
             {
@@ -99,7 +87,6 @@ namespace MyNN.MLP2.Autoencoders
             _deviceChooser = deviceChooser;
             _randomizer = randomizer;
             _mlpFactory = mlpFactory;
-            _serialization = serialization;
             _dataProviderFactory = dataProviderFactory;
             _validationFactory = validationFactory;
             _configFactory = configFactory;
@@ -109,13 +96,18 @@ namespace MyNN.MLP2.Autoencoders
         }
 
         public IMLP Train(
-            string root,
-            DataSet trainData,
-            DataSet validationData)
+            string sdaeName,
+            IMLPContainer rootContainer,
+            IDataSet trainData,
+            IDataSet validationData)
         {
-            if (root == null)
+            if (sdaeName == null)
             {
-                throw new ArgumentNullException("root");
+                throw new ArgumentNullException("sdaeName");
+            }
+            if (rootContainer == null)
+            {
+                throw new ArgumentNullException("rootContainer");
             }
             if (validationData == null)
             {
@@ -134,6 +126,8 @@ namespace MyNN.MLP2.Autoencoders
                 throw new InvalidOperationException("validationData.IsAutoencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
             }
 
+            var sdaeContainer = rootContainer.GetChildContainer(sdaeName);
+
             var processingTrainData = trainData;
             var processingValidationData = validationData;
 
@@ -144,9 +138,12 @@ namespace MyNN.MLP2.Autoencoders
             var depth = _layerInfos.Length - 1;
             for (var depthIndex = 0; depthIndex < depth; depthIndex++)
             {
-                var net = _mlpFactory.CreateMLP(
-                    root,
-                    null,
+                var mlpName = string.Format(
+                    "mlp{0}.mlp",
+                    DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+                var mlp = _mlpFactory.CreateMLP(
+                    mlpName,
                     new IFunction[3]
                     {
                         null,
@@ -160,10 +157,14 @@ namespace MyNN.MLP2.Autoencoders
                         _layerInfos[depthIndex].LayerSize
                     });
                 
-                ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + net.GetLayerInformation());
+                ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + mlp.GetLayerInformation());
+
+                var mlpContainer = sdaeContainer.GetChildContainer(mlpName);
 
                 var trainDataProvider = _dataProviderFactory(processingTrainData);
-                var validation = _validationFactory(processingValidationData);
+                var validation = _validationFactory(
+                    processingValidationData,
+                    mlpContainer);
 
                 var config = _configFactory(depthIndex);
 
@@ -173,16 +174,16 @@ namespace MyNN.MLP2.Autoencoders
                     var algo = _backpropagationAlgorithmFactory.GetBackpropagationAlgorithm(
                         _randomizer,
                         clProvider,
-                        net,
+                        mlpContainer,
+                        mlp,
                         validation,
                         config);
 
                     algo.Train(trainDataProvider);
-
                 }
 
                 //добавляем в итоговый автоенкодер слои
-                var cloned = _serialization.DeepClone(net);
+                var cloned = sdaeContainer.DeepClone(mlp);
                 if (depthIndex == 0)
                 {
                     layerList[0] = cloned.Layers[0];
@@ -198,20 +199,19 @@ namespace MyNN.MLP2.Autoencoders
                 if (depthIndex < depth - 1)
                 {
                     //обновляем обучающие данные (от исходного множества, чтобы без применения возможных деформаций)
-                    net.AutoencoderCutTail();
-
+                    mlp.AutoencoderCutTail();
 
                     using (var clProvider = new CLProvider(_deviceChooser, true))
                     {
-                        var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, net);
+                        var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, mlp);
 
                         var nextTrain = forward.ComputeOutput(processingTrainData);
-                        var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.State), null);
+                        var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.State));
                         processingTrainData = newTrainData;
 
                         //обновляем валидационные данные (от исходного множества, чтобы без применения возможных деформаций)
                         var nextValidation = forward.ComputeOutput(processingValidationData);
-                        var newValidationData = new DataSet(validationData, nextValidation.ConvertAll(j => j.State), null);
+                        var newValidationData = new DataSet(validationData, nextValidation.ConvertAll(j => j.State));
                         processingValidationData = newValidationData;
                     }
                 }
@@ -221,38 +221,37 @@ namespace MyNN.MLP2.Autoencoders
             for (var cc = (layerListCount + 1) / 2; cc < layerListCount - 1; cc++)
             {
                 layerList[cc].AddBiasNeuron();
-
-                //layerList[cc] = new Layer(
-                //    layerList[cc].Neurons,
-                //    true);
             }
 
             //собираем итоговый автоенкодер
-            this.CombinedNet = _mlpFactory.CreateMLP(
-                root,
-                null,
+            var combinedNet = _mlpFactory.CreateMLP(
+                sdaeName,
                 layerList);
 
             using (var clProvider = new CLProvider())
             {
-                var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, this.CombinedNet);
+                var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, combinedNet);
 
                 //валидируем его
-                var finalValidation = _validationFactory(validationData);
+                var finalValidation = _validationFactory(
+                    validationData,
+                    sdaeContainer);
 
-                finalValidation.Validate(
+                var finalAccuracy =finalValidation.Validate(
                     forward,
-                    root,
-                    false);
+                    0,
+                    sdaeContainer
+                    );
+
+                //сохраняем
+                sdaeContainer.Save(
+                    combinedNet, 
+                    finalAccuracy
+                    );
             }
 
-            //сохраняем
-            _serialization.SaveToFile(
-                this.CombinedNet,
-                Path.Combine(root, this.CombinedNet.FolderName.ToLower() + ".sdae"));
-
             return
-                this.CombinedNet;
+                combinedNet;
         }
 
 

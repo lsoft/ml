@@ -362,8 +362,8 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
                             new DataItem(
                                 _visibleForEnergy.Array.Take(784).ToArray(),
                                 new float[10]),
-                        },
-                        null));
+                        }
+                        ));
 
                 var p1x0 = _rbm.CalculateFreeEnergySet(
                     rightWeights,
@@ -373,8 +373,8 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
                             new DataItem(
                                 _visibleForEnergy.Array.Take(784).ToArray(),
                                 new float[10]),
-                        },
-                        null));
+                        }
+                        ));
 
                 var randomIndex1 = this._rbm.Randomizer.Next(this._rbm.RandomCount);
 
@@ -417,8 +417,8 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
                             new DataItem(
                                 _visibleForEnergy.Array.Take(784).ToArray(),
                                 new float[10])
-                        },
-                        null));
+                        }
+                        ));
 
                 var p1x1 = _rbm.CalculateFreeEnergySet(
                     rightWeights,
@@ -428,8 +428,8 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.NegativeSampler
                             new DataItem(
                                 _visibleForEnergy.Array.Take(784).ToArray(),
                                 new float[10])
-                        },
-                        null));
+                        }
+                        ));
 
                 //var leftEnergy = this.CalculateEnergy(leftData, leftWeights);
                 //var rightEnergy = this.CalculateEnergy(rightData, rightWeights);

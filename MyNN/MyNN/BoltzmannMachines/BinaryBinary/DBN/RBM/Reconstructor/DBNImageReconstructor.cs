@@ -11,7 +11,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
     {
         private readonly DeepBeliefNetwork _dbn;
         private readonly int _layerIndex;
-        private readonly DataSet _trainData;
+        private readonly IDataSet _trainData;
 
         private readonly int _reconstructedCount;
         private readonly int _imageWidth;
@@ -23,7 +23,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
         public DBNImageReconstructor(
             DeepBeliefNetwork dbn,
             int layerIndex,
-            DataSet trainData,
+            IDataSet trainData,
             int reconstructedCount,
             int imageWidth,
             int imageHeight)

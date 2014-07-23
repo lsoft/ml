@@ -32,7 +32,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             throw new Exception("юзатель! помни! этот форвардер не проверен ни разу! написан вслепую! прежде чем юзать - зотести!");
         }
 
-        public List<ILayerState> ComputeOutput(DataSet dataSet)
+        public List<ILayerState> ComputeOutput(IDataSet dataSet)
         {
             TimeSpan propagationTime;
             var result = ComputeOutput(
@@ -42,7 +42,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             return result;
         }
 
-        public List<ILayerState> ComputeOutput(DataSet dataSet, out TimeSpan propagationTime)
+        public List<ILayerState> ComputeOutput(IDataSet dataSet, out TimeSpan propagationTime)
         {
             if (dataSet == null)
             {
@@ -84,7 +84,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
         }
 
 
-        public List<IMLPState> ComputeState(DataSet dataSet)
+        public List<IMLPState> ComputeState(IDataSet dataSet)
         {
             if (dataSet == null)
             {

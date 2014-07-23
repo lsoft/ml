@@ -25,7 +25,7 @@ namespace MyNN.MLP2.ForwardPropagation
         /// </summary>
         /// <param name="dataSet">Данные для прохождения по сети</param>
         /// <returns>Значение выходного слоя</returns>
-        List<ILayerState> ComputeOutput(DataSet dataSet);
+        List<ILayerState> ComputeOutput(IDataSet dataSet);
 
         /// <summary>
         /// Получение значений на выходном слое сети
@@ -33,7 +33,7 @@ namespace MyNN.MLP2.ForwardPropagation
         /// <param name="dataSet">Данные для прохождения по сети</param>
         /// <param name="propagationTime">Время просчета (без учета времени подготовки)</param>
         /// <returns>Значение выходного слоя</returns>
-        List<ILayerState> ComputeOutput(DataSet dataSet, out TimeSpan propagationTime);
+        List<ILayerState> ComputeOutput(IDataSet dataSet, out TimeSpan propagationTime);
 
         /// <summary>
         /// Вычисление состояние всей сети по одному примеру
@@ -41,6 +41,6 @@ namespace MyNN.MLP2.ForwardPropagation
         /// <param name="dataSet">Данные для прохождения по сети</param>
         /// <returns>Значение выходного слоя</returns>
         /// <returns>Состояние каждого нейрона сети для каждого примера</returns>
-        List<IMLPState> ComputeState(DataSet dataSet);
+        List<IMLPState> ComputeState(IDataSet dataSet);
     }
 }

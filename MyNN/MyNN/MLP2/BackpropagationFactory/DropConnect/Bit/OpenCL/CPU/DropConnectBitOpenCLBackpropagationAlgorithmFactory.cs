@@ -2,10 +2,12 @@
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.Validation;
+using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
+using MyNN.MLP2.Structure.Factory;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 
@@ -44,6 +46,7 @@ namespace MyNN.MLP2.BackpropagationFactory.DropConnect.Bit.OpenCL.CPU
         public BackpropagationAlgorithm GetBackpropagationAlgorithm(
             IRandomizer randomizer,
             CLProvider clProvider,
+            IMLPContainer mlpContainer,
             IMLP net,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config)
@@ -55,6 +58,10 @@ namespace MyNN.MLP2.BackpropagationFactory.DropConnect.Bit.OpenCL.CPU
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
+            }
+            if (mlpContainer == null)
+            {
+                throw new ArgumentNullException("mlpContainer");
             }
             if (net == null)
             {
@@ -79,6 +86,7 @@ namespace MyNN.MLP2.BackpropagationFactory.DropConnect.Bit.OpenCL.CPU
                     clProvider,
                     _sampleCount,
                     _p),
+                mlpContainer,
                 net,
                 validationDataProvider,
                 config);

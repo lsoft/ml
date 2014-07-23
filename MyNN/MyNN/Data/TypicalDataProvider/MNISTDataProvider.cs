@@ -8,7 +8,7 @@ namespace MyNN.Data.TypicalDataProvider
 {
     public class MNISTDataProvider
     {
-        public static DataSet GetDataSet(
+        public static IDataSet GetDataSet(
             string root,
             int maxCountFilesInCategory,
             bool binarize = false)
@@ -108,8 +108,7 @@ namespace MyNN.Data.TypicalDataProvider
 
             return
                 new DataSet(
-                    resultList,
-                    new MNISTVisualizer());
+                    resultList);
         }
     }
 }

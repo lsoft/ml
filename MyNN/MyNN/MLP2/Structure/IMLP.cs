@@ -7,17 +7,7 @@ namespace MyNN.MLP2.Structure
 {
     public interface IMLP
     {
-        string Root
-        {
-            get;
-        }
-
-        string FolderName
-        {
-            get;
-        }
-
-        string WorkFolderPath
+        string Name
         {
             get;
         }
@@ -26,8 +16,6 @@ namespace MyNN.MLP2.Structure
         {
             get;
         }
-
-        void SetRootFolder(string root);
 
         string GetLayerInformation();
 

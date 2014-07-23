@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN;
 using MyNN.BoltzmannMachines.DBNInfo;
 using MyNN.MLP2.Structure.Layer;
@@ -33,12 +34,15 @@ namespace MyNN.MLP2.Structure.Factory
         }
 
         public IMLP CreateMLP(
-            string root,
-            string folderName, 
+            string name,
             IFunction[] activationFunction, 
             params int[] neuronCountList)
         {
-            //root, folderName  allowed to be null
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
+
 
             if (neuronCountList == null)
             {
@@ -74,20 +78,20 @@ namespace MyNN.MLP2.Structure.Factory
 
             return
                 new MLP(
+                    name,
                     _layerFactory,
-                    root,
-                    folderName,
                     layerList);
         }
 
         public IMLP CreateMLP(
-            string root,
-            string folderName, 
+            string name,
             ILayer[] layerList
             )
         {
-            //root, folderName allowed to be null
-
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
             if (layerList == null)
             {
                 throw new ArgumentNullException("layerList");
@@ -95,16 +99,14 @@ namespace MyNN.MLP2.Structure.Factory
 
             return
                 new MLP(
+                    name,
                     _layerFactory,
-                    root,
-                    folderName,
                     layerList);
         }
 
         public IMLP CreateMLP(
             IDBNInformation dbnInformation,
-            string root,
-            string folderName,
+            string name,
             IFunction[] activationFunction
             )
         {
@@ -112,7 +114,10 @@ namespace MyNN.MLP2.Structure.Factory
             {
                 throw new ArgumentNullException("dbnInformation");
             }
-            //root, folderName allowed to be null
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
             if (activationFunction == null)
             {
                 throw new ArgumentNullException("activationFunction");
@@ -167,9 +172,8 @@ namespace MyNN.MLP2.Structure.Factory
             //создаем MLP
             var mlp =
                 new MLP(
+                    name,
                     _layerFactory,
-                    root,
-                    folderName,
                     layerList);
 
             return
@@ -292,8 +296,7 @@ namespace MyNN.MLP2.Structure.Factory
 
         public IMLP CreateAutoencoderMLP(
             IDBNInformation dbnInformation,
-            string root,
-            string folderName,
+            string name,
             IFunction[] activationFunction
             )
         {
@@ -301,7 +304,10 @@ namespace MyNN.MLP2.Structure.Factory
             {
                 throw new ArgumentNullException("dbnInformation");
             }
-            //root, folderName allowed to be null
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
             if (activationFunction == null)
             {
                 throw new ArgumentNullException("activationFunction");
@@ -379,9 +385,8 @@ namespace MyNN.MLP2.Structure.Factory
             //создаем MLP
             var mlp =
                 new MLP(
+                    name,
                     _layerFactory,
-                    root,
-                    folderName,
                     layerList);
 
             return
@@ -529,14 +534,14 @@ namespace MyNN.MLP2.Structure.Factory
         //        mlp;
         //}
 
-        private int ExtractRBMEpocheNumberFromDirName(string dirname)
-        {
-            var lastSlashIndex = dirname.ToList().FindLastIndex(j => j == '\\');
+        //private int ExtractRBMEpocheNumberFromDirName(string dirname)
+        //{
+        //    var lastSlashIndex = dirname.ToList().FindLastIndex(j => j == '\\');
 
-            var stringNumber = dirname.Substring(lastSlashIndex + 8); //!!! константу 8 заменить на ссылку на имя.Length
+        //    var stringNumber = dirname.Substring(lastSlashIndex + 8); //!!! константу 8 заменить на ссылку на имя.Length
 
-            return int.Parse(stringNumber);
-        }
+        //    return int.Parse(stringNumber);
+        //}
 
     }
 }

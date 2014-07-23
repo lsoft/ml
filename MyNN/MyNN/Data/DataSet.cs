@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using MyNN.Data.Visualizer;
 using MyNN.Randomizer;
@@ -8,26 +9,8 @@ using MyNN.Randomizer;
 namespace MyNN.Data
 {
     [Serializable]
-    public class DataSet : IEnumerable<DataItem>, IVisualizer
+    public class DataSet : IDataSet
     {
-        public IVisualizer Visualizer
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Данный датасет способен визуализировать информацию
-        /// </summary>
-        public bool IsAbleToVisualize
-        {
-            get
-            {
-                return
-                    Visualizer != null;
-            }
-        }
-
         public List<DataItem> Data
         {
             get;
@@ -35,12 +18,6 @@ namespace MyNN.Data
         }
 
         public bool IsAuencoderDataSet
-        {
-            get;
-            private set;
-        }
-
-        public bool IsClassificationAuencoderDataSet
         {
             get;
             private set;
@@ -55,19 +32,15 @@ namespace MyNN.Data
             }
         }
 
-        public DataSet(
-            IVisualizer visualizer = null)
+        public DataSet()
         {
-            Visualizer = visualizer;
             Data = new List<DataItem>();
-
             IsAuencoderDataSet = false;
-            IsClassificationAuencoderDataSet = false;
         }
 
         public DataSet(
-            List<DataItem> data,
-            IVisualizer visualizer = null)
+            List<DataItem> data
+            )
         {
             if (data == null)
             {
@@ -75,31 +48,11 @@ namespace MyNN.Data
             }
 
             Data = data;
-            Visualizer = visualizer;
 
             IsAuencoderDataSet = false;
-            IsClassificationAuencoderDataSet = false;
         }
 
-        public DataSet(DataSet dataSet)
-        {
-            #region validate
-
-            if (dataSet == null)
-            {
-                throw new ArgumentNullException("dataSet");
-            }
-
-            #endregion
-
-            Visualizer = dataSet.Visualizer;
-            Data = new List<DataItem>(dataSet.Data);
-
-            IsAuencoderDataSet = false;
-            IsClassificationAuencoderDataSet = false;
-        }
-
-        public DataSet(DataSet dataSet, int takeCount)
+        public DataSet(IDataSet dataSet, int takeCount)
         {
             #region validate
 
@@ -115,17 +68,15 @@ namespace MyNN.Data
 
             #endregion
 
-            Visualizer = dataSet.Visualizer;
             Data = new List<DataItem>(dataSet.Data.Take(takeCount));
 
             IsAuencoderDataSet = false;
-            IsClassificationAuencoderDataSet = false;
         }
 
         public DataSet(
-            DataSet dataSet,
-            List<float[]> inputPart,
-            IVisualizer visualizer)
+            IDataSet dataSet,
+            List<float[]> inputPart
+            )
         {
             //visualizer allowed to be null
 
@@ -142,7 +93,6 @@ namespace MyNN.Data
                 throw new InvalidOperationException("Датасет и данные должны быть одного размера");
             }
 
-            Visualizer = visualizer;
             this.Data = new List<DataItem>();
 
             for (var i = 0; i < dataSet.Count; i++)
@@ -152,12 +102,6 @@ namespace MyNN.Data
             }
 
             IsAuencoderDataSet = false;
-            IsClassificationAuencoderDataSet = false;
-        }
-
-        public void AddItem(DataItem di)
-        {
-            this.Data.Add(di);
         }
 
         public DataItem this[int i]
@@ -169,24 +113,12 @@ namespace MyNN.Data
             }
         }
 
-        public DataSet ConvertToClassificationAutoencoder()
+        public IDataSet ConvertToAutoencoder()
         {
             var result =
                 new DataSet(
-                    this.Data.ConvertAll(j => new DataItem(j.Input, j.Output.Concatenate(j.Input))),
-                    this.Visualizer);
-
-            result.IsClassificationAuencoderDataSet = true;
-
-            return result;
-        }
-
-        public DataSet ConvertToAutoencoder()
-        {
-            var result =
-                new DataSet(
-                    this.Data.ConvertAll(j => new DataItem(j.Input, j.Input)),
-                    this.Visualizer);
+                    this.Data.ConvertAll(j => new DataItem(j.Input, j.Input))
+                    );
 
             result.IsAuencoderDataSet = true;
 
@@ -198,49 +130,6 @@ namespace MyNN.Data
             return
                 this.Data.ConvertAll(j => j.Input);
         }
-
-        //public void ExpandDataSet(
-        //    IRandomizer randomizer,
-        //    float scale,
-        //    int epocheCount)
-        //{
-        //    if (randomizer == null)
-        //    {
-        //        throw new ArgumentNullException("randomizer");
-        //    }
-
-        //    Console.WriteLine("Generate expanded set...");
-
-        //    var resultData = new List<DataItem>();
-
-        //    for (var epocheNumber = 0; epocheNumber < epocheCount; epocheNumber++)
-        //    {
-        //        Console.WriteLine("Generate expanded set, epoche " + epocheNumber);
-
-        //        foreach (var d in this.Data)
-        //        {
-        //            var inputd = new float[d.Input.Length];
-        //            Array.Copy(d.Input, inputd, inputd.Length);
-
-        //            var outputd = new float[d.Output.Length];
-        //            Array.Copy(d.Output, outputd, outputd.Length);
-
-        //            for (var cc = 0; cc < inputd.Length; cc++)
-        //            {
-        //                var linearcoef = (1.0f - (randomizer.Next() * scale / 2.0f - scale));
-        //                inputd[cc] *= linearcoef;
-
-        //                var sincoef = (float)(Math.Sin(cc * 0.01f) * scale + 1.0f);
-        //                inputd[cc] *= sincoef;
-        //            }
-
-        //            resultData.Add(
-        //                new DataItem(inputd, outputd));
-        //        }
-        //    }
-
-        //    this.Data.AddRange(resultData);
-        //}
 
         /// <summary>
         /// Линейная нормализация [0;1]
@@ -335,7 +224,7 @@ namespace MyNN.Data
         /// Создает новый датасет, перемешивает его и отдает
         /// </summary>
         /// <returns></returns>
-        public DataSet CreateShuffledDataSet(
+        public IDataSet CreateShuffledDataSet(
             IRandomizer randomizer)
         {
             if (randomizer == null)
@@ -358,8 +247,7 @@ namespace MyNN.Data
 
             return
                 new DataSet(
-                    cloned,
-                    this.Visualizer);
+                    cloned);
         }
 
         /// <summary>
@@ -368,7 +256,7 @@ namespace MyNN.Data
         /// Если данные не нормализованы в диапазон [0;1], генерируется исключение
         /// </summary>
         /// <returns></returns>
-        public DataSet Binarize(
+        public IDataSet Binarize(
             IRandomizer randomizer)
         {
             if (randomizer == null)
@@ -392,8 +280,7 @@ namespace MyNN.Data
 
             return 
                 new DataSet(
-                    cloned, 
-                    this.Visualizer);
+                    cloned);
         }
 
 
@@ -413,38 +300,5 @@ namespace MyNN.Data
 
         #endregion
 
-        public void SaveAsGrid(string filepath, List<float[]> data)
-        {
-            if (filepath == null)
-            {
-                throw new ArgumentNullException("filepath");
-            }
-            if (data == null)
-            {
-                throw new ArgumentNullException("data");
-            }
-
-            if (Visualizer != null)
-            {
-                Visualizer.SaveAsGrid(filepath, data);
-            }
-        }
-
-        public void SaveAsPairList(string filepath, List<Pair<float[], float[]>> data)
-        {
-            if (filepath == null)
-            {
-                throw new ArgumentNullException("filepath");
-            }
-            if (data == null)
-            {
-                throw new ArgumentNullException("data");
-            }
-
-            if (Visualizer != null)
-            {
-                Visualizer.SaveAsPairList(filepath, data);
-            }
-        }
     }
 }

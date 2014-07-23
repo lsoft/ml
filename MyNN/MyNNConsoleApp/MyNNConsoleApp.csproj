@@ -116,9 +116,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
     </Reference>
-    <Reference Include="OpenCvSharp">
-      <HintPath>..\OpenCVSharp\OpenCvSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -129,53 +126,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClassificationAutoencoder\CATrainSCDAE.cs" />
-    <Compile Include="ClassificationAutoencoder\CATrainMLPBasedOnSCDAE.cs" />
-    <Compile Include="ClassificationAutoencoder\CATuneSCDAE.cs" />
     <Compile Include="CombinedConsole.cs" />
-    <Compile Include="DerivativeChange\Test0.cs" />
-    <Compile Include="DropConnectInference\Experiment6.cs" />
-    <Compile Include="DropConnectInference\Experiment5.cs" />
-    <Compile Include="DropConnectInference\Experiment3.cs" />
-    <Compile Include="DropConnectInference\Experiment4.cs" />
-    <Compile Include="DropConnectInference\Experiment2.cs" />
-    <Compile Include="DropConnectInference\Experiment0.cs" />
-    <Compile Include="DropConnectInference\Experiment1.cs" />
-    <Compile Include="DropConnectInference\TrainMLPBasedOnSDAE.cs" />
-    <Compile Include="DropConnectInference\TuneSDAE.cs" />
-    <Compile Include="DropConnectInference\TrainStackedAutoencoder.cs" />
-    <Compile Include="DropConnectInference\MyBino.cs" />
-    <Compile Include="DropConnectInference\MyNormal.cs" />
-    <Compile Include="DropConnectInference\WVBino.cs" />
-    <Compile Include="MLP2\MLP2TrainMLPBasedOnSDAE.cs" />
-    <Compile Include="MLP2\MLP2AutoencoderNLNCA.cs" />
-    <Compile Include="MLP2\MLP2Experiments.cs" />
-    <Compile Include="MLP2\MLP2TrainStackedAutoencoder.cs" />
-    <Compile Include="MLP2\MLP2TuneSDAE.cs" />
-    <Compile Include="NExperiments\INExperiment.cs" />
-    <Compile Include="NExperiments\Example\DBNExperiment0.cs" />
-    <Compile Include="NLNCA\MLP2NLNCA.cs" />
-    <Compile Include="NLNCA\MLP2NLNCAAutoencoderTest.cs" />
-    <Compile Include="NLNCA\MLP2TrainStackedNLNCAAutoencoder.cs" />
-    <Compile Include="Nvidia\NvidiaDoDfCalculatorGeneration2Optimizer.cs" />
-    <Compile Include="Nvidia\NvidiaBackpropSmallMLPOptimizer.cs" />
-    <Compile Include="Nvidia\NvidiaDoDfCalculatorOptimizer.cs" />
-    <Compile Include="Nvidia\NvidiaTransposeBackpropOptimizer.cs" />
-    <Compile Include="Nvidia\NvidiaBackpropOptimizer.cs" />
-    <Compile Include="Nvidia\NvidiaForwardOptimizer.cs" />
-    <Compile Include="pabProfiler.cs" />
-    <Compile Include="PingPong\NextMLP2.cs" />
-    <Compile Include="PingPong\NextAutoencoder2.cs" />
-    <Compile Include="PingPong\NextDataSet.cs" />
-    <Compile Include="PingPong\NextMLP.cs" />
-    <Compile Include="PingPong\NextAutoencoder.cs" />
+    <Compile Include="RefactoredForDI\TrainNLNCAAutoencoder.cs" />
+    <Compile Include="RefactoredForDI\TrainNLNCAMLP.cs" />
+    <Compile Include="RefactoredForDI\TrainSDAE.cs" />
+    <Compile Include="RefactoredForDI\TrainAutoencoder.cs" />
+    <Compile Include="RefactoredForDI\TrainMLP.cs" />
     <Compile Include="TfidfCalculator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrainNReLUDBN.cs" />
-    <Compile Include="TransposeExperiments\Transpose2.cs" />
-    <Compile Include="TransposeExperiments\Transpose1.cs" />
-    <Compile Include="TransposeExperiments\Transpose0.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\csharp-half-code-2\System.Half\System.Half.csproj">
@@ -199,8 +158,8 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /Y $(ProjectDir)\..\OpenCV\*.*  $(TargetDir)
-xcopy /Y $(ProjectDir)\..\OpenCVSharp\*.*  $(TargetDir)</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

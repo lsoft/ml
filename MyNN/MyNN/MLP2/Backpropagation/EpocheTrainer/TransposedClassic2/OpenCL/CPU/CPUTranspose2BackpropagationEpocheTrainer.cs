@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using MyNN.Data;
+using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
@@ -140,7 +141,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
 
         #endregion
 
-        public void PreTrainInit(DataSet data)
+        public void PreTrainInit(IDataSet data)
         {
             //создаем инфраструктуру
             for (var i = 1; i < _mlp.Layers.Length; i++)
@@ -171,17 +172,17 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
         }
 
         public void TrainEpoche(
-            DataSet data, 
-            string epocheRoot, 
+            IDataSet data,
+            IMLPContainer mlpContainer, 
             float learningRate)
         {
             if (data == null)
             {
                 throw new ArgumentNullException("data");
             }
-            if (epocheRoot == null)
+            if (mlpContainer == null)
             {
-                throw new ArgumentNullException("epocheRoot");
+                throw new ArgumentNullException("mlpContainer");
             }
 
             #region one epoche

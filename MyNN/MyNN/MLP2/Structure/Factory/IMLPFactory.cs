@@ -11,15 +11,13 @@ namespace MyNN.MLP2.Structure.Factory
     public interface IMLPFactory
     {
         IMLP CreateMLP(
-            string root,
-            string folderName,
+            string name,
             IFunction[] activationFunction,
             params int[] neuronCountList
             );
 
         IMLP CreateMLP(
-            string root,
-            string folderName,
+            string name,
             ILayer[] layerList
             );
 
@@ -28,8 +26,7 @@ namespace MyNN.MLP2.Structure.Factory
         /// </summary>
         IMLP CreateMLP(
             IDBNInformation dbnInformation,
-            string root,
-            string folderName,
+            string name,
             IFunction[] activationFunction
             );
 
@@ -49,8 +46,7 @@ namespace MyNN.MLP2.Structure.Factory
         /// </summary>
         IMLP CreateAutoencoderMLP(
             IDBNInformation dbnInformation,
-            string root,
-            string folderName,
+            string name,
             IFunction[] activationFunction
             );
 

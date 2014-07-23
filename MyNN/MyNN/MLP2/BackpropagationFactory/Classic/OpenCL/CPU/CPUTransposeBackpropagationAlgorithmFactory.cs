@@ -2,6 +2,7 @@
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.Validation;
+using MyNN.MLP2.Container;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
@@ -18,6 +19,7 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU
         public BackpropagationAlgorithm GetBackpropagationAlgorithm(
             IRandomizer randomizer,
             CLProvider clProvider,
+            IMLPContainer mlpContainer,
             IMLP net,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config)
@@ -29,6 +31,10 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
+            }
+            if (mlpContainer == null)
+            {
+                throw new ArgumentNullException("mlpContainer");
             }
             if (net == null)
             {
@@ -50,6 +56,7 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU
                     net,
                     config,
                     clProvider),
+                mlpContainer,
                 net,
                 validationDataProvider,
                 config);

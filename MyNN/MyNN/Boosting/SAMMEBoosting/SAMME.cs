@@ -50,8 +50,8 @@ namespace MyNN.Boosting.SAMMEBoosting
         }
 
         public SAMMEClassifierSet Train(
-            DataSet trainData,
-            DataSet validationData, 
+            IDataSet trainData,
+            IDataSet validationData, 
             int epocheThreshold,
             float errorThreshold)
         {
@@ -157,7 +157,7 @@ namespace MyNN.Boosting.SAMMEBoosting
 
         private int Validate(
             SAMMEClassifierSet classifierSet,
-            DataSet validationData)
+            IDataSet validationData)
         {
             var success = 0;
             var total = 0;

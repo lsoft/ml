@@ -13,6 +13,7 @@ namespace MyNN.BoltzmannMachines.DBNInfo
     public class FileDBNInformation : IDBNInformation
     {
         private readonly string _dbnInfoRoot;
+        private readonly ISerializationHelper _serializationHelper;
 
         /// <summary>
         /// Количество слоев в обученной DBN
@@ -40,14 +41,21 @@ namespace MyNN.BoltzmannMachines.DBNInfo
         }
 
         public FileDBNInformation(
-            string dbnInfoRoot)
+            string dbnInfoRoot,
+            ISerializationHelper serializationHelper
+            )
         {
             if (dbnInfoRoot == null)
             {
                 throw new ArgumentNullException("dbnInfoRoot");
             }
+            if (serializationHelper == null)
+            {
+                throw new ArgumentNullException("serializationHelper");
+            }
 
             _dbnInfoRoot = dbnInfoRoot;
+            _serializationHelper = serializationHelper;
 
             ////количество слоев в обученной DBN
             //var dbnFolderCount =
@@ -113,8 +121,8 @@ namespace MyNN.BoltzmannMachines.DBNInfo
 
             var pathToWeightsFile = Path.Combine(lastEpocheNumber, "weights.bin"); //!!! заменить юзанием конст
 
-            encoderWeightLoader = new RBMWeightLoader(pathToWeightsFile);
-            decoderWeightLoader = new RBMAutoencoderWeightLoader(pathToWeightsFile);
+            encoderWeightLoader = new RBMWeightLoader(pathToWeightsFile, _serializationHelper);
+            decoderWeightLoader = new RBMAutoencoderWeightLoader(pathToWeightsFile, _serializationHelper);
         }
 
         /// <summary>
@@ -146,7 +154,7 @@ namespace MyNN.BoltzmannMachines.DBNInfo
 
             var pathToWeightsFile = Path.Combine(lastEpocheNumber, "weights.bin"); //!!! заменить юзанием конст
 
-            weightLoader = new RBMWeightLoader(pathToWeightsFile);
+            weightLoader = new RBMWeightLoader(pathToWeightsFile, _serializationHelper);
         }
 
         private int ExtractRBMEpocheNumberFromDirName(string dirname)

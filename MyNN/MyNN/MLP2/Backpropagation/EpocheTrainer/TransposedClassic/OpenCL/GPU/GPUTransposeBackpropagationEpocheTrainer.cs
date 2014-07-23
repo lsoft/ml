@@ -2,6 +2,7 @@
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
+using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
 using MyNN.MLP2.LearningConfig;
@@ -154,7 +155,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
 
         #endregion
 
-        public void PreTrainInit(DataSet data)
+        public void PreTrainInit(IDataSet data)
         {
             //создаем массивы смещений по весам и dedz
             for (var i = 1; i < _mlp.Layers.Length; i++)
@@ -191,17 +192,17 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
         }
 
         public void TrainEpoche(
-            DataSet data, 
-            string epocheRoot, 
+            IDataSet data,
+            IMLPContainer mlpContainer, 
             float learningRate)
         {
             if (data == null)
             {
                 throw new ArgumentNullException("data");
             }
-            if (epocheRoot == null)
+            if (mlpContainer == null)
             {
-                throw new ArgumentNullException("epocheRoot");
+                throw new ArgumentNullException("mlpContainer");
             }
 
             #region one epoche

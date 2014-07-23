@@ -13,11 +13,6 @@ namespace MyNN.Randomizer
             _random = new Random(rndSeed);
         }
 
-        //public DefaultRandomizer(ref int rndSeed)
-        //{
-        //    _random = new Random(++rndSeed);
-        //}
-
         public int Next(int maxValue)
         {
             lock (_lockObject)

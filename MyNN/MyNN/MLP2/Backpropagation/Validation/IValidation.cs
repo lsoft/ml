@@ -1,4 +1,6 @@
-﻿using MyNN.MLP2.ForwardPropagation;
+﻿using MyNN.MLP2.AccuracyRecord;
+using MyNN.MLP2.Container;
+using MyNN.MLP2.ForwardPropagation;
 
 namespace MyNN.MLP2.Backpropagation.Validation
 {
@@ -8,12 +10,13 @@ namespace MyNN.MLP2.Backpropagation.Validation
         /// Epoche validation
         /// </summary>
         /// <param name="forwardPropagation">Forward propagator</param>
-        /// <param name="epocheRoot">Root epoche folder</param>
-        /// <param name="allowToSave">Is it allowed to save MLP?</param>
-        /// <returns>Current per-item error</returns>
-        float Validate(
+        /// <param name="epocheNumber">Number of current epoche. Null if it's pretrain call.</param>
+        /// <param name="epocheContainer">Container that stores MLP and other related data</param>
+        /// <returns>A class that contains an information about MLP accuracy in terms of validation method</returns>
+        IAccuracyRecord Validate(
             IForwardPropagation forwardPropagation,
-            string epocheRoot,
-            bool allowToSave);
+            int? epocheNumber,
+            IMLPContainer epocheContainer
+            );
     }
 }

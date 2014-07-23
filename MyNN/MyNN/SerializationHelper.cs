@@ -11,7 +11,7 @@ namespace MyNN
 {
     public class SerializationHelper : ISerializationHelper
     {
-        public static List<DataItem> ReadDataFromFile(string fileName, int totalCount)
+        public List<DataItem> ReadDataFromFile(string fileName, int totalCount)
         {
             using (var reader = new BinaryReader(File.Open(fileName, FileMode.Open)))
             {
@@ -46,9 +46,8 @@ namespace MyNN
             }
         }
 
-        public static void SaveDataToFile(List<DataItem> obj, string fileName)
+        public void SaveDataToFile(List<DataItem> obj, string fileName)
         {
-            
             using (var writer = new BinaryWriter(File.Open(fileName, FileMode.Create)))
             {
                 writer.Write(obj.Count);
@@ -71,7 +70,7 @@ namespace MyNN
             }
         }
 
-        public static T LoadLastFile<T>(string dirname, string mask)
+        public T LoadLastFile<T>(string dirname, string mask)
             where T : class
         {
             var files = Directory.GetFiles(dirname, mask);
@@ -90,7 +89,7 @@ namespace MyNN
                 LoadFromFile<T>(lastFile);
         }
 
-        public static T LoadFromFile<T>(string fileName)
+        public T LoadFromFile<T>(string fileName)
             where T : class
         {
             Console.WriteLine("Loading " + fileName);

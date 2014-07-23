@@ -120,8 +120,8 @@ namespace MyNN.BoltzmannMachines.LinearNReLU.RBM
 
         public void Train(
             string rootFolder,
-            DataSet trainData,
-            DataSet validationData,
+            IDataSet trainData,
+            IDataSet validationData,
             int maxGibbsChainLength,
             float learningRage,
             int epocheCount,
@@ -231,7 +231,7 @@ namespace MyNN.BoltzmannMachines.LinearNReLU.RBM
                 }
 
                 var after = DateTime.Now;
-                Console.WriteLine("Epoche takes {0}", (after - before));
+                Console.WriteLine("EpocheNumber takes {0}", (after - before));
 
                 #region считаем ошибку и сохраняем реконструкцию, если задан реконструктор
 
@@ -358,7 +358,7 @@ namespace MyNN.BoltzmannMachines.LinearNReLU.RBM
 
                 #endregion
 
-                Console.WriteLine("Epoche {0:D3}, per-item error {1}, total error {2}  ", epocheNumber, epochError / validationData.Count, epochError);
+                Console.WriteLine("EpocheNumber {0:D3}, per-item error {1}, total error {2}  ", epocheNumber, epochError / validationData.Count, epochError);
             }
 
             this.SaveStateHistogram(
@@ -693,7 +693,7 @@ namespace MyNN.BoltzmannMachines.LinearNReLU.RBM
 
             #endregion
 
-            var d = SerializationHelper.LoadFromFile<float[]>(filename);
+            var d = new SerializationHelper().LoadFromFile<float[]>(filename);
 
             //хидден веса + биасы
             var toIndex = 0;

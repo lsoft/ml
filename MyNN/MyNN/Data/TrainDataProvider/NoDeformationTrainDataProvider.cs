@@ -4,7 +4,7 @@ namespace MyNN.Data.TrainDataProvider
 {
     public class NoDeformationTrainDataProvider : ITrainDataProvider
     {
-        private readonly DataSet _trainData;
+        private readonly IDataSet _trainData;
 
         public bool IsAuencoderDataSet
         {
@@ -14,24 +14,17 @@ namespace MyNN.Data.TrainDataProvider
             }
         }
 
-        public bool IsClassificationAuencoderDataSet
-        {
-            get
-            {
-                return this._trainData.IsClassificationAuencoderDataSet;
-            }
-        }
-
-        public NoDeformationTrainDataProvider(DataSet trainData)
+        public NoDeformationTrainDataProvider(IDataSet trainData)
         {
             if (trainData == null)
             {
                 throw new ArgumentNullException("trainData");
             }
+
             _trainData = trainData;
         }
 
-        public DataSet GetDataSet(int epocheNumber)
+        public IDataSet GetDataSet(int epocheNumber)
         {
             return _trainData;
         }

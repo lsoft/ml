@@ -7,11 +7,6 @@
             get;
         }
 
-        bool IsClassificationAuencoderDataSet
-        {
-            get;
-        }
-
-        DataSet GetDataSet(int epocheNumber);
+        IDataSet GetDataSet(int epocheNumber);
     }
 }
