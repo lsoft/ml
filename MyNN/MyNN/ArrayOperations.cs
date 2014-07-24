@@ -93,7 +93,6 @@ namespace MyNN
             var r = new T[length];
             Array.Copy(a, startIndex, r, 0, length);
 
-
             return r;
         }
 

@@ -128,11 +128,13 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
                 ); //Parallel.For
         }
 
-        public void UpdateWeights(float learningRate)
+        public void UpdateWeights(
+            int batchSize,
+            float learningRate)
         {
             for (var cc = 0; cc < _nabla.Length; cc++)
             {
-                Weights[cc] += learningRate * _nabla[cc];
+                Weights[cc] += learningRate * _nabla[cc] / batchSize;
             }
         }
 

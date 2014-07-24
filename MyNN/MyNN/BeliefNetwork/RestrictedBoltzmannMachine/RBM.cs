@@ -2,6 +2,7 @@
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container;
 using MyNN.BoltzmannMachines;
+using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.Data;
 using MyNN.LearningRateController;
 using MyNN.OutputConsole;
@@ -14,14 +15,16 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
         private readonly IRandomizer _randomizer;
         private readonly IContainer _container;
         private readonly IImageReconstructor _imageReconstructor;
-        
+        private readonly IFeatureExtractor _featureExtractor;
+
         private readonly IAlgorithm _algorithm;
 
         public RBM(
             IRandomizer randomizer,
             IContainer container,
             IAlgorithm algorithm,
-            IImageReconstructor imageReconstructor
+            IImageReconstructor imageReconstructor,
+            IFeatureExtractor featureExtractor
             )
         {
             if (randomizer == null)
@@ -40,15 +43,20 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             {
                 throw new ArgumentNullException("imageReconstructor");
             }
+            if (featureExtractor == null)
+            {
+                throw new ArgumentNullException("featureExtractor");
+            }
 
             _randomizer = randomizer;
             _container = container;
             _algorithm = algorithm;
             _imageReconstructor = imageReconstructor;
+            _featureExtractor = featureExtractor;
         }
 
         public void Train(
-            IDataSet trainData,
+            Func<IDataSet> trainDataProvider,
             IDataSet validationData,
             ILearningRate learningRateController,
             int epocheCount,
@@ -56,9 +64,9 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             int maxGibbsChainLength
             )
         {
-            if (trainData == null)
+            if (trainDataProvider == null)
             {
-                throw new ArgumentNullException("trainData");
+                throw new ArgumentNullException("trainDataProvider");
             }
             if (validationData == null)
             {
@@ -97,7 +105,8 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                 //скорость обучения на эту эпоху
                 var learningRate = learningRateController.GetLearningRate(epochNumber);
 
-                var epocheTrainData = trainData.CreateShuffledDataSet(_randomizer);
+                var freshTrainData = trainDataProvider();
+                var epocheTrainData = freshTrainData.CreateShuffledDataSet(_randomizer);
 
                 _algorithm.PrepareBatch();
 
@@ -130,13 +139,18 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
 
                     _algorithm.BatchFinished();
 
-                    _container.UpdateWeights(learningRate);
+                    _container.UpdateWeights(
+                        batchSize,
+                        learningRate);
                 }
 
                 this.CaculateError(
                     validationData,
                     epochNumber
                     );
+
+                this.ExtractFeatures(
+                    epochNumber);
 
                 epochNumber++;
 
@@ -150,6 +164,23 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             }
 
 
+        }
+
+        private void ExtractFeatures(
+            int epocheNumber
+            )
+        {
+            var features = _algorithm.GetFeatures();
+
+            foreach (var feature in features)
+            {
+                _featureExtractor.AddFeature(feature);
+            }
+
+            _featureExtractor.GetFeatureBitmap().Save(
+                string.Format(
+                    "feature{0}.bmp",
+                    epocheNumber));
         }
 
         private void CaculateError(

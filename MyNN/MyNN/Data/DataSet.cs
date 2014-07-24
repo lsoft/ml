@@ -245,9 +245,10 @@ namespace MyNN.Data
                 }
             }
 
-            return
-                new DataSet(
-                    cloned);
+            var result = new DataSet(
+                cloned);
+
+            return result;
         }
 
         /// <summary>
@@ -278,9 +279,10 @@ namespace MyNN.Data
                 cloned.Add(ndi);
             }
 
-            return 
-                new DataSet(
-                    cloned);
+            var result = new DataSet(
+                cloned);
+
+            return result;
         }
 
 

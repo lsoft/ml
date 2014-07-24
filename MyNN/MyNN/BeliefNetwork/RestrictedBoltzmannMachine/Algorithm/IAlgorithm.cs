@@ -1,4 +1,6 @@
-﻿namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm
+﻿using System.Collections.Generic;
+
+namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm
 {
     public interface IAlgorithm
     {
@@ -20,5 +22,7 @@
         void BatchFinished();
 
         float[] CalculateReconstructed();
+        
+        ICollection<float[]> GetFeatures();
     }
 }

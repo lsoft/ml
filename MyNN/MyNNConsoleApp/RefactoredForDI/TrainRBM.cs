@@ -9,6 +9,7 @@ using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
+using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
@@ -61,21 +62,31 @@ namespace MyNNConsoleApp.RefactoredForDI
                 calculator,
                 container);
 
-            var reconstructor = new IsolatedImageReconstructor(validationData, 300, 28, 28);
+            var reconstructor = new IsolatedImageReconstructor(
+                validationData, 
+                300, 
+                28, 
+                28);
+
+            var extractor = new IsolatedFeatureExtractor(
+                hiddenNeuronCount, 
+                28, 
+                28);
 
             var rbm = new RBM(
                 randomizer,
                 container,
                 algorithm,
-                reconstructor
+                reconstructor,
+                extractor
                 );
 
             rbm.Train(
-                trainData,
+                () => trainData,
                 validationData,
                 new ConstLearningRate(0.0001f),
                 20,
-                5,
+                10,
                 1);
         }
 
@@ -85,9 +96,9 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                1000//int.MaxValue
+                1000
+                //int.MaxValue
                 );
-            trainData = trainData.Binarize(randomizer);
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
@@ -112,19 +123,29 @@ namespace MyNNConsoleApp.RefactoredForDI
                 28, 
                 28);
 
+            var extractor = new IsolatedFeatureExtractor(
+                hiddenNeuronCount, 
+                28, 
+                28);
+
             var rbm = new RBM(
                 randomizer,
                 container,
                 algorithm,
-                reconstructor
+                reconstructor,
+                extractor
                 );
 
             rbm.Train(
-                trainData,
+                () =>
+                {
+                    var binarized = trainData.Binarize(randomizer);
+                    return binarized;
+                },
                 validationData,
-                new ConstLearningRate(0.1f),
+                new LinearLearningRate(0.01f, 0.99f), 
                 20,
-                5,
+                10,
                 1);
         }
     }

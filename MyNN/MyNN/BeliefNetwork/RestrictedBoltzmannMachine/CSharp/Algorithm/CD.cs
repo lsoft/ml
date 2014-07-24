@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
@@ -112,6 +113,33 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm
 
             return
                 _container.Visible;
+        }
+
+        public ICollection<float[]> GetFeatures()
+        {
+            var result = new List<float[]>();
+
+            var h = new float[_container.Hidden0.Length];
+            h[_container.Hidden0.Length - 1] = 1f; //set bias
+
+            for (var cc = 0; cc < _container.HiddenNeuronCount; cc++)
+            {
+                h[cc] = 1;
+
+                var feature = new float[_container.VisibleNeuronCount + 1]; //with bias
+
+                _calculator.CalculateVisible(
+                    _container.Weights,
+                    feature,
+                    h
+                    );
+
+                result.Add(feature.GetSubArray(0, _container.VisibleNeuronCount));
+
+                h[cc] = 0;
+            }
+
+            return result;
         }
     }
 }

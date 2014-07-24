@@ -18,7 +18,9 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container
 
         void CalculateNabla();
 
-        void UpdateWeights(float learningRate);
+        void UpdateWeights(
+            int batchSize,
+            float learningRate);
 
         float GetError();
     }
