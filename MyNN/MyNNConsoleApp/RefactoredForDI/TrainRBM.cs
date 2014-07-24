@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using MyNN;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp;
+using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
+using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.NegativeSampler;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
@@ -46,11 +48,16 @@ namespace MyNNConsoleApp.RefactoredForDI
                 );
             validationData.GNormalize();
 
-            var rbm = new LNRELURBM(
+            const int visibleNeuronCount = 784;
+            const int hiddenNeuronCount = 500;
+
+            var rbm = new RBM(
                 randomizer,
+                new LNRELUCalculator(visibleNeuronCount, hiddenNeuronCount), 
+                new CDNegativeSamplerFactory(), 
                 new IsolatedImageReconstructor(validationData, 300, 28, 28),
-                784,
-                500);
+                visibleNeuronCount,
+                hiddenNeuronCount);
 
             rbm.Train(
                 trainData,
@@ -77,11 +84,16 @@ namespace MyNNConsoleApp.RefactoredForDI
                 );
             validationData = validationData.Binarize(randomizer);
 
-            var rbm = new BBRBM(
+            const int visibleNeuronCount = 784;
+            const int hiddenNeuronCount = 500;
+
+            var rbm = new RBM(
                 randomizer,
+                new BBCalculator(randomizer, visibleNeuronCount, hiddenNeuronCount),
+                new CDNegativeSamplerFactory(), 
                 new IsolatedImageReconstructor(validationData, 300, 28, 28),
-                784,
-                500);
+                visibleNeuronCount,
+                hiddenNeuronCount);
 
             rbm.Train(
                 trainData,
@@ -89,7 +101,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                 new ConstLearningRate(0.1f),
                 20,
                 5,
-                5);
+                1);
         }
     }
 }

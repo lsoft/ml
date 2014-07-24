@@ -1,17 +1,21 @@
 ﻿using System;
 using AForge;
+using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
+using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.NegativeSampler;
 using MyNN.BoltzmannMachines;
 using MyNN.Data;
 using MyNN.LearningRateController;
+using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
 {
-    public class BBRBM
+    public class RBM
     {
         private readonly IRandomizer _randomizer;
+        private readonly ICalculator _calculator;
         private readonly IImageReconstructor _imageReconstructor;
         private readonly int _visibleNeuronCount;
         private readonly int _hiddenNeuronCount;
@@ -22,9 +26,12 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
         private readonly float[] _hidden1;
         private readonly float[] _weights;
         private readonly float[] _nabla;
+        private readonly INegativeSampler _negativeSampler;
 
-        public BBRBM(
+        public RBM(
             IRandomizer randomizer,
+            ICalculator calculator,
+            INegativeSamplerFactory negativeSamplerFactory,
             IImageReconstructor imageReconstructor,
             int visibleNeuronCount,
             int hiddenNeuronCount
@@ -33,6 +40,10 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
+            }
+            if (calculator == null)
+            {
+                throw new ArgumentNullException("calculator");
             }
             if (imageReconstructor == null)
             {
@@ -44,6 +55,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
             }
 
             _randomizer = randomizer;
+            _calculator = calculator;
             _imageReconstructor = imageReconstructor;
             _visibleNeuronCount = visibleNeuronCount + 1; //bias neuron
             _hiddenNeuronCount = hiddenNeuronCount + 1; //bias neuron
@@ -67,7 +79,12 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
             _hidden0[_hiddenNeuronCount - 1] = 1f;
             _hidden1[_hiddenNeuronCount - 1] = 1f;
 
-
+            _negativeSampler = negativeSamplerFactory.CreateNegativeSampler(
+                _calculator,
+                _weights,
+                _visible,
+                _hidden0,
+                _hidden1);
         }
 
         public void Train(
@@ -92,29 +109,47 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
                 throw new ArgumentNullException("learningRateController");
             }
 
+            ConsoleAmbientContext.Console.WriteLine(
+                string.Format(
+                    "RBM ({0}-{1}) training starts with algorightm {2}",
+                    _visibleNeuronCount,
+                    _hiddenNeuronCount,
+                    _negativeSampler.Name
+                    )
+                );
+
+            _negativeSampler.PrepareTrain(batchSize);
+
             var epochNumber = 0;
             while (epochNumber < epocheCount)
             {
+                var beforeEpoch = DateTime.Now;
+
                 ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
-                        "{0} Epoche {1} {2}",
-                        new string('-', 20),
+                        "{0} Epoche {1:D5} {2}",
+                        new string('-', 22),
                         epochNumber,
-                        new string('-', 20))
+                        new string('-', 22))
                         );
-
-                var beforeEpoch = DateTime.Now;
 
                 //скорость обучения на эту эпоху
                 var learningRate = learningRateController.GetLearningRate(epochNumber);
 
-
                 var epocheTrainData = trainData.CreateShuffledDataSet(_randomizer);
+
+                _negativeSampler.PrepareBatch();
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "Epoch learning rate = {0}",
+                        learningRate));
 
                 foreach (var batch in epocheTrainData.Split(batchSize))
                 {
                     this.ClearNabla();
 
+                    var indexIntoBatch = 0;
                     foreach (var trainItem in batch)
                     {
                         //gibbs sampling
@@ -123,43 +158,23 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
                         Array.Copy(trainItem.Input, _input, _visibleNeuronCount - 1);
 
                         //sample hidden
-                        this.SampleHidden(
+                        _calculator.SampleHidden(
+                            _weights,
                             _hidden0,
                             _input
                             );
 
-                        for (var cdi = 0; cdi < maxGibbsChainLength; cdi++)
-                        {
-                            var ifFirst = cdi == 0;
-                            var ifLast = cdi == (maxGibbsChainLength - 1);
-
-                            //compute visible
-                            this.ComputeVisible(
-                                _visible,
-                                ifFirst ? _hidden0 : _hidden1
-                                );
-
-                            if (ifLast)
-                            {
-                                //compute hidden
-                                this.ComputeHidden(
-                                    _hidden1,
-                                    _visible);
-                            }
-                            else
-                            {
-                                //sample hidden
-                                this.SampleHidden(
-                                    _hidden1,
-                                    _visible
-                                    );
-                            }
-
-                        }
+                        _negativeSampler.CalculateNegativeSample(
+                            indexIntoBatch,
+                            maxGibbsChainLength);
 
                         //считаем разницу и записываем ее в наблу
                         this.CalculateNabla();
+
+                        indexIntoBatch++;
                     }
+
+                    _negativeSampler.BatchFinished();
 
                     this.UpdateWeights(learningRate);
                 }
@@ -204,11 +219,13 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
                 //заполняем видимое
                 Array.Copy(d.Input, _visible, _visibleNeuronCount - 1);
 
-                this.ComputeHidden(
+                _calculator.CalculateHidden(
+                    _weights,
                     _hidden0,
                     _visible);
 
-                this.ComputeVisible(
+                _calculator.CalculateVisible(
+                    _weights, 
                     _visible,
                     _hidden0);
 
@@ -272,148 +289,6 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
             }
             ); //Parallel.For
         }
-
-        private void ComputeVisible(
-            float[] targetVisible,
-            float[] fromHidden
-            )
-        {
-            if (targetVisible == null)
-            {
-                throw new ArgumentNullException("targetVisible");
-            }
-            if (fromHidden == null)
-            {
-                throw new ArgumentNullException("fromHidden");
-            }
-
-            Parallel.For(0, _visibleNeuronCount - 1, visibleIndex => 
-            //for (var visibleIndex = 0; visibleIndex < _visibleNeuronCount - 1; visibleIndex++)
-            {
-                //высчитываем состояние скрытого нейрона
-                float sum = 0f;
-                for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount; hiddenIndex++)
-                {
-                    sum +=
-                        _weights[CalculateWeightIndex(hiddenIndex, visibleIndex)]
-                        * fromHidden[hiddenIndex];
-                }
-
-                //вероятностное состояние нейрона
-                var probability = ComputeSigmoid(sum);
-                targetVisible[visibleIndex] = probability;
-            }
-            );//Parallel.For
-        }
-
-        private void SampleVisible(
-            float[] targetVisible,
-            float[] fromHidden
-            )
-        {
-            if (targetVisible == null)
-            {
-                throw new ArgumentNullException("targetVisible");
-            }
-            if (fromHidden == null)
-            {
-                throw new ArgumentNullException("fromHidden");
-            }
-
-            Parallel.For(0, _visibleNeuronCount - 1, visibleIndex => 
-            //for (var visibleIndex = 0; visibleIndex < _visibleNeuronCount - 1; visibleIndex++)
-            {
-                //высчитываем состояние скрытого нейрона
-                float sum = 0f;
-                for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount; hiddenIndex++)
-                {
-                    sum +=
-                        _weights[CalculateWeightIndex(hiddenIndex, visibleIndex)]
-                        * fromHidden[hiddenIndex];
-                }
-
-                //уникальный рандом 
-                var random = _randomizer.Next();
-
-                //вероятностное состояние нейрона
-                var probability = ComputeSigmoid(sum);
-                targetVisible[visibleIndex] = (random <= probability ? 1f : 0f);
-            }
-            );//Parallel.For
-        }
-
-
-        private void ComputeHidden(
-            float[] targetHidden,
-            float[] fromVisible
-            )
-        {
-            if (targetHidden == null)
-            {
-                throw new ArgumentNullException("targetHidden");
-            }
-            if (fromVisible == null)
-            {
-                throw new ArgumentNullException("fromVisible");
-            }
-
-            Parallel.For(0, _hiddenNeuronCount - 1, hiddenIndex => 
-            //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount - 1; hiddenIndex++)
-            {
-                //высчитываем состояние скрытого нейрона
-                float sum = 0f;
-                for (var visibleIndex = 0; visibleIndex < _visibleNeuronCount; visibleIndex++)
-                {
-                    sum += _weights[CalculateWeightIndex(hiddenIndex, visibleIndex)] * fromVisible[visibleIndex];
-                }
-
-                //вероятностное состояние нейрона
-                var probability = ComputeSigmoid(sum);
-                targetHidden[hiddenIndex] = probability;
-            }
-            );//Parallel.For
-        }
-
-        private void SampleHidden(
-            float[] targetHidden,
-            float[] fromVisible
-            )
-        {
-            if (targetHidden == null)
-            {
-                throw new ArgumentNullException("targetHidden");
-            }
-            if (fromVisible == null)
-            {
-                throw new ArgumentNullException("fromVisible");
-            }
-
-            Parallel.For(0, _hiddenNeuronCount - 1, hiddenIndex => 
-            //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount - 1; hiddenIndex++)
-            {
-                //высчитываем состояние скрытого нейрона
-                float sum = 0f;
-                for (var visibleIndex = 0; visibleIndex < _visibleNeuronCount; visibleIndex++)
-                {
-                    sum += _weights[CalculateWeightIndex(hiddenIndex, visibleIndex)]*fromVisible[visibleIndex];
-                }
-
-                //уникальный рандом 
-                var random = _randomizer.Next();
-
-                //вероятностное состояние нейрона
-                var probability = ComputeSigmoid(sum);
-                targetHidden[hiddenIndex] = (random <= probability ? 1f : 0f);
-            }
-            );//Parallel.For
-        }
-
-        public float ComputeSigmoid(float x)
-        {
-            var r = (float)(1.0 / (1.0 + Math.Exp(-x)));
-            return r;
-        }
-
 
         private int CalculateWeightIndex(
             int hiddenIndex,

@@ -156,8 +156,14 @@
   <ItemGroup>
     <Compile Include="ArrayOperations.cs" />
     <Compile Include="BeliefNetwork\DBN.cs" />
-    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\BBRBM.cs" />
-    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\LNRELURBM.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Calculator\BBCalculator.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Calculator\ICalculator.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Calculator\LNRELUCalculator.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\NegativeSampler\CD.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\NegativeSampler\INegativeSampler.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\NegativeSampler\INegativeSamplerFactory.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\NegativeSampler\CDNegativeSamplerFactory.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\RBM.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\DeepBeliefNetwork.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\DBNFeatureExtractor.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IFeatureExtractor.cs" />
@@ -539,9 +545,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="BeliefNetwork\RestrictedBoltzmannMachine\NegativeSampler\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
