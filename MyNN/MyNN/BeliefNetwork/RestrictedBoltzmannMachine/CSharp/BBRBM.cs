@@ -95,6 +95,16 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
             var epochNumber = 0;
             while (epochNumber < epocheCount)
             {
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "{0} Epoche {1} {2}",
+                        new string('-', 20),
+                        epochNumber,
+                        new string('-', 20))
+                        );
+
+                var beforeEpoch = DateTime.Now;
+
                 //скорость обучения на эту эпоху
                 var learningRate = learningRateController.GetLearningRate(epochNumber);
 
@@ -148,24 +158,32 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
                         }
 
                         //считаем разницу и записываем ее в наблу
-                        this.NablaCompute();
+                        this.CalculateNabla();
                     }
 
                     this.UpdateWeights(learningRate);
                 }
 
-                this.ErrorCompute(
+                this.CaculateError(
                     validationData,
                     epochNumber
                     );
 
                 epochNumber++;
+
+                var afterEpoch = DateTime.Now;
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "Epoche takes {0}",
+                        (afterEpoch - beforeEpoch)));
+                ConsoleAmbientContext.Console.WriteLine(new string('-', 60));
             }
 
 
         }
 
-        private void ErrorCompute(
+        private void CaculateError(
             IDataSet validationData,
             int epocheNumber
             )
@@ -236,7 +254,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
             }
         }
 
-        private void NablaCompute()
+        private void CalculateNabla()
         {
             Parallel.For(0, _hiddenNeuronCount - 1, hiddenIndex => 
             //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount - 1; hiddenIndex++)
@@ -282,7 +300,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
                 }
 
                 //вероятностное состояние нейрона
-                var probability = 1.0f / (1.0f + (float)Math.Exp(-sum));
+                var probability = ComputeSigmoid(sum);
                 targetVisible[visibleIndex] = probability;
             }
             );//Parallel.For
@@ -318,7 +336,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
                 var random = _randomizer.Next();
 
                 //вероятностное состояние нейрона
-                var probability = 1.0f / (1.0f + (float)Math.Exp(-sum));
+                var probability = ComputeSigmoid(sum);
                 targetVisible[visibleIndex] = (random <= probability ? 1f : 0f);
             }
             );//Parallel.For
@@ -350,7 +368,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
                 }
 
                 //вероятностное состояние нейрона
-                var probability = 1.0f / (1.0f + (float)Math.Exp(-sum));
+                var probability = ComputeSigmoid(sum);
                 targetHidden[hiddenIndex] = probability;
             }
             );//Parallel.For
@@ -384,11 +402,18 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
                 var random = _randomizer.Next();
 
                 //вероятностное состояние нейрона
-                var probability = 1.0f / (1.0f + (float)Math.Exp(-sum));
+                var probability = ComputeSigmoid(sum);
                 targetHidden[hiddenIndex] = (random <= probability ? 1f : 0f);
             }
             );//Parallel.For
         }
+
+        public float ComputeSigmoid(float x)
+        {
+            var r = (float)(1.0 / (1.0 + Math.Exp(-x)));
+            return r;
+        }
+
 
         private int CalculateWeightIndex(
             int hiddenIndex,

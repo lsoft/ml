@@ -155,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayOperations.cs" />
+    <Compile Include="BeliefNetwork\DBN.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\BBRBM.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\LNRELURBM.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\DeepBeliefNetwork.cs" />

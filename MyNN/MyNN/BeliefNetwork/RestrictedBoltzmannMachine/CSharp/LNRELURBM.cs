@@ -151,7 +151,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
                         }
 
                         //считаем разницу и записываем ее в наблу
-                        this.NablaCompute();
+                        this.CalculateNabla();
                     }
 
                     this.UpdateWeights(learningRate);
@@ -242,7 +242,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
             }
         }
 
-        private void NablaCompute()
+        private void CalculateNabla()
         {
             Parallel.For(0, _hiddenNeuronCount - 1, hiddenIndex => 
             //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount - 1; hiddenIndex++)
