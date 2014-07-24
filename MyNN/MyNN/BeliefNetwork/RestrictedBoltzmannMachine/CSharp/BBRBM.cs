@@ -9,7 +9,7 @@ using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
 {
-    public class RBM
+    public class BBRBM
     {
         private readonly IRandomizer _randomizer;
         private readonly IImageReconstructor _imageReconstructor;
@@ -23,7 +23,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
         private readonly float[] _weights;
         private readonly float[] _nabla;
 
-        public RBM(
+        public BBRBM(
             IRandomizer randomizer,
             IImageReconstructor imageReconstructor,
             int visibleNeuronCount,
@@ -74,6 +74,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
             IDataSet trainData,
             IDataSet validationData,
             ILearningRate learningRateController,
+            int epocheCount,
             int batchSize,
             int maxGibbsChainLength
             )
@@ -92,7 +93,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp
             }
 
             var epochNumber = 0;
-            while (epochNumber < 10)
+            while (epochNumber < epocheCount)
             {
                 //скорость обучения на эту эпоху
                 var learningRate = learningRateController.GetLearningRate(epochNumber);

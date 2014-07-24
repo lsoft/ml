@@ -30,7 +30,38 @@ namespace MyNNConsoleApp.RefactoredForDI
 {
     public class TrainRBM
     {
-        public static void DoTrain()
+        public static void DoTrainLNRELU()
+        {
+            var randomizer = new DefaultRandomizer(123);
+
+            var trainData = MNISTDataProvider.GetDataSet(
+                "_MNIST_DATABASE/mnist/trainingset/",
+                1000//int.MaxValue
+                );
+            trainData.GNormalize();
+
+            var validationData = MNISTDataProvider.GetDataSet(
+                "_MNIST_DATABASE/mnist/testset/",
+                300//int.MaxValue
+                );
+            validationData.GNormalize();
+
+            var rbm = new LNRELURBM(
+                randomizer,
+                new IsolatedImageReconstructor(validationData, 300, 28, 28),
+                784,
+                500);
+
+            rbm.Train(
+                trainData,
+                validationData,
+                new ConstLearningRate(0.0001f),
+                20,
+                5,
+                1);
+        }
+
+        public static void DoTrainBB()
         {
             var randomizer = new DefaultRandomizer(123);
 
@@ -46,7 +77,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                 );
             validationData = validationData.Binarize(randomizer);
 
-            var rbm = new RBM(
+            var rbm = new BBRBM(
                 randomizer,
                 new IsolatedImageReconstructor(validationData, 300, 28, 28),
                 784,
@@ -56,6 +87,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                 trainData,
                 validationData,
                 new ConstLearningRate(0.1f),
+                20,
                 5,
                 5);
         }
