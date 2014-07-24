@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using Accord.MachineLearning.DecisionTrees.Pruning;
 using MyNN.Data;
 
 
@@ -9,7 +10,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
 {
     public class IsolatedImageReconstructor : IImageReconstructor
     {
-        private readonly IDataSet _trainData;
+        private readonly IDataSet _dataSet;
         private readonly int _reconstructedCount;
         private readonly int _imageWidth;
         private readonly int _imageHeight;
@@ -18,13 +19,18 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
         private int _currentIndex = 0;
 
         public IsolatedImageReconstructor(
-            IDataSet trainData,
+            IDataSet dataSet,
             int reconstructedCount,
             int imageWidth,
             int imageHeight)
         {
-            _trainData = trainData;
-            _reconstructedCount = Math.Min(reconstructedCount, trainData.Count);
+            if (dataSet == null)
+            {
+                throw new ArgumentNullException("dataSet");
+            }
+
+            _dataSet = dataSet;
+            _reconstructedCount = Math.Min(reconstructedCount, dataSet.Count);
             _imageWidth = imageWidth;
             _imageHeight = imageHeight;
 
@@ -34,11 +40,10 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
         }
 
         public void AddPair(
-            int indexof,
-            //float[] originalData, 
+            int dataItemIndexIntoDataSet,
             float[] reconstructedData)
         {
-            var originalData = _trainData[indexof].Input;
+            var originalData = _dataSet[dataItemIndexIntoDataSet].Input;
 
             CreateContrastEnhancedBitmapFromLayer(
                 0,
@@ -59,6 +64,12 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
 
             return
                 _bitmap;
+        }
+
+        public int GetReconstructedImageCount()
+        {
+            return
+                _reconstructedCount;
         }
 
 

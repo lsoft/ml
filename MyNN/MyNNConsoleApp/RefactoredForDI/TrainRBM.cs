@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN;
+using MyNN.BeliefNetwork.RestrictedBoltzmannMachine;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp;
+using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.NegativeSampler;
+using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
@@ -51,13 +53,22 @@ namespace MyNNConsoleApp.RefactoredForDI
             const int visibleNeuronCount = 784;
             const int hiddenNeuronCount = 500;
 
+            var calculator = new LNRELUCalculator(visibleNeuronCount, hiddenNeuronCount);
+
+            var container = new FloatArrayContainer(randomizer, visibleNeuronCount, hiddenNeuronCount);
+
+            var algorithm = new CD(
+                calculator,
+                container);
+
+            var reconstructor = new IsolatedImageReconstructor(validationData, 300, 28, 28);
+
             var rbm = new RBM(
                 randomizer,
-                new LNRELUCalculator(visibleNeuronCount, hiddenNeuronCount), 
-                new CDNegativeSamplerFactory(), 
-                new IsolatedImageReconstructor(validationData, 300, 28, 28),
-                visibleNeuronCount,
-                hiddenNeuronCount);
+                container,
+                algorithm,
+                reconstructor
+                );
 
             rbm.Train(
                 trainData,
@@ -87,13 +98,26 @@ namespace MyNNConsoleApp.RefactoredForDI
             const int visibleNeuronCount = 784;
             const int hiddenNeuronCount = 500;
 
+            var calculator = new BBCalculator(randomizer, visibleNeuronCount, hiddenNeuronCount);
+
+            var container = new FloatArrayContainer(randomizer, visibleNeuronCount, hiddenNeuronCount);
+
+            var algorithm = new CD(
+                calculator,
+                container);
+
+            var reconstructor = new IsolatedImageReconstructor(
+                validationData, 
+                300, 
+                28, 
+                28);
+
             var rbm = new RBM(
                 randomizer,
-                new BBCalculator(randomizer, visibleNeuronCount, hiddenNeuronCount),
-                new CDNegativeSamplerFactory(), 
-                new IsolatedImageReconstructor(validationData, 300, 28, 28),
-                visibleNeuronCount,
-                hiddenNeuronCount);
+                container,
+                algorithm,
+                reconstructor
+                );
 
             rbm.Train(
                 trainData,

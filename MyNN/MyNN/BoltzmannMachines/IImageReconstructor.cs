@@ -5,10 +5,11 @@ namespace MyNN.BoltzmannMachines
     public interface IImageReconstructor
     {
         void AddPair(
-            int indexof,
-            //float[] originalData, 
+            int dataItemIndexIntoDataSet,
             float[] reconstructedData);
         
         Bitmap GetReconstructedBitmap();
+        
+        int GetReconstructedImageCount();
     }
 }

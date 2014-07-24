@@ -2,7 +2,12 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator
 {
     public interface ICalculator
     {
-        string Name
+        string VisibleFunctionName
+        {
+            get;
+        }
+
+        string HiddenFunctionName
         {
             get;
         }

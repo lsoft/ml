@@ -156,14 +156,16 @@
   <ItemGroup>
     <Compile Include="ArrayOperations.cs" />
     <Compile Include="BeliefNetwork\DBN.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Algorithm\IAlgorithm.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Algorithm\IAlgorithmFactory.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Calculator\BBCalculator.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Calculator\ICalculator.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Calculator\LNRELUCalculator.cs" />
-    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\NegativeSampler\CD.cs" />
-    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\NegativeSampler\INegativeSampler.cs" />
-    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\NegativeSampler\INegativeSamplerFactory.cs" />
-    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\NegativeSampler\CDNegativeSamplerFactory.cs" />
-    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\RBM.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Algorithm\CD.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Algorithm\CDAlgorithmFactory.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Container\FloatArrayContainer.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Container\IContainer.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\RBM.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\DeepBeliefNetwork.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\DBNFeatureExtractor.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IFeatureExtractor.cs" />

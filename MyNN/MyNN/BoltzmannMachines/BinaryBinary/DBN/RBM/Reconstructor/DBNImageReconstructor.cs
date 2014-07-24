@@ -42,7 +42,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
         }
 
         public void AddPair(
-            int indexof,
+            int dataItemIndexIntoDataSet,
             //float[] originalData, 
             float[] reconstructedData)
         {
@@ -56,7 +56,7 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
                 reconstructedData = _dbn.RBMList[cc].ComputeVisibleFromHidden(reconstructedData);
             }
 
-            var originalData = _trainData[indexof].Input;
+            var originalData = _trainData[dataItemIndexIntoDataSet].Input;
 
             CreateContrastEnhancedBitmapFromLayer(
                 0,
@@ -77,6 +77,12 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
 
             return
                 _bitmap;
+        }
+
+        public int GetReconstructedImageCount()
+        {
+            return
+                _reconstructedCount;
         }
 
 

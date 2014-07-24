@@ -1,6 +1,6 @@
-﻿namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.NegativeSampler
+﻿namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm
 {
-    public interface INegativeSampler
+    public interface IAlgorithm
     {
         string Name
         {
@@ -12,11 +12,13 @@
 
         void PrepareBatch();
 
-        void CalculateNegativeSample(
+        void CalculateSamples(
             int indexIntoBatch,
             int maxGibbsChainLength
             );
 
         void BatchFinished();
+
+        float[] CalculateReconstructed();
     }
 }

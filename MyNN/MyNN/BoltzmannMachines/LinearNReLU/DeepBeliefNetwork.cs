@@ -33,6 +33,7 @@ namespace MyNN.BoltzmannMachines.LinearNReLU
         private List<RestrictedBoltzmannMachine> _rbmList;
         private Bitmap _bitmap;
         private int _currentIndex;
+        private int _reconstructedCount;
 
         public DeepBeliefNetwork(
             IRandomizer randomizer,
@@ -68,6 +69,7 @@ namespace MyNN.BoltzmannMachines.LinearNReLU
         {
             _trainData = trainData;
             _validationData = validationData;
+            _reconstructedCount = reconstructedCount;
 
             _layerIndex = 0;
             _currentIndex = 0;
@@ -154,7 +156,7 @@ namespace MyNN.BoltzmannMachines.LinearNReLU
         #region Implementation of IImageReconstructor
 
         public void AddPair(
-            int indexof,
+            int dataItemIndexIntoDataSet,
             float[] reconstructedData)
         {
             for (var cc = _layerIndex - 1; cc >= 0; cc--)
@@ -167,7 +169,7 @@ namespace MyNN.BoltzmannMachines.LinearNReLU
                 reconstructedData = visibleData;
             }
 
-            var originalData = _validationData[indexof].Input;
+            var originalData = _validationData[dataItemIndexIntoDataSet].Input;
 
             CreateContrastEnhancedBitmapFromLayer(
                 0,
@@ -189,6 +191,12 @@ namespace MyNN.BoltzmannMachines.LinearNReLU
 
             return
                 _bitmap;
+        }
+
+        public int GetReconstructedImageCount()
+        {
+            return
+                _reconstructedCount;
         }
 
 

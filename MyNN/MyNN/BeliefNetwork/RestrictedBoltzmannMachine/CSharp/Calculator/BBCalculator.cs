@@ -10,12 +10,21 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator
         private readonly int _visibleNeuronCount;
         private readonly int _hiddenNeuronCount;
 
-        public string Name
+        public string VisibleFunctionName
         {
             get
             {
                 return
-                    "Binary-Binary";
+                    "Binary";
+            }
+        }
+
+        public string HiddenFunctionName
+        {
+            get
+            {
+                return
+                    "Binary";
             }
         }
 
