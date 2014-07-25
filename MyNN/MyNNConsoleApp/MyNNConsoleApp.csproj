@@ -127,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
+    <Compile Include="RefactoredForDI\TrainDBN.cs" />
     <Compile Include="RefactoredForDI\TrainRBM.cs" />
     <Compile Include="RefactoredForDI\TrainNLNCAAutoencoder.cs" />
     <Compile Include="RefactoredForDI\TrainNLNCAMLP.cs" />

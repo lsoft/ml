@@ -21,6 +21,8 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm
 
         void BatchFinished();
 
+        float[] CalculateVisible();
+
         float[] CalculateReconstructed();
         
         ICollection<float[]> GetFeatures();

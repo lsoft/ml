@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN;
+using MyNN.BeliefNetwork.Accuracy;
 using MyNN.BeliefNetwork.FreeEnergyCalculator;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp;

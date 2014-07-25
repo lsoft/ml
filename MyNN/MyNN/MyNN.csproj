@@ -155,13 +155,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayOperations.cs" />
+    <Compile Include="BeliefNetwork\Accuracy\AccuracyController.cs" />
+    <Compile Include="BeliefNetwork\Accuracy\IAccuracyController.cs" />
     <Compile Include="BeliefNetwork\DBN.cs" />
     <Compile Include="BeliefNetwork\FeatureExtractor\MockFeatureExtractor.cs" />
     <Compile Include="BeliefNetwork\FreeEnergyCalculator\MockFreeEnergyCalculator.cs" />
+    <Compile Include="BeliefNetwork\ImageReconstructor\StackedImageReconstructor.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\FreeEnergyCalculator\FloatArrayFreeEnergyCalculator.cs" />
     <Compile Include="BeliefNetwork\FreeEnergyCalculator\IFreeEnergyCalculator.cs" />
     <Compile Include="BeliefNetwork\ImageReconstructor\MockImageReconstructor.cs" />
-    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\AccuracyController.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Algorithm\IAlgorithm.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Algorithm\IAlgorithmFactory.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Calculator\BBCalculator.cs" />

@@ -7,6 +7,22 @@ namespace MyNN
 {
     public static class ArrayOperations
     {
+        public static T[] CloneArray<T>(this T[] a)
+        {
+            if (a == null)
+            {
+                return null;
+            }
+
+            var result = new T[a.Length];
+
+            for (var cc = 0; cc < a.Length; cc++)
+            {
+                result[cc] = a[cc];
+            }
+
+            return result;
+        }
 
         public static void Clear<T>(this T[] a)
         {
@@ -59,6 +75,17 @@ namespace MyNN
                 r;
         }
 
+        public static T[] RemoveLastElement<T>(this T[] a)
+        {
+            if (a == null)
+            {
+                throw new ArgumentNullException("a");
+            }
+
+            return
+                GetSubArray(a, 0, a.Length - 1);
+        }
+
         public static T[] GetSubArray<T>(this T[] a, int startIndex)
         {
             if (a == null)
@@ -73,7 +100,6 @@ namespace MyNN
             return
                 GetSubArray(a, startIndex, a.Length - startIndex);
         }
-
 
         public static T[] GetSubArray<T>(this T[] a, int startIndex, int length)
         {

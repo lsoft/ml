@@ -99,6 +99,18 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm
             //nothing to do in CD
         }
 
+        public float[] CalculateVisible()
+        {
+            _calculator.CalculateVisible(
+                _container.Weights,
+                _container.Input,
+                _container.Hidden0);
+
+            var result = _container.Input.CloneArray();
+
+            return result;
+        }
+
         public float[] CalculateReconstructed()
         {
             _calculator.CalculateHidden(
@@ -111,8 +123,9 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm
                 _container.Visible,
                 _container.Hidden0);
 
-            return
-                _container.Visible;
+            var result = _container.Visible.CloneArray();
+
+            return result;
         }
 
         public ICollection<float[]> GetFeatures()

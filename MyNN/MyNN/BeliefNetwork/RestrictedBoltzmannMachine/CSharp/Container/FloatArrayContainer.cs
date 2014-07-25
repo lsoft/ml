@@ -104,7 +104,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
             Hidden1[HiddenNeuronCount] = 1f;
         }
 
-        public void SetTrainItem(float[] input)
+        public void SetInput(float[] input)
         {
             if (input == null)
             {
@@ -112,6 +112,16 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
             }
 
             Array.Copy(input, Input, VisibleNeuronCount);
+        }
+
+        public void SetHidden(float[] hidden)
+        {
+            if (hidden == null)
+            {
+                throw new ArgumentNullException("hidden");
+            }
+
+            Array.Copy(hidden, Hidden0, HiddenNeuronCount);
         }
 
         public void ClearNabla()

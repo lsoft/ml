@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Text;
+using MyNN.BeliefNetwork.Accuracy;
 using MyNN.BeliefNetwork.FeatureExtractor;
 using MyNN.BeliefNetwork.ImageReconstructor;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm;
@@ -17,7 +18,19 @@ using MyNN.Randomizer;
 
 namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
 {
-    public class RBM
+    public interface IRBM
+    {
+        void Train(
+            Func<IDataSet> trainDataProvider,
+            IDataSet validationData,
+            ILearningRate learningRateController,
+            IAccuracyController accuracyController,
+            int batchSize,
+            int maxGibbsChainLength
+            );
+    }
+
+    public class RBM : IRBM
     {
         private readonly IArtifactContainer _rbmContainer;
         private readonly IRandomizer _randomizer;
@@ -149,7 +162,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                         //gibbs sampling
 
                         //заполняем видимое
-                        _container.SetTrainItem(trainItem.Input);
+                        _container.SetInput(trainItem.Input);
 
                         _algorithm.CalculateSamples(
                             indexIntoBatch,
@@ -306,7 +319,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                 var d = validationData[indexof];
 
                 //заполняем видимое
-                _container.SetTrainItem(d.Input);
+                _container.SetInput(d.Input);
 
                 var reconstructed = _algorithm.CalculateReconstructed();
 

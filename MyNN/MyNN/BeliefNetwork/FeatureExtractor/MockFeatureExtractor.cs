@@ -23,7 +23,7 @@ namespace MyNN.BeliefNetwork.FeatureExtractor
                 g.DrawString(
                     "Dataset cannot be visualized",
                     new Font("Tahoma", 12),
-                    Brushes.Black,
+                    Brushes.White,
                     new RectangleF(0, 0, 300, 100)
                     );
 

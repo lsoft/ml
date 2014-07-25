@@ -15,7 +15,9 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container
             get;
         }
 
-        void SetTrainItem(float[] input);
+        void SetInput(float[] input);
+
+        void SetHidden(float[] hidden);
 
         void ClearNabla();
 
