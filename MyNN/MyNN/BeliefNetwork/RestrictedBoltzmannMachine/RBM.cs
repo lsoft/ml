@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using MyNN.BeliefNetwork.FeatureExtractor;
+using MyNN.BeliefNetwork.ImageReconstructor;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container;
 using MyNN.BoltzmannMachines;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.Data;
 using MyNN.LearningRateController;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
 
@@ -12,6 +17,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
 {
     public class RBM
     {
+        private readonly IArtifactContainer _rbmContainer;
         private readonly IRandomizer _randomizer;
         private readonly IContainer _container;
         private readonly IImageReconstructor _imageReconstructor;
@@ -20,6 +26,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
         private readonly IAlgorithm _algorithm;
 
         public RBM(
+            IArtifactContainer rbmContainer,
             IRandomizer randomizer,
             IContainer container,
             IAlgorithm algorithm,
@@ -27,6 +34,10 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             IFeatureExtractor featureExtractor
             )
         {
+            if (rbmContainer == null)
+            {
+                throw new ArgumentNullException("rbmContainer");
+            }
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
@@ -39,27 +50,22 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             {
                 throw new ArgumentNullException("algorithm");
             }
-            if (imageReconstructor == null)
-            {
-                throw new ArgumentNullException("imageReconstructor");
-            }
-            if (featureExtractor == null)
-            {
-                throw new ArgumentNullException("featureExtractor");
-            }
+            //imageReconstructor allowed to be null
+            //featureExtractor allowed to be null
 
+            _rbmContainer = rbmContainer;
             _randomizer = randomizer;
             _container = container;
             _algorithm = algorithm;
-            _imageReconstructor = imageReconstructor;
-            _featureExtractor = featureExtractor;
+            _imageReconstructor = imageReconstructor ?? new MockImageReconstructor();
+            _featureExtractor = featureExtractor ?? new MockFeatureExtractor();
         }
 
         public void Train(
             Func<IDataSet> trainDataProvider,
             IDataSet validationData,
             ILearningRate learningRateController,
-            int epocheCount,
+            IAccuracyController accuracyController,
             int batchSize,
             int maxGibbsChainLength
             )
@@ -76,6 +82,10 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             {
                 throw new ArgumentNullException("learningRateController");
             }
+            if (accuracyController == null)
+            {
+                throw new ArgumentNullException("accuracyController");
+            }
 
             ConsoleAmbientContext.Console.WriteLine(
                 string.Format(
@@ -90,7 +100,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             _algorithm.PrepareTrain(batchSize);
 
             var epochNumber = 0;
-            while (epochNumber < epocheCount)
+            while (!accuracyController.IsNeedToStop())
             {
                 var beforeEpoch = DateTime.Now;
 
@@ -101,6 +111,11 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                         epochNumber,
                         new string('-', 23))
                         );
+
+                var epochContainer = _rbmContainer.GetChildContainer(
+                    string.Format(
+                        "epoch {0}",
+                        epochNumber));
 
                 //скорость обучения на эту эпоху
                 var learningRate = learningRateController.GetLearningRate(epochNumber);
@@ -144,13 +159,18 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                         learningRate);
                 }
 
-                this.CaculateError(
-                    validationData,
-                    epochNumber
+                var error = this.CaculateError(
+                    epochContainer,
+                    validationData
                     );
 
-                this.ExtractFeatures(
-                    epochNumber);
+                this.SaveFeatures(
+                    epochContainer
+                    );
+
+                accuracyController.AddError(
+                    epochNumber,
+                    error);
 
                 epochNumber++;
 
@@ -166,10 +186,14 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
 
         }
 
-        private void ExtractFeatures(
-            int epocheNumber
+        private void SaveFeatures(
+            IArtifactContainer epochContainer
             )
         {
+            if (epochContainer == null)
+            {
+                throw new ArgumentNullException("epochContainer");
+            }
             var features = _algorithm.GetFeatures();
 
             foreach (var feature in features)
@@ -177,17 +201,23 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                 _featureExtractor.AddFeature(feature);
             }
 
-            _featureExtractor.GetFeatureBitmap().Save(
-                string.Format(
-                    "feature{0}.bmp",
-                    epocheNumber));
+            using (var writeStream = epochContainer.GetWriteStreamForResource("feature.bmp"))
+            {
+                var bitmap = _featureExtractor.GetFeatureBitmap();
+
+                bitmap.Save(writeStream, System.Drawing.Imaging.ImageFormat.Bmp);
+            }
         }
 
-        private void CaculateError(
-            IDataSet validationData,
-            int epocheNumber
+        private float CaculateError(
+            IArtifactContainer epochContainer,
+            IDataSet validationData
             )
         {
+            if (epochContainer == null)
+            {
+                throw new ArgumentNullException("epochContainer");
+            }
             if (validationData == null)
             {
                 throw new ArgumentNullException("validationData");
@@ -219,15 +249,20 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
 
             var perItemError = epocheError/validationData.Count;
 
-            _imageReconstructor.GetReconstructedBitmap().Save(
-                string.Format(
-                    "reconstruct{0}.bmp",
-                    epocheNumber));
+            using (var writeStream = epochContainer.GetWriteStreamForResource("reconstruct.bmp"))
+            {
+                var bitmap = _imageReconstructor.GetReconstructedBitmap();
+
+                bitmap.Save(writeStream, System.Drawing.Imaging.ImageFormat.Bmp);
+            }
 
             ConsoleAmbientContext.Console.WriteLine(
                 string.Format(
                     "Reconstruction per-item error: {0}",
                     perItemError));
+
+            return
+                perItemError;
         }
     }
 

@@ -1,8 +1,8 @@
 ﻿using System;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
 using MyNN.MLP2.Backpropagation.Validation;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 using MyNN.Randomizer;
@@ -18,7 +18,7 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.GPU
         public BackpropagationAlgorithm GetBackpropagationAlgorithm(
             IRandomizer randomizer,
             CLProvider clProvider,
-            IMLPContainer mlpContainer,
+            IArtifactContainer artifactContainer,
             IMLP net,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config)
@@ -31,9 +31,9 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.GPU
             {
                 throw new ArgumentNullException("clProvider");
             }
-            if (mlpContainer == null)
+            if (artifactContainer == null)
             {
-                throw new ArgumentNullException("mlpContainer");
+                throw new ArgumentNullException("artifactContainer");
             }
             if (net == null)
             {
@@ -54,7 +54,7 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.GPU
                     net,
                     config,
                     clProvider),
-                mlpContainer,
+                artifactContainer,
                 net,
                 validationDataProvider,
                 config);

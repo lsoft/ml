@@ -11,6 +11,7 @@ using MyNN.Data.TrainDataProvider.Noiser.Range;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.KNN;
 using MyNN.LearningRateController;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Autoencoders;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
@@ -23,7 +24,6 @@ using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
 using MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
@@ -87,7 +87,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                             td,
                             noiser);
                 },
-                (IDataSet vd, IMLPContainer mlpContainer) =>
+                (IDataSet vd, IArtifactContainer mlpContainer) =>
                 {
                     var vda = vd.ConvertToAutoencoder();
 
@@ -142,7 +142,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var combinedNet = sa.Train(
                 mlpName,
-                new FileSystemMLPContainer(".", serialization),
+                new FileSystemArtifactContainer(".", serialization),
                 trainData,
                 validationData
                 );

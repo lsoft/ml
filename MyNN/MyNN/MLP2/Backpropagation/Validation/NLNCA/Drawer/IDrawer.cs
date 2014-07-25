@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using MyNN.MLP2.Container;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Structure.Layer;
 
 namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
@@ -7,7 +7,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
     public interface IDrawer
     {
         void Draw(
-            IMLPContainer containerForSave,
+            IArtifactContainer containerForSave,
             int? epocheNumber,
             List<ILayerState> netResults
             );

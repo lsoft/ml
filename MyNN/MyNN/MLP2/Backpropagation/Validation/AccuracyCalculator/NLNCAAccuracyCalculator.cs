@@ -5,8 +5,8 @@ using System.Text;
 using MyNN.Data;
 using MyNN.KNN;
 using MyNN.MLP2.AccuracyRecord;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator.KNNTester;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.OutputConsole;
@@ -17,12 +17,12 @@ namespace MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator
     {
         private readonly IKNNTester _knnTester;
         private readonly IDataSet _validationData;
-        private readonly IMLPContainer _mlpContainer;
+        private readonly IArtifactContainer _artifactContainer;
 
         public NLNCAAccuracyCalculator(
             IKNNTester knnTester,
             IDataSet validationData,
-            IMLPContainer mlpContainer
+            IArtifactContainer artifactContainer
             )
         {
             if (knnTester == null)
@@ -33,14 +33,14 @@ namespace MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator
             {
                 throw new ArgumentNullException("validationData");
             }
-            if (mlpContainer == null)
+            if (artifactContainer == null)
             {
-                throw new ArgumentNullException("mlpContainer");
+                throw new ArgumentNullException("artifactContainer");
             }
 
             _knnTester = knnTester;
             _validationData = validationData;
-            _mlpContainer = mlpContainer;
+            _artifactContainer = artifactContainer;
         }
 
         public void CalculateAccuracy(
@@ -72,7 +72,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator
                 float.MaxValue
                 );
 
-            using (var s = _mlpContainer.GetWriteStreamForResource("knn_correct.csv"))
+            using (var s = _artifactContainer.GetWriteStreamForResource("knn_correct.csv"))
             {
                 var writeinfo = DateTime.Now + ";" + result.CorrectCount + "\r\n";
                 var writebytes = Encoding.Unicode.GetBytes(writeinfo);

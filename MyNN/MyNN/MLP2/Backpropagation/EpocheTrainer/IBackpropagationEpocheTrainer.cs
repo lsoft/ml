@@ -1,5 +1,5 @@
 using MyNN.Data;
-using MyNN.MLP2.Container;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.ForwardPropagation;
 
 namespace MyNN.MLP2.Backpropagation.EpocheTrainer
@@ -27,11 +27,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer
         /// Do epoche training
         /// </summary>
         /// <param name="data">Train data</param>
-        /// <param name="mlpContainer">Container that stores MLP and other related data</param>
+        /// <param name="artifactContainer">Container that stores MLP and other related data</param>
         /// <param name="learningRate">Learning rate coef</param>
         void TrainEpoche(
             IDataSet data,
-            IMLPContainer mlpContainer,
+            IArtifactContainer artifactContainer,
             float learningRate);
     }
 }

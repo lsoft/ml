@@ -14,13 +14,13 @@ using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.Metrics;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
@@ -41,7 +41,8 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                1000//int.MaxValue
+                1000
+                //int.MaxValue
                 );
             trainData.GNormalize();
 
@@ -73,7 +74,18 @@ namespace MyNNConsoleApp.RefactoredForDI
                 28, 
                 28);
 
+            var serialization = new SerializationHelper();
+
+            var rootContainer = new FileSystemArtifactContainer(".", serialization);
+
+            var rbmContainer = rootContainer.GetChildContainer(
+                string.Format(
+                    "rbm{0}",
+                    DateTime.Now.ToString("yyyyMMddHHmmss")
+                    ));
+
             var rbm = new RBM(
+                rbmContainer,
                 randomizer,
                 container,
                 algorithm,
@@ -84,8 +96,10 @@ namespace MyNNConsoleApp.RefactoredForDI
             rbm.Train(
                 () => trainData,
                 validationData,
-                new ConstLearningRate(0.0001f),
-                20,
+                new LinearLearningRate(0.0001f, 0.99f), 
+                new AccuracyController(
+                    0.1f,
+                    20),
                 10,
                 1);
         }
@@ -128,7 +142,18 @@ namespace MyNNConsoleApp.RefactoredForDI
                 28, 
                 28);
 
+            var serialization = new SerializationHelper();
+
+            var rootContainer = new FileSystemArtifactContainer(".", serialization);
+
+            var rbmContainer = rootContainer.GetChildContainer(
+                string.Format(
+                    "rbm{0}",
+                    DateTime.Now.ToString("yyyyMMddHHmmss")
+                    ));
+
             var rbm = new RBM(
+                rbmContainer,
                 randomizer,
                 container,
                 algorithm,
@@ -143,8 +168,10 @@ namespace MyNNConsoleApp.RefactoredForDI
                     return binarized;
                 },
                 validationData,
-                new LinearLearningRate(0.01f, 0.99f), 
-                20,
+                new LinearLearningRate(0.01f, 0.99f),
+                new AccuracyController(
+                    0.1f,
+                    20),
                 10,
                 1);
         }

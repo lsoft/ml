@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyNN.Data;
 using MyNN.Data.Visualizer;
-using MyNN.MLP2.Container;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Structure.Layer;
 
 namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
@@ -40,7 +40,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
         }
 
         public void Draw(
-            IMLPContainer containerForSave,
+            IArtifactContainer containerForSave,
             int? epocheNumber, 
             List<ILayerState> netResults)
         {

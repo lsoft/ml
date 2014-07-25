@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using MyNN.Data.TrainDataProvider;
 using MyNN.MLP2.AccuracyRecord;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation.EpocheTrainer;
 using MyNN.MLP2.Backpropagation.Validation;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 using MyNN.OutputConsole;
@@ -20,14 +20,14 @@ namespace MyNN.MLP2.Backpropagation
         private readonly IValidation _validation;
         private readonly ILearningAlgorithmConfig _config;
         private readonly IBackpropagationEpocheTrainer _backpropagationEpocheTrainer;
-        private readonly IMLPContainer _mlpContainer;
+        private readonly IArtifactContainer _artifactContainer;
 
         private IAccuracyRecord _bestAccuracyRecord;
 
         public BackpropagationAlgorithm(
             IRandomizer randomizer,
             IBackpropagationEpocheTrainer backpropagationEpocheTrainer,
-            IMLPContainer mlpContainer,
+            IArtifactContainer artifactContainer,
             IMLP mlp,
             IValidation validation,
             ILearningAlgorithmConfig config)
@@ -40,9 +40,9 @@ namespace MyNN.MLP2.Backpropagation
             {
                 throw new ArgumentNullException("backpropagationEpocheTrainer");
             }
-            if (mlpContainer == null)
+            if (artifactContainer == null)
             {
-                throw new ArgumentNullException("mlpContainer");
+                throw new ArgumentNullException("artifactContainer");
             }
             if (validation == null)
             {
@@ -51,7 +51,7 @@ namespace MyNN.MLP2.Backpropagation
 
             _randomizer = randomizer;
             _backpropagationEpocheTrainer = backpropagationEpocheTrainer;
-            _mlpContainer = mlpContainer;//.GetChildContainer(mlp.Name);
+            _artifactContainer = artifactContainer;//.GetChildContainer(mlp.Name);
             _mlp = mlp;
             _validation = validation;
             _config = config;
@@ -78,7 +78,7 @@ namespace MyNN.MLP2.Backpropagation
 
             ConsoleAmbientContext.Console.WriteLine("Default net validation results:");
 
-            var preTrainContainer = _mlpContainer.GetChildContainer("_pretrain");
+            var preTrainContainer = _artifactContainer.GetChildContainer("_pretrain");
 
             _validation.Validate(
                 _backpropagationEpocheTrainer.ForwardPropagation,
@@ -129,7 +129,7 @@ namespace MyNN.MLP2.Backpropagation
                 #region train epoche
 
                 //создаем папку эпохи
-                var epocheContainer = _mlpContainer.GetChildContainer(
+                var epocheContainer = _artifactContainer.GetChildContainer(
                     string.Format("epoche {0}", epochNumber));
 
                 //перемешиваем данные для эпохи
@@ -222,7 +222,7 @@ namespace MyNN.MLP2.Backpropagation
                 {
                     _bestAccuracyRecord = epocheAccuracyRecord;
                     
-                    epocheContainer.Save(
+                    epocheContainer.SaveMLP(
                         _backpropagationEpocheTrainer.ForwardPropagation.MLP,
                         epocheAccuracyRecord);
                 }

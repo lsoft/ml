@@ -1,5 +1,5 @@
 ﻿using MyNN.Data;
-using MyNN.MLP2.Container;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Structure;
 
 namespace MyNN.MLP2.Autoencoders
@@ -8,7 +8,7 @@ namespace MyNN.MLP2.Autoencoders
     {
         IMLP Train(
             string sdaeName,
-            IMLPContainer rootContainer,
+            IArtifactContainer rootContainer,
             IDataSet trainData,
             IDataSet validationData);
     }

@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using MyNN.Data;
-using MyNN.MLP2.Container;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Structure.Layer;
 
 namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
 {
     public class NLNCADrawer : IDrawer
     {
-        private readonly IMLPContainer _bitmapContainer;
+        private readonly IArtifactContainer _bitmapContainer;
         private readonly IDataSet _validationData;
 
         private readonly Color[] _colors;
 
         public NLNCADrawer(
             IDataSet validationData,
-            IMLPContainer mlpContainer,
+            IArtifactContainer artifactContainer,
             IColorProvider colorProvider
             )
         {
@@ -25,19 +25,19 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
             {
                 throw new ArgumentNullException("validationData");
             }
-            if (mlpContainer == null)
+            if (artifactContainer == null)
             {
-                throw new ArgumentNullException("mlpContainer");
+                throw new ArgumentNullException("artifactContainer");
             }
 
             _validationData = validationData;
 
-            _bitmapContainer = mlpContainer.GetChildContainer("bitmaps");
+            _bitmapContainer = artifactContainer.GetChildContainer("bitmaps");
             _colors = colorProvider.GetColors();
         }
 
         public void Draw(
-            IMLPContainer containerForSave, 
+            IArtifactContainer containerForSave, 
             int? epocheNumber,
             List<ILayerState> netResults
             )

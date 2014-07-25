@@ -156,6 +156,9 @@
   <ItemGroup>
     <Compile Include="ArrayOperations.cs" />
     <Compile Include="BeliefNetwork\DBN.cs" />
+    <Compile Include="BeliefNetwork\FeatureExtractor\MockFeatureExtractor.cs" />
+    <Compile Include="BeliefNetwork\ImageReconstructor\MockImageReconstructor.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\AccuracyController.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Algorithm\IAlgorithm.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Algorithm\IAlgorithmFactory.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Calculator\BBCalculator.cs" />
@@ -248,9 +251,9 @@
     <Compile Include="MLP2\BackpropagationFactory\Classic\OpenCL\CPU\CPUTransposeBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\BackpropagationFactory\DropConnect\Bit\OpenCL\CPU\DropConnectBitOpenCLBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\BackpropagationFactory\Classic\OpenCL\GPU\GPUBackpropagationAlgorithmFactory.cs" />
-    <Compile Include="MLP2\Container\FileSystemMLPContainer.cs" />
-    <Compile Include="MLP2\Container\IMLPContainer.cs" />
-    <Compile Include="MLP2\Container\IMLPReadContainer.cs" />
+    <Compile Include="MLP2\ArtifactContainer\FileSystemArtifactContainer.cs" />
+    <Compile Include="MLP2\ArtifactContainer\IArtifactContainer.cs" />
+    <Compile Include="MLP2\ArtifactContainer\IArtifactReadContainer.cs" />
     <Compile Include="MLP2\FileSystemFeatureVisualization.cs" />
     <Compile Include="MLP2\ForwardPropagationFactory\Classic\OpenCL\GPU\GPUForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagation\Classic\CSharp\CCharpForwardPropagation.cs" />

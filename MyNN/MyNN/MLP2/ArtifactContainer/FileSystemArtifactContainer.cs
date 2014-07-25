@@ -3,14 +3,14 @@ using System.IO;
 using MyNN.MLP2.AccuracyRecord;
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.Container
+namespace MyNN.MLP2.ArtifactContainer
 {
-    public class FileSystemMLPContainer : IMLPContainer
+    public class FileSystemArtifactContainer : IArtifactContainer
     {
         private readonly string _rootFolder;
         private readonly ISerializationHelper _serializationHelper;
 
-        public FileSystemMLPContainer(
+        public FileSystemArtifactContainer(
             string rootFolder,
             ISerializationHelper serializationHelper
             )
@@ -54,7 +54,7 @@ namespace MyNN.MLP2.Container
                 _serializationHelper.DeepClone(mlp);
         }
 
-        public void Save(
+        public void SaveMLP(
             IMLP mlp,
             IAccuracyRecord accuracyRecord)
         {
@@ -110,7 +110,7 @@ namespace MyNN.MLP2.Container
 
         }
 
-        public IMLPContainer GetChildContainer(string containerName)
+        public IArtifactContainer GetChildContainer(string containerName)
         {
             if (containerName == null)
             {
@@ -120,7 +120,7 @@ namespace MyNN.MLP2.Container
             var childRootFolder = Path.Combine(_rootFolder, containerName);
 
             return 
-                new FileSystemMLPContainer(
+                new FileSystemArtifactContainer(
                     childRootFolder,
                     _serializationHelper);
         }

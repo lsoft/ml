@@ -1,8 +1,8 @@
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.Container
+namespace MyNN.MLP2.ArtifactContainer
 {
-    public interface IMLPReadContainer
+    public interface IArtifactReadContainer
     {
         IMLP Load(string mlpName);
 

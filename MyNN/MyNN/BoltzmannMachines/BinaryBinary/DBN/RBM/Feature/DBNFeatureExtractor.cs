@@ -53,14 +53,15 @@ namespace MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature
                 {
                     var rectf = new RectangleF(70, 90, 90, 50);
 
-                    var g = Graphics.FromImage(_bitmap);
+                    using (var g = Graphics.FromImage(_bitmap))
+                    {
+                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                        g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                        g.DrawString("no features", new Font("Tahoma", 12), Brushes.Black, rectf);
 
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                    g.DrawString("no features", new Font("Tahoma", 12), Brushes.Black, rectf);
-
-                    g.Flush();
+                        g.Flush();
+                    }
                 }
 
                 _currentIndex++;

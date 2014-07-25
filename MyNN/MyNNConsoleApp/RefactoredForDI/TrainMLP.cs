@@ -7,13 +7,13 @@ using MyNN;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.Metrics;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
@@ -51,7 +51,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var serialization = new SerializationHelper();
 
-            var rootContainer = new FileSystemMLPContainer(
+            var rootContainer = new FileSystemArtifactContainer(
                 ".",
                 serialization);
 

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MyNN.MLP2.AccuracyRecord;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation.Validation;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation;
 
 namespace MyNN.Tests.MLP2.EpocheTrainer
@@ -14,7 +14,7 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
         public IAccuracyRecord Validate(
             IForwardPropagation forwardPropagation,
             int? epocheNumber,
-            IMLPContainer epocheContainer
+            IArtifactContainer epocheContainer
             )
         {
             if (forwardPropagation == null)

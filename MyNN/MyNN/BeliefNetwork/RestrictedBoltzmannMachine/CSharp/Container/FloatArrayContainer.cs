@@ -1,6 +1,7 @@
 using System;
 using AForge;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.Randomizer;
 
 namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
@@ -150,6 +151,28 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
             var result = (float) Math.Sqrt(sqdiff);
 
             return result;
+        }
+
+        public void Save(
+            IArtifactContainer container)
+        {
+            if (container == null)
+            {
+                throw new ArgumentNullException("container");
+            }
+
+            using (var writeStream = container.GetWriteStreamForResource("weights.bin"))
+            {
+                foreach (var w in this.Weights)
+                {
+                    var bytes = BitConverter.GetBytes(w);
+
+                    writeStream.Write(
+                        bytes,
+                        0,
+                        bytes.Length);
+                }
+            }
         }
 
         private int CalculateWeightIndex(

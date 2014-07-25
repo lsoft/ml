@@ -1,5 +1,5 @@
 ﻿using MyNN.MLP2.AccuracyRecord;
-using MyNN.MLP2.Container;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.ForwardPropagation;
 
 namespace MyNN.MLP2.Backpropagation.Validation
@@ -16,7 +16,7 @@ namespace MyNN.MLP2.Backpropagation.Validation
         IAccuracyRecord Validate(
             IForwardPropagation forwardPropagation,
             int? epocheNumber,
-            IMLPContainer epocheContainer
+            IArtifactContainer epocheContainer
             );
     }
 }

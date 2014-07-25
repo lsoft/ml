@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using MyNN.Data;
-using MyNN.MLP2.Container;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
@@ -173,16 +173,16 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
 
         public void TrainEpoche(
             IDataSet data,
-            IMLPContainer mlpContainer, 
+            IArtifactContainer artifactContainer, 
             float learningRate)
         {
             if (data == null)
             {
                 throw new ArgumentNullException("data");
             }
-            if (mlpContainer == null)
+            if (artifactContainer == null)
             {
-                throw new ArgumentNullException("mlpContainer");
+                throw new ArgumentNullException("artifactContainer");
             }
 
             #region one epoche

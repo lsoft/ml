@@ -1,23 +1,20 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
+using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container;
 using MyNN.MLP2.AccuracyRecord;
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.Container
+namespace MyNN.MLP2.ArtifactContainer
 {
-    public interface IMLPContainer : IMLPReadContainer
+    public interface IArtifactContainer : IArtifactReadContainer
     {
-        void Save(
+        void SaveMLP(
             IMLP mlp,
             IAccuracyRecord accuracyRecord
             );
 
         Stream GetWriteStreamForResource(string resourceName);
 
-        IMLPContainer GetChildContainer(string containerName);
+        IArtifactContainer GetChildContainer(string containerName);
         
         void Clear();
 

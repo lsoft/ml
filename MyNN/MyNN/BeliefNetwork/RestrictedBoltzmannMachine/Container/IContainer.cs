@@ -1,3 +1,5 @@
+using MyNN.MLP2.ArtifactContainer;
+
 namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container
 {
     public interface IContainer
@@ -23,5 +25,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container
             float learningRate);
 
         float GetError();
+
+        void Save(IArtifactContainer container);
     }
 }

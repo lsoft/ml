@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.AccuracyRecord;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation.Metrics;
 using MyNN.MLP2.Backpropagation.Validation;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation;
 
 namespace MyNN.Tests
@@ -40,7 +40,7 @@ namespace MyNN.Tests
         public IAccuracyRecord Validate(
             IForwardPropagation forwardPropagation,
             int? epocheNumber,
-            IMLPContainer epocheContainer
+            IArtifactContainer epocheContainer
             )
         {
             if (forwardPropagation == null)

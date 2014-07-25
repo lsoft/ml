@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyNN.MLP2.AccuracyRecord;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.OutputConsole;
@@ -33,7 +33,7 @@ namespace MyNN.MLP2.Backpropagation.Validation
         public IAccuracyRecord Validate(
             IForwardPropagation forwardPropagation,
             int? epocheNumber,
-            IMLPContainer epocheContainer
+            IArtifactContainer epocheContainer
             )
         {
             if (forwardPropagation == null)

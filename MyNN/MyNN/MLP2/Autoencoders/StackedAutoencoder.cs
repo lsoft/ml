@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using MyNN.Data;
 using MyNN.Data.TrainDataProvider;
+using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.BackpropagationFactory;
-using MyNN.MLP2.Container;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagationFactory;
 using MyNN.MLP2.LearningConfig;
@@ -26,7 +26,7 @@ namespace MyNN.MLP2.Autoencoders
         private readonly IRandomizer _randomizer;
         private readonly IMLPFactory _mlpFactory;
         private readonly Func<IDataSet, ITrainDataProvider> _dataProviderFactory;
-        private readonly Func<IDataSet, IMLPContainer, IValidation> _validationFactory;
+        private readonly Func<IDataSet, IArtifactContainer, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
         private readonly IBackpropagationAlgorithmFactory _backpropagationAlgorithmFactory;
         private readonly IForwardPropagationFactory _forwardPropagationFactory;
@@ -37,7 +37,7 @@ namespace MyNN.MLP2.Autoencoders
             IRandomizer randomizer,
             IMLPFactory mlpFactory,
             Func<IDataSet, ITrainDataProvider> dataProviderFactory,
-            Func<IDataSet, IMLPContainer, IValidation> validationFactory,
+            Func<IDataSet, IArtifactContainer, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
             IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
             IForwardPropagationFactory forwardPropagationFactory,
@@ -97,7 +97,7 @@ namespace MyNN.MLP2.Autoencoders
 
         public IMLP Train(
             string sdaeName,
-            IMLPContainer rootContainer,
+            IArtifactContainer rootContainer,
             IDataSet trainData,
             IDataSet validationData)
         {
@@ -244,7 +244,7 @@ namespace MyNN.MLP2.Autoencoders
                     );
 
                 //сохраняем
-                sdaeContainer.Save(
+                sdaeContainer.SaveMLP(
                     combinedNet, 
                     finalAccuracy
                     );
