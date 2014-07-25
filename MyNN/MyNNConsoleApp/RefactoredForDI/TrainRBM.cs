@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN;
+using MyNN.BeliefNetwork.FreeEnergyCalculator;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
+using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Data.TrainDataProvider;
@@ -55,9 +57,15 @@ namespace MyNNConsoleApp.RefactoredForDI
             const int visibleNeuronCount = 784;
             const int hiddenNeuronCount = 500;
 
-            var calculator = new LNRELUCalculator(visibleNeuronCount, hiddenNeuronCount);
+            var calculator = new LNRELUCalculator(
+                visibleNeuronCount, 
+                hiddenNeuronCount);
 
-            var container = new FloatArrayContainer(randomizer, visibleNeuronCount, hiddenNeuronCount);
+            var container = new FloatArrayContainer(
+                randomizer,
+                null,
+                visibleNeuronCount, 
+                hiddenNeuronCount);
 
             var algorithm = new CD(
                 calculator,
@@ -125,7 +133,15 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var calculator = new BBCalculator(randomizer, visibleNeuronCount, hiddenNeuronCount);
 
-            var container = new FloatArrayContainer(randomizer, visibleNeuronCount, hiddenNeuronCount);
+            var feCalculator = new FloatArrayFreeEnergyCalculator(
+                visibleNeuronCount,
+                hiddenNeuronCount);
+
+            var container = new FloatArrayContainer(
+                randomizer, 
+                feCalculator,
+                visibleNeuronCount, 
+                hiddenNeuronCount);
 
             var algorithm = new CD(
                 calculator,

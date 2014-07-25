@@ -267,6 +267,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             {
                 throw new ArgumentNullException("epochContainer");
             }
+
             var features = _algorithm.GetFeatures();
 
             foreach (var feature in features)

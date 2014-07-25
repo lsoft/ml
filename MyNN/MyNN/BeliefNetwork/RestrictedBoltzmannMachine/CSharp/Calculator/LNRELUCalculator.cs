@@ -198,7 +198,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator
             }
         }
 
-        public float ComputeSigmoid(float x)
+        private float ComputeSigmoid(float x)
         {
             var r = (float)(1.0 / (1.0 + Math.Exp(-x)));
             return r;

@@ -29,7 +29,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container
 
         void Save(IArtifactContainer container);
 
-        float CalculateFreeEnergy(
+        double CalculateFreeEnergy(
             IDataSet data);
     }
 }

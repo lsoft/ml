@@ -1,5 +1,7 @@
 using System;
+using System.Xml;
 using AForge;
+using MyNN.BeliefNetwork.FreeEnergyCalculator;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container;
 using MyNN.Data;
 using MyNN.MLP2.ArtifactContainer;
@@ -9,6 +11,8 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
 {
     public class FloatArrayContainer : IContainer
     {
+        private readonly IFreeEnergyCalculator _freeEnergyCalculator;
+
         public float[] Input
         {
             get;
@@ -58,6 +62,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
 
         public FloatArrayContainer(
             IRandomizer randomizer,
+            IFreeEnergyCalculator freeEnergyCalculator,
             int visibleNeuronCount, 
             int hiddenNeuronCount
             )
@@ -66,13 +71,16 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
             {
                 throw new ArgumentNullException("randomizer");
             }
+            //freeEnergyCalculator allowed to be null
             if (visibleNeuronCount <= 0 || hiddenNeuronCount <= 0)
             {
                 throw new ArgumentException("visibleNeuronCount <= 0 || hiddenNeuronCount <= 0");
             }
 
+            _freeEnergyCalculator = freeEnergyCalculator ?? new MockFreeEnergyCalculator();
             VisibleNeuronCount = visibleNeuronCount;
             HiddenNeuronCount = hiddenNeuronCount;
+
             _visibleNeuronCountWithBias = visibleNeuronCount + 1; //bias neuron
             _hiddenNeuronCountWithBias = hiddenNeuronCount + 1; //bias neuron
 
@@ -168,8 +176,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
                 );
         }
 
-
-        public float CalculateFreeEnergy(
+        public double CalculateFreeEnergy(
             IDataSet data)
         {
             if (data == null)
@@ -177,45 +184,10 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
                 throw new ArgumentNullException("data");
             }
 
-            var sumFreeEnergy = 0f;
-            foreach (var vd in data)
-            {
-                var vis = 0f;
-                for (var i = 0; i < VisibleNeuronCount; i++)
-                {
-                    var vi = vd.Input[i];
-                    var ai = Weights[CalculateWeightIndex(HiddenNeuronCount, i)];
-
-                    var visPart = vi * ai;
-                    vis += visPart;
-                }
-
-                var hid = 0f;
-                for (var j = 0; j < HiddenNeuronCount; j++)
-                {
-                    var xj = 0f;
-                    for (var i = 0; i < _visibleNeuronCountWithBias; i++)
-                    {
-                        var vi =
-                            i < VisibleNeuronCount
-                                ? vd.Input[i]
-                                : 1f;
-                        var wij = Weights[CalculateWeightIndex(j, i)];
-
-                        xj += vi * wij;
-                    }
-
-                    var expxj = Math.Exp(xj);
-                    var hidPart = Math.Log(1 + expxj);
-
-                    hid += (float)hidPart;
-                }
-
-                var freeEnergy = -vis - hid;
-                sumFreeEnergy += freeEnergy;
-            }
-
-            return sumFreeEnergy;
+            return 
+                _freeEnergyCalculator.CalculateFreeEnergy(
+                    this.Weights,
+                    data);
         }
 
         private int CalculateWeightIndex(
