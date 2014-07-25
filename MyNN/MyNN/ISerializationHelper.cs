@@ -9,11 +9,9 @@ namespace MyNN
 
         void SaveDataToFile(List<DataItem> obj, string fileName);
 
-        T LoadLastFile<T>(string dirname, string mask)
-            where T : class;
+        T LoadLastFile<T>(string dirname, string mask);
 
-        T LoadFromFile<T>(string fileName)
-            where T : class;
+        T LoadFromFile<T>(string fileName);
 
         void SaveToFile<T>(T obj, string fileName);
 

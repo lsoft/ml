@@ -1,6 +1,7 @@
 using System;
 using AForge;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container;
+using MyNN.Data;
 using MyNN.MLP2.ArtifactContainer;
 using MyNN.Randomizer;
 
@@ -161,18 +162,60 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
                 throw new ArgumentNullException("container");
             }
 
-            using (var writeStream = container.GetWriteStreamForResource("weights.bin"))
-            {
-                foreach (var w in this.Weights)
-                {
-                    var bytes = BitConverter.GetBytes(w);
+            container.SaveSerialized(
+                this.Weights,
+                "weights.bin"
+                );
+        }
 
-                    writeStream.Write(
-                        bytes,
-                        0,
-                        bytes.Length);
-                }
+
+        public float CalculateFreeEnergy(
+            IDataSet data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
             }
+
+            var sumFreeEnergy = 0f;
+            foreach (var vd in data)
+            {
+                var vis = 0f;
+                for (var i = 0; i < VisibleNeuronCount; i++)
+                {
+                    var vi = vd.Input[i];
+                    var ai = Weights[CalculateWeightIndex(HiddenNeuronCount, i)];
+
+                    var visPart = vi * ai;
+                    vis += visPart;
+                }
+
+                var hid = 0f;
+                for (var j = 0; j < HiddenNeuronCount; j++)
+                {
+                    var xj = 0f;
+                    for (var i = 0; i < _visibleNeuronCountWithBias; i++)
+                    {
+                        var vi =
+                            i < VisibleNeuronCount
+                                ? vd.Input[i]
+                                : 1f;
+                        var wij = Weights[CalculateWeightIndex(j, i)];
+
+                        xj += vi * wij;
+                    }
+
+                    var expxj = Math.Exp(xj);
+                    var hidPart = Math.Log(1 + expxj);
+
+                    hid += (float)hidPart;
+                }
+
+                var freeEnergy = -vis - hid;
+                sumFreeEnergy += freeEnergy;
+            }
+
+            return sumFreeEnergy;
         }
 
         private int CalculateWeightIndex(

@@ -71,13 +71,12 @@ namespace MyNN
         }
 
         public T LoadLastFile<T>(string dirname, string mask)
-            where T : class
         {
             var files = Directory.GetFiles(dirname, mask);
 
             if (files == null || files.Length == 0)
             {
-                return null;
+                return default(T);
             }
 
             var lastFile =
@@ -90,7 +89,6 @@ namespace MyNN
         }
 
         public T LoadFromFile<T>(string fileName)
-            where T : class
         {
             Console.WriteLine("Loading " + fileName);
 

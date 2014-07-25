@@ -12,6 +12,10 @@ namespace MyNN.MLP2.ArtifactContainer
             IAccuracyRecord accuracyRecord
             );
 
+        T LoadSerialized<T>(string resourceName);
+
+        void SaveSerialized<T>(T obj, string resourceName);
+
         Stream GetWriteStreamForResource(string resourceName);
 
         IArtifactContainer GetChildContainer(string containerName);

@@ -1,3 +1,4 @@
+using MyNN.Data;
 using MyNN.MLP2.ArtifactContainer;
 
 namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container
@@ -27,5 +28,8 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container
         float GetError();
 
         void Save(IArtifactContainer container);
+
+        float CalculateFreeEnergy(
+            IDataSet data);
     }
 }

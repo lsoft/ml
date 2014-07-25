@@ -15,6 +15,8 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             );
 
         bool IsNeedToStop();
+
+        bool IsLastEpochBetterThanPrevious();
     }
 
     public class AccuracyController : IAccuracyController
@@ -84,5 +86,22 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             return result;
         }
 
+        public bool IsLastEpochBetterThanPrevious()
+        {
+            var result = true;
+
+            if (_lastErrors.Count > 1)
+            {
+                var prev = _lastErrors[_lastErrors.Count - 2];
+                var last = _lastErrors[_lastErrors.Count - 1];
+
+                if (last > prev)
+                {
+                    result = false;
+                }
+            }
+
+            return result;
+        }
     }
 }

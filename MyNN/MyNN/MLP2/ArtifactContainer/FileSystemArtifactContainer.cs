@@ -67,11 +67,6 @@ namespace MyNN.MLP2.ArtifactContainer
                 throw new ArgumentNullException("accuracyRecord");
             }
 
-            //var epocheRoot = Path.Combine(
-            //    Name,
-            //    accuracyRecord.EpocheNumber.ToString());
-            //Directory.CreateDirectory(epocheRoot);
-
             //сохраняем сеть
             var mlpFilePath = Path.Combine(_rootFolder, mlp.Name);
             _serializationHelper.SaveToFile(mlp, mlpFilePath);
@@ -79,6 +74,31 @@ namespace MyNN.MLP2.ArtifactContainer
             //сохраняем файл с результатами
             var txtFilePath = Path.Combine(_rootFolder, "_result.txt");
             File.WriteAllText(txtFilePath, accuracyRecord.GetTextResults());
+        }
+
+        public T LoadSerialized<T>(string resourceName)
+        {
+            if (resourceName == null)
+            {
+                throw new ArgumentNullException("resourceName");
+            }
+
+            var resourceFilePath = Path.Combine(_rootFolder, resourceName);
+
+            return
+                _serializationHelper.LoadFromFile<T>(resourceFilePath);
+        }
+
+        public void SaveSerialized<T>(T obj, string resourceName)
+        {
+            if (resourceName == null)
+            {
+                throw new ArgumentNullException("resourceName");
+            }
+
+            var resourceFilePath = Path.Combine(_rootFolder, resourceName);
+
+            _serializationHelper.SaveToFile(obj, resourceFilePath);
         }
 
         public Stream GetWriteStreamForResource(string resourceName)

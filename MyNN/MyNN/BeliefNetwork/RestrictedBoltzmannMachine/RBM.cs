@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
+using System.Text;
 using MyNN.BeliefNetwork.FeatureExtractor;
 using MyNN.BeliefNetwork.ImageReconstructor;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm;
@@ -97,6 +99,13 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                     )
                 );
 
+            #region формируем наборы для вычисления свободной энергии
+
+            var trainFreeEnergySet = trainDataProvider();
+            var validationFreeEnergySet = validationData;
+
+            #endregion
+
             _algorithm.PrepareTrain(batchSize);
 
             var epochNumber = 0;
@@ -159,6 +168,12 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                         learningRate);
                 }
 
+                this.CalculateFreeEnergy(
+                    _rbmContainer,
+                    trainFreeEnergySet,
+                    validationData
+                    );
+
                 var error = this.CaculateError(
                     epochContainer,
                     validationData
@@ -172,6 +187,11 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                     epochNumber,
                     error);
 
+                if (accuracyController.IsLastEpochBetterThanPrevious())
+                {
+                    _container.Save(epochContainer);
+                }
+
                 epochNumber++;
 
                 var afterEpoch = DateTime.Now;
@@ -183,6 +203,59 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                 ConsoleAmbientContext.Console.WriteLine(new string('-', 60));
             }
 
+
+        }
+
+        private void CalculateFreeEnergy(
+            IArtifactContainer rbmContainer,
+            IDataSet trainFreeEnergySet,
+            IDataSet validationFreeEnergySet
+            )
+        {
+            if (rbmContainer == null)
+            {
+                throw new ArgumentNullException("rbmContainer");
+            }
+            if (trainFreeEnergySet == null)
+            {
+                throw new ArgumentNullException("trainFreeEnergySet");
+            }
+            if (validationFreeEnergySet == null)
+            {
+                throw new ArgumentNullException("validationFreeEnergySet");
+            }
+
+            var feTrain = _container.CalculateFreeEnergy(trainFreeEnergySet);
+            var feTrainPerItem = feTrain / trainFreeEnergySet.Count;
+            Console.WriteLine(
+                "TRAIN per-item free energy = {0}",
+                feTrainPerItem);
+
+            var feValidation = _container.CalculateFreeEnergy(validationFreeEnergySet);
+            var feValidationPerItem = feValidation / validationFreeEnergySet.Count;
+            Console.WriteLine(
+                "VALIDATION per-item free energy = {0}",
+                feValidationPerItem);
+
+            var diffPerItem = Math.Abs(feTrainPerItem - feValidationPerItem);
+            Console.WriteLine(
+                "----------> Per-item diff free energy {0} <----------",
+                diffPerItem);
+
+            using (var writeStream = rbmContainer.GetWriteStreamForResource("_free_energy.csv"))
+            {
+                var s = string.Format(
+                    "{0};{1};{2};{3};{4}\r\n",
+                    feTrain,
+                    feValidation,
+                    feTrainPerItem,
+                    feValidationPerItem,
+                    diffPerItem);
+
+                var bytes = Encoding.ASCII.GetBytes(s);
+
+                writeStream.Write(bytes, 0, bytes.Length);
+            }
 
         }
 
