@@ -27,7 +27,13 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
             }
 
             return
-                null;
+                new ClassificationAccuracyRecord(
+                    epocheNumber ?? 0,
+                    10,
+                    5,
+                    0.5f);
         }
+
+        
     }
 }

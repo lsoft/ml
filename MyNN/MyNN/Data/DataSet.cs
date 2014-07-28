@@ -25,8 +25,17 @@ namespace MyNN.Data
 
         public bool IsAuencoderDataSet
         {
-            get;
-            private set;
+            get
+            {
+                var result = false;
+
+                if (this.Data.Count > 0)
+                {
+                    result = this.Data[0].InputLength == this.Data[0].OutputLength;
+                }
+
+                return result;
+            }
         }
 
         public int Count
@@ -56,21 +65,6 @@ namespace MyNN.Data
         public DataSet()
         {
             Data = new List<DataItem>();
-            IsAuencoderDataSet = false;
-        }
-
-        public DataSet(
-            List<DataItem> data,
-            bool isAutoencoderDataSet
-            )
-        {
-            if (data == null)
-            {
-                throw new ArgumentNullException("data");
-            }
-
-            Data = data;
-            IsAutoencoderDataSet = isAutoencoderDataSet;
         }
 
         public DataSet(
@@ -83,9 +77,8 @@ namespace MyNN.Data
             }
 
             Data = data;
-
-            IsAuencoderDataSet = false;
         }
+
 
         public DataSet(IDataSet dataSet, int takeCount)
         {
@@ -104,8 +97,6 @@ namespace MyNN.Data
             #endregion
 
             Data = new List<DataItem>(dataSet.Data.Take(takeCount));
-
-            IsAuencoderDataSet = false;
         }
 
         public DataSet(
@@ -135,8 +126,6 @@ namespace MyNN.Data
                 var di = new DataItem(inputPart[i], dataSet[i].Output);
                 this.Data.Add(di);
             }
-
-            IsAuencoderDataSet = false;
         }
 
         public DataItem this[int i]

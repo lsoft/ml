@@ -104,8 +104,8 @@ namespace MyNN.BeliefNetwork
                         : null;
 
                 IRBM rbm;
-                IContainer container;
-                IAlgorithm algorithm;
+                IDataSetConverter forwardDataSetConverter;
+                IDataArrayConverter dataArrayConverter;
                 _rbmFactory.CreateRBM(
                     layerTrainData,
                     rbmContainer,
@@ -114,8 +114,8 @@ namespace MyNN.BeliefNetwork
                     visibleNeuronCount,
                     hiddenNeuronCount,
                     out rbm,
-                    out container,
-                    out algorithm
+                    out forwardDataSetConverter,
+                    out dataArrayConverter
                     );
 
                 var trainDataProvider = trainDataProviderFunc(layerTrainData);
@@ -128,23 +128,10 @@ namespace MyNN.BeliefNetwork
                     batchSize,
                     maxGibbsChainLength);
 
-                stackedImageReconstructor.AddConverter(
-                    (d) =>
-                    {
-                        container.SetHidden(d);
-                        var result = algorithm.CalculateVisible();
-                        return result;
-                    });
+                stackedImageReconstructor.AddConverter(dataArrayConverter);
 
-                layerTrainData = ForwardDataSet(
-                    layerTrainData,
-                    container,
-                    algorithm);
-
-                layerValidationData = ForwardDataSet(
-                    layerValidationData, 
-                    container, 
-                    algorithm);
+                layerTrainData = forwardDataSetConverter.Convert(layerTrainData);
+                layerValidationData = forwardDataSetConverter.Convert(layerValidationData);
 
             }
 
@@ -165,40 +152,5 @@ namespace MyNN.BeliefNetwork
             }
         }
 
-        private IDataSet ForwardDataSet(
-            IDataSet dataSet, 
-            IContainer container, 
-            IAlgorithm algorithm)
-        {
-            if (dataSet == null)
-            {
-                throw new ArgumentNullException("dataSet");
-            }
-            if (container == null)
-            {
-                throw new ArgumentNullException("container");
-            }
-            if (algorithm == null)
-            {
-                throw new ArgumentNullException("algorithm");
-            }
-
-            var newdiList = new List<DataItem>();
-            foreach (var di in dataSet)
-            {
-                container.SetInput(di.Input);
-                var nextLayer = algorithm.CalculateHidden();
-
-                var newdi = new DataItem(
-                    nextLayer,
-                    di.Output);
-
-                newdiList.Add(newdi);
-            }
-
-            var result = new DataSet(newdiList);
-
-            return result;
-        }
     }
 }

@@ -13,7 +13,7 @@ namespace MyNN.BeliefNetwork.ImageReconstructor
     public class StackedImageReconstructor : IStackedImageReconstructor
     {
         private readonly IImageReconstructor _isolatedImageReconstructor;
-        private readonly List<Func<float[], float[]>> _converterList;
+        private readonly List<IDataArrayConverter> _converterList;
 
         public StackedImageReconstructor(
             IImageReconstructor isolatedImageReconstructor)
@@ -25,11 +25,10 @@ namespace MyNN.BeliefNetwork.ImageReconstructor
 
             _isolatedImageReconstructor = isolatedImageReconstructor;
 
-            _converterList = new List<Func<float[], float[]>>();
+            _converterList = new List<IDataArrayConverter>();
         }
 
-        public void AddConverter(
-            Func<float[], float[]> converter)
+        public void AddConverter(IDataArrayConverter converter)
         {
             if (converter == null)
             {
@@ -54,7 +53,7 @@ namespace MyNN.BeliefNetwork.ImageReconstructor
             {
                 var c = _converterList[ci];
 
-                var cded = c(d);
+                var cded = c.Convert(d);
 
                 d = cded;
             }

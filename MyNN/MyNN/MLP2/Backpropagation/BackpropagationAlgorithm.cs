@@ -68,9 +68,9 @@ namespace MyNN.MLP2.Backpropagation
                 "BACKPROPAGATION STARTED WITH {0}",
                 _mlp.GetLayerInformation());
             ConsoleAmbientContext.Console.WriteLine(
-                "EPOCHE TRAINER = {0}, VALIDATION = {1}",
-                this._backpropagationEpocheTrainer.GetType().Name,
-                this._validation.GetType().Name);
+                "EPOCHE TRAINER = {0}",
+                this._backpropagationEpocheTrainer.GetType().Name
+                );
 
             #region валидируем дефолтовую сеть
 

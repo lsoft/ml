@@ -164,10 +164,8 @@ namespace OpenCL.Net.Wrapper
         private string GetResourceFile(string resourceName)
         {
             var assembly = Assembly.GetExecutingAssembly();
-            //var resourceName = "MyCompany.MyProduct.MyFile.txt";
 
-            var names = assembly.GetManifestResourceNames().ToList();
-
+            //var names = assembly.GetManifestResourceNames().ToList();
             //names.ForEach(j => Console.WriteLine(j));
 
             var stream = assembly.GetManifestResourceStream(resourceName);

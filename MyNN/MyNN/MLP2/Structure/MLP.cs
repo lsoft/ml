@@ -55,6 +55,10 @@ namespace MyNN.MLP2.Structure
             {
                 throw new ArgumentNullException("layerList");
             }
+            if (layerList.Any(j => j == null))
+            {
+                throw new ArgumentException("layerList.Any(j => j == null)");
+            }
 
             Name = name;
             _layerFactory = layerFactory;

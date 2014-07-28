@@ -161,6 +161,7 @@
     <Compile Include="BeliefNetwork\FeatureExtractor\MockFeatureExtractor.cs" />
     <Compile Include="BeliefNetwork\FreeEnergyCalculator\MockFreeEnergyCalculator.cs" />
     <Compile Include="BeliefNetwork\IFeatureExtractorFactory.cs" />
+    <Compile Include="BeliefNetwork\ImageReconstructor\IDataArrayConverter.cs" />
     <Compile Include="BeliefNetwork\ImageReconstructor\IStackedImageReconstructor.cs" />
     <Compile Include="BeliefNetwork\ImageReconstructor\StackedImageReconstructor.cs" />
     <Compile Include="BeliefNetwork\IRBMFactory.cs" />

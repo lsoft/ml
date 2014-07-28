@@ -155,7 +155,7 @@ namespace MyNN.BoltzmannMachines.DBNInfo
         {
             var lastSlashIndex = dirname.ToList().FindLastIndex(j => j == '\\');
 
-            var stringNumber = dirname.Substring(lastSlashIndex + 8); //!!! константу 8 заменить на ссылку на имя.Length
+            var stringNumber = dirname.Substring(lastSlashIndex + 7); //!!! константу 7 заменить на ссылку на имя.Length
 
             return int.Parse(stringNumber);
         }
