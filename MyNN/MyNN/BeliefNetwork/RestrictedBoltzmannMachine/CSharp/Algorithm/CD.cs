@@ -51,7 +51,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm
             //nothing to do in CD
         }
 
-        public void CalculateSamples(
+        public void ExecuteGibbsSampling(
             int indexIntoBatch,
             int maxGibbsChainLength)
         {
@@ -106,7 +106,19 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm
                 _container.Input,
                 _container.Hidden0);
 
-            var result = _container.Input.CloneArray();
+            var result = _container.Input.RemoveLastElement();
+
+            return result;
+        }
+
+        public float[] CalculateHidden()
+        {
+            _calculator.CalculateHidden(
+                _container.Weights,
+                _container.Hidden0,
+                _container.Input);
+
+            var result = _container.Hidden0.RemoveLastElement();
 
             return result;
         }
@@ -123,7 +135,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm
                 _container.Visible,
                 _container.Hidden0);
 
-            var result = _container.Visible.CloneArray();
+            var result = _container.Visible.RemoveLastElement();
 
             return result;
         }

@@ -11,6 +11,7 @@ using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container;
 using MyNN.BoltzmannMachines;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.Data;
+using MyNN.Data.TrainDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.ArtifactContainer;
 using MyNN.OutputConsole;
@@ -18,18 +19,6 @@ using MyNN.Randomizer;
 
 namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
 {
-    public interface IRBM
-    {
-        void Train(
-            Func<IDataSet> trainDataProvider,
-            IDataSet validationData,
-            ILearningRate learningRateController,
-            IAccuracyController accuracyController,
-            int batchSize,
-            int maxGibbsChainLength
-            );
-    }
-
     public class RBM : IRBM
     {
         private readonly IArtifactContainer _rbmContainer;
@@ -77,7 +66,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
         }
 
         public void Train(
-            Func<IDataSet> trainDataProvider,
+            ITrainDataProvider trainDataProvider,
             IDataSet validationData,
             ILearningRate learningRateController,
             IAccuracyController accuracyController,
@@ -114,7 +103,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
 
             #region формируем наборы для вычисления свободной энергии
 
-            var trainFreeEnergySet = trainDataProvider();
+            var trainFreeEnergySet = trainDataProvider.GetDataSet(0);
             var validationFreeEnergySet = validationData;
 
             #endregion
@@ -142,8 +131,13 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                 //скорость обучения на эту эпоху
                 var learningRate = learningRateController.GetLearningRate(epochNumber);
 
-                var freshTrainData = trainDataProvider();
-                var epocheTrainData = freshTrainData.CreateShuffledDataSet(_randomizer);
+                //получаем данные для эпохи (уже shuffled)
+                var epocheTrainData = trainDataProvider.GetDataSet(epochNumber);
+
+                if (epocheTrainData.InputLength != _container.VisibleNeuronCount)
+                {
+                    throw new InvalidOperationException("Размер датасета не совпадает с количеством видимых нейронов RBM");
+                }
 
                 _algorithm.PrepareBatch();
 
@@ -152,19 +146,25 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                         "Epoch learning rate = {0}",
                         learningRate));
 
+                var indexIntoEpoch = 0;
                 foreach (var batch in epocheTrainData.Split(batchSize))
                 {
+                    ConsoleAmbientContext.Console.Write(
+                        string.Format(
+                            "Processed {0} out of {1}",
+                            indexIntoEpoch * batchSize,
+                            epocheTrainData.Count));
+                    ConsoleAmbientContext.Console.ReturnCarriage();
+
                     _container.ClearNabla();
 
                     var indexIntoBatch = 0;
                     foreach (var trainItem in batch)
                     {
-                        //gibbs sampling
-
                         //заполняем видимое
                         _container.SetInput(trainItem.Input);
 
-                        _algorithm.CalculateSamples(
+                        _algorithm.ExecuteGibbsSampling(
                             indexIntoBatch,
                             maxGibbsChainLength);
 
@@ -179,6 +179,8 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
                     _container.UpdateWeights(
                         batchSize,
                         learningRate);
+
+                    indexIntoEpoch++;
                 }
 
                 this.CalculateFreeEnergy(
@@ -252,7 +254,7 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
 
             var diffPerItem = Math.Abs(feTrainPerItem - feValidationPerItem);
             Console.WriteLine(
-                "----------> Per-item diff free energy {0} <----------",
+                "-------> Per-item diff free energy {0} <-------",
                 diffPerItem);
 
             using (var writeStream = rbmContainer.GetWriteStreamForResource("_free_energy.csv"))

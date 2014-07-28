@@ -20,12 +20,15 @@ namespace MyNN.Data
             get;
         }
 
-        DataItem this[int i]
+        int InputLength        
         {
             get;
         }
 
-        IDataSet ConvertToAutoencoder();
+        DataItem this[int i]
+        {
+            get;
+        }
 
         List<float[]> GetInputPart();
 
@@ -40,20 +43,5 @@ namespace MyNN.Data
         /// </summary>
         void GNormalize();
 
-        /// <summary>
-        /// Создает новый датасет, перемешивает его и отдает
-        /// </summary>
-        /// <returns></returns>
-        IDataSet CreateShuffledDataSet(
-            IRandomizer randomizer);
-        
-        /// <summary>
-        /// Бинаризует данные в датасете
-        /// (1 с вероятностью значения)
-        /// Если данные не нормализованы в диапазон [0;1], генерируется исключение
-        /// </summary>
-        /// <returns></returns>
-        IDataSet Binarize(
-            IRandomizer randomizer);
     }
 }

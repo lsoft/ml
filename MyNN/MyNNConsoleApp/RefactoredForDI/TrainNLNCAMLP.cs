@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN;
+using MyNN.Data.DataSetConverter;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.KNN;
@@ -110,6 +111,12 @@ namespace MyNNConsoleApp.RefactoredForDI
                     -1f
                     );
 
+                var trainDataProvider =
+                    new ConverterTrainDataProvider(
+                        new ShuffleDataSetConverter(randomizer),
+                        new NoDeformationTrainDataProvider(trainData)
+                        );
+
                 var algo = new BackpropagationAlgorithm(
                     randomizer,
                     new CPUNLNCABackpropagationEpocheTrainer(
@@ -128,7 +135,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     );
 
                 algo.Train(
-                    new NoDeformationTrainDataProvider(trainData)
+                    trainDataProvider
                     );
             }
         }

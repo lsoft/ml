@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyNN;
 using MyNN.Data;
+using MyNN.Data.DataSetConverter;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Data.TrainDataProvider.Noiser.Range;
@@ -56,6 +57,8 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var randomizer = new DefaultRandomizer(123);
 
+            var toa = new ToAutoencoderDataSetConverter();
+
             var noiser = new AllNoisers(
                 randomizer,
                 new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
@@ -82,14 +85,17 @@ namespace MyNNConsoleApp.RefactoredForDI
                 mlpf,
                 (IDataSet td) =>
                 {
+                    var result =
+                        new ConverterTrainDataProvider(
+                            new ShuffleDataSetConverter(randomizer),
+                            new NoiseDataProvider(td, noiser)
+                            );
                     return
-                        new NoiseDataProvider(
-                            td,
-                            noiser);
+                        result;
                 },
                 (IDataSet vd, IArtifactContainer mlpContainer) =>
                 {
-                    var vda = vd.ConvertToAutoencoder();
+                    var vda = toa.Convert(vd);
 
                     return
                         new Validation(

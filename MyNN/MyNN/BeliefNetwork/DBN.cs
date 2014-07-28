@@ -1,36 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 using MyNN.BeliefNetwork.Accuracy;
 using MyNN.BeliefNetwork.ImageReconstructor;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator;
 using MyNN.BoltzmannMachines;
-using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
-using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Data;
+using MyNN.Data.DataSetConverter;
+using MyNN.Data.TrainDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.ArtifactContainer;
 using MyNN.Randomizer;
+using IContainer = MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container.IContainer;
 
 namespace MyNN.BeliefNetwork
 {
     public class DBN
     {
+        public const string RbmFolderName = "rbm_layer";
+
         private readonly IRandomizer _randomizer;
         private readonly IArtifactContainer _dbnContainer;
+        private readonly IRBMFactory _rbmFactory;
         private readonly int[] _layerSizes;
 
         public DBN(
             IRandomizer randomizer,
             IArtifactContainer dbnContainer,
+            IRBMFactory rbmFactory,
             params int[] layerSizes
             )
         {
@@ -42,23 +43,57 @@ namespace MyNN.BeliefNetwork
             {
                 throw new ArgumentNullException("dbnContainer");
             }
+            if (rbmFactory == null)
+            {
+                throw new ArgumentNullException("rbmFactory");
+            }
 
             _randomizer = randomizer;
             _dbnContainer = dbnContainer;
+            _rbmFactory = rbmFactory;
             _layerSizes = layerSizes;
         }
 
         public void Train(
             IDataSet trainData,
             IDataSet validationData,
-            IImageReconstructor imageReconstructor,
+            Func<IDataSet, ITrainDataProvider> trainDataProviderFunc,
+            IFeatureExtractorFactory featureExtractorFactory,
+            IStackedImageReconstructor stackedImageReconstructor,
             ILearningRate learningRateController,
             IAccuracyController accuracyController,
             int batchSize,
             int maxGibbsChainLength
             )
         {
-            var sir = new StackedImageReconstructor(imageReconstructor);
+            if (trainData == null)
+            {
+                throw new ArgumentNullException("trainData");
+            }
+            if (validationData == null)
+            {
+                throw new ArgumentNullException("validationData");
+            }
+            if (trainDataProviderFunc == null)
+            {
+                throw new ArgumentNullException("trainDataProviderFunc");
+            }
+            if (featureExtractorFactory == null)
+            {
+                throw new ArgumentNullException("featureExtractorFactory");
+            }
+            if (stackedImageReconstructor == null)
+            {
+                throw new ArgumentNullException("stackedImageReconstructor");
+            }
+            if (learningRateController == null)
+            {
+                throw new ArgumentNullException("learningRateController");
+            }
+            if (accuracyController == null)
+            {
+                throw new ArgumentNullException("accuracyController");
+            }
 
             var layerTrainData = trainData;
             var layerValidationData = validationData;
@@ -68,40 +103,39 @@ namespace MyNN.BeliefNetwork
                 var visibleNeuronCount = _layerSizes[layerIndex];
                 var hiddenNeuronCount = _layerSizes[layerIndex + 1];
 
-                var rbmContainer = _dbnContainer.GetChildContainer(
-                    string.Format(
-                        "rbm{0}",
-                        layerIndex));
-                    
+                var rbmContainer = _dbnContainer.GetChildContainer(RbmFolderName + layerIndex);
+
+                var featureExractor =
+                    layerIndex == 0
+                        ? featureExtractorFactory.CreateFeatureExtractor(hiddenNeuronCount)
+                        : null;
+
                 IRBM rbm;
                 IContainer container;
                 IAlgorithm algorithm;
-                this.CreateRBM(
-                    _randomizer,
-                    trainData,
+                _rbmFactory.CreateRBM(
+                    layerTrainData,
                     rbmContainer,
-                    sir,
+                    stackedImageReconstructor,
+                    featureExractor,
                     visibleNeuronCount,
                     hiddenNeuronCount,
-                    layerIndex,
                     out rbm,
                     out container,
                     out algorithm
                     );
 
+                var trainDataProvider = trainDataProviderFunc(layerTrainData);
+
                 rbm.Train(
-                    () =>
-                    {
-                        var binarized = trainData.Binarize(_randomizer);
-                        return binarized;
-                    },
-                    validationData,
+                    trainDataProvider,
+                    layerValidationData,
                     learningRateController,
                     accuracyController.Clone(),
                     batchSize,
                     maxGibbsChainLength);
 
-                sir.AddConverter(
+                stackedImageReconstructor.AddConverter(
                     (d) =>
                     {
                         container.SetHidden(d);
@@ -119,6 +153,22 @@ namespace MyNN.BeliefNetwork
                     container, 
                     algorithm);
 
+            }
+
+            this.DumpDBNInfo();
+        }
+
+        private void DumpDBNInfo()
+        {
+            var dbninfo = string.Format(
+                "Layers sizes: {0}",
+                string.Join("-", _layerSizes.ToList().ConvertAll(k => k.ToString()))
+                );
+
+            using (var s = _dbnContainer.GetWriteStreamForResource("dbn.info"))
+            {
+                var bytes = Encoding.ASCII.GetBytes(dbninfo);
+                s.Write(bytes, 0, bytes.Length);
             }
         }
 
@@ -144,7 +194,7 @@ namespace MyNN.BeliefNetwork
             foreach (var di in dataSet)
             {
                 container.SetInput(di.Input);
-                var nextLayer = algorithm.CalculateVisible();
+                var nextLayer = algorithm.CalculateHidden();
 
                 var newdi = new DataItem(
                     nextLayer,
@@ -157,74 +207,5 @@ namespace MyNN.BeliefNetwork
 
             return result;
         }
-
-        private void CreateRBM(
-            IRandomizer randomizer,
-            IDataSet trainData,
-            IArtifactContainer rbmContainer,
-            IImageReconstructor imageReconstructor,
-            int visibleNeuronCount, 
-            int hiddenNeuronCount,
-            int rbmIndex,
-            out IRBM rbm,
-            out IContainer container,
-            out IAlgorithm algorithm
-            )
-        {
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
-            }
-            if (trainData == null)
-            {
-                throw new ArgumentNullException("trainData");
-            }
-            if (rbmContainer == null)
-            {
-                throw new ArgumentNullException("rbmContainer");
-            }
-            if (imageReconstructor == null)
-            {
-                throw new ArgumentNullException("imageReconstructor");
-            }
-
-            var calculator = new BBCalculator(randomizer, visibleNeuronCount, hiddenNeuronCount);
-
-            var feCalculator = new FloatArrayFreeEnergyCalculator(
-                visibleNeuronCount,
-                hiddenNeuronCount);
-
-            var facontainer = new FloatArrayContainer(
-                randomizer,
-                feCalculator,
-                visibleNeuronCount,
-                hiddenNeuronCount);
-
-            container = facontainer;
-
-            algorithm = new CD(
-                calculator,
-                facontainer);
-
-            var extractor =
-                rbmIndex == 0
-                    ? new IsolatedFeatureExtractor(
-                        hiddenNeuronCount,
-                        28,
-                        28)
-                    : null;
-
-            rbm = new RBM(
-                rbmContainer,
-                randomizer,
-                container,
-                algorithm,
-                imageReconstructor,
-                extractor
-                );
-
-        }
-
-
     }
 }

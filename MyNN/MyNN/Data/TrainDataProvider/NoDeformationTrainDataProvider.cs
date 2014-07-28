@@ -6,14 +6,6 @@ namespace MyNN.Data.TrainDataProvider
     {
         private readonly IDataSet _trainData;
 
-        public bool IsAuencoderDataSet
-        {
-            get
-            {
-                return this._trainData.IsAuencoderDataSet;
-            }
-        }
-
         public NoDeformationTrainDataProvider(IDataSet trainData)
         {
             if (trainData == null)

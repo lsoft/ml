@@ -160,7 +160,10 @@
     <Compile Include="BeliefNetwork\DBN.cs" />
     <Compile Include="BeliefNetwork\FeatureExtractor\MockFeatureExtractor.cs" />
     <Compile Include="BeliefNetwork\FreeEnergyCalculator\MockFreeEnergyCalculator.cs" />
+    <Compile Include="BeliefNetwork\IFeatureExtractorFactory.cs" />
+    <Compile Include="BeliefNetwork\ImageReconstructor\IStackedImageReconstructor.cs" />
     <Compile Include="BeliefNetwork\ImageReconstructor\StackedImageReconstructor.cs" />
+    <Compile Include="BeliefNetwork\IRBMFactory.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\FreeEnergyCalculator\FloatArrayFreeEnergyCalculator.cs" />
     <Compile Include="BeliefNetwork\FreeEnergyCalculator\IFreeEnergyCalculator.cs" />
     <Compile Include="BeliefNetwork\ImageReconstructor\MockImageReconstructor.cs" />
@@ -173,36 +176,39 @@
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Algorithm\CDAlgorithmFactory.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\Container\FloatArrayContainer.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Container\IContainer.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\IRBM.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\RBM.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\DeepBeliefNetwork.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\DBNFeatureExtractor.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IFeatureExtractor.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IsolatedFeatureExtractor.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\IRestrictedBoltzmannMachine.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\CD.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\IRBMNegativeSampler.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\ParallelTempering\ITemperature.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\ParallelTempering\LinearTemperature.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\PCD.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\NegativeSampler\PT.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Reconstructor\DBNImageReconstructor.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Reconstructor\IsolatedImageReconstructor.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\RestrictedBoltzmannMachine.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\CDBaseSamplerProvider.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\INegativeSamplerProvider.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\PCDBaseSamplerProvider.cs" />
-    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\SamplerProvider\PTBaseSamplerProvider.cs" />
-    <Compile Include="BoltzmannMachines\DBNInfo\FileDBNInformation.cs" />
-    <Compile Include="BoltzmannMachines\DBNInfo\IDBNInformation.cs" />
-    <Compile Include="BoltzmannMachines\IImageReconstructor.cs" />
-    <Compile Include="BoltzmannMachines\LinearNReLU\DeepBeliefNetwork.cs" />
-    <Compile Include="BoltzmannMachines\LinearNReLU\RBM\RestrictedBoltzmannMachine.cs" />
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IFeatureExtractor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IsolatedFeatureExtractor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Reconstructor\IsolatedImageReconstructor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoltzmannMachines\DBNInfo\FileDBNInformation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoltzmannMachines\DBNInfo\IDBNInformation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BoltzmannMachines\IImageReconstructor.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Boosting\SAMMEBoosting\IEpocheClassifier.cs" />
     <Compile Include="Boosting\SAMMEBoosting\IEpocheDataProvider.cs" />
     <Compile Include="Boosting\SAMMEBoosting\IEpocheTrainer.cs" />
     <Compile Include="Boosting\SAMMEBoosting\SAMME.cs" />
     <Compile Include="Boosting\SAMMEBoosting\SAMMEClassifierSet.cs" />
+    <Compile Include="Data\DataSetConverter\BinarizeDataSetConverter.cs" />
+    <Compile Include="Data\DataSetConverter\IDataSetConverter.cs" />
+    <Compile Include="Data\DataSetConverter\ListDataSetConverter.cs" />
+    <Compile Include="Data\DataSetConverter\NoConvertDataSetConverter.cs" />
+    <Compile Include="Data\DataSetConverter\ShuffleDataSetConverter.cs" />
+    <Compile Include="Data\DataSetConverter\ToAutoencoderDataSetConverter.cs" />
     <Compile Include="Data\IDataSet.cs" />
+    <Compile Include="Data\TrainDataProvider\ConverterTrainDataProvider.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\NoNoiser.cs" />
     <Compile Include="ISerializationHelper.cs" />
     <Compile Include="KNN\CPUOpenCLKNearestFactory.cs" />

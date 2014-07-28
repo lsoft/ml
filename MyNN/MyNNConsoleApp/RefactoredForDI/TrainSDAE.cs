@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MyNN;
 using MyNN.Data;
+using MyNN.Data.DataSetConverter;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Data.TrainDataProvider.Noiser.Range;
@@ -58,6 +59,8 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var serialization = new SerializationHelper();
 
+            var toa = new ToAutoencoderDataSetConverter();
+
             var rootContainer = new FileSystemArtifactContainer(
                 ".",
                 serialization);
@@ -77,14 +80,17 @@ namespace MyNNConsoleApp.RefactoredForDI
                 mlpfactory,
                 (IDataSet td) =>
                 {
+                    var result =
+                        new ConverterTrainDataProvider(
+                            new ShuffleDataSetConverter(randomizer),
+                            new NoiseDataProvider(td, noiser)
+                            );
                     return
-                        new NoiseDataProvider(
-                            td.ConvertToAutoencoder(),
-                            noiser);
+                        result;
                 },
                 (IDataSet vd, IArtifactContainer mlpContainer) =>
                 {
-                    var vda = vd.ConvertToAutoencoder();
+                    var vda = toa.Convert(vd);
 
                     return
                         new Validation(

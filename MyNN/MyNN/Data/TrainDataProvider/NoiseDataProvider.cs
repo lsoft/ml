@@ -12,14 +12,6 @@ namespace MyNN.Data.TrainDataProvider
         private readonly INoiser _noiser;
         private readonly Func<int, INoiser> _noiserProvider;
 
-        public bool IsAuencoderDataSet
-        {
-            get
-            {
-                return this._trainData.IsAuencoderDataSet;
-            }
-        }
-
         public NoiseDataProvider(
             IDataSet trainData,
             INoiser noiser)
@@ -64,10 +56,10 @@ namespace MyNN.Data.TrainDataProvider
             {
                 var noiser = _noiser ?? _noiserProvider(epocheNumber);
 
-                var id = noiser.ApplyNoise(d.Input);
+                var noisedData = noiser.ApplyNoise(d.Input);
 
                 var di = new DataItem(
-                    id,
+                    noisedData,
                     d.Output);
 
                 result.Add(di);

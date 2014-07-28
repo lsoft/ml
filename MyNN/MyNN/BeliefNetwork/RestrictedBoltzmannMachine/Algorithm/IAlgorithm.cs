@@ -14,15 +14,20 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm
 
         void PrepareBatch();
 
-        void CalculateSamples(
+        void ExecuteGibbsSampling(
             int indexIntoBatch,
             int maxGibbsChainLength
             );
 
         void BatchFinished();
 
+        //result should not contains bias value!
         float[] CalculateVisible();
 
+        //result should not contains bias value!
+        float[] CalculateHidden();
+
+        //result should not contains bias value!
         float[] CalculateReconstructed();
         
         ICollection<float[]> GetFeatures();

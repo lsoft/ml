@@ -6,6 +6,7 @@ using System.Threading;
 using MathNet.Numerics.Distributions;
 using MyNN;
 using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator;
+using MyNN.BoltzmannMachines.DBNInfo;
 using MyNN.Data;
 using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Data.TypicalDataProvider;
@@ -32,7 +33,8 @@ namespace MyNNConsoleApp
                 //TrainRBM.DoTrainBB();
                 //TrainRBM.DoTrainLNRELU();
 
-                TrainDBN.DoTrainBB();
+                //TrainDBN.DoTrainBB();
+                TrainDBN.DoTrainLNRELU();
 
                 Console.WriteLine(".......... press any key to exit");
                 Console.ReadLine();

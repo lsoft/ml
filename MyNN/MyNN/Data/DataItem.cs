@@ -8,6 +8,15 @@ namespace MyNN.Data
         private float[] _input = null;
         private float[] _output = null;
 
+        public int InputLength
+        {
+            get
+            {
+                return
+                    _input.Length;
+            }
+        }
+
         public int OutputLength
         {
             get

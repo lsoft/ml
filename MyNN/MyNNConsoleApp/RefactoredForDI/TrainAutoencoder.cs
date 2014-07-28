@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN;
+using MyNN.Data.DataSetConverter;
 using MyNN.Data.TrainDataProvider;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
@@ -31,19 +32,21 @@ namespace MyNNConsoleApp.RefactoredForDI
     {
         public static void DoTrain()
         {
+            var toa = new ToAutoencoderDataSetConverter();
+
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
                 1000 //int.MaxValue
                 );
             trainData.Normalize();
-            trainData = trainData.ConvertToAutoencoder();
+            trainData = toa.Convert(trainData);
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
                 300 //int.MaxValue
                 );
             validationData.Normalize();
-            validationData = validationData.ConvertToAutoencoder();
+            validationData = toa.Convert(validationData);
 
             var randomizer = new DefaultRandomizer(123);
 
@@ -78,7 +81,11 @@ namespace MyNNConsoleApp.RefactoredForDI
                 -1f
                 );
 
-            var trainDataProvider = new NoDeformationTrainDataProvider(trainData);
+            var trainDataProvider = 
+                new ConverterTrainDataProvider(
+                    new ShuffleDataSetConverter(randomizer), 
+                    new NoDeformationTrainDataProvider(trainData)
+                    );
 
             var autoencoderName = string.Format(
                 "ae{0}.ae",

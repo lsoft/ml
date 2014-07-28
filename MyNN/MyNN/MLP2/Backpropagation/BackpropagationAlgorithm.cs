@@ -51,7 +51,7 @@ namespace MyNN.MLP2.Backpropagation
 
             _randomizer = randomizer;
             _backpropagationEpocheTrainer = backpropagationEpocheTrainer;
-            _artifactContainer = artifactContainer;//.GetChildContainer(mlp.Name);
+            _artifactContainer = artifactContainer;
             _mlp = mlp;
             _validation = validation;
             _config = config;
@@ -98,7 +98,7 @@ namespace MyNN.MLP2.Backpropagation
 
             ConsoleAmbientContext.Console.WriteLine("Predeformation...");
 
-            //запрашиваем данные
+            //запрашиваем данные (уже перемешанные)
             var trainData = trainDataProvider.GetDataSet(epochNumber);
 
             ConsoleAmbientContext.Console.WriteLine("Start training...");
@@ -132,13 +132,10 @@ namespace MyNN.MLP2.Backpropagation
                 var epocheContainer = _artifactContainer.GetChildContainer(
                     string.Format("epoche {0}", epochNumber));
 
-                //перемешиваем данные для эпохи
-                var shuffled = trainData.CreateShuffledDataSet(_randomizer);
-
                 var dtStart = DateTime.Now;
 
                 //обучаем эпоху
-                _backpropagationEpocheTrainer.TrainEpoche(shuffled, epocheContainer, learningRate);
+                _backpropagationEpocheTrainer.TrainEpoche(trainData, epocheContainer, learningRate);
 
                 //сколько времени заняла эпоха обучения
                 var trainTimeEnd = DateTime.Now;
@@ -181,6 +178,7 @@ namespace MyNN.MLP2.Backpropagation
 
                 var deformStart = DateTime.Now;
 
+                //получаем данные для следующей эпохи (уже перемешанные)
                 trainData = trainDataProvider.GetDataSet(epochNumber);
 
                 //сколько времени заняло искажение данных

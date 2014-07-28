@@ -17,6 +17,12 @@ namespace MyNN.Data
             private set;
         }
 
+        public bool IsAutoencoderDataSet
+        {
+            get;
+            set;
+        }
+
         public bool IsAuencoderDataSet
         {
             get;
@@ -32,10 +38,39 @@ namespace MyNN.Data
             }
         }
 
+        public int InputLength
+        {
+            get
+            {
+                var result = 0;
+
+                if (this.Data.Count > 0)
+                {
+                    result = this.Data[0].InputLength;
+                }
+
+                return result;
+            }
+        }
+
         public DataSet()
         {
             Data = new List<DataItem>();
             IsAuencoderDataSet = false;
+        }
+
+        public DataSet(
+            List<DataItem> data,
+            bool isAutoencoderDataSet
+            )
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+
+            Data = data;
+            IsAutoencoderDataSet = isAutoencoderDataSet;
         }
 
         public DataSet(
@@ -111,18 +146,6 @@ namespace MyNN.Data
                 return
                     this.Data[i];
             }
-        }
-
-        public IDataSet ConvertToAutoencoder()
-        {
-            var result =
-                new DataSet(
-                    this.Data.ConvertAll(j => new DataItem(j.Input, j.Input))
-                    );
-
-            result.IsAuencoderDataSet = true;
-
-            return result;
         }
 
         public List<float[]> GetInputPart()
@@ -218,71 +241,6 @@ namespace MyNN.Data
                     Console.WriteLine("mean {0}   variance {1}   std {2}", mean1, variance1, standardDeviation1);
                 }
             }
-        }
-
-        /// <summary>
-        /// Создает новый датасет, перемешивает его и отдает
-        /// </summary>
-        /// <returns></returns>
-        public IDataSet CreateShuffledDataSet(
-            IRandomizer randomizer)
-        {
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
-            }
-
-            var cloned = new List<DataItem>(this.Data);
-            for (int i = 0; i < cloned.Count - 1; i++)
-            {
-                if (randomizer.Next() >= 0.5d)
-                {
-                    var newIndex = randomizer.Next(cloned.Count);
-
-                    var tmp = cloned[i];
-                    cloned[i] = cloned[newIndex];
-                    cloned[newIndex] = tmp;
-                }
-            }
-
-            var result = new DataSet(
-                cloned);
-
-            return result;
-        }
-
-        /// <summary>
-        /// Бинаризует данные в датасете
-        /// (1 с вероятностью значения)
-        /// Если данные не нормализованы в диапазон [0;1], генерируется исключение
-        /// </summary>
-        /// <returns></returns>
-        public IDataSet Binarize(
-            IRandomizer randomizer)
-        {
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
-            }
-
-            var cloned = new List<DataItem>();
-            foreach (var di in this.Data)
-            {
-                if (di.Input.Any(j => j < 0f || j > 1f))
-                {
-                    throw new InvalidOperationException("Данные не нормализованы в диапазон [0;1]");
-                }
-
-                var bi = di.Input.ToList().ConvertAll(j => (randomizer.Next() < j) ? 1f : 0f);
-
-                var ndi = new DataItem(bi.ToArray(), di.Output);
-                cloned.Add(ndi);
-            }
-
-            var result = new DataSet(
-                cloned);
-
-            return result;
         }
 
 

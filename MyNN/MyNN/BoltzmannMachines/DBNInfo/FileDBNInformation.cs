@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MyNN.BeliefNetwork;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN;
 using MyNN.MLP2.Structure.Layer.Factory.WeightLoader;
 using MyNN.OutputConsole;
@@ -57,13 +58,6 @@ namespace MyNN.BoltzmannMachines.DBNInfo
             _dbnInfoRoot = dbnInfoRoot;
             _serializationHelper = serializationHelper;
 
-            ////количество слоев в обученной DBN
-            //var dbnFolderCount =
-            //    Directory.GetDirectories(dbnInfoRoot)
-            //    .ToList()
-            //    .FindAll(j => Path.GetFileName(j).StartsWith(DeepBeliefNetwork.RbmFolderName))
-            //    .Count;
-
             #region проверяем наличие файла dbn.info и содержимое в нем
 
             var pathToDbnInfo = Path.Combine(dbnInfoRoot, "dbn.info");
@@ -105,7 +99,7 @@ namespace MyNN.BoltzmannMachines.DBNInfo
                 throw new ArgumentException("Номер слоя должен начинаться с 1, так как для входного слоя веса не загружаются.");
             }
 
-            var rbmFolderPath = Path.Combine(_dbnInfoRoot, DeepBeliefNetwork.RbmFolderName + (layerIndex - 1));
+            var rbmFolderPath = Path.Combine(_dbnInfoRoot, DBN.RbmFolderName + (layerIndex - 1));
 
             var lastEpocheNumber =
                 (from d in Directory.EnumerateDirectories(rbmFolderPath)
@@ -139,7 +133,7 @@ namespace MyNN.BoltzmannMachines.DBNInfo
                 throw new ArgumentException("Номер слоя должен начинаться с 1, так как для входного слоя веса не загружаются.");
             }
 
-            var rbmFolderPath = Path.Combine(_dbnInfoRoot, DeepBeliefNetwork.RbmFolderName + (layerIndex - 1));
+            var rbmFolderPath = Path.Combine(_dbnInfoRoot, DBN.RbmFolderName + (layerIndex - 1));
 
             var lastEpocheNumber =
                 (from d in Directory.EnumerateDirectories(rbmFolderPath)
@@ -174,12 +168,12 @@ namespace MyNN.BoltzmannMachines.DBNInfo
             }
 
             var lines = File.ReadAllLines(pathToDbnInfo);
-            if (lines.Length <= 1)
+            if (lines.Length < 1)
             {
                 return null;
             }
 
-            var layersLine = lines[1];
+            var layersLine = lines.First(j => j.StartsWith("Layers sizes"));
             if (string.IsNullOrEmpty(layersLine) || layersLine.IndexOf(':') < 0)
             {
                 return null;
