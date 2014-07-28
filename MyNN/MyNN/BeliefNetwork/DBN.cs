@@ -23,22 +23,16 @@ namespace MyNN.BeliefNetwork
     {
         public const string RbmFolderName = "rbm_layer";
 
-        private readonly IRandomizer _randomizer;
         private readonly IArtifactContainer _dbnContainer;
         private readonly IRBMFactory _rbmFactory;
         private readonly int[] _layerSizes;
 
         public DBN(
-            IRandomizer randomizer,
             IArtifactContainer dbnContainer,
             IRBMFactory rbmFactory,
             params int[] layerSizes
             )
         {
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
-            }
             if (dbnContainer == null)
             {
                 throw new ArgumentNullException("dbnContainer");
@@ -48,7 +42,6 @@ namespace MyNN.BeliefNetwork
                 throw new ArgumentNullException("rbmFactory");
             }
 
-            _randomizer = randomizer;
             _dbnContainer = dbnContainer;
             _rbmFactory = rbmFactory;
             _layerSizes = layerSizes;

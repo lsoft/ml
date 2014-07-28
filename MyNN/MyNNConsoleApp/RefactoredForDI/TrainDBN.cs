@@ -59,7 +59,6 @@ namespace MyNNConsoleApp.RefactoredForDI
             var rbmFactory = new RBMLNRELUCDFactory(randomizer);
 
             var dbn = new DBN(
-                randomizer,
                 dbnContainer,
                 rbmFactory,
                 784,
@@ -129,7 +128,6 @@ namespace MyNNConsoleApp.RefactoredForDI
             var rbmFactory = new RBMBBCDFactory(randomizer);
 
             var dbn = new DBN(
-                randomizer,
                 dbnContainer,
                 rbmFactory,
                 784,
