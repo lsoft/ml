@@ -73,6 +73,16 @@ namespace MyNN.MLP2.Structure
                 string.Join(" -> ", this.Layers.ToList().ConvertAll(j => j.GetLayerInformation()));
         }
 
+        public void OverwriteName(string newName)
+        {
+            if (newName == null)
+            {
+                throw new ArgumentNullException("newName");
+            }
+
+            this.Name = newName;
+        }
+
         /// <summary>
         /// Обрезать автоенкодер. Удаляются слои, начиная с узкого слоя и до конца
         /// </summary>

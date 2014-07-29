@@ -20,16 +20,13 @@ namespace MyNN.MLP2
     {
         private readonly IMLP _mlp;
         private readonly IForwardPropagationFactory _forwardPropagationFactory;
-        private readonly int _nonZeroCount;
-        private readonly float _featureValue;
         private readonly IRandomizer _randomizer;
 
         public FileSystemFeatureVisualization(
             IRandomizer randomizer,
             IMLP mlp,
-            IForwardPropagationFactory forwardPropagationFactory,
-            int nonZeroCount,
-            float featureValue)
+            IForwardPropagationFactory forwardPropagationFactory
+            )
         {
             if (randomizer == null)
             {
@@ -47,16 +44,17 @@ namespace MyNN.MLP2
             _randomizer = randomizer;
             _mlp = mlp;
             _forwardPropagationFactory = forwardPropagationFactory;
-            _nonZeroCount = nonZeroCount;
-            _featureValue = featureValue;
         }
 
         public void Visualize(
             IVisualizer visualizer,
             string imageFileName,
+            int nonZeroCount,
+            float featureValue,
             int takeIntoAccount = 900,
             bool randomOrder = true,
-            bool clampTo01 = false)
+            bool clampTo01 = false
+            )
         {
             if (visualizer == null)
             {
@@ -90,9 +88,9 @@ namespace MyNN.MLP2
                 {
                     var input = new float[inputLayerSize];
 
-                    for (var nz = 0; nz < _nonZeroCount; nz++)
+                    for (var nz = 0; nz < nonZeroCount; nz++)
                     {
-                        input[_randomizer.Next(input.Length)] = _featureValue;
+                        input[_randomizer.Next(input.Length)] = featureValue;
                     }
 
                     var output = new float[1];

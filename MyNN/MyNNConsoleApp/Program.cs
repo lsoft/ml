@@ -35,8 +35,9 @@ namespace MyNNConsoleApp
 
                 //TrainDBN.DoTrainBB();
                 //TrainDBN.DoTrainLNRELU();
-                //TrainDBN.DoTrainMLP();
-                TrainDBN.DoTrainAutoencoder();
+                //TrainDBN.DoTrainMLPOnDBN();
+                //TrainDBN.DoTrainAutoencoder();
+                TrainDBN.DoTrainMLPOnAE();
 
                 Console.WriteLine(".......... press any key to exit");
                 Console.ReadLine();

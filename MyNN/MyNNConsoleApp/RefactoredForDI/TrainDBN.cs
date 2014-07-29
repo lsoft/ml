@@ -27,6 +27,7 @@ using MyNN.Data.TrainDataProvider.Noiser.Range;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.Data.Visualizer;
 using MyNN.LearningRateController;
+using MyNN.MLP2;
 using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
@@ -35,8 +36,10 @@ using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
+using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
+using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Factory;
 using MyNN.MLP2.Structure.Layer.Factory;
 using MyNN.MLP2.Structure.Neurons.Factory;
@@ -48,6 +51,91 @@ namespace MyNNConsoleApp.RefactoredForDI
 {
     public class TrainDBN
     {
+        public static void DoTrainMLPOnAE()
+        {
+            var trainData = MNISTDataProvider.GetDataSet(
+                "_MNIST_DATABASE/mnist/trainingset/",
+                int.MaxValue
+                );
+            trainData.GNormalize();
+
+            var validationData = MNISTDataProvider.GetDataSet(
+                "_MNIST_DATABASE/mnist/testset/",
+                int.MaxValue
+                );
+            validationData.GNormalize();
+
+            var randomizer = new DefaultRandomizer(123);
+
+            var serialization = new SerializationHelper();
+
+            var rootContainer = new FileSystemArtifactContainer(
+                ".",
+                serialization);
+
+            var validation = new Validation(
+                new ClassificationAccuracyCalculator(
+                    new HalfSquaredEuclidianDistance(),
+                    validationData),
+                new GridReconstructDrawer(
+                    new MNISTVisualizer(),
+                    validationData,
+                    300,
+                    100)
+                );
+
+
+            using (var clProvider = new CLProvider())
+            {
+                var mlp = serialization.LoadFromFile<MLP>("aeondbn20140728201343.ae\\epoche 49\\aeondbn20140728201343.ae");
+                mlp.AutoencoderCutTail();
+                mlp.AddLayer(
+                    new SigmoidFunction(1f),
+                    10,
+                    false);
+
+                var mlpName = string.Format(
+                    "mlponae{0}.mlp",
+                    DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+                mlp.OverwriteName(mlpName);
+
+                var config = new LearningAlgorithmConfig(
+                    new LinearLearningRate(0.006f, 0.99f),
+                    1,
+                    0f,
+                    50,
+                    -1f,
+                    -1f
+                    );
+
+                var trainDataProvider =
+                    new ConverterTrainDataProvider(
+                        new ShuffleDataSetConverter(randomizer),
+                        new NoDeformationTrainDataProvider(trainData)
+                        );
+
+                var mlpContainer = rootContainer.GetChildContainer(mlp.Name);
+
+                var algo = new BackpropagationAlgorithm(
+                    randomizer,
+                    new CPUBackpropagationEpocheTrainer(
+                        VectorizationSizeEnum.VectorizationMode16,
+                        mlp,
+                        config,
+                        clProvider),
+                    mlpContainer,
+                    mlp,
+                    validation,
+                    config
+                    );
+
+                algo.Train(
+                    trainDataProvider
+                    );
+            }
+        }
+
         public static void DoTrainAutoencoder()
         {
             var toa = new ToAutoencoderDataSetConverter();
@@ -162,7 +250,7 @@ namespace MyNNConsoleApp.RefactoredForDI
             }
         }
 
-        public static void DoTrainMLP()
+        public static void DoTrainMLPOnDBN()
         {
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
