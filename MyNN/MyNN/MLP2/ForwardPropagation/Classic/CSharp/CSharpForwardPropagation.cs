@@ -31,7 +31,8 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             MLP = mlp;
         }
 
-        public List<ILayerState> ComputeOutput(IDataSet dataSet)
+        public List<ILayerState> ComputeOutput(
+            IDataSet dataSet)
         {
             TimeSpan propagationTime;
             var result = ComputeOutput(
@@ -41,7 +42,9 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             return result;
         }
 
-        public List<ILayerState> ComputeOutput(IDataSet dataSet, out TimeSpan propagationTime)
+        public List<ILayerState> ComputeOutput(
+            IDataSet dataSet,
+            out TimeSpan propagationTime)
         {
             if (dataSet == null)
             {

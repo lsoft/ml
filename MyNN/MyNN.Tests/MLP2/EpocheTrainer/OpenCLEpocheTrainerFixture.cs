@@ -51,6 +51,7 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
         [ClassInitialize()]
         public static void MyClassInitialize(TestContext testContext)
         {
+            ConsoleAmbientContext.ResetConsole();
             ConsoleAmbientContext.Console = new TestOutputConsole();
         }
         
