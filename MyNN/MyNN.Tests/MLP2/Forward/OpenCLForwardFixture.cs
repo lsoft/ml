@@ -9,6 +9,7 @@ using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Neurons.Function;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.Forward
 {
@@ -70,7 +71,7 @@ namespace MyNN.Tests.MLP2.Forward
         [TestMethod]
         public void OpenCLForward_1_1_Test0()
         {
-            var test = new Forward_1_1_Test();
+            var test = new ForwardTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -81,27 +82,30 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
 
-            var result = test.ExecuteTest(
-                dataset,
-                1f,
-                1f,
-                () => new LinearFunction(1f), 
-                (clProvider, mlp) =>
-                {
-                    return 
-                        new CPUForwardPropagation(
-                            VectorizationSizeEnum.NoVectorization,
-                            mlp,
-                            clProvider);
-                });
+            using (var clProvider = new CLProvider())
+            {
+                var result = test.ExecuteTestWith11MLP(
+                    dataset,
+                    1f,
+                    1f,
+                    () => new LinearFunction(1f),
+                    (mlp) =>
+                    {
+                        return
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.NoVectorization,
+                                mlp,
+                                clProvider);
+                    });
 
-            Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
+                Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
+            }
         }
 
         [TestMethod]
         public void OpenCLForward_1_1_Test1()
         {
-            var test = new Forward_1_1_Test();
+            var test = new ForwardTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -112,22 +116,94 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
 
-            var result = test.ExecuteTest(
-                dataset,
-                0.5f,
-                -1f,
-                () => new SigmoidFunction(1f), 
-                (clProvider, mlp) =>
+            using (var clProvider = new CLProvider())
+            {
+                var result = test.ExecuteTestWith11MLP(
+                    dataset,
+                    0.5f,
+                    -1f,
+                    () => new SigmoidFunction(1f),
+                    (mlp) =>
+                    {
+                        return
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.NoVectorization,
+                                mlp,
+                                clProvider);
+                    });
+
+                Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
+            }
+        }
+
+        [TestMethod]
+        public void OpenCLForward_1_1_Test2()
+        {
+            var test = new ForwardTester();
+
+            var dataset = new DataSet(
+                new List<DataItem>
                 {
-                    return
-                        new CPUForwardPropagation(
-                            VectorizationSizeEnum.NoVectorization,
-                            mlp,
-                            clProvider);
+                    new DataItem(
+                        new[] {2f},
+                        new[] {1f})
                 });
 
-            Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
+
+            using (var clProvider = new CLProvider())
+            {
+                var result = test.ExecuteTestWith11MLP(
+                    dataset,
+                    0.5f,
+                    -1f,
+                    () => new SigmoidFunction(1f),
+                    (mlp) =>
+                    {
+                        return
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.VectorizationMode4,
+                                mlp,
+                                clProvider);
+                    });
+
+                Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
+            }
         }
+
+        [TestMethod]
+        public void OpenCLForward_1_1_Test3()
+        {
+            var test = new ForwardTester();
+
+            var dataset = new DataSet(
+                new List<DataItem>
+                {
+                    new DataItem(
+                        new[] {2f},
+                        new[] {1f})
+                });
+
+
+            using (var clProvider = new CLProvider())
+            {
+                var result = test.ExecuteTestWith11MLP(
+                    dataset,
+                    0.5f,
+                    -1f,
+                    () => new SigmoidFunction(1f),
+                    (mlp) =>
+                    {
+                        return
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.VectorizationMode16,
+                                mlp,
+                                clProvider);
+                    });
+
+                Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
+            }
+        }
+
 
     }
 }

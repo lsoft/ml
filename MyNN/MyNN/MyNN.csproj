@@ -268,7 +268,7 @@
     <Compile Include="MLP2\ArtifactContainer\IArtifactReadContainer.cs" />
     <Compile Include="MLP2\FileSystemFeatureVisualization.cs" />
     <Compile Include="MLP2\ForwardPropagationFactory\Classic\OpenCL\GPU\GPUForwardPropagationFactory.cs" />
-    <Compile Include="MLP2\ForwardPropagation\Classic\CSharp\CCharpForwardPropagation.cs" />
+    <Compile Include="MLP2\ForwardPropagation\Classic\CSharp\CSharpForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagationFactory\DropConnect\OpenCL\CPU\CPUDropConnectForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagationFactory\IForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagationFactory\Classic\OpenCL\CPU\CPUForwardPropagationFactory.cs" />
@@ -329,7 +329,6 @@
     <Compile Include="MLP2\Autoencoders\StackedAutoencoder.cs" />
     <Compile Include="MLP2\Autoencoders\StackedNLNCAAutoencoder.cs" />
     <Compile Include="MLP2\Backpropagation\BackpropagationAlgorithm.cs" />
-    <Compile Include="MLP2\Backpropagation\DataSourceDelegate.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\DropConnect\Bit\OpenCL\CPU\DropConnectBitKernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\DropConnect\Bit\OpenCL\CPU\DropConnectBitCPUBackpropagationEpocheTrainer.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\DropConnect\Bit\WeightMask\BigArrayWeightBitMaskContainer.cs" />

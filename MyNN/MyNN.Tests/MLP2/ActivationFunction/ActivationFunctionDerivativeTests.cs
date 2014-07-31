@@ -31,11 +31,6 @@ namespace MyNN.Tests.MLP2.ActivationFunction
 
                 var diff = Math.Abs(cDerivative - fDerivative);
 
-                //if (diff >= DerivativeEpsilon)
-                //{
-                //    throw new Exception();
-                //}
-
                 Assert.IsTrue(diff <= allowedDerivativeEpsilon);
             }
         }

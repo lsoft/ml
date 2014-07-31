@@ -12,15 +12,15 @@ using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.Forward
 {
-    internal class Forward_1_1_Test
+    internal class ForwardTester
     {
 
-        public float ExecuteTest(
+        public float ExecuteTestWith11MLP(
             IDataSet dataset,
             float weight0,
             float weight1,
             Func<IFunction> functionFactory,
-            Func<CLProvider, IMLP, IForwardPropagation> forwardFactory)
+            Func<IMLP, IForwardPropagation> forwardFactory)
         {
             if (dataset == null)
             {
@@ -37,19 +37,17 @@ namespace MyNN.Tests.MLP2.Forward
 
             var randomizer = new ConstRandomizer(0.5f);
 
-            var layerFactory = new LayerFactory(new NeuronFactory(randomizer));
-            
-
             var mlpf = new MLPFactory(
-                layerFactory
-                );
+                new LayerFactory(
+                    new NeuronFactory(
+                        randomizer)));
 
             var mlp = mlpf.CreateMLP(
                 DateTime.Now.ToString("yyyyMMddHHmmss"),
                 new IFunction[]
                 {
                     null,
-                    functionFactory() 
+                    functionFactory()
                 },
                 new int[]
                 {
@@ -59,20 +57,16 @@ namespace MyNN.Tests.MLP2.Forward
 
             mlp.Layers[1].Neurons[0].Weights[0] = weight0;
             mlp.Layers[1].Neurons[0].Weights[1] = weight1;
+            
+            var forward = forwardFactory(mlp);
 
-            using (var clProvider = new CLProvider())
-            {
-                var forward = forwardFactory(clProvider, mlp);
+            var output = forward.ComputeOutput(dataset);
 
-                var output = forward.ComputeOutput(dataset);
+            Assert.IsTrue(output.Count == 1);
+            Assert.IsTrue(output[0].State.Length == 1);
 
-                Assert.IsTrue(output.Count == 1);
-                Assert.IsTrue(output[0].State.Length == 1);
-
-                return
-                    output[0].State[0];
-            }
-
+            return
+                output[0].State[0];
         }
     }
 }

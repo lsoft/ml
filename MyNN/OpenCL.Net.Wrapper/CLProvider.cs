@@ -42,6 +42,8 @@ namespace OpenCL.Net.Wrapper
             private set;
         }
 
+        private volatile bool _providerIsInDisposeMode = false;
+
         public CLProvider(
             IDeviceChooser deviceChooser,
             bool silentStart)
@@ -358,16 +360,6 @@ namespace OpenCL.Net.Wrapper
             return memd;
         }
 
-        private void MemDisposed(Guid memGuid)
-        {
-            var removedCount = _mems.RemoveAll(j => j.MemGuid == memGuid);
-
-            if (removedCount != 1)
-            {
-                throw new InvalidOperationException("Должен был удалиться 1 мем");
-            }
-        }
-
         public void QueueFinish()
         {
             _commandQueue.Finish();
@@ -375,6 +367,8 @@ namespace OpenCL.Net.Wrapper
 
         public virtual void Dispose()
         {
+            _providerIsInDisposeMode = true;
+
             foreach (var m in _mems)
             {
                 m.Dispose();
@@ -388,5 +382,22 @@ namespace OpenCL.Net.Wrapper
             Cl.ReleaseCommandQueue(_commandQueue);
             Cl.ReleaseContext(_context);
         }
+
+        private void MemDisposed(Guid memGuid)
+        {
+            if (_providerIsInDisposeMode)
+            {
+                return;
+            }
+
+            var removedCount = _mems.RemoveAll(j => j.MemGuid == memGuid);
+
+            if (removedCount != 1)
+            {
+                throw new InvalidOperationException("Должен был удалиться 1 мем");
+            }
+        }
+
+
     }
 }

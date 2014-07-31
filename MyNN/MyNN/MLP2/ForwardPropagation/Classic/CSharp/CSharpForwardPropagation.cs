@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AForge;
 using MyNN.Data;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Layer;
@@ -11,7 +12,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
     /// <summary>
     /// MLP Forward propagation implemented in parallel C#
     /// </summary>
-    public class CCharpForwardPropagation : IForwardPropagation
+    public class CSharpForwardPropagation : IForwardPropagation
     {
         public IMLP MLP
         {
@@ -19,7 +20,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             private set;
         }
 
-        public CCharpForwardPropagation(
+        public CSharpForwardPropagation(
             IMLP mlp)
         {
             if (mlp == null)
@@ -28,8 +29,6 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             }
 
             MLP = mlp;
-
-            throw new Exception("юзатель! помни! этот форвардер не проверен ни разу! написан вслепую! прежде чем юзать - зотести!");
         }
 
         public List<ILayerState> ComputeOutput(IDataSet dataSet)
@@ -57,10 +56,11 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
 
             foreach (var d in dataSet)
             {
-                var calcResult = new float[inputLength];
+                var calcResult = new float[this.MLP.Layers[0].Neurons.Length];
                 Array.Copy(d.Input, calcResult, inputLength);
+                calcResult[calcResult.Length - 1] = 1f;
                 
-                for (var cc = 0; cc < this.MLP.Layers.Length; cc++)
+                for (var cc = 1; cc < this.MLP.Layers.Length; cc++)
                 {
                     var tmp =
                         this.ComputeLayer(
@@ -99,10 +99,11 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             {
                 var listls = new List<ILayerState>();
 
-                var calcResult = new float[inputLength];
+                var calcResult = new float[this.MLP.Layers[0].Neurons.Length];
                 Array.Copy(d.Input, calcResult, inputLength);
+                calcResult[calcResult.Length - 1] = 1f;
 
-                for (var cc = 0; cc < this.MLP.Layers.Length; cc++)
+                for (var cc = 1; cc < this.MLP.Layers.Length; cc++)
                 {
                     var tmp =
                         this.ComputeLayer(
@@ -132,6 +133,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
         {
             var lastOutput = new float[layer.Neurons.Length];
 
+            //Parallel.For(0, layer.Neurons.Length, cc =>
             for (var cc = 0; cc < layer.Neurons.Length; cc++)
             {
                 var a = 1f;
@@ -146,6 +148,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
 
                 lastOutput[cc] = a;
             }
+            //); //Parallel.For
 
             return
                 lastOutput;
