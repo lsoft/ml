@@ -398,6 +398,7 @@
     <Compile Include="Randomizer\DefaultRandomizer.cs" />
     <Compile Include="Randomizer\IRandomizer.cs" />
     <Compile Include="Randomizer\NoRandomRandomizer.cs" />
+    <Compile Include="Randomizer\TableRandomizer.cs" />
     <Compile Include="rfloat.cs" />
     <Compile Include="SerializationHelper.cs" />
     <Compile Include="SplitHelper.cs" />

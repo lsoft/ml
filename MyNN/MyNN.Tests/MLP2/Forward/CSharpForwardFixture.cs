@@ -29,7 +29,7 @@ namespace MyNN.Tests.MLP2.Forward
                         new[] {1f})
                 });
 
-            var result = test.ExecuteTestWith11MLP(
+            var result = test.ExecuteTestWith_1_1_MLP(
                 dataset,
                 1f,
                 1f,
@@ -56,7 +56,7 @@ namespace MyNN.Tests.MLP2.Forward
                         new[] {1f})
                 });
             
-            var result = test.ExecuteTestWith11MLP(
+            var result = test.ExecuteTestWith_1_1_MLP(
                 dataset,
                 0.5f,
                 -1f,
@@ -68,6 +68,39 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
             Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
+        }
+
+        [TestMethod]
+        public void CSharpForward_5_24_24_1_Test0()
+        {
+            var test = new ForwardTester();
+
+            var dataset = new DataSet(
+                new List<DataItem>
+                {
+                    new DataItem(
+                        new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
+                        new[] {1f})
+                });
+            
+            var result = test.ExecuteTestWith_5_24_24_1_MLP(
+                dataset,
+                () => new LinearFunction(1f), 
+                (mlp) =>
+                {
+                    return
+                        new CSharpForwardPropagation(mlp);
+                });
+
+            const float correctResult = -0.4017001f;
+
+            ConsoleAmbientContext.Console.WriteLine(
+                string.Format(
+                    "correct = {0}, result = {1}",
+                    correctResult,
+                    result));
+
+            Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
         }
     }
 }

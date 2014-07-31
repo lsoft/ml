@@ -132,23 +132,19 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             float[] inputVector)
         {
             var lastOutput = new float[layer.Neurons.Length];
+            lastOutput[lastOutput.Length - 1] = 1f;
 
-            //Parallel.For(0, layer.Neurons.Length, cc =>
-            for (var cc = 0; cc < layer.Neurons.Length; cc++)
+            Parallel.For(0, layer.NonBiasNeuronCount, cc =>
+            //for (var cc = 0; cc < layer.NonBiasNeuronCount; cc++)
             {
-                var a = 1f;
-
                 var n = layer.Neurons[cc];
-                //if (!n.IsBiasNeuron)
-                //{
-                    a = this.Activate(
+                var a = this.Activate(
                         n,
                         inputVector);
-                //}
 
                 lastOutput[cc] = a;
             }
-            //); //Parallel.For
+            ); //Parallel.For
 
             return
                 lastOutput;
@@ -181,7 +177,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
 
             for (var cc = 0; cc < inputVector.Length; ++cc)
             {
-                sum += neuron.Weights[cc] * inputVector[cc];
+                sum += neuron.Weights[cc]*inputVector[cc];
             }
 
             return
