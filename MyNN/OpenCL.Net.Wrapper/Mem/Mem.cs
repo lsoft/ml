@@ -33,7 +33,6 @@ namespace OpenCL.Net.Wrapper.Mem
             Array = new T[arrayLength];
 
             _mem = context.CreateBuffer(Array, flags);
-            //_mem = context.AllocateArray<T>(Array, _sizeOfT, flags);
         }
 
         public OpenCL.Net.IMem<T> GetMem()

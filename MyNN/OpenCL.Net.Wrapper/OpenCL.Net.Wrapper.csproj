@@ -51,6 +51,7 @@
     <Compile Include="DeviceChooser\IntelCPUDeviceChooser.cs" />
     <Compile Include="DeviceChooser\IntelGPUDeviceChooser.cs" />
     <Compile Include="DeviceChooser\NvidiaOrAmdGPUDeviceChooser.cs" />
+    <Compile Include="Resource\EmbeddedResourceReader.cs" />
     <Compile Include="Kernel.cs" />
     <Compile Include="Mem\BaseMem.cs" />
     <Compile Include="Mem\BlockModeEnum.cs" />
@@ -71,9 +72,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="KernelLibrary\WarpReduction.cl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    <EmbeddedResource Include="KernelLibrary\Reduction.cl" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

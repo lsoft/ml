@@ -8,15 +8,15 @@ using System.Text;
 using OpenCL.Net.Extensions;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCL.Net.Wrapper.Resource;
 
 namespace OpenCL.Net.Wrapper
 {
     public class CLProvider : IDisposable
     {
-        private readonly IDeviceChooser _deviceChooser;
-        private Device _device;
-        private Context _context;
-        private CommandQueue _commandQueue;
+        private readonly Device _device;
+        private readonly Context _context;
+        private readonly CommandQueue _commandQueue;
 
         private readonly List<IMemWrapper> _mems;
         private readonly List<Kernel> _kernels;
@@ -50,11 +50,12 @@ namespace OpenCL.Net.Wrapper
             {
                 throw new ArgumentNullException("deviceChooser");
             }
-
-            _deviceChooser = deviceChooser;
             
             //ищем подходящее устройство opencl
-            ChooseDevice();
+            DeviceType choosedDeviceType;
+            deviceChooser.ChooseDevice(out choosedDeviceType, out _device);
+
+            this.ChoosedDeviceType = choosedDeviceType;
 
             this.Parameters = new CLParameters(this.ChoosedDevice);
 
@@ -65,10 +66,10 @@ namespace OpenCL.Net.Wrapper
             }
 
             //создаем контекст вычислений
-            CreateContext();
+            _context = CreateContext();
 
             //создаем очередь команд
-            CreateCommandQueue();
+            _commandQueue = CreateCommandQueue();
 
             //создаем пустые структуры
             _mems = new List<IMemWrapper>();
@@ -83,112 +84,35 @@ namespace OpenCL.Net.Wrapper
 
         #region opencl init
 
-        private void CreateCommandQueue()
+        private CommandQueue CreateCommandQueue()
         {
             ErrorCode error;
 
-            _commandQueue = Cl.CreateCommandQueue(_context, _device, (CommandQueueProperties)0, out error);
+            var commandQueue = Cl.CreateCommandQueue(_context, _device, (CommandQueueProperties)0, out error);
             if (error != ErrorCode.Success)
             {
                 throw new InvalidProgramException(string.Format("Unable to CreateCommandQueue: {0}!", error));
             }
+
+            return commandQueue;
         }
 
-        private void CreateContext()
+        private Context CreateContext()
         {
             ErrorCode error;
 
-            _context = Cl.CreateContext(null, 1, new[] { _device }, null, IntPtr.Zero, out error);
+            var context = Cl.CreateContext(null, 1, new[] { _device }, null, IntPtr.Zero, out error);
 
             if (error != ErrorCode.Success)
             {
                 throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Context, error was: {0}!", error));
             }
-        }
 
-        private void ChooseDevice()
-        {
-            //ErrorCode error;
-
-            //var platforms = Cl.GetPlatformIDs(out error);
-            //if (error != ErrorCode.Success)
-            //{
-            //    throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Device, error was: {0}!", error));
-            //}
-
-            //Device? device = null;
-
-            //DeviceType[] devicePriority =
-            //{
-            //    //DeviceType.Cpu, //!!!
-            //    DeviceType.Gpu, 
-            //    DeviceType.Accelerator, 
-            //    DeviceType.All, 
-            //    DeviceType.Cpu
-            //};
-
-            //foreach (var deviceType in devicePriority)
-            //{
-            //    //look for GPUs first
-            //    foreach (var platform in platforms)//.Skip(1))
-            //    {
-            //        var deviceIds = Cl.GetDeviceIDs(platform, deviceType, out error);
-            //        if (deviceIds.Any())
-            //        {
-            //            device = deviceIds.First();
-            //            this.ChoosedDeviceType = deviceType;
-            //            break;
-            //        }
-            //    }
-
-            //    if (device != null)
-            //    {
-            //        break;
-            //    }
-            //}
-
-            //if (error != ErrorCode.Success)
-            //{
-            //    throw new InvalidOperationException(string.Format("Unable to retrieve an OpenCL Device, error was: {0}!", error));
-            //}
-
-            DeviceType choosedDeviceType;
-            _deviceChooser.ChooseDevice(out choosedDeviceType, out _device);
-
-            this.ChoosedDeviceType = choosedDeviceType;
+            return
+                context;
         }
 
         #endregion
-
-
-        private string GetResourceFile(string resourceName)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-
-            //var names = assembly.GetManifestResourceNames().ToList();
-            //names.ForEach(j => Console.WriteLine(j));
-
-            var stream = assembly.GetManifestResourceStream(resourceName);
-
-            if (stream != null)
-            {
-                try
-                {
-                    using (var reader = new StreamReader(stream))
-                    {
-                        var result = reader.ReadToEnd();
-                        return result;
-                    }
-                }
-                finally
-                {
-                    stream.Dispose();
-                }
-            }
-
-            return null;
-
-        }
 
         /// <summary>
         /// загружаем программу и параметры
@@ -199,9 +123,10 @@ namespace OpenCL.Net.Wrapper
             string source,
             string kernelName)
         {
+            var err = new EmbeddedResourceReader();
+
             var fullTextStringBuilder = new StringBuilder();
-            fullTextStringBuilder.Append(
-                GetResourceFile("OpenCL.Net.Wrapper.KernelLibrary.WarpReduction.cl"));
+            fullTextStringBuilder.Append(err.GetTextResourceFile("OpenCL.Net.Wrapper.KernelLibrary.Reduction.cl"));
             fullTextStringBuilder.Append(source);
 
             var fullText = fullTextStringBuilder.ToString();

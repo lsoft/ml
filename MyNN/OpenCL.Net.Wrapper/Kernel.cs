@@ -26,8 +26,18 @@ namespace OpenCL.Net.Wrapper
             {
                 throw new Cl.Exception(errorCode);
             }
+        }
 
-            //_kernel = _program.CreateKernel(kernelName);
+        public Kernel SetKernelArgLocalMem(uint argId, int size)
+        {
+            var error = Cl.SetKernelArg(_kernel, argId, new IntPtr(size), null);
+
+            if (error != ErrorCode.Success)
+            {
+                throw new InvalidProgramException(string.Format("Unable to run Cl.SetKernelArgMem: {0}!", error));
+            }
+
+            return this;
         }
 
         public Kernel SetKernelArgLocalMem(uint argId, uint size)
@@ -38,8 +48,6 @@ namespace OpenCL.Net.Wrapper
             {
                 throw new InvalidProgramException(string.Format("Unable to run Cl.SetKernelArgMem: {0}!", error));
             }
-
-            //_kernel.SetKernelArgLocalMem(argId, size);
 
             return this;
         }

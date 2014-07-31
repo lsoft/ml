@@ -14,8 +14,13 @@ using MyNN.MLP2;
 
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.OutputConsole;
 using MyNN.Randomizer;
 using MyNNConsoleApp.RefactoredForDI;
+using OpenCL.Net;
+using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.DeviceChooser;
+using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNNConsoleApp
 {
@@ -37,7 +42,7 @@ namespace MyNNConsoleApp
                 //TrainDBN.DoTrainLNRELU();
                 //TrainDBN.DoTrainMLPOnDBN();
                 //TrainDBN.DoTrainAutoencoder();
-                TrainDBN.DoTrainMLPOnAE();
+                //TrainDBN.DoTrainMLPOnAE();
 
                 Console.WriteLine(".......... press any key to exit");
                 Console.ReadLine();

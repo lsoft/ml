@@ -1,7 +1,5 @@
 ﻿/*
  * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
-
- * (this reduction does not works on Intel CPU (CENTRAL processor unit) OpenCL but works on Intel GPU (HD4400))
  */
 inline void WarpReductionToFirstElement(
     __local float *partialDotProduct)
@@ -32,7 +30,9 @@ inline void WarpReductionToFirstElement(
       // The first thread of each warp stores the result of the reduction
       // at the beginning of partialDotProduct
       if (id == 0)
+      {
          partialDotProduct[get_local_id(0) / WARP_SIZE] = warpResult;
+      }
 
       // Synchronize to make sure each warp is done writing to
       // partialDotProduct before it is read in the next step
