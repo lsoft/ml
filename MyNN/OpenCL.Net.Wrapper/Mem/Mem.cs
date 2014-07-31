@@ -5,10 +5,11 @@ using OpenCL.Net.Extensions;
 
 namespace OpenCL.Net.Wrapper.Mem
 {
-    public abstract class Mem<T> //: BaseMem
+    public abstract class Mem<T>
         : IMemWrapper
         where T : struct
     {
+        private readonly Action<Guid> _memDisposed;
         private readonly CommandQueue _commandQueue;
         private readonly IMem<T> _mem;
 
@@ -20,17 +21,32 @@ namespace OpenCL.Net.Wrapper.Mem
             private set;
         }
 
+        public Guid MemGuid
+        {
+            get;
+            private set;
+        }
+
         protected Mem(
+            Action<Guid> memDisposed,
             CommandQueue commandQueue,
             Context context,
             ulong arrayLength,
             int sizeOfT,
             MemFlags flags)
         {
+            if (memDisposed == null)
+            {
+                throw new ArgumentNullException("memDisposed");
+            }
+            
+            _memDisposed = memDisposed;
             _commandQueue = commandQueue;
             _sizeOfT = sizeOfT;
 
             Array = new T[arrayLength];
+
+            MemGuid = Guid.NewGuid();
 
             _mem = context.CreateBuffer(Array, flags);
         }
@@ -81,6 +97,8 @@ namespace OpenCL.Net.Wrapper.Mem
             this.Array = null;
 
             Cl.ReleaseMemObject(_mem);
+
+            _memDisposed(this.MemGuid);
         }
     }
 }

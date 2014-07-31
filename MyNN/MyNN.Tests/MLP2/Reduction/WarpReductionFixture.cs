@@ -68,45 +68,10 @@ namespace MyNN.Tests.MLP2.Reduction
                 128
             };
 
+            using (var clProvider = new CLProvider(deviceChooser, true))
             for (var currentSize = localSizes.Min(); currentSize < upperBound; currentSize += (randomizer.Next(randomStep) + 1))
             {
-                foreach (var localSize in localSizes)
-                {
-                    var globalSize =
-                        ((currentSize % localSize) > 0)
-                            ? ((int)(currentSize / localSize) + 1) * localSize
-                            : currentSize;
-
-                    var localMemoryInBytes = globalSize * localSize * 4;
-
-                    if (localMemoryInBytes > 32 * 1024)
-                    {
-                        //слищком жирно - кончится локальная память у устройства
-                        continue;
-                    }
-
-                    ConsoleAmbientContext.Console.WriteLine(
-                        "csize = {0}, gsize = {1}, lsize = {2}...    ", 
-                        currentSize, 
-                        globalSize,
-                        localSize);
-
-                    using (var clProvider = new CLProvider(deviceChooser, true))
-                    {
-                        var m = clProvider.CreateFloatMem(
-                            currentSize,
-                            MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-
-                        for (var cc = 0; cc < m.Array.Length; cc++)
-                        {
-                            m.Array[cc] = randomizer.Next(256)/256f;
-                        }
-
-                        m.Write(BlockModeEnum.Blocking);
-
-                        var cpuSum = m.Array.Sum();
-
-                        var k = @"
+                var k = @"
 __kernel void TestReductionKernel(
     __global float * gdata,
     __local float * ldata,
@@ -137,7 +102,42 @@ __kernel void TestReductionKernel(
 }
 ";
 
-                        var kernel = clProvider.CreateKernel(k, "TestReductionKernel");
+                var kernel = clProvider.CreateKernel(k, "TestReductionKernel");
+
+                foreach (var localSize in localSizes)
+                {
+                    var globalSize =
+                        ((currentSize % localSize) > 0)
+                            ? ((int)(currentSize / localSize) + 1) * localSize
+                            : currentSize;
+
+                    var localMemoryInBytes = globalSize * localSize * 4;
+
+                    if (localMemoryInBytes > 32 * 1024)
+                    {
+                        //слищком жирно - кончится локальная память у устройства
+                        continue;
+                    }
+
+                    ConsoleAmbientContext.Console.WriteLine(
+                        "csize = {0}, gsize = {1}, lsize = {2}...    ", 
+                        currentSize, 
+                        globalSize,
+                        localSize);
+
+                    using (MemFloat m = clProvider.CreateFloatMem(
+                            currentSize,
+                            MemFlags.CopyHostPtr | MemFlags.ReadWrite))
+                    {
+
+                        for (var cc = 0; cc < m.Array.Length; cc++)
+                        {
+                            m.Array[cc] = randomizer.Next(256)/256f;
+                        }
+
+                        m.Write(BlockModeEnum.Blocking);
+
+                        var cpuSum = m.Array.Sum();
 
                         kernel
                             .SetKernelArgMem(0, m)

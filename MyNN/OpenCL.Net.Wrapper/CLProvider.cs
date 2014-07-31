@@ -186,6 +186,7 @@ namespace OpenCL.Net.Wrapper
             }
 
             var memi = new MemUint(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 (ulong)arrayLength,
@@ -201,6 +202,7 @@ namespace OpenCL.Net.Wrapper
             MemFlags flags)
         {
             var memi = new MemUint(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 arrayLength,
@@ -221,6 +223,7 @@ namespace OpenCL.Net.Wrapper
             }
 
             var memi = new MemInt(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 (ulong)arrayLength,
@@ -237,6 +240,7 @@ namespace OpenCL.Net.Wrapper
             MemFlags flags)
         {
             var memi = new MemInt(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 arrayLength,
@@ -257,6 +261,7 @@ namespace OpenCL.Net.Wrapper
             }
 
             var memh = new MemHalf(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 (ulong)arrayLength,
@@ -272,6 +277,7 @@ namespace OpenCL.Net.Wrapper
             MemFlags flags)
         {
             var memh = new MemHalf(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 arrayLength,
@@ -288,6 +294,7 @@ namespace OpenCL.Net.Wrapper
             MemFlags flags)
         {
             var memb = new MemByte(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 arrayLength,
@@ -308,6 +315,7 @@ namespace OpenCL.Net.Wrapper
             }
 
             var memf = new MemFloat(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 (ulong)arrayLength,
@@ -323,6 +331,7 @@ namespace OpenCL.Net.Wrapper
             MemFlags flags)
         {
             var memf = new MemFloat(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 arrayLength,
@@ -338,6 +347,7 @@ namespace OpenCL.Net.Wrapper
             MemFlags flags)
         {
             var memd = new MemDouble(
+                MemDisposed,
                 _commandQueue,
                 _context,
                 arrayLength,
@@ -346,6 +356,16 @@ namespace OpenCL.Net.Wrapper
             this._mems.Add(memd);
 
             return memd;
+        }
+
+        private void MemDisposed(Guid memGuid)
+        {
+            var removedCount = _mems.RemoveAll(j => j.MemGuid == memGuid);
+
+            if (removedCount != 1)
+            {
+                throw new InvalidOperationException("Должен был удалиться 1 мем");
+            }
         }
 
         public void QueueFinish()
