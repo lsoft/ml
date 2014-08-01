@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,14 +14,14 @@ using OpenCL.Net.Wrapper.Mem;
 namespace MyNN.Tests.MLP2.Reduction
 {
     [TestClass]
-    public class WarpReductionFixture
+    public class WarpReductionPerformanceFixture
     {
         [TestMethod]
         public void NvidiaAMDWarpReductionTest()
         {
             var deviceChooser = new NvidiaOrAmdGPUDeviceChooser();
 
-            TestReduction(deviceChooser, 33000, 13);
+            TestReduction(deviceChooser, 150000, 20000000);
         }
 
         [TestMethod]
@@ -28,7 +29,7 @@ namespace MyNN.Tests.MLP2.Reduction
         {
             var deviceChooser = new IntelGPUDeviceChooser();
 
-            TestReduction(deviceChooser, 33000, 13);
+            TestReduction(deviceChooser, 150000, 20000000);
         }
 
         [TestMethod]
@@ -36,13 +37,13 @@ namespace MyNN.Tests.MLP2.Reduction
         {
             var deviceChooser = new IntelCPUDeviceChooser();
 
-            TestReduction(deviceChooser, 33000, 13);
+            TestReduction(deviceChooser, 150000, 20000000);
         }
 
         private static void TestReduction(
             IDeviceChooser deviceChooser,
-            int upperBound,
-            int randomStep
+            int testCount,
+            int upperBound
             )
         {
             if (deviceChooser == null)
@@ -53,63 +54,25 @@ namespace MyNN.Tests.MLP2.Reduction
             var seed = DateTime.Now.Millisecond;
             var randomizer = new DefaultRandomizer(seed);
 
-            var localSizes = new[]
-            {
-                3,
-                4,
-                8,
-                16,
-                24,
-                31,
-                32,
-                33,
-                64,
-                128,
-                255,
-                256,
-                257,
-                512,
-                991,
-                997,
-                1024,
-                1601,
-                2048,
-                3541,
-                4095,
-                4096,
-            };
-
-            //var localSizes = new[]
-            //{
-            //    4,
-            //    8,
-            //    16,
-            //    32,
-            //    64,
-            //    128,
-            //    256,
-            //    512,
-            //    1024,
-            //    2048,
-            //    4096,
-            //};
-
             using (var clProvider = new CLProvider(deviceChooser, false))
             {
                 var k = @"
 __kernel void TestReductionKernel(
     __global float * gdata,
+    __global float * tdata,
     __local float * ldata,
     int currentSize
 )
 {
     float v = 0;
-
     if(get_global_id(0) < currentSize)
     {
-        v = gdata[get_global_id(0)];
+        for(int i = get_global_id(0); i < currentSize; i += get_global_size(0))
+        {
+            v += gdata[i];
+        }
     }
-    
+
     ldata[get_local_id(0)] = v;
 
     barrier(CLK_LOCAL_MEM_FENCE);
@@ -120,87 +83,153 @@ __kernel void TestReductionKernel(
 
     if(get_local_id(0) == 0)
     {
-        gdata[get_group_id(0)] = ldata[0];
+        tdata[get_group_id(0)] = ldata[0];
     }
 }
 ";
 
-                var kernel = clProvider.CreateKernel(k, "TestReductionKernel"); 
-                
-                for (var currentSize = localSizes.Min(); currentSize < upperBound; currentSize += (randomizer.Next(randomStep) + 1))
+                var kernel = clProvider.CreateKernel(k, "TestReductionKernel");
+
+                var maxGroupCount = (int)clProvider.Parameters.NumComputeUnits*32;
+
+                var testParameters = new List<TestParameters>();
+
+                //добавляем с минимальными значениями предопределенные поля
+                for (var groupCount = 1; groupCount < 8; groupCount++)
                 {
-                    foreach (var localSize in localSizes)
+                    for (var localSize = 1; localSize < 8; localSize++)
                     {
-                        if (localSize > clProvider.Parameters.MaxWorkGroupSize)
+                        for (var currentSize = 1; currentSize < 64; currentSize++)
                         {
-                            continue;
+                            testParameters.Add(
+                                new TestParameters(
+                                    groupCount,
+                                    localSize,
+                                    currentSize));
                         }
+                    }
+                }
 
-                        var groupCount =
-                            (currentSize/localSize) + ((currentSize%localSize) == 0 ? 0 : 1);
+                //добавляем со стандартными параметрами
+                for (var testIndex = 0; testIndex < testCount; testIndex++)
+                {
+                    var groupCount = randomizer.Next(maxGroupCount) + 1;
 
-                        var globalSize = groupCount*localSize;
+                    var localMaxByDeviceMemory = (int) clProvider.Parameters.LocalMemorySize/4/sizeof (float)/groupCount;
+                    var localMaxByWorkGroupSize = (int) clProvider.Parameters.MaxWorkGroupSize;
+                    var localSize = randomizer.Next(Math.Min(localMaxByDeviceMemory - 1, localMaxByWorkGroupSize - 1)) + 1;
 
-                        var localMemoryInBytes = (ulong)groupCount * (ulong)localSize * 4;
-                        if (localMemoryInBytes > clProvider.Parameters.LocalMemorySize / 2)
-                        {
-                            //слишком жирно - кончится локальная память у устройства
-                            continue;
-                        }
+                    var currentSize = Math.Min(localSize, randomizer.Next(upperBound) + 1);
+                    //var globalSize = groupCount*localSize;
 
-                        ConsoleAmbientContext.Console.Write(
-                            "csize = {0}, gsize = {1}, lsize = {2}, gcount = {3}, overhead = {4}...    ",
-                            currentSize,
-                            globalSize,
-                            localSize,
+                    //var groupCount = 1;
+                    //var localSize = 2699;
+                    //var currentSize = 8;
+                    //var globalSize = groupCount * localSize;
+
+                    testParameters.Add(
+                        new TestParameters(
                             groupCount,
-                            globalSize - currentSize
+                            localSize,
+                            currentSize));
+                }
+
+                foreach(var tp in testParameters)
+                {
+                    ConsoleAmbientContext.Console.Write(
+                        "csize = {0}, gsize = {1}, lsize = {2}, gcount = {3}, overhead = {4}...    ",
+                        tp.CurrentSize,
+                        tp.GlobalSize,
+                        tp.LocalSize,
+                        tp.GroupCount,
+                        tp.GlobalSize - tp.CurrentSize
+                        );
+
+                    using (var m = clProvider.CreateFloatMem(
+                        tp.CurrentSize,
+                        MemFlags.CopyHostPtr | MemFlags.ReadOnly))
+                    using (var t = clProvider.CreateFloatMem(
+                        tp.GroupCount,
+                        MemFlags.CopyHostPtr | MemFlags.WriteOnly))
+                    {
+
+                        for (var cc = 0; cc < m.Array.Length; cc++)
+                        {
+                            m.Array[cc] = randomizer.Next(8) + 1;
+                        }
+
+                        m.Write(BlockModeEnum.Blocking);
+
+                        Array.Clear(t.Array, 0, t.Array.Length);
+                        t.Write(BlockModeEnum.Blocking);
+
+                        var cpuSum = KahanAlgorithm.Reduce(m.Array);
+
+                        kernel
+                            .SetKernelArgMem(0, m)
+                            .SetKernelArgMem(1, t)
+                            .SetKernelArgLocalMem(2, tp.LocalSize * 4)
+                            .SetKernelArg(3, 4, tp.CurrentSize)
+                            .EnqueueNDRangeKernel(
+                                new[]
+                                    {
+                                        tp.GlobalSize
+                                    },
+                                new[]
+                                    {
+                                        tp.LocalSize
+                                    }
                             );
 
-                        using (var m = clProvider.CreateFloatMem(
-                            currentSize,
-                            MemFlags.CopyHostPtr | MemFlags.ReadWrite))
-                        {
+                        clProvider.QueueFinish();
 
-                            for (var cc = 0; cc < m.Array.Length; cc++)
-                            {
-                                m.Array[cc] = randomizer.Next(8) + 1;
-                            }
+                        t.Read(BlockModeEnum.Blocking);
 
-                            m.Write(BlockModeEnum.Blocking);
+                        var gpuSum = t.Array.Sum();
 
-                            var cpuSum = KahanAlgorithm.Reduce(m.Array);
+                        ConsoleAmbientContext.Console.WriteLine((cpuSum - gpuSum).ToString());
 
-                            kernel
-                                .SetKernelArgMem(0, m)
-                                .SetKernelArgLocalMem(1, localSize * 4)
-                                .SetKernelArg(2, 4, currentSize)
-                                .EnqueueNDRangeKernel(
-                                    new[]
-                                    {
-                                        globalSize
-                                    },
-                                    new[]
-                                    {
-                                        localSize
-                                    }
-                                );
-
-                            clProvider.QueueFinish();
-
-                            m.Read(BlockModeEnum.Blocking);
-
-                            var gpuSum = m.Array.Take(groupCount).Sum();
-
-                            ConsoleAmbientContext.Console.WriteLine((cpuSum - gpuSum).ToString());
-
-                            Assert.AreEqual(cpuSum, gpuSum);
-                        }
+                        Assert.AreEqual(cpuSum, gpuSum);
                     }
                 }
             }
         }
 
+        private class TestParameters
+        {
+            public int GroupCount
+            {
+                get;
+                private set;
+            }
 
+            public int LocalSize
+            {
+                get;
+                private set;
+            }
+
+            public int CurrentSize
+            {
+                get;
+                private set;
+            }
+
+            public int GlobalSize
+            {
+                get
+                {
+                    return
+                        this.GroupCount*this.LocalSize;
+                }
+            }
+
+            public TestParameters(int groupCount, int localSize, int currentSize)
+            {
+                GroupCount = groupCount;
+                LocalSize = localSize;
+                CurrentSize = currentSize;
+            }
+        }
     }
 }

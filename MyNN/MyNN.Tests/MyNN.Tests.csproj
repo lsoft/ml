@@ -115,6 +115,7 @@
     <Compile Include="MLP2\Forward\OpenCLForwardFixture.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MLP2\Reduction\Performance\WarpReductionPerformanceFixture.cs" />
     <Compile Include="MLP2\Reduction\WarpReductionFixture.cs" />
     <Compile Include="MLP2\Sort\SortFixture.cs" />
     <Compile Include="MLP2\Sort\SortItem.cs" />
