@@ -272,7 +272,11 @@
     <Compile Include="MLP2\ForwardPropagationFactory\DropConnect\OpenCL\CPU\CPUDropConnectForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagationFactory\IForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagationFactory\Classic\OpenCL\CPU\CPUForwardPropagationFactory.cs" />
+    <Compile Include="MLP2\ForwardPropagation\Classic\CSharp\CSharpLayerPropagator.cs" />
     <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\CPU\CPUForwardPropagation.cs" />
+    <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\CPU\CPUKernelSource.cs" />
+    <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\CPU\CPULayerMemContainer.cs" />
+    <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\CPU\OpenCLLayerPropagator.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\TrainItemForward\Bit\OpenCL\CPU\DropConnectBitOpenCLForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\TrainItemForward\Float\OpenCL\CPU\DropConnectOpenCLForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\Inference\OpenCL\CPU\Inferencer\InferenceOpenCLForwardPropagation.cs" />

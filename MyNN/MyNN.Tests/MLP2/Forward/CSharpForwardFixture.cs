@@ -37,7 +37,9 @@ namespace MyNN.Tests.MLP2.Forward
                 (mlp) =>
                 {
                     return
-                        new CSharpForwardPropagation(mlp);
+                        new CSharpForwardPropagation(
+                            new CSharpLayerPropagator(), 
+                            mlp);
                 });
 
             Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
@@ -64,7 +66,9 @@ namespace MyNN.Tests.MLP2.Forward
                 (mlp) =>
                 {
                     return
-                        new CSharpForwardPropagation(mlp);
+                        new CSharpForwardPropagation(
+                            new CSharpLayerPropagator(), 
+                            mlp);
                 });
 
             Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
@@ -89,7 +93,9 @@ namespace MyNN.Tests.MLP2.Forward
                 (mlp) =>
                 {
                     return
-                        new CSharpForwardPropagation(mlp);
+                        new CSharpForwardPropagation(
+                            new CSharpLayerPropagator(), 
+                            mlp);
                 });
 
             const float correctResult = -0.4017001f;
