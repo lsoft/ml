@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
@@ -7,7 +8,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.OpenCLHelper;
+using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper;
@@ -18,11 +21,11 @@ namespace MyNN.Tests.MLP2.Forward
     /// Summary description for OpenCLForwardFixture
     /// </summary>
     [TestClass]
-    public class OpenCLForwardFixture
+    public class OpenCLForward2Fixture
     {
         private const float ForwardEpsilon = 1e-6f;
 
-        public OpenCLForwardFixture()
+        public OpenCLForward2Fixture()
         {
             //
             // TODO: Add constructor logic here
@@ -92,9 +95,21 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new PropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        ILayerMemContainer[] containers;
+                        ICPULayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.NoVectorization,
+                            out containers,
+                            out propagators);
+
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.NoVectorization,
+                            new CPUForwardPropagation2(
+                                containers,
+                                propagators,
                                 mlp,
                                 clProvider);
                     });
@@ -126,9 +141,21 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new PropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        ILayerMemContainer[] containers;
+                        ICPULayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.NoVectorization,
+                            out containers,
+                            out propagators);
+
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.NoVectorization,
+                            new CPUForwardPropagation2(
+                                containers,
+                                propagators,
                                 mlp,
                                 clProvider);
                     });
@@ -160,9 +187,22 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new PropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        ILayerMemContainer[] containers;
+                        ICPULayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.VectorizationMode4,
+                            out containers,
+                            out propagators);
+
+
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.VectorizationMode4,
+                            new CPUForwardPropagation2(
+                                containers,
+                                propagators,
                                 mlp,
                                 clProvider);
                     });
@@ -194,9 +234,21 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new PropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        ILayerMemContainer[] containers;
+                        ICPULayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            out containers,
+                            out propagators);
+
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.VectorizationMode16,
+                            new CPUForwardPropagation2(
+                                containers,
+                                propagators,
                                 mlp,
                                 clProvider);
                     });
@@ -226,9 +278,22 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f), 
                     (mlp) =>
                     {
+                        var pcc = new PropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        ILayerMemContainer[] containers;
+                        ICPULayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            out containers,
+                            out propagators);
+
+
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.VectorizationMode16,
+                            new CPUForwardPropagation2(
+                                containers,
+                                propagators,
                                 mlp,
                                 clProvider);
                     });
@@ -266,9 +331,22 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new PropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        ILayerMemContainer[] containers;
+                        ICPULayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.VectorizationMode4,
+                            out containers,
+                            out propagators);
+
+
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.VectorizationMode4,
+                            new CPUForwardPropagation2(
+                                containers,
+                                propagators,
                                 mlp,
                                 clProvider);
                     });
@@ -306,9 +384,21 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new PropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        ILayerMemContainer[] containers;
+                        ICPULayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.NoVectorization,
+                            out containers,
+                            out propagators);
+
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.NoVectorization,
+                            new CPUForwardPropagation2(
+                                containers,
+                                propagators,
                                 mlp,
                                 clProvider);
                     });
@@ -324,5 +414,7 @@ namespace MyNN.Tests.MLP2.Forward
                 Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
             }
         }
+
+
     }
 }

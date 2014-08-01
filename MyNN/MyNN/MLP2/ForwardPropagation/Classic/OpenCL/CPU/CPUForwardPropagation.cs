@@ -263,9 +263,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU
                     .SetKernelArgMem(1, this.NetMem[layerIndex])
                     .SetKernelArgMem(2, this.StateMem[layerIndex])
                     .SetKernelArgMem(3, this.WeightMem[layerIndex])
-                    .SetKernelArg(4, 4, prevLayerNeuronTotalCount / vectorizationSize)
-                    .SetKernelArg(5, 4, prevLayerNeuronTotalCount - prevLayerNeuronTotalCount % vectorizationSize)
-                    .SetKernelArg(6, 4, prevLayerNeuronTotalCount)
+                    .SetKernelArg(4, 4, prevLayerNeuronTotalCount)
                     .EnqueueNDRangeKernel(_mlp.Layers[layerIndex].NonBiasNeuronCount);
             }
 

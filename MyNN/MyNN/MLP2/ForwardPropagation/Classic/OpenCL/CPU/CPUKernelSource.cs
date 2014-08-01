@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Neurons.Function;
 
@@ -68,8 +64,6 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCount1,
-            int previousLayerNeuronCount1M1,
             int previousLayerNeuronCountTotal)
 {
     //оригинальный алгоритм более чем в два раза медленен
@@ -100,10 +94,11 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCount4,
-            int previousLayerNeuronCount4M4,
             int previousLayerNeuronCountTotal)
 {
+    int previousLayerNeuronCount4 = previousLayerNeuronCountTotal / 4;
+    int previousLayerNeuronCount4M4 = previousLayerNeuronCountTotal - previousLayerNeuronCountTotal % 4;
+
     int neuronIndex = get_global_id(0);
 
     //compute LastNET
@@ -155,10 +150,11 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCount16,
-            int previousLayerNeuronCount16M16,
             int previousLayerNeuronCountTotal)
 {
+    int previousLayerNeuronCount16 = previousLayerNeuronCountTotal / 16;
+    int previousLayerNeuronCount16M16 = previousLayerNeuronCountTotal - previousLayerNeuronCountTotal % 16;
+
     int neuronIndex = get_global_id(0);
 
     //compute LastNET

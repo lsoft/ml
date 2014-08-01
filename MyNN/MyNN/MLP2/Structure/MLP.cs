@@ -55,6 +55,10 @@ namespace MyNN.MLP2.Structure
             {
                 throw new ArgumentNullException("layerList");
             }
+            if (layerList.Length < 2)
+            {
+                throw new ArgumentException("layerList.Length < 2");
+            }
             if (layerList.Any(j => j == null))
             {
                 throw new ArgumentException("layerList.Any(j => j == null)");
