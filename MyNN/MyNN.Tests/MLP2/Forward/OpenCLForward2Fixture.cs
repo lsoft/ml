@@ -95,11 +95,11 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
                             mlp);
 
-                        ILayerMemContainer[] containers;
+                        IMemLayerContainer[] containers;
                         ICPULayerPropagator[] propagators;
                         pcc.CreateComponents(
                             VectorizationSizeEnum.NoVectorization,
@@ -107,11 +107,11 @@ namespace MyNN.Tests.MLP2.Forward
                             out propagators);
 
                         return
-                            new CPUForwardPropagation2(
+                            new ForwardPropagation2(
                                 containers,
                                 propagators,
-                                mlp,
-                                clProvider);
+                                mlp
+                                );
                     });
 
                 Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
@@ -141,11 +141,11 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
                             mlp);
 
-                        ILayerMemContainer[] containers;
+                        IMemLayerContainer[] containers;
                         ICPULayerPropagator[] propagators;
                         pcc.CreateComponents(
                             VectorizationSizeEnum.NoVectorization,
@@ -153,11 +153,11 @@ namespace MyNN.Tests.MLP2.Forward
                             out propagators);
 
                         return
-                            new CPUForwardPropagation2(
+                            new ForwardPropagation2(
                                 containers,
                                 propagators,
-                                mlp,
-                                clProvider);
+                                mlp
+                                );
                     });
 
                 Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
@@ -187,11 +187,11 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
                             mlp);
 
-                        ILayerMemContainer[] containers;
+                        IMemLayerContainer[] containers;
                         ICPULayerPropagator[] propagators;
                         pcc.CreateComponents(
                             VectorizationSizeEnum.VectorizationMode4,
@@ -200,11 +200,11 @@ namespace MyNN.Tests.MLP2.Forward
 
 
                         return
-                            new CPUForwardPropagation2(
+                            new ForwardPropagation2(
                                 containers,
                                 propagators,
-                                mlp,
-                                clProvider);
+                                mlp
+                                );
                     });
 
                 Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
@@ -234,11 +234,11 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
                             mlp);
 
-                        ILayerMemContainer[] containers;
+                        IMemLayerContainer[] containers;
                         ICPULayerPropagator[] propagators;
                         pcc.CreateComponents(
                             VectorizationSizeEnum.VectorizationMode16,
@@ -246,11 +246,11 @@ namespace MyNN.Tests.MLP2.Forward
                             out propagators);
 
                         return
-                            new CPUForwardPropagation2(
+                            new ForwardPropagation2(
                                 containers,
                                 propagators,
-                                mlp,
-                                clProvider);
+                                mlp
+                                );
                     });
 
                 Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
@@ -278,11 +278,11 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f), 
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
                             mlp);
 
-                        ILayerMemContainer[] containers;
+                        IMemLayerContainer[] containers;
                         ICPULayerPropagator[] propagators;
                         pcc.CreateComponents(
                             VectorizationSizeEnum.VectorizationMode16,
@@ -291,11 +291,11 @@ namespace MyNN.Tests.MLP2.Forward
 
 
                         return
-                            new CPUForwardPropagation2(
+                            new ForwardPropagation2(
                                 containers,
                                 propagators,
-                                mlp,
-                                clProvider);
+                                mlp
+                                );
                     });
 
                 const float correctResult = -0.4017001f;
@@ -331,11 +331,11 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
                             mlp);
 
-                        ILayerMemContainer[] containers;
+                        IMemLayerContainer[] containers;
                         ICPULayerPropagator[] propagators;
                         pcc.CreateComponents(
                             VectorizationSizeEnum.VectorizationMode4,
@@ -344,11 +344,11 @@ namespace MyNN.Tests.MLP2.Forward
 
 
                         return
-                            new CPUForwardPropagation2(
+                            new ForwardPropagation2(
                                 containers,
                                 propagators,
-                                mlp,
-                                clProvider);
+                                mlp
+                                );
                     });
 
                 const float correctResult = -0.4017001f;
@@ -384,11 +384,11 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
                             mlp);
 
-                        ILayerMemContainer[] containers;
+                        IMemLayerContainer[] containers;
                         ICPULayerPropagator[] propagators;
                         pcc.CreateComponents(
                             VectorizationSizeEnum.NoVectorization,
@@ -396,11 +396,11 @@ namespace MyNN.Tests.MLP2.Forward
                             out propagators);
 
                         return
-                            new CPUForwardPropagation2(
+                            new ForwardPropagation2(
                                 containers,
                                 propagators,
-                                mlp,
-                                clProvider);
+                                mlp
+                                );
                     });
 
                 const float correctResult = -0.4017001f;

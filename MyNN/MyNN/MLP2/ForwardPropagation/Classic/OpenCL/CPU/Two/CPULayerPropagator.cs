@@ -7,8 +7,9 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
 {
     public class CPULayerPropagator : ICPULayerPropagator
     {
-        private readonly ILayerMemContainer _previousLayerMemContainer;
-        private readonly ILayerMemContainer _currentLayerMemContainer;
+        private readonly CLProvider _clProvider;
+        private readonly IMemLayerContainer _previousMemLayerContainer;
+        private readonly IMemLayerContainer _currentMemLayerContainer;
         private readonly int _prevLayerNeuronTotalCount;
         private readonly int _currentLayerNonBiasNeuronCount;
         
@@ -17,33 +18,38 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
         public CPULayerPropagator(
             CLProvider clProvider,
             CPUKernelSource ks,
-            ILayerMemContainer previousLayerMemContainer,
-            ILayerMemContainer currentLayerMemContainer,
+            IMemLayerContainer previousMemLayerContainer,
+            IMemLayerContainer currentMemLayerContainer,
             IFunction activationFunction,
             VectorizationSizeEnum vse,
             int prevLayerNeuronTotalCount,
             int currentLayerNonBiasNeuronCount
             )
         {
+            if (clProvider == null)
+            {
+                throw new ArgumentNullException("clProvider");
+            }
             if (ks == null)
             {
                 throw new ArgumentNullException("ks");
             }
-            if (previousLayerMemContainer == null)
+            if (previousMemLayerContainer == null)
             {
-                throw new ArgumentNullException("previousLayerMemContainer");
+                throw new ArgumentNullException("previousMemLayerContainer");
             }
-            if (currentLayerMemContainer == null)
+            if (currentMemLayerContainer == null)
             {
-                throw new ArgumentNullException("currentLayerMemContainer");
+                throw new ArgumentNullException("currentMemLayerContainer");
             }
             if (activationFunction == null)
             {
                 throw new ArgumentNullException("activationFunction");
             }
 
-            _previousLayerMemContainer = previousLayerMemContainer;
-            _currentLayerMemContainer = currentLayerMemContainer;
+            _clProvider = clProvider;
+            _previousMemLayerContainer = previousMemLayerContainer;
+            _currentMemLayerContainer = currentMemLayerContainer;
             _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
             _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
 
@@ -63,12 +69,18 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             )
         {
             _kernel
-                .SetKernelArgMem(0, _previousLayerMemContainer.StateMem)
-                .SetKernelArgMem(1, _currentLayerMemContainer.NetMem)
-                .SetKernelArgMem(2, _currentLayerMemContainer.StateMem)
-                .SetKernelArgMem(3, _currentLayerMemContainer.WeightMem)
+                .SetKernelArgMem(0, _previousMemLayerContainer.StateMem)
+                .SetKernelArgMem(1, _currentMemLayerContainer.NetMem)
+                .SetKernelArgMem(2, _currentMemLayerContainer.StateMem)
+                .SetKernelArgMem(3, _currentMemLayerContainer.WeightMem)
                 .SetKernelArg(4, 4, _prevLayerNeuronTotalCount)
                 .EnqueueNDRangeKernel(_currentLayerNonBiasNeuronCount);
+        }
+
+        public void WaitForCalculationFinished()
+        {
+            // Make sure we're done with everything that's been requested before
+            _clProvider.QueueFinish();
         }
     }
 }

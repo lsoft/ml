@@ -6,8 +6,9 @@ using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
 {
-    public class CPULayerMemContainer : ILayerMemContainer
+    public class CPUMemLayerContainer : IMemLayerContainer
     {
+        private readonly CLProvider _clProvider;
         private readonly int _previousLayerTotalNeuronCount;
         private readonly int _currentLayerNonBiasNeuronCount;
         private readonly int _currentLayerTotalNeuronCount;
@@ -30,7 +31,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             private set;
         }
 
-        public CPULayerMemContainer(
+        public CPUMemLayerContainer(
             CLProvider clProvider,
             int previousLayerTotalNeuronCount,
             int currentLayerNonBiasNeuronCount,
@@ -42,6 +43,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
                 throw new ArgumentNullException("clProvider");
             }
 
+            _clProvider = clProvider;
             _previousLayerTotalNeuronCount = previousLayerTotalNeuronCount;
             _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
             _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
@@ -102,6 +104,9 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
 
             this.NetMem.Write(BlockModeEnum.NonBlocking);
             this.StateMem.Write(BlockModeEnum.NonBlocking);
+
+            // Make sure we're done with everything that's been requested before
+            _clProvider.QueueFinish();
         }
 
         public void PushWeights(ILayer layer)

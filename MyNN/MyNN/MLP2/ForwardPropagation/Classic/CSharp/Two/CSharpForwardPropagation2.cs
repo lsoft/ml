@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Data;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Layer;
 using OpenCL.Net.Wrapper;
-using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
 {
     /// <summary>
     /// MLP Forward propagation implemented in CPU-oriented (Intel) OpenCL
     /// </summary>
-    public class CPUForwardPropagation2 : IForwardPropagation
+    public class CSharpForwardPropagation2 : IForwardPropagation
     {
         private readonly IMLP _mlp;
 
@@ -24,12 +24,10 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             }
         }
 
-        private readonly CLProvider _clProvider;
-
-        private readonly ILayerMemContainer[] _mems;
+        private readonly ILayerContainer[] _mems;
         private readonly ICPULayerPropagator[] _propagators;
 
-        private ILayerMemContainer _lastContainer
+        private ILayerContainer _lastContainer
         {
             get
             {
@@ -38,11 +36,10 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             }
         }
 
-        public CPUForwardPropagation2(
-            ILayerMemContainer[] mems,
+        public CSharpForwardPropagation2(
+            ILayerContainer[] mems,
             ICPULayerPropagator[] propagators,
-            IMLP mlp,
-            CLProvider clProvider
+            IMLP mlp
             )
         {
             if (mems == null)
@@ -56,10 +53,6 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             if (mlp == null)
             {
                 throw new ArgumentNullException("mlp");
-            }
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
             }
             if (mems.Length != mlp.Layers.Length)
             {
@@ -85,7 +78,6 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             _mems = mems;
             _propagators = propagators;
             _mlp = mlp;
-            _clProvider = clProvider;
 
         }
 
@@ -173,9 +165,6 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
 
             PushInput(d);
             
-            // Make sure we're done with everything that's been requested before
-            _clProvider.QueueFinish();
-
             //начинаем считать
             var layerCount = _mlp.Layers.Length;
 
@@ -183,9 +172,6 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             {
                 _propagators[layerIndex].ComputeLayer();
             }
-
-            // Make sure we're done with everything that's been requested before
-            _clProvider.QueueFinish();
         }
 
         public void PushWeights()

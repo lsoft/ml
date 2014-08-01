@@ -1,52 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
-using MyNN.MLP2.OpenCLHelper;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.Structure;
-using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
 {
-    public class PropagatorComponentConstructor
+    public class CSharpPropagatorComponentConstructor
     {
-        private readonly CLProvider _clProvider;
         private readonly IMLP _mlp;
 
-        public PropagatorComponentConstructor(
-            CLProvider clProvider,
+        public CSharpPropagatorComponentConstructor(
             IMLP mlp
             )
         {
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
-            }
             if (mlp == null)
             {
                 throw new ArgumentNullException("mlp");
             }
 
-            _clProvider = clProvider;
             _mlp = mlp;
         }
 
         public void CreateComponents(
-            VectorizationSizeEnum vse,
-            out ILayerMemContainer[] containers,
+            out ICSharpLayerContainer[] containers,
             out ICPULayerPropagator[] propagators
             )
         {
             var c = this.CreateMemsByMLP();
-            var p = this.CreatePropagatorsByMLP(
-                c,
-                vse);
+            var p = this.CreatePropagatorsByMLP(c);
 
             containers = c;
             propagators = p;
         }
 
         private ICPULayerPropagator[] CreatePropagatorsByMLP(
-            ILayerMemContainer[] containers,
-            VectorizationSizeEnum vse
+            ICSharpLayerContainer[] containers
             )
         {
             if (containers == null)
@@ -57,21 +45,14 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             var result = new List<ICPULayerPropagator>();
             result.Add(null); //для первого слоя нет пропагатора
 
-            var ks = new CPUKernelSource();
-
             var layerCount = _mlp.Layers.Length;
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
-                var p = new CPULayerPropagator(
-                    _clProvider,
-                    ks,
+                var p = new CSharpCPULayerPropagator(
+                    _mlp.Layers[layerIndex],
                     containers[layerIndex - 1],
-                    containers[layerIndex],
-                    _mlp.Layers[layerIndex].LayerActivationFunction,
-                    vse,
-                    _mlp.Layers[layerIndex - 1].Neurons.Length,
-                    _mlp.Layers[layerIndex].NonBiasNeuronCount
+                    containers[layerIndex]
                     );
 
                 result.Add(p);
@@ -81,10 +62,10 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
                 result.ToArray();
         }
 
-        private ILayerMemContainer[] CreateMemsByMLP(
+        private ICSharpLayerContainer[] CreateMemsByMLP(
             )
         {
-            var result = new List<ILayerMemContainer>();
+            var result = new List<ICSharpLayerContainer>();
 
             var layerCount = _mlp.Layers.Length;
 
@@ -94,8 +75,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
                 var currentLayerNonBiasNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
                 var currentLayerTotalNeuronCount = _mlp.Layers[layerIndex].Neurons.Length;
 
-                var mc = new CPULayerMemContainer(
-                    _clProvider,
+                var mc = new CSharpLayerContainer(
                     previousLayerTotalNeuronCount,
                     currentLayerNonBiasNeuronCount,
                     currentLayerTotalNeuronCount

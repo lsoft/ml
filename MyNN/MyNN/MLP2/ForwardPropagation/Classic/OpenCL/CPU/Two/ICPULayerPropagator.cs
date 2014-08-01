@@ -4,5 +4,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
     {
         void ComputeLayer(
             );
+
+        void WaitForCalculationFinished();
     }
 }
