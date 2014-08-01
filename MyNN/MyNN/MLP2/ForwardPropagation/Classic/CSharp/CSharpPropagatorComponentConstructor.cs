@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
 {
     public class CSharpPropagatorComponentConstructor
     {
@@ -23,7 +23,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
 
         public void CreateComponents(
             out ICSharpLayerContainer[] containers,
-            out ICPULayerPropagator[] propagators
+            out ILayerPropagator[] propagators
             )
         {
             var c = this.CreateMemsByMLP();
@@ -33,7 +33,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
             propagators = p;
         }
 
-        private ICPULayerPropagator[] CreatePropagatorsByMLP(
+        private ILayerPropagator[] CreatePropagatorsByMLP(
             ICSharpLayerContainer[] containers
             )
         {
@@ -42,14 +42,14 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
                 throw new ArgumentNullException("containers");
             }
 
-            var result = new List<ICPULayerPropagator>();
+            var result = new List<ILayerPropagator>();
             result.Add(null); //для первого слоя нет пропагатора
 
             var layerCount = _mlp.Layers.Length;
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
-                var p = new CSharpCPULayerPropagator(
+                var p = new CSharpLayerPropagator(
                     _mlp.Layers[layerIndex],
                     containers[layerIndex - 1],
                     containers[layerIndex]

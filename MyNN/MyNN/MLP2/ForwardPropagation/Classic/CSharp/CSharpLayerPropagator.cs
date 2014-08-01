@@ -1,4 +1,6 @@
-using AForge;
+﻿using System;
+using System.Threading.Tasks;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.MLP2.Structure.Neurons;
 
@@ -6,56 +8,73 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
 {
     public class CSharpLayerPropagator : ILayerPropagator
     {
-        public CSharpLayerPropagator()
+        private readonly ILayer _currentLayer;
+        private readonly ICSharpLayerContainer _previousLayerMemContainer;
+        private readonly ICSharpLayerContainer _currentLayerMemContainer;
+
+        public CSharpLayerPropagator(
+            ILayer currentLayer,
+            ICSharpLayerContainer previousLayerMemContainer,
+            ICSharpLayerContainer currentLayerMemContainer
+            )
         {
+            if (currentLayer == null)
+            {
+                throw new ArgumentNullException("currentLayer");
+            }
+            if (previousLayerMemContainer == null)
+            {
+                throw new ArgumentNullException("previousLayerMemContainer");
+            }
+            if (currentLayerMemContainer == null)
+            {
+                throw new ArgumentNullException("currentLayerMemContainer");
+            }
+
+            _currentLayer = currentLayer;
+            _previousLayerMemContainer = previousLayerMemContainer;
+            _currentLayerMemContainer = currentLayerMemContainer;
         }
 
-        public float[] ComputeLayer(
-            ILayer layer,
-            float[] inputVector)
+
+        public void ComputeLayer()
         {
-            var lastOutput = new float[layer.Neurons.Length];
-            lastOutput[lastOutput.Length - 1] = 1f;
-
-            Parallel.For(0, layer.NonBiasNeuronCount, cc =>
-            //for (var cc = 0; cc < layer.NonBiasNeuronCount; cc++)
+            Parallel.For(0, _currentLayer.NonBiasNeuronCount, neuronIndex =>
+            //for (var neuronIndex = 0; neuronIndex < currentLayer.NonBiasNeuronCount; neuronIndex++)
             {
-                var n = layer.Neurons[cc];
-                var a = this.Activate(
-                    n,
-                    inputVector);
-
-                lastOutput[cc] = a;
+                var n = _currentLayer.Neurons[neuronIndex];
+                this.ActivateNeuron(neuronIndex, n);
             }
             ); //Parallel.For
-
-            return
-                lastOutput;
         }
 
-        private float Activate(
-            INeuron neuron,
-            float[] inputVector)
+        public void WaitForCalculationFinished()
         {
-            var sum = this.ComputeNET(
-                neuron,
-                inputVector);
-            
-            var lastState = neuron.ActivationFunction.Compute(sum);
+            //nothing to do
+        }
 
-            return lastState;
+        #region private methods
+
+        private void ActivateNeuron(
+            int neuronIndex,
+            INeuron neuron)
+        {
+            var lastNet = this.ComputeNet(neuron);
+            var lastState = neuron.ActivationFunction.Compute(lastNet);
+
+            _currentLayerMemContainer.NetMem[neuronIndex] = lastNet;
+            _currentLayerMemContainer.StateMem[neuronIndex] = lastState;
         }
 
         /// <summary>
         /// Compute NET of the neuron by input vector
         /// </summary>
         /// <param name="neuron">Neuron</param>
-        /// <param name="inputVector">Input vector</param>
         /// <returns>Compute NET of neuron</returns>
-        private float ComputeNET(
-            INeuron neuron,
-            float[] inputVector)
+        private float ComputeNet(INeuron neuron)
         {
+            var inputVector = _previousLayerMemContainer.StateMem;
+
             var sum = 0.0f;
 
             for (var cc = 0; cc < inputVector.Length; ++cc)
@@ -63,8 +82,10 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
                 sum += neuron.Weights[cc]*inputVector[cc];
             }
 
-            return
+            return 
                 sum;
         }
+
+        #endregion
     }
 }

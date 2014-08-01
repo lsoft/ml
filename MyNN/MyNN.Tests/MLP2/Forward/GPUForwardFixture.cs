@@ -1,17 +1,12 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.ForwardPropagation.Classic;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
 using MyNN.MLP2.OpenCLHelper;
-using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper;
@@ -22,11 +17,11 @@ namespace MyNN.Tests.MLP2.Forward
     /// Summary description for OpenCLForwardFixture
     /// </summary>
     [TestClass]
-    public class OpenCLForward2Fixture
+    public class GPUForwardFixture
     {
         private const float ForwardEpsilon = 1e-6f;
 
-        public OpenCLForward2Fixture()
+        public GPUForwardFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -96,23 +91,10 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            mlp);
-
-                        IMemLayerContainer[] containers;
-                        ILayerPropagator[] propagators;
-                        pcc.CreateComponents(
-                            VectorizationSizeEnum.NoVectorization,
-                            out containers,
-                            out propagators);
-
                         return
-                            new ForwardPropagation2(
-                                containers,
-                                propagators,
-                                mlp
-                                );
+                            new GPUForwardPropagation(
+                                mlp,
+                                clProvider);
                     });
 
                 Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
@@ -142,23 +124,10 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            mlp);
-
-                        IMemLayerContainer[] containers;
-                        ILayerPropagator[] propagators;
-                        pcc.CreateComponents(
-                            VectorizationSizeEnum.NoVectorization,
-                            out containers,
-                            out propagators);
-
                         return
-                            new ForwardPropagation2(
-                                containers,
-                                propagators,
-                                mlp
-                                );
+                            new GPUForwardPropagation(
+                                mlp,
+                                clProvider);
                     });
 
                 Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
@@ -188,24 +157,10 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            mlp);
-
-                        IMemLayerContainer[] containers;
-                        ILayerPropagator[] propagators;
-                        pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode4,
-                            out containers,
-                            out propagators);
-
-
                         return
-                            new ForwardPropagation2(
-                                containers,
-                                propagators,
-                                mlp
-                                );
+                            new GPUForwardPropagation(
+                                mlp,
+                                clProvider);
                     });
 
                 Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
@@ -235,23 +190,10 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            mlp);
-
-                        IMemLayerContainer[] containers;
-                        ILayerPropagator[] propagators;
-                        pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode16,
-                            out containers,
-                            out propagators);
-
                         return
-                            new ForwardPropagation2(
-                                containers,
-                                propagators,
-                                mlp
-                                );
+                            new GPUForwardPropagation(
+                                mlp,
+                                clProvider);
                     });
 
                 Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
@@ -279,24 +221,10 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f), 
                     (mlp) =>
                     {
-                        var pcc = new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            mlp);
-
-                        IMemLayerContainer[] containers;
-                        ILayerPropagator[] propagators;
-                        pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode16,
-                            out containers,
-                            out propagators);
-
-
                         return
-                            new ForwardPropagation2(
-                                containers,
-                                propagators,
-                                mlp
-                                );
+                            new GPUForwardPropagation(
+                                mlp,
+                                clProvider);
                     });
 
                 const float correctResult = -0.4017001f;
@@ -332,24 +260,10 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            mlp);
-
-                        IMemLayerContainer[] containers;
-                        ILayerPropagator[] propagators;
-                        pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode4,
-                            out containers,
-                            out propagators);
-
-
                         return
-                            new ForwardPropagation2(
-                                containers,
-                                propagators,
-                                mlp
-                                );
+                            new GPUForwardPropagation(
+                                mlp,
+                                clProvider);
                     });
 
                 const float correctResult = -0.4017001f;
@@ -385,23 +299,10 @@ namespace MyNN.Tests.MLP2.Forward
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            mlp);
-
-                        IMemLayerContainer[] containers;
-                        ILayerPropagator[] propagators;
-                        pcc.CreateComponents(
-                            VectorizationSizeEnum.NoVectorization,
-                            out containers,
-                            out propagators);
-
                         return
-                            new ForwardPropagation2(
-                                containers,
-                                propagators,
-                                mlp
-                                );
+                            new GPUForwardPropagation(
+                                mlp,
+                                clProvider);
                     });
 
                 const float correctResult = -0.4017001f;
@@ -415,7 +316,5 @@ namespace MyNN.Tests.MLP2.Forward
                 Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
             }
         }
-
-
     }
 }

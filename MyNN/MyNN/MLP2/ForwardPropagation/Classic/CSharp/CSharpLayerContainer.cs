@@ -1,7 +1,7 @@
 ﻿using System;
 using MyNN.MLP2.Structure.Layer;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
 {
     public class CSharpLayerContainer : ICSharpLayerContainer
     {

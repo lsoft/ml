@@ -1,3 +1,5 @@
+использовать http://en.wikipedia.org/wiki/Kahan_summation_algorithm в тесте редукции
+
 тест на ComputeState с несколькими скрытыми слоями
 
 бекпроп тесты

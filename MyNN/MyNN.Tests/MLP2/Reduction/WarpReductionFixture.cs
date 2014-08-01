@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.OutputConsole;
 using MyNN.Randomizer;
@@ -19,7 +20,7 @@ namespace MyNN.Tests.MLP2.Reduction
         {
             var deviceChooser = new NvidiaOrAmdGPUDeviceChooser();
 
-            TestReduction(deviceChooser, 5999, 79);
+            TestReduction(deviceChooser, 33000, 13);
         }
 
         [TestMethod]
@@ -27,15 +28,15 @@ namespace MyNN.Tests.MLP2.Reduction
         {
             var deviceChooser = new IntelGPUDeviceChooser();
 
-            TestReduction(deviceChooser, 5999, 79);
+            TestReduction(deviceChooser, 33000, 13);
         }
 
         [TestMethod]
         public void IntelCPUWarpReductionTest()
         {
             var deviceChooser = new IntelCPUDeviceChooser();
-            
-            TestReduction(deviceChooser, 1511, 61);
+
+            TestReduction(deviceChooser, 33000, 13);
         }
 
         private static void TestReduction(
@@ -54,18 +55,44 @@ namespace MyNN.Tests.MLP2.Reduction
 
             var localSizes = new[]
             {
+                3,
                 4,
                 8,
                 16,
+                24,
+                31,
                 32,
+                33,
                 64,
                 128,
+                255,
                 256,
+                257,
                 512,
+                991,
+                997,
                 1024,
+                1601,
                 2048,
-                4096
+                3541,
+                4095,
+                4096,
             };
+
+            //var localSizes = new[]
+            //{
+            //    4,
+            //    8,
+            //    16,
+            //    32,
+            //    64,
+            //    128,
+            //    256,
+            //    512,
+            //    1024,
+            //    2048,
+            //    4096,
+            //};
 
             using (var clProvider = new CLProvider(deviceChooser, false))
             {
@@ -73,19 +100,19 @@ namespace MyNN.Tests.MLP2.Reduction
 __kernel void TestReductionKernel(
     __global float * gdata,
     __local float * ldata,
-    int size
+    int currentSize
 )
 {
-    if(get_global_size(0) >= size)
-    {
-        return;
-    }
+    float v = 0;
 
-    ldata[get_local_id(0)] = gdata[get_group_id(0) * get_local_size(0) + get_local_id(0)];
+    if(get_global_id(0) < currentSize)
+    {
+        v = gdata[get_global_id(0)];
+    }
+    
+    ldata[get_local_id(0)] = v;
 
     barrier(CLK_LOCAL_MEM_FENCE);
-
-    gdata[get_group_id(0) * get_local_size(0) + get_local_id(0)] = 0;
 
     WarpReductionToFirstElement(ldata);
 
@@ -95,8 +122,6 @@ __kernel void TestReductionKernel(
     {
         gdata[get_group_id(0)] = ldata[0];
     }
-
-    barrier(CLK_LOCAL_MEM_FENCE);
 }
 ";
 
@@ -123,29 +148,32 @@ __kernel void TestReductionKernel(
                             continue;
                         }
 
-                        ConsoleAmbientContext.Console.WriteLine(
-                            "csize = {0}, gsize = {1}, lsize = {2}...    ",
+                        ConsoleAmbientContext.Console.Write(
+                            "csize = {0}, gsize = {1}, lsize = {2}, gcount = {3}, overhead = {4}...    ",
                             currentSize,
                             globalSize,
-                            localSize);
+                            localSize,
+                            groupCount,
+                            globalSize - currentSize
+                            );
 
-                        using (MemFloat m = clProvider.CreateFloatMem(
+                        using (var m = clProvider.CreateFloatMem(
                             currentSize,
                             MemFlags.CopyHostPtr | MemFlags.ReadWrite))
                         {
 
                             for (var cc = 0; cc < m.Array.Length; cc++)
                             {
-                                m.Array[cc] = randomizer.Next(256)/256f;
+                                m.Array[cc] = randomizer.Next(8) + 1;
                             }
 
                             m.Write(BlockModeEnum.Blocking);
 
-                            var cpuSum = m.Array.Sum();
+                            var cpuSum = KahanAlgorithm.Reduce(m.Array);
 
                             kernel
                                 .SetKernelArgMem(0, m)
-                                .SetKernelArgLocalMem(1, currentSize)
+                                .SetKernelArgLocalMem(1, localSize * 4)
                                 .SetKernelArg(2, 4, currentSize)
                                 .EnqueueNDRangeKernel(
                                     new[]
@@ -162,7 +190,9 @@ __kernel void TestReductionKernel(
 
                             m.Read(BlockModeEnum.Blocking);
 
-                            var gpuSum = m.Array.Sum();
+                            var gpuSum = m.Array.Take(groupCount).Sum();
+
+                            ConsoleAmbientContext.Console.WriteLine((cpuSum - gpuSum).ToString());
 
                             Assert.AreEqual(cpuSum, gpuSum);
                         }
@@ -170,5 +200,7 @@ __kernel void TestReductionKernel(
                 }
             }
         }
+
+
     }
 }

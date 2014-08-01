@@ -356,8 +356,8 @@ __kernel void ComputeLayerKernel(
 
             PushInput(d);
 
-            //// Make sure we're done with everything that's been requested before
-            //_clProvider.QueueFinish();
+            // Make sure we're done with everything that's been requested before
+            _clProvider.QueueFinish();
 
             //начинаем считать
             var layerCount = _mlp.Layers.Length;
@@ -388,8 +388,8 @@ __kernel void ComputeLayerKernel(
                         );
             }
 
-            //// Make sure we're done with everything that's been requested before
-            //_clProvider.QueueFinish();
+            // Make sure we're done with everything that's been requested before
+            _clProvider.QueueFinish();
         }
 
         public void PushWeights()

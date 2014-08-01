@@ -5,7 +5,7 @@ using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
 {
-    public class CPULayerPropagator : ICPULayerPropagator
+    public class CPULayerPropagator : ILayerPropagator
     {
         private readonly CLProvider _clProvider;
         private readonly IMemLayerContainer _previousMemLayerContainer;

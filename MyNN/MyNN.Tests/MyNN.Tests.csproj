@@ -108,13 +108,13 @@
     <Compile Include="MLP2\EpocheTrainer\EpocheTrainerValidation.cs" />
     <Compile Include="MLP2\EpocheTrainer\EpocheTrainer_1_1_Test.cs" />
     <Compile Include="MLP2\EpocheTrainer\OpenCLEpocheTrainerFixture.cs" />
+    <Compile Include="MLP2\Forward\GPUForwardFixture.cs" />
     <Compile Include="MLP2\Forward\CSharpForward2Fixture.cs" />
     <Compile Include="MLP2\Forward\OpenCLForward2Fixture.cs" />
     <Compile Include="MLP2\Forward\ForwardTester.cs" />
     <Compile Include="MLP2\Forward\OpenCLForwardFixture.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MLP2\Forward\CSharpForwardFixture.cs" />
     <Compile Include="MLP2\Reduction\WarpReductionFixture.cs" />
     <Compile Include="MLP2\Sort\SortFixture.cs" />
     <Compile Include="MLP2\Sort\SortItem.cs" />

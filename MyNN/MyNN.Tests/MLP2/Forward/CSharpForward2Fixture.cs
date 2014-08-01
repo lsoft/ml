@@ -7,7 +7,8 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two;
+using MyNN.MLP2.ForwardPropagation.Classic;
+using MyNN.MLP2.ForwardPropagation.Classic.CSharp;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.OpenCLHelper;
@@ -97,7 +98,7 @@ namespace MyNN.Tests.MLP2.Forward
                         mlp);
 
                     ICSharpLayerContainer[] containers;
-                    ICPULayerPropagator[] propagators;
+                    ILayerPropagator[] propagators;
                     pcc.CreateComponents(
                         out containers,
                         out propagators);
@@ -138,7 +139,7 @@ namespace MyNN.Tests.MLP2.Forward
                         mlp);
 
                     ICSharpLayerContainer[] containers;
-                    ICPULayerPropagator[] propagators;
+                    ILayerPropagator[] propagators;
                     pcc.CreateComponents(
                         out containers,
                         out propagators);
@@ -176,7 +177,7 @@ namespace MyNN.Tests.MLP2.Forward
                         mlp);
 
                     ICSharpLayerContainer[] containers;
-                    ICPULayerPropagator[] propagators;
+                    ILayerPropagator[] propagators;
                     pcc.CreateComponents(
                         out containers,
                         out propagators);

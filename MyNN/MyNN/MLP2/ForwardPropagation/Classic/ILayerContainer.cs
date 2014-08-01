@@ -1,6 +1,6 @@
 ﻿using MyNN.MLP2.Structure.Layer;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic
 {
     public interface ILayerContainer
     {

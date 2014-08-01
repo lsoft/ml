@@ -32,7 +32,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
         public void CreateComponents(
             VectorizationSizeEnum vse,
             out IMemLayerContainer[] containers,
-            out ICPULayerPropagator[] propagators
+            out ILayerPropagator[] propagators
             )
         {
             var c = this.CreateMemsByMLP();
@@ -44,7 +44,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             propagators = p;
         }
 
-        private ICPULayerPropagator[] CreatePropagatorsByMLP(
+        private ILayerPropagator[] CreatePropagatorsByMLP(
             IMemLayerContainer[] containers,
             VectorizationSizeEnum vse
             )
@@ -54,7 +54,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
                 throw new ArgumentNullException("containers");
             }
 
-            var result = new List<ICPULayerPropagator>();
+            var result = new List<ILayerPropagator>();
             result.Add(null); //для первого слоя нет пропагатора
 
             var ks = new CPUKernelSource();

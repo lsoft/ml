@@ -2,17 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Layer;
-using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic
 {
     /// <summary>
-    /// MLP Forward propagation implemented in CPU-oriented (Intel) OpenCL
+    /// MLP Forward propagation
     /// </summary>
-    public class CSharpForwardPropagation2 : IForwardPropagation
+    public class ForwardPropagation2 : IForwardPropagation
     {
         private readonly IMLP _mlp;
 
@@ -25,7 +23,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
         }
 
         private readonly ILayerContainer[] _mems;
-        private readonly ICPULayerPropagator[] _propagators;
+        private readonly ILayerPropagator[] _propagators;
 
         private ILayerContainer _lastContainer
         {
@@ -36,9 +34,9 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
             }
         }
 
-        public CSharpForwardPropagation2(
+        public ForwardPropagation2(
             ILayerContainer[] mems,
-            ICPULayerPropagator[] propagators,
+            ILayerPropagator[] propagators,
             IMLP mlp
             )
         {
@@ -78,7 +76,6 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
             _mems = mems;
             _propagators = propagators;
             _mlp = mlp;
-
         }
 
         public List<ILayerState> ComputeOutput(IDataSet dataSet)
@@ -163,7 +160,8 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
                 throw new ArgumentNullException("d");
             }
 
-            PushInput(d);
+            //записываем значения в сеть
+            _mems[0].PushInput(d.Input);
             
             //начинаем считать
             var layerCount = _mlp.Layers.Length;
@@ -172,6 +170,8 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
             {
                 _propagators[layerIndex].ComputeLayer();
             }
+
+            _propagators.Last().WaitForCalculationFinished();
         }
 
         public void PushWeights()
@@ -209,20 +209,6 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
         {
             //извлекаем из Opencl последний слой
             _lastContainer.PopLastLayerState();
-        }
-
-        /// <summary>
-        /// распаковывает значения из сети в массивы для opencl
-        /// </summary>
-        private void PushInput(DataItem d)
-        {
-            if (d == null)
-            {
-                throw new ArgumentNullException("d");
-            }
-
-            //записываем значения в сеть
-            _mems[0].PushInput(d.Input);
         }
 
     }

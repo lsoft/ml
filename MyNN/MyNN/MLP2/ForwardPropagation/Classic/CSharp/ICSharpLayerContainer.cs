@@ -1,6 +1,6 @@
 ﻿using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
 {
     public interface ICSharpLayerContainer : ILayerContainer
     {
