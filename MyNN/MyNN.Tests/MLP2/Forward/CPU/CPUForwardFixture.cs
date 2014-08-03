@@ -1,27 +1,24 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Text;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.Tests.MLP2.Forward
+namespace MyNN.Tests.MLP2.Forward.CPU
 {
     /// <summary>
-    /// Summary description for OpenCLForwardFixture
+    /// Summary description for CPUForwardFixture
     /// </summary>
     [TestClass]
-    public class GPUForwardFixture
+    public class CPUForwardFixture
     {
         private const float ForwardEpsilon = 1e-6f;
 
-        public GPUForwardFixture()
+        public CPUForwardFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -92,7 +89,8 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new GPUForwardPropagation(
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.NoVectorization,
                                 mlp,
                                 clProvider);
                     });
@@ -125,7 +123,8 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new GPUForwardPropagation(
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.NoVectorization,
                                 mlp,
                                 clProvider);
                     });
@@ -158,7 +157,8 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new GPUForwardPropagation(
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.VectorizationMode4,
                                 mlp,
                                 clProvider);
                     });
@@ -191,7 +191,8 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new GPUForwardPropagation(
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.VectorizationMode16,
                                 mlp,
                                 clProvider);
                     });
@@ -222,7 +223,8 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new GPUForwardPropagation(
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.VectorizationMode16,
                                 mlp,
                                 clProvider);
                     });
@@ -261,7 +263,8 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new GPUForwardPropagation(
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.VectorizationMode4,
                                 mlp,
                                 clProvider);
                     });
@@ -300,7 +303,8 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new GPUForwardPropagation(
+                            new CPUForwardPropagation(
+                                VectorizationSizeEnum.NoVectorization,
                                 mlp,
                                 clProvider);
                     });

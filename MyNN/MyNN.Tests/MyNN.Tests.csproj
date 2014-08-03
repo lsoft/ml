@@ -95,32 +95,34 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConstRandomizer.cs" />
-    <Compile Include="MLP2\ActivationFunction\ActivationFunctionDerivativeTests.cs" />
-    <Compile Include="MLP2\ActivationFunction\ActivationFunctionDerivativeOpenCLTests.cs" />
-    <Compile Include="MLP2\ActivationFunction\RLUFixture.cs" />
-    <Compile Include="MLP2\ActivationFunction\RLUOpenCLFixture.cs" />
-    <Compile Include="MLP2\ActivationFunction\SparsifierOpenCLFixture.cs" />
-    <Compile Include="MLP2\ActivationFunction\HyperbolicTangensOpenCLFixture.cs" />
-    <Compile Include="MLP2\ActivationFunction\LinearFixture.cs" />
-    <Compile Include="MLP2\ActivationFunction\HyperbolicTangensFixture.cs" />
-    <Compile Include="MLP2\ActivationFunction\SigmoidOpenCLFixture.cs" />
-    <Compile Include="MLP2\ActivationFunction\SparsifierFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\CSharp\ActivationFunctionDerivativeTests.cs" />
+    <Compile Include="MLP2\ActivationFunction\CSharp\HyperbolicTangensFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\CSharp\LinearFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\CSharp\RLUFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\CSharp\SigmoidFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\CSharp\SparsifierFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\OpenCL\ActivationFunctionDerivativeOpenCLTests.cs" />
+    <Compile Include="MLP2\ActivationFunction\OpenCL\HyperbolicTangensOpenCLFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\OpenCL\LinearOpenCLFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\OpenCL\RLUOpenCLFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\OpenCL\SigmoidOpenCLFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\OpenCL\SparsifierOpenCLFixture.cs" />
     <Compile Include="MLP2\EpocheTrainer\EpocheTrainerValidation.cs" />
     <Compile Include="MLP2\EpocheTrainer\EpocheTrainer_1_1_Test.cs" />
     <Compile Include="MLP2\EpocheTrainer\OpenCLEpocheTrainerFixture.cs" />
-    <Compile Include="MLP2\Forward\GPUForwardFixture.cs" />
-    <Compile Include="MLP2\Forward\CSharpForward2Fixture.cs" />
-    <Compile Include="MLP2\Forward\OpenCLForward2Fixture.cs" />
+    <Compile Include="MLP2\Forward\CPU\CPUForward2Fixture.cs" />
+    <Compile Include="MLP2\Forward\CPU\CPUForwardFixture.cs" />
+    <Compile Include="MLP2\Forward\CSharp\CSharpForward2Fixture.cs" />
+    <Compile Include="MLP2\Forward\GPU\GPUAlgorithmForwardAtNVidiaFixture.cs" />
+    <Compile Include="MLP2\Forward\GPU\GPUAlgorithmForwardAtIntelGPUFixture.cs" />
+    <Compile Include="MLP2\Forward\GPU\GPUAlgorithmForwardAtIntelCPUFixture.cs" />
     <Compile Include="MLP2\Forward\ForwardTester.cs" />
-    <Compile Include="MLP2\Forward\OpenCLForwardFixture.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="MLP2\Forward\GPU\GPUForward2Fixture.cs" />
     <Compile Include="MLP2\Reduction\Performance\WarpReductionPerformanceFixture.cs" />
     <Compile Include="MLP2\Reduction\WarpReductionFixture.cs" />
     <Compile Include="MLP2\Sort\SortFixture.cs" />
     <Compile Include="MLP2\Sort\SortItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MLP2\ActivationFunction\SigmoidFixture.cs" />
     <Compile Include="TestOutputConsole.cs" />
     <Compile Include="TestPurposeValidation.cs" />
   </ItemGroup>

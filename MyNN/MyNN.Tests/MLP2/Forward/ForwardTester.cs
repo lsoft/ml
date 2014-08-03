@@ -121,5 +121,57 @@ namespace MyNN.Tests.MLP2.Forward
             return
                 output[0].State[0];
         }
+
+        public float ExecuteTestWith_5_300_1_MLP(
+            IDataSet dataset,
+            Func<IFunction> functionFactory,
+            Func<IMLP, IForwardPropagation> forwardFactory)
+        {
+            if (dataset == null)
+            {
+                throw new ArgumentNullException("dataset");
+            }
+            if (functionFactory == null)
+            {
+                throw new ArgumentNullException("functionFactory");
+            }
+            if (forwardFactory == null)
+            {
+                throw new ArgumentNullException("forwardFactory");
+            }
+
+            var randomizer = new ConstRandomizer(1f);
+
+            var mlpf = new MLPFactory(
+                new LayerFactory(
+                    new NeuronFactory(
+                        randomizer)));
+
+            var mlp = mlpf.CreateMLP(
+                DateTime.Now.ToString("yyyyMMddHHmmss"),
+                new IFunction[]
+                {
+                    null,
+                    functionFactory(),
+                    functionFactory()
+                },
+                new int[]
+                {
+                    5,
+                    300,
+                    1
+                });
+
+            var forward = forwardFactory(mlp);
+
+            var output = forward.ComputeOutput(dataset);
+
+            Assert.IsTrue(output.Count == 1);
+            Assert.IsTrue(output[0].State.Length == 1);
+
+            return
+                output[0].State[0];
+        }
+
     }
 }

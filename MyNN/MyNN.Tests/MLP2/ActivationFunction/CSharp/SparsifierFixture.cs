@@ -1,19 +1,15 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Structure.Neurons.Function;
 
-namespace MyNN.Tests.MLP2.ActivationFunction
+namespace MyNN.Tests.MLP2.ActivationFunction.CSharp
 {
     /// <summary>
-    /// Summary description for RLUFixture
+    /// Summary description for SparsifierFixture
     /// </summary>
     [TestClass]
-    public class RLUFixture
+    public class SparsifierFixture
     {
-        public RLUFixture()
+        public SparsifierFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -61,12 +57,22 @@ namespace MyNN.Tests.MLP2.ActivationFunction
         #endregion
 
         [TestMethod]
-        public void RLUTest()
+        public void SparsifierTestWithDefaultCoef()
         {
-            var sf = new RLUFunction();
+            var sf = new SparsifierFunction();
 
             var tests = new ActivationFunctionDerivativeTests();
-            tests.ExecuteTests(sf);
+            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
         }
+
+        [TestMethod]
+        public void SparsifierTestWithOneTwoCoef()
+        {
+            var sf = new SparsifierFunction(1f, 2f);
+
+            var tests = new ActivationFunctionDerivativeTests();
+            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
+        }
+
     }
 }

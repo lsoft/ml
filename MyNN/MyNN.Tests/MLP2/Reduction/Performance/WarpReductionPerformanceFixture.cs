@@ -88,12 +88,11 @@ __kernel void TestReductionKernel(
 
     WarpReductionToFirstElement(ldata);
 
-    barrier(CLK_LOCAL_MEM_FENCE);
-
     if(get_local_id(0) == 0)
     {
         tdata[get_group_id(0)] = ldata[0];
     }
+
 }
 ";
 

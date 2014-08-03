@@ -14,7 +14,7 @@ using OpenCL.Net.Wrapper.Mem;
 namespace MyNN.Tests.MLP2.Reduction
 {
     [TestClass]
-    public class WarpReductionPerformanceFixture
+    public class WarpReductionFixture
     {
         [TestMethod]
         public void NvidiaAMDWarpReductionTest()
@@ -94,6 +94,7 @@ __kernel void TestReductionKernel(
 
                 var testParameters = new List<TestParameters>();
 
+
                 //добавляем с минимальными значениями предопределенные поля
                 for (var groupCount = 1; groupCount < 8; groupCount++)
                 {
@@ -109,6 +110,7 @@ __kernel void TestReductionKernel(
                         }
                     }
                 }
+//*/
 
                 //добавляем со стандартными параметрами
                 for (var testIndex = 0; testIndex < testCount; testIndex++)
@@ -133,7 +135,21 @@ __kernel void TestReductionKernel(
                             localSize,
                             currentSize));
                 }
+//*/
 
+/*
+                var currentSize = 2;
+                var localSize = 4;
+                var groupCount = 1;
+                var globalSize = groupCount * localSize;
+
+                testParameters.Add(
+                    new TestParameters(
+                        groupCount,
+                        localSize,
+                        currentSize));
+
+//*/
                 foreach(var tp in testParameters)
                 {
                     ConsoleAmbientContext.Console.Write(
@@ -163,7 +179,7 @@ __kernel void TestReductionKernel(
                         Array.Clear(t.Array, 0, t.Array.Length);
                         t.Write(BlockModeEnum.Blocking);
 
-                        var cpuSum = KahanAlgorithm.Reduce(m.Array);
+                        var cpuSum = KahanAlgorithm.Sum(m.Array);
 
                         kernel
                             .SetKernelArgMem(0, m)

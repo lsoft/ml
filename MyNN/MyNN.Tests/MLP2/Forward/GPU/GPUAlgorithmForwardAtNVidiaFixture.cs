@@ -1,28 +1,24 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Text;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
-using MyNN.MLP2.OpenCLHelper;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.DeviceChooser;
 
-namespace MyNN.Tests.MLP2.Forward
+namespace MyNN.Tests.MLP2.Forward.GPU
 {
     /// <summary>
-    /// Summary description for OpenCLForwardFixture
+    /// Summary description for GPUAlgorithmForwardAtNVidiaFixture
     /// </summary>
     [TestClass]
-    public class OpenCLForwardFixture
+    public class GPUAlgorithmForwardAtNVidiaFixture
     {
         private const float ForwardEpsilon = 1e-6f;
 
-        public OpenCLForwardFixture()
+        public GPUAlgorithmForwardAtNVidiaFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -70,7 +66,7 @@ namespace MyNN.Tests.MLP2.Forward
         #endregion
 
         [TestMethod]
-        public void OpenCLForward_1_1_Test0()
+        public void GPUForward_1_1_Test0()
         {
             var test = new ForwardTester();
 
@@ -83,7 +79,7 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var result = test.ExecuteTestWith_1_1_MLP(
                     dataset,
@@ -93,8 +89,7 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.NoVectorization,
+                            new GPUForwardPropagation(
                                 mlp,
                                 clProvider);
                     });
@@ -104,7 +99,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_1_1_Test1()
+        public void GPUForward_1_1_Test1()
         {
             var test = new ForwardTester();
 
@@ -117,7 +112,7 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var result = test.ExecuteTestWith_1_1_MLP(
                     dataset,
@@ -127,8 +122,7 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.NoVectorization,
+                            new GPUForwardPropagation(
                                 mlp,
                                 clProvider);
                     });
@@ -138,7 +132,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_1_1_Test2()
+        public void GPUForward_1_1_Test2()
         {
             var test = new ForwardTester();
 
@@ -151,7 +145,7 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var result = test.ExecuteTestWith_1_1_MLP(
                     dataset,
@@ -161,8 +155,7 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.VectorizationMode4,
+                            new GPUForwardPropagation(
                                 mlp,
                                 clProvider);
                     });
@@ -172,7 +165,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_1_1_Test3()
+        public void GPUForward_1_1_Test3()
         {
             var test = new ForwardTester();
 
@@ -185,7 +178,7 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var result = test.ExecuteTestWith_1_1_MLP(
                     dataset,
@@ -195,8 +188,7 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.VectorizationMode16,
+                            new GPUForwardPropagation(
                                 mlp,
                                 clProvider);
                     });
@@ -206,7 +198,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_5_24_24_1_Test0()
+        public void GPUForward_5_24_24_1_Test0()
         {
             var test = new ForwardTester();
 
@@ -219,7 +211,7 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var result = test.ExecuteTestWith_5_24_24_1_MLP(
                     dataset,
@@ -227,8 +219,7 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.VectorizationMode16,
+                            new GPUForwardPropagation(
                                 mlp,
                                 clProvider);
                     });
@@ -246,7 +237,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_5_24_24_1_Test1()
+        public void GPUForward_5_24_24_1_Test1()
         {
             var test = new ForwardTester();
 
@@ -259,7 +250,7 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var result = test.ExecuteTestWith_5_24_24_1_MLP(
                     dataset,
@@ -267,8 +258,7 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.VectorizationMode4,
+                            new GPUForwardPropagation(
                                 mlp,
                                 clProvider);
                     });
@@ -286,7 +276,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_5_24_24_1_Test2()
+        public void GPUForward_5_24_24_1_Test2()
         {
             var test = new ForwardTester();
 
@@ -299,7 +289,7 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var result = test.ExecuteTestWith_5_24_24_1_MLP(
                     dataset,
@@ -307,8 +297,7 @@ namespace MyNN.Tests.MLP2.Forward
                     (mlp) =>
                     {
                         return
-                            new CPUForwardPropagation(
-                                VectorizationSizeEnum.NoVectorization,
+                            new GPUForwardPropagation(
                                 mlp,
                                 clProvider);
                     });

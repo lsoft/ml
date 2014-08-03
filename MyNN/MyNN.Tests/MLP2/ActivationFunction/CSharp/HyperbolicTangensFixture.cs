@@ -1,19 +1,15 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Structure.Neurons.Function;
 
-namespace MyNN.Tests.MLP2.ActivationFunction
+namespace MyNN.Tests.MLP2.ActivationFunction.CSharp
 {
     /// <summary>
-    /// Summary description for LinearFixture
+    /// Summary description for HyperbolicTangensFixture
     /// </summary>
     [TestClass]
-    public class LinearFixture
+    public class HyperbolicTangensFixture
     {
-        public LinearFixture()
+        public HyperbolicTangensFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -61,18 +57,18 @@ namespace MyNN.Tests.MLP2.ActivationFunction
         #endregion
 
         [TestMethod]
-        public void LinearTestWithOneCoef()
+        public void HyperbolicTangensTestWithOneOneCoef()
         {
-            var sf = new LinearFunction(1f);
+            var sf = new HyperbolicTangensFunction(1f, 1f);
 
             var tests = new ActivationFunctionDerivativeTests();
             tests.ExecuteTests(sf);
         }
 
         [TestMethod]
-        public void LinearTestWithNonOneCoef()
+        public void HyperbolicTangensTestWithDefaultCoef()
         {
-            var sf = new LinearFunction(0.678f);
+            var sf = new HyperbolicTangensFunction();
 
             var tests = new ActivationFunctionDerivativeTests();
             tests.ExecuteTests(sf);

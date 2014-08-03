@@ -5,7 +5,7 @@ using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.Tests.MLP2.ActivationFunction
+namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL
 {
     internal class ActivationFunctionDerivativeOpenCLTests
     {

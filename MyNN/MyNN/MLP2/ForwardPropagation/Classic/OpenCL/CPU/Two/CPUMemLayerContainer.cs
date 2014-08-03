@@ -67,7 +67,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             if (previousLayerTotalNeuronCount > 0)
             {
                 var weightMem = clProvider.CreateFloatMem(
-                    currentLayerTotalNeuronCount * previousLayerTotalNeuronCount,
+                    currentLayerNonBiasNeuronCount * previousLayerTotalNeuronCount,
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite);
                 weightMem.Write(BlockModeEnum.Blocking);
 

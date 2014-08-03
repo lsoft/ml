@@ -51,7 +51,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
             }
         }
 
-        private Kernel[] _mulKernels;
+        private Kernel[] _kernels;
 
         public GPUForwardPropagation(
             IMLP mlp,
@@ -126,140 +126,27 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
 
         private void LoadProgram()
         {
-            _mulKernels = new Kernel[_mlp.Layers.Length];
+            var ks = new GPUKernelSource();
+
+            _kernels = new Kernel[_mlp.Layers.Length];
 
             for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; layerIndex++)
             {
-                var activationFunction = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLActivationFunction("lastNET");
+                var activationFunction = _mlp.Layers[layerIndex].LayerActivationFunction;
 
-                var mulKernelSource = _kernelSource.Replace(
-                    "<activationFunction_lastNET>",
-                    activationFunction);
+                string kernelName;
+                var kernelSource = ks.GetKernelSource(
+                    activationFunction,
+                    _mlp.Layers[layerIndex].NonBiasNeuronCount,
+                    _mlp.Layers[layerIndex - 1].Neurons.Length,
+                    out kernelName
+                    );
 
-                mulKernelSource = mulKernelSource.Replace(
-                    "{CURRENT_LAYER_NEURON_COUNT}",
-                    _mlp.Layers[layerIndex].NonBiasNeuronCount.ToString(CultureInfo.InvariantCulture));
-
-                mulKernelSource = mulKernelSource.Replace(
-                    "{PREVIOUS_LAYER_NEURON_COUNT}",
-                    _mlp.Layers[layerIndex - 1].Neurons.Length.ToString(CultureInfo.InvariantCulture));
-
-                var kernelName = "ComputeLayerKernel";
-
-                _mulKernels[layerIndex] = _clProvider.CreateKernel(
-                    mulKernelSource,
+                _kernels[layerIndex] = _clProvider.CreateKernel(
+                    kernelSource,
                     kernelName);
             }
         }
-
-        private string _kernelSource = @"
-inline int ComputeWeightIndex(
-    int previousLayerNeuronCount,
-    int neuronIndex)
-{
-    return
-        previousLayerNeuronCount * neuronIndex;
-}
-
-#define WARP_SIZE 32
-
-__kernel void ComputeLayerKernel(
-    const __global float* previousLayerLastState,
-    __global float* currentLayerLastNET,
-    __global float * currentLayerLastState,
-    const __global float* weights,
-    __local float* partialDotProduct
-    )
-{
-    uint width = {PREVIOUS_LAYER_NEURON_COUNT};
-    uint height = {CURRENT_LAYER_NEURON_COUNT};
-
-   // Each work-group computes multiple elements of W
-   for (uint y = get_group_id(0); y < height; y += get_num_groups(0))
-   {
-      const __global float* row = weights + y * width;
-
-      // Each work-item accumulates as many products as necessary
-      // into private variable 'sum'
-      float sum = 0;
-      for (uint x = get_local_id(0); x < width; x += get_local_size(0))
-         sum += row[x] * previousLayerLastState[x];
-
-      // Each partial dot product is stored in shared memory
-      partialDotProduct[get_local_id(0)] = sum;
-
-      // Perform parallel reduction to add each work-item's
-      // partial dot product together
-
-      // Synchronize to make sure each work-item is done writing to
-      // partialDotProduct
-      barrier(CLK_LOCAL_MEM_FENCE);
-
-      // Thread local ID within a warp
-      uint id = get_local_id(0) & (WARP_SIZE - 1); 
-
-      // Each warp reduces 64 (default) consecutive elements
-      float warpResult = 0.0f;
-      if (get_local_id(0) < get_local_size(0)/2 )
-      {
-          volatile __local float* p = partialDotProduct + 2 * get_local_id(0) - id;
-          p[0] += p[32];
-          p[0] += p[16];
-          p[0] += p[8];
-          p[0] += p[4];
-          p[0] += p[2];
-          p[0] += p[1];
-          warpResult = p[0];
-      }
-
-      // Synchronize to make sure each warp is done reading
-      // partialDotProduct before it is overwritten in the next step
-      barrier(CLK_LOCAL_MEM_FENCE);
-
-      // The first thread of each warp stores the result of the reduction
-      // at the beginning of partialDotProduct
-      if (id == 0)
-         partialDotProduct[get_local_id(0) / WARP_SIZE] = warpResult;
-
-      // Synchronize to make sure each warp is done writing to
-      // partialDotProduct before it is read in the next step
-      barrier(CLK_LOCAL_MEM_FENCE);
-
-      // Number of remaining elements after the first reduction
-      uint size = get_local_size(0) / (2 * WARP_SIZE);
-
-      // get_local_size(0) is less or equal to 512 on NVIDIA GPUs, so
-      // only a single warp is needed for the following last reduction
-      // step
-      if (get_local_id(0) < size / 2)
-      {
-         volatile __local float* p = partialDotProduct + get_local_id(0);
-
-         if (size >= 8)
-            p[0] += p[4];
-         if (size >= 4)
-            p[0] += p[2];
-         if (size >= 2)
-            p[0] += p[1];
-      }
-
-      // Write the result of the reduction to global memory
-      if (get_local_id(0) == 0)
-      {
-         float lastNET = partialDotProduct[0];
-         currentLayerLastNET[y] = lastNET;
-
-         //compute last state
-         float lastState = <activationFunction_lastNET>;
-         currentLayerLastState[y] = lastState;
-      }
-
-      // Synchronize to make sure the first work-item is done with
-      // reading partialDotProduct
-      barrier(CLK_LOCAL_MEM_FENCE);
-   }
-}
-";
 
         #endregion
 
@@ -370,7 +257,7 @@ __kernel void ComputeLayerKernel(
                 const uint szLocalWorkSize = 256;
                 uint szGlobalWorkSize = 64 * _clProvider.Parameters.NumComputeUnits * szLocalWorkSize;
 
-                _mulKernels[layerIndex]
+                _kernels[layerIndex]
                     .SetKernelArgMem(0, this.StateMem[layerIndex - 1])
                     .SetKernelArgMem(1, this.NetMem[layerIndex])
                     .SetKernelArgMem(2, this.StateMem[layerIndex])

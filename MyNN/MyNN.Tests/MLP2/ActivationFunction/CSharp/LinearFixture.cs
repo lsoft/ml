@@ -1,19 +1,15 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Structure.Neurons.Function;
 
-namespace MyNN.Tests.MLP2.ActivationFunction
+namespace MyNN.Tests.MLP2.ActivationFunction.CSharp
 {
     /// <summary>
-    /// Summary description for SparsifierOpenCLFixture
+    /// Summary description for LinearFixture
     /// </summary>
     [TestClass]
-    public class SparsifierOpenCLFixture
+    public class LinearFixture
     {
-        public SparsifierOpenCLFixture()
+        public LinearFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -61,21 +57,21 @@ namespace MyNN.Tests.MLP2.ActivationFunction
         #endregion
 
         [TestMethod]
-        public void SparsifierTestWithDefaultCoef_OpenCL()
+        public void LinearTestWithOneCoef()
         {
-            var sf = new SparsifierFunction();
+            var sf = new LinearFunction(1f);
 
-            var tests = new ActivationFunctionDerivativeOpenCLTests();
-            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
+            var tests = new ActivationFunctionDerivativeTests();
+            tests.ExecuteTests(sf);
         }
 
         [TestMethod]
-        public void SparsifierTestWithOneTwoCoef_OpenCL()
+        public void LinearTestWithNonOneCoef()
         {
-            var sf = new SparsifierFunction(1f, 2f);
+            var sf = new LinearFunction(0.678f);
 
-            var tests = new ActivationFunctionDerivativeOpenCLTests();
-            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
+            var tests = new ActivationFunctionDerivativeTests();
+            tests.ExecuteTests(sf);
         }
     }
 }

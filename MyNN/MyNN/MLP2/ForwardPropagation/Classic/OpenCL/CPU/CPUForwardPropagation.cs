@@ -99,16 +99,16 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU
             //нейроны
             for (var cc = 0; cc < layerCount; cc++)
             {
-                var currentLayerNeuronCount = _mlp.Layers[cc].Neurons.Length;
+                var currentLayerTotalNeuronCount = _mlp.Layers[cc].Neurons.Length;
 
                 var netMem = _clProvider.CreateFloatMem(
-                    currentLayerNeuronCount,
+                    currentLayerTotalNeuronCount,
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite);
                 netMem.Write(BlockModeEnum.Blocking);
                 NetMem[cc] = netMem;
 
                 var stateMem = _clProvider.CreateFloatMem(
-                    currentLayerNeuronCount,
+                    currentLayerTotalNeuronCount,
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite);
                 stateMem.Write(BlockModeEnum.Blocking);
                 StateMem[cc] = stateMem;

@@ -211,6 +211,7 @@
     <Compile Include="Data\IDataSet.cs" />
     <Compile Include="Data\TrainDataProvider\ConverterTrainDataProvider.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\NoNoiser.cs" />
+    <Compile Include="diapfloat.cs" />
     <Compile Include="ISerializationHelper.cs" />
     <Compile Include="KahanAlgorithm.cs" />
     <Compile Include="KNN\CPUOpenCLKNearestFactory.cs" />
@@ -285,6 +286,9 @@
     <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\CPU\Two\CPULayerPropagator.cs" />
     <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\CPU\Two\IMemLayerContainer.cs" />
     <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\CPU\Two\CPUPropagatorComponentConstructor.cs" />
+    <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\GPU\GPUKernelSource.cs" />
+    <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\GPU\Two\GPUPropagatorComponentConstructor.cs" />
+    <Compile Include="MLP2\ForwardPropagation\Classic\OpenCL\GPU\Two\GPULayerPropagator.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\TrainItemForward\Bit\OpenCL\CPU\DropConnectBitOpenCLForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\TrainItemForward\Float\OpenCL\CPU\DropConnectOpenCLForwardPropagation.cs" />
     <Compile Include="MLP2\ForwardPropagation\DropConnect\Inference\OpenCL\CPU\Inferencer\InferenceOpenCLForwardPropagation.cs" />

@@ -1,26 +1,16 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Text;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic;
 using MyNN.MLP2.ForwardPropagation.Classic.CSharp;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
-using MyNN.MLP2.OpenCLHelper;
-using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
-using OpenCL.Net.Wrapper;
 
-namespace MyNN.Tests.MLP2.Forward
+namespace MyNN.Tests.MLP2.Forward.CSharp
 {
     /// <summary>
-    /// Summary description for OpenCLForwardFixture
+    /// Summary description for CPUForwardFixture
     /// </summary>
     [TestClass]
     public class CSharpForward2Fixture
@@ -191,6 +181,52 @@ namespace MyNN.Tests.MLP2.Forward
                 });
 
             const float correctResult = -0.4017001f;
+
+            ConsoleAmbientContext.Console.WriteLine(
+                string.Format(
+                    "correct = {0}, result = {1}",
+                    correctResult,
+                    result));
+
+            Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
+        }
+
+        [TestMethod]
+        public void CSharpForward_5_300_1_Test1()
+        {
+            var test = new ForwardTester();
+
+            var dataset = new DataSet(
+                new List<DataItem>
+                {
+                    new DataItem(
+                        new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
+                        new[] {1f})
+                });
+
+            var result = test.ExecuteTestWith_5_300_1_MLP(
+                dataset,
+                () => new LinearFunction(1f),
+                (mlp) =>
+                {
+                    var pcc = new CSharpPropagatorComponentConstructor(
+                        mlp);
+
+                    ICSharpLayerContainer[] containers;
+                    ILayerPropagator[] propagators;
+                    pcc.CreateComponents(
+                        out containers,
+                        out propagators);
+
+                    return
+                        new ForwardPropagation2(
+                            containers,
+                            propagators,
+                            mlp
+                            );
+                });
+
+            const float correctResult = 5.8f;
 
             ConsoleAmbientContext.Console.WriteLine(
                 string.Format(

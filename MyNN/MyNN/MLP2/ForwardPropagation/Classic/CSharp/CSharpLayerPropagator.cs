@@ -75,12 +75,10 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
         {
             var inputVector = _previousLayerMemContainer.StateMem;
 
-            var sum = 0.0f;
-
-            for (var cc = 0; cc < inputVector.Length; ++cc)
-            {
-                sum += neuron.Weights[cc]*inputVector[cc];
-            }
+            var sum = KahanAlgorithm.Sum(
+                inputVector.Length,
+                (cc) => neuron.Weights[cc]*inputVector[cc])
+                ;
 
             return 
                 sum;

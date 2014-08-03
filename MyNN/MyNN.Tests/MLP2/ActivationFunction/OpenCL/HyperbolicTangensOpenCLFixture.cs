@@ -1,19 +1,16 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Tests.MLP2.ActivationFunction.CSharp;
 
-namespace MyNN.Tests.MLP2.ActivationFunction
+namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL
 {
     /// <summary>
-    /// Summary description for SparsifierFixture
+    /// Summary description for HyperbolicTangensOpenCLFixture
     /// </summary>
     [TestClass]
-    public class SparsifierFixture
+    public class HyperbolicTangensOpenCLFixture
     {
-        public SparsifierFixture()
+        public HyperbolicTangensOpenCLFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -61,22 +58,21 @@ namespace MyNN.Tests.MLP2.ActivationFunction
         #endregion
 
         [TestMethod]
-        public void SparsifierTestWithDefaultCoef()
+        public void HyperbolicTangensTestWithOneOneCoef_OpenCL()
         {
-            var sf = new SparsifierFunction();
+            var sf = new HyperbolicTangensFunction(1f, 1f);
 
             var tests = new ActivationFunctionDerivativeTests();
-            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
+            tests.ExecuteTests(sf);
         }
 
         [TestMethod]
-        public void SparsifierTestWithOneTwoCoef()
+        public void HyperbolicTangensTestWithDefaultCoef_OpenCL()
         {
-            var sf = new SparsifierFunction(1f, 2f);
+            var sf = new HyperbolicTangensFunction();
 
-            var tests = new ActivationFunctionDerivativeTests();
-            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
+            var tests = new ActivationFunctionDerivativeOpenCLTests();
+            tests.ExecuteTests(sf);
         }
-
     }
 }

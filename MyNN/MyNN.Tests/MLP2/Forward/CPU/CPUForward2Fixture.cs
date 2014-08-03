@@ -1,32 +1,25 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Text;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.OpenCLHelper;
-using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.Tests.MLP2.Forward
+namespace MyNN.Tests.MLP2.Forward.CPU
 {
     /// <summary>
-    /// Summary description for OpenCLForwardFixture
+    /// Summary description for CPUForwardFixture
     /// </summary>
     [TestClass]
-    public class OpenCLForward2Fixture
+    public class CPUForward2Fixture
     {
         private const float ForwardEpsilon = 1e-6f;
 
-        public OpenCLForward2Fixture()
+        public CPUForward2Fixture()
         {
             //
             // TODO: Add constructor logic here
@@ -74,7 +67,7 @@ namespace MyNN.Tests.MLP2.Forward
         #endregion
 
         [TestMethod]
-        public void OpenCLForward_1_1_Test0()
+        public void OpenCLForward_1_1_NoVec_Test0()
         {
             var test = new ForwardTester();
 
@@ -120,7 +113,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_1_1_Test1()
+        public void OpenCLForward_1_1_NoVec_Test1()
         {
             var test = new ForwardTester();
 
@@ -166,7 +159,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_1_1_Test2()
+        public void OpenCLForward_1_1_Vec4_Test()
         {
             var test = new ForwardTester();
 
@@ -213,7 +206,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_1_1_Test3()
+        public void OpenCLForward_1_1_Vec16_Test()
         {
             var test = new ForwardTester();
 
@@ -259,7 +252,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_5_24_24_1_Test0()
+        public void OpenCLForward_5_24_24_1_Vec16_Test()
         {
             var test = new ForwardTester();
 
@@ -312,7 +305,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_5_24_24_1_Test1()
+        public void OpenCLForward_5_24_24_1_Vec4_Test()
         {
             var test = new ForwardTester();
 
@@ -365,7 +358,7 @@ namespace MyNN.Tests.MLP2.Forward
         }
 
         [TestMethod]
-        public void OpenCLForward_5_24_24_1_Test2()
+        public void OpenCLForward_5_24_24_1_NoVec_Test()
         {
             var test = new ForwardTester();
 
@@ -416,6 +409,160 @@ namespace MyNN.Tests.MLP2.Forward
             }
         }
 
+        [TestMethod]
+        public void CPUForward_5_300_1_NoVec_Test()
+        {
+            var test = new ForwardTester();
 
+            var dataset = new DataSet(
+                new List<DataItem>
+                {
+                    new DataItem(
+                        new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
+                        new[] {1f})
+                });
+
+
+            using (var clProvider = new CLProvider())
+            {
+                var result = test.ExecuteTestWith_5_300_1_MLP(
+                    dataset,
+                    () => new LinearFunction(1f),
+                    (mlp) =>
+                    {
+                        var pcc = new CPUPropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        IMemLayerContainer[] containers;
+                        ILayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.NoVectorization,
+                            out containers,
+                            out propagators);
+
+                        return
+                            new ForwardPropagation2(
+                                containers,
+                                propagators,
+                                mlp
+                                );
+                    });
+
+                var correctResult = new diapfloat(5.8f, 0.000015f);
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "correct = {0}, result = {1}",
+                        correctResult,
+                        result));
+
+                Assert.IsTrue(correctResult.IsValueInclusive(result));
+            }
+        }
+
+        [TestMethod]
+        public void CPUForward_5_300_1_Vec4_Test()
+        {
+            var test = new ForwardTester();
+
+            var dataset = new DataSet(
+                new List<DataItem>
+                {
+                    new DataItem(
+                        new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
+                        new[] {1f})
+                });
+
+
+            using (var clProvider = new CLProvider())
+            {
+                var result = test.ExecuteTestWith_5_300_1_MLP(
+                    dataset,
+                    () => new LinearFunction(1f),
+                    (mlp) =>
+                    {
+                        var pcc = new CPUPropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        IMemLayerContainer[] containers;
+                        ILayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.VectorizationMode4,
+                            out containers,
+                            out propagators);
+
+                        return
+                            new ForwardPropagation2(
+                                containers,
+                                propagators,
+                                mlp
+                                );
+                    });
+
+                var correctResult = new diapfloat(5.8f, 0.000005f);
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "correct = {0}, result = {1}",
+                        correctResult,
+                        result));
+
+                Assert.IsTrue(correctResult.IsValueInclusive(result));
+            }
+        }
+
+        [TestMethod]
+        public void CPUForward_5_300_1_Vec16_Test()
+        {
+            var test = new ForwardTester();
+
+            var dataset = new DataSet(
+                new List<DataItem>
+                {
+                    new DataItem(
+                        new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
+                        new[] {1f})
+                });
+
+
+            using (var clProvider = new CLProvider())
+            {
+                var result = test.ExecuteTestWith_5_300_1_MLP(
+                    dataset,
+                    () => new LinearFunction(1f),
+                    (mlp) =>
+                    {
+                        var pcc = new CPUPropagatorComponentConstructor(
+                            clProvider,
+                            mlp);
+
+                        IMemLayerContainer[] containers;
+                        ILayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            VectorizationSizeEnum.VectorizationMode16,
+                            out containers,
+                            out propagators);
+
+                        return
+                            new ForwardPropagation2(
+                                containers,
+                                propagators,
+                                mlp
+                                );
+                    });
+
+                const float correctResult = 5.8f;
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "correct = {0}, result = {1}",
+                        correctResult,
+                        result));
+
+                Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
+            }
+        }
     }
 }
