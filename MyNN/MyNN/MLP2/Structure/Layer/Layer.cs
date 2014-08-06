@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using AForge.Math.Metrics;
 using MyNN.MLP2.Structure.Neurons;
 using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
@@ -166,6 +167,16 @@ namespace MyNN.MLP2.Structure.Layer
                     this.LayerActivationFunction != null
                         ? this.LayerActivationFunction.ShortName
                         : "Input");
+        }
+
+        public ILayerConfiguration GetConfiguration()
+        {
+            return 
+                new LayerConfiguration(
+                    this.Neurons.ConvertAll(j => j.GetConfiguration()),
+                    this.IsBiasNeuronExists,
+                    this.NonBiasNeuronCount
+                    );
         }
     }
 }

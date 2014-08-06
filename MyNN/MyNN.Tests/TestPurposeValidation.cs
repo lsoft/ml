@@ -58,7 +58,7 @@ namespace MyNN.Tests
                 d.Add(
                     new DataItem(
                         _validationData[i].Output,
-                        netResults[i].State));
+                        netResults[i].NState));
             }
 
             var metrics = new TestPurposeMetric();
@@ -68,7 +68,7 @@ namespace MyNN.Tests
             ulong resultsTotalSum = 0L;
             foreach (var nr in netResults)
             {
-                foreach (var ni in nr.State)
+                foreach (var ni in nr.NState)
                 {
                     var bytes = BitConverter.GetBytes(ni);
                     var uinteger = BitConverter.ToUInt32(bytes, 0);

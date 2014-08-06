@@ -3,7 +3,10 @@ using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.ForwardPropagation;
+using MyNN.MLP2.ForwardPropagation.Classic;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.Two;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 using MyNN.OutputConsole;
@@ -19,6 +22,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
     /// </summary>
     public class GPUBackpropagationEpocheTrainer : IBackpropagationEpocheTrainer
     {
+        private readonly IMemLayerContainer[] _containers;
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
@@ -32,7 +36,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
         private Kernel _updateWeightKernel;
 
-        private readonly GPUForwardPropagation _forwardPropagation;
+        private readonly ForwardPropagation2 _forwardPropagation;
         public IForwardPropagation ForwardPropagation
         {
             get
@@ -76,9 +80,24 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             _config = config;
             _clProvider = clProvider;
 
-            _forwardPropagation = new GPUForwardPropagation(
-                _mlp,
-                _clProvider);
+            var cc = new GPUPropagatorComponentConstructor(
+                _clProvider
+                );
+
+            ILayerContainer[] containers;
+            ILayerPropagator[] propagators;
+            cc.CreateComponents(
+                mlp,
+                out containers,
+                out propagators);
+
+            _containers = containers.ToList().ConvertAll(j => j as IMemLayerContainer).ToArray();
+
+            _forwardPropagation = new ForwardPropagation2(
+                containers,
+                propagators,
+                _mlp
+                );
 
             this.PrepareInfrastructure();
         }
@@ -235,12 +254,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                         //_clProvider.QueueFinish();
 
                         _outputKernelOverwrite.Last()
-                            .SetKernelArgMem(0, _forwardPropagation.NetMem[outputLayerIndex])
-                            .SetKernelArgMem(1, _forwardPropagation.StateMem[outputLayerIndex - 1])
-                            .SetKernelArgMem(2, _forwardPropagation.StateMem[outputLayerIndex])
+                            .SetKernelArgMem(0, _containers[outputLayerIndex].NetMem)
+                            .SetKernelArgMem(1, _containers[outputLayerIndex - 1].StateMem)
+                            .SetKernelArgMem(2, _containers[outputLayerIndex].StateMem)
                             .SetKernelArgMem(3, this._deDz[outputLayerIndex])
                             .SetKernelArgMem(4, _desiredOutput)
-                            .SetKernelArgMem(5, _forwardPropagation.WeightMem[outputLayerIndex])
+                            .SetKernelArgMem(5, _containers[outputLayerIndex].WeightMem)
                             .SetKernelArgMem(6, outputNablaLayer)
                             .SetKernelArg(7, 4, preOutputLayer.Neurons.Length)
                             .SetKernelArg(8, 4, outputLayer.NonBiasNeuronCount)
@@ -261,12 +280,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                     else
                     {
                         _outputKernelIncrement.Last()
-                            .SetKernelArgMem(0, _forwardPropagation.NetMem[outputLayerIndex])
-                            .SetKernelArgMem(1, _forwardPropagation.StateMem[outputLayerIndex - 1])
-                            .SetKernelArgMem(2, _forwardPropagation.StateMem[outputLayerIndex])
+                            .SetKernelArgMem(0, _containers[outputLayerIndex].NetMem)
+                            .SetKernelArgMem(1, _containers[outputLayerIndex - 1].StateMem)
+                            .SetKernelArgMem(2, _containers[outputLayerIndex].StateMem)
                             .SetKernelArgMem(3, this._deDz[outputLayerIndex])
                             .SetKernelArgMem(4, _desiredOutput)
-                            .SetKernelArgMem(5, _forwardPropagation.WeightMem[outputLayerIndex])
+                            .SetKernelArgMem(5, _containers[outputLayerIndex].WeightMem)
                             .SetKernelArgMem(6, outputNablaLayer)
                             .SetKernelArg(7, 4, preOutputLayer.Neurons.Length)
                             .SetKernelArg(8, 4, outputLayer.NonBiasNeuronCount)
@@ -303,13 +322,13 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                         if (inBatchIndex == 0)
                         {
                             _hiddenKernelOverwrite[hiddenLayerIndex]
-                                .SetKernelArgMem(0, _forwardPropagation.NetMem[hiddenLayerIndex])
-                                .SetKernelArgMem(1, _forwardPropagation.StateMem[hiddenLayerIndex - 1])
-                                .SetKernelArgMem(2, _forwardPropagation.StateMem[hiddenLayerIndex])
+                                .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
+                                .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
+                                .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
                                 .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
                                 .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
-                                .SetKernelArgMem(6, _forwardPropagation.WeightMem[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
+                                .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
                                 .SetKernelArg(8, 4, prevLayer.Neurons.Length)
                                 .SetKernelArg(9, 4, currentLayer.NonBiasNeuronCount)
@@ -334,13 +353,13 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                         else
                         {
                             _hiddenKernelIncrement[hiddenLayerIndex]
-                                .SetKernelArgMem(0, _forwardPropagation.NetMem[hiddenLayerIndex])
-                                .SetKernelArgMem(1, _forwardPropagation.StateMem[hiddenLayerIndex - 1])
-                                .SetKernelArgMem(2, _forwardPropagation.StateMem[hiddenLayerIndex])
+                                .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
+                                .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
+                                .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
                                 .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
                                 .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(5, _forwardPropagation.WeightMem[hiddenLayerIndex])
-                                .SetKernelArgMem(6, _forwardPropagation.WeightMem[hiddenLayerIndex + 1])
+                                .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
+                                .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
                                 .SetKernelArg(8, 4, prevLayer.Neurons.Length)
                                 .SetKernelArg(9, 4, currentLayer.NonBiasNeuronCount)
@@ -386,7 +405,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
 
                 for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
                 {
-                    var weightMem = _forwardPropagation.WeightMem[layerIndex];
+                    var weightMem = _containers[layerIndex].WeightMem;
                     var nablaMem = _nablaWeights[layerIndex];
 
                     var neuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
@@ -433,11 +452,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             _clProvider.QueueFinish();
 
             //считываем веса с устройства
-            foreach (var wm in _forwardPropagation.WeightMem)
+            foreach (var container in _containers)
             {
-                if (wm != null)
+                if (container.WeightMem != null)
                 {
-                    wm.Read(BlockModeEnum.Blocking);
+                    container.WeightMem.Read(BlockModeEnum.Blocking);
                 }
             }
 
@@ -447,7 +466,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             for (int layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
             {
                 var layer = _mlp.Layers[layerIndex];
-                var weightLayer = _forwardPropagation.WeightMem[layerIndex];
+                var weightLayer = _containers[layerIndex].WeightMem;
 
                 var weightShiftIndex = 0;
                 for (int neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; ++neuronIndex)

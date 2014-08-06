@@ -7,7 +7,7 @@ namespace MyNN.MLP2.Structure.Layer
     /// </summary>
     public interface ILayerState : IEnumerable<float>
     {
-        float[] State
+        float[] NState
         {
             get;
         }

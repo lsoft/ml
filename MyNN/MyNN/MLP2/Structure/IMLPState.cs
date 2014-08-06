@@ -8,7 +8,7 @@ namespace MyNN.MLP2.Structure
 {
     public interface IMLPState
     {
-        ILayerState[] State
+        ILayerState[] LState
         {
             get;
         }

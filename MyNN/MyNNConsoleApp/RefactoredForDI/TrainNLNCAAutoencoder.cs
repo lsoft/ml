@@ -25,7 +25,8 @@ using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
 using MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU;
-using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.CPU;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
+using MyNN.MLP2.ForwardPropagationFactory.Classic;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Factory;
@@ -79,79 +80,85 @@ namespace MyNNConsoleApp.RefactoredForDI
             const float lambda = 0.5f;
             const float partTakeOfAccount = 0.5f;
 
-            var sa = new StackedAutoencoder(
-                new IntelCPUDeviceChooser(),
-                randomizer,
-                mlpf,
-                (IDataSet td) =>
-                {
-                    var result =
-                        new ConverterTrainDataProvider(
-                            new ShuffleDataSetConverter(randomizer),
-                            new NoiseDataProvider(td, noiser)
-                            );
-                    return
-                        result;
-                },
-                (IDataSet vd, IArtifactContainer mlpContainer) =>
-                {
-                    var vda = toa.Convert(vd);
+            using (var clProvider = new CLProvider())
+            {
+                var sa = new StackedAutoencoder(
+                    new IntelCPUDeviceChooser(),
+                    randomizer,
+                    mlpf,
+                    (IDataSet td) =>
+                    {
+                        var result =
+                            new ConverterTrainDataProvider(
+                                new ShuffleDataSetConverter(randomizer),
+                                new NoiseDataProvider(td, noiser)
+                                );
+                        return
+                            result;
+                    },
+                    (IDataSet vd, IArtifactContainer mlpContainer) =>
+                    {
+                        var vda = toa.Convert(vd);
 
-                    return
-                        new Validation(
-                            new MetricsAccuracyCalculator(
-                                new RMSE(),
-                                vda),
-                            new GridReconstructDrawer(
-                                new MNISTVisualizer(), 
-                                vda,
-                                300,
-                                100)
-                            );
-                },
-                (int depthIndex) =>
-                {
-                    var lr =
-                        depthIndex == 0
-                            ? 0.005f
-                            : 0.001f;
+                        return
+                            new Validation(
+                                new MetricsAccuracyCalculator(
+                                    new RMSE(),
+                                    vda),
+                                new GridReconstructDrawer(
+                                    new MNISTVisualizer(),
+                                    vda,
+                                    300,
+                                    100)
+                                );
+                    },
+                    (int depthIndex) =>
+                    {
+                        var lr =
+                            depthIndex == 0
+                                ? 0.005f
+                                : 0.001f;
 
-                    var conf = new LearningAlgorithmConfig(
-                        new LinearLearningRate(lr, 0.99f),
-                        250,
-                        0.0f,
-                        25,
-                        0f,
-                        -0.0025f);
+                        var conf = new LearningAlgorithmConfig(
+                            new LinearLearningRate(lr, 0.99f),
+                            250,
+                            0.0f,
+                            25,
+                            0f,
+                            -0.0025f);
 
-                    return conf;
-                },
-                new CPUNLNCABackpropagationAlgorithmFactory(
-                    (data) =>
-                        new DodfCalculatorOpenCL(
-                            data,
-                            new VectorizedCpuDistanceDictCalculator() //generation 1
-                            ),
-                    1,
-                    lambda,
-                    partTakeOfAccount),
-                new CPUForwardPropagationFactory(),
-                new LayerInfo(firstLayerSize, new RLUFunction()),
-                new LayerInfo(400, new RLUFunction()),
-                new LayerInfo(800, new RLUFunction())
-                );
+                        return conf;
+                    },
+                    new CPUNLNCABackpropagationAlgorithmFactory(
+                        (data) =>
+                            new DodfCalculatorOpenCL(
+                                data,
+                                new VectorizedCpuDistanceDictCalculator() //generation 1
+                                ),
+                        1,
+                        lambda,
+                        partTakeOfAccount),
+                    new ForwardPropagationFactory(
+                        new CPUPropagatorComponentConstructor(
+                            clProvider,
+                            VectorizationSizeEnum.VectorizationMode16)),
+                    new LayerInfo(firstLayerSize, new RLUFunction()),
+                    new LayerInfo(400, new RLUFunction()),
+                    new LayerInfo(800, new RLUFunction())
+                    );
 
-            var mlpName = string.Format(
-                "nlnca_ae{0}.sdae",
-                DateTime.Now.ToString("yyyyMMddHHmmss"));
+                var mlpName = string.Format(
+                    "nlnca_ae{0}.sdae",
+                    DateTime.Now.ToString("yyyyMMddHHmmss"));
 
 
-            var combinedNet = sa.Train(
-                mlpName,
-                new FileSystemArtifactContainer(".", serialization),
-                trainData,
-                validationData
-                );
+                var combinedNet = sa.Train(
+                    mlpName,
+                    new FileSystemArtifactContainer(".", serialization),
+                    trainData,
+                    validationData
+                    );
+            }
         }
     }
 }

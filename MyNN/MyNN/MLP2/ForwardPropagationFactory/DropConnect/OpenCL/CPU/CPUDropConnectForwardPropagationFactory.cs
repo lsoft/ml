@@ -18,6 +18,7 @@ namespace MyNN.MLP2.ForwardPropagationFactory.DropConnect.OpenCL.CPU
     public class CPUDropConnectForwardPropagationFactory<T> : IForwardPropagationFactory
         where T : ILayerInference
     {
+        private readonly CLProvider _clProvider;
         private readonly VectorizationSizeEnum _vse;
         private readonly int _sampleCount;
         private readonly float _p;
@@ -25,14 +26,20 @@ namespace MyNN.MLP2.ForwardPropagationFactory.DropConnect.OpenCL.CPU
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="clProvider">Provider OpenCL</param>
         /// <param name="vse">Vectorization mode</param>
         /// <param name="sampleCount">Sample count per neuron per inference iteration (typically 1000 - 10000)</param>
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
         public CPUDropConnectForwardPropagationFactory(
+            CLProvider clProvider,
             VectorizationSizeEnum vse = VectorizationSizeEnum.VectorizationMode16,
             int sampleCount = 10000,
             float p = 0.5f)
         {
+            if (clProvider == null)
+            {
+                throw new ArgumentNullException("clProvider");
+            }
             if (sampleCount <= 0)
             {
                 throw new ArgumentOutOfRangeException("sampleCount");
@@ -42,6 +49,7 @@ namespace MyNN.MLP2.ForwardPropagationFactory.DropConnect.OpenCL.CPU
                 throw new ArgumentOutOfRangeException("p");
             }
 
+            _clProvider = clProvider;
             _vse = vse;
             _sampleCount = sampleCount;
             _p = p;
@@ -51,21 +59,15 @@ namespace MyNN.MLP2.ForwardPropagationFactory.DropConnect.OpenCL.CPU
         /// Factory method
         /// </summary>
         /// <param name="randomizer">Random number provider</param>
-        /// <param name="clProvider">OpenCL provider</param>
         /// <param name="mlp">Trained MLP</param>
         /// <returns>Forward propagator</returns>
         public IForwardPropagation Create(
             IRandomizer randomizer,
-            CLProvider clProvider,
             IMLP mlp)
         {
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
-            }
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
             }
             if (mlp == null)
             {
@@ -75,7 +77,7 @@ namespace MyNN.MLP2.ForwardPropagationFactory.DropConnect.OpenCL.CPU
             var forwardPropagation = new InferenceOpenCLForwardPropagation<T>(
                 _vse,
                 mlp,
-                clProvider,
+                _clProvider,
                 randomizer,
                 _sampleCount,
                 _p);

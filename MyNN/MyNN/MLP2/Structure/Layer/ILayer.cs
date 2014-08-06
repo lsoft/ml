@@ -31,5 +31,7 @@ namespace MyNN.MLP2.Structure.Layer
         void RemoveBiasNeuron();
 
         string GetLayerInformation();
+
+        ILayerConfiguration GetConfiguration();
     }
 }

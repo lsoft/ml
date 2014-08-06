@@ -54,7 +54,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator
                 d.Add(
                     new DataItem(
                         _validationData[i].Output,
-                        netResults[i].State));
+                        netResults[i].NState));
             }
 
             var totalError = d.AsParallel().Sum(

@@ -66,6 +66,14 @@ namespace MyNN.MLP2.Structure.Neurons
             }
         }
 
+        public INeuronConfiguration GetConfiguration()
+        {
+            return 
+                new NeuronConfiguration(
+                    this.Weights.Length,
+                    this.IsBiasNeuron);
+        }
+
         public InputNeuron(
             int thisIndex)
         {

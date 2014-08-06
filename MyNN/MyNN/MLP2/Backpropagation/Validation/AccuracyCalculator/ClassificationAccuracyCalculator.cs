@@ -69,7 +69,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator
                 #region суммируем ошибку
 
                 var err = _errorMetrics.Calculate(
-                    netResult.State,
+                    netResult.NState,
                     testItem.Output);
 
                 totalError += err;
@@ -83,7 +83,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator
                 var success = false;
 
                 //берем максимальный вес на выходных
-                var max = netResult.State.Max();
+                var max = netResult.NState.Max();
                 if (max > 0) //если это не нуль, значит хоть что-то да распозналось
                 {
                     //если таких (максимальных) весов больше одного, значит, сеть не смогла точно идентифицировать символ

@@ -2,7 +2,9 @@
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
+using MyNN.MLP2.ForwardPropagation.Classic;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
 using MyNN.OutputConsole;
@@ -53,18 +55,31 @@ namespace MyNN.MLP2
 
             using (var clProvider = new CLProvider())
             {
-                var forward = new CPUForwardPropagation(
-                    VectorizationSizeEnum.VectorizationMode16,
+                var cc = new CPUPropagatorComponentConstructor(
+                    clProvider,
+                    VectorizationSizeEnum.VectorizationMode16
+                    );
+
+                ILayerContainer[] containers;
+                ILayerPropagator[] propagators;
+                cc.CreateComponents(
                     _mlp,
-                    clProvider);
+                    out containers,
+                    out propagators);
+
+                var forward = new ForwardPropagation2(
+                    containers,
+                    propagators,
+                    _mlp
+                    );
 
                 var sparseddata = forward.ComputeOutput(testDataset);
 
                 var totalZero = sparseddata.Sum(j => j.Count(k => Math.Abs(k) < float.Epsilon));
-                sparsePart = totalZero / (float)sparseddata.Count / (float)sparseddata[0].State.Length;
+                sparsePart = totalZero / (float)sparseddata.Count / (float)sparseddata[0].NState.Length;
 
-                avgNonZeroCountPerItem = (float)sparseddata.Average(j => j.State.Count(k => Math.Abs(k) >= float.Epsilon));
-                avgValueOfNonZero = sparseddata.Average(j => j.State.Where(k => Math.Abs(k) >= float.Epsilon).Average());
+                avgNonZeroCountPerItem = (float)sparseddata.Average(j => j.NState.Count(k => Math.Abs(k) >= float.Epsilon));
+                avgValueOfNonZero = sparseddata.Average(j => j.NState.Where(k => Math.Abs(k) >= float.Epsilon).Average());
             }
         }
     }

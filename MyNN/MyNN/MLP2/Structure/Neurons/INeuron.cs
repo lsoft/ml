@@ -18,5 +18,7 @@ namespace MyNN.MLP2.Structure.Neurons
         {
             get;
         }
+
+        INeuronConfiguration GetConfiguration();
     }
 }

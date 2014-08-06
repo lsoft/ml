@@ -5,12 +5,17 @@ using MyNN.MLP2.Structure;
 
 namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
 {
-    public class CSharpPropagatorComponentConstructor
+    public class CSharpPropagatorComponentConstructor : IPropagatorComponentConstructor
     {
-        private readonly IMLP _mlp;
-
         public CSharpPropagatorComponentConstructor(
-            IMLP mlp
+            )
+        {
+        }
+
+        public void CreateComponents(
+            IMLP mlp,
+            out ILayerContainer[] containers,
+            out ILayerPropagator[] propagators
             )
         {
             if (mlp == null)
@@ -18,25 +23,22 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
                 throw new ArgumentNullException("mlp");
             }
 
-            _mlp = mlp;
-        }
-
-        public void CreateComponents(
-            out ICSharpLayerContainer[] containers,
-            out ILayerPropagator[] propagators
-            )
-        {
-            var c = this.CreateMemsByMLP();
-            var p = this.CreatePropagatorsByMLP(c);
+            var c = this.CreateMemsByMLP(mlp);
+            var p = this.CreatePropagatorsByMLP(mlp, c);
 
             containers = c;
             propagators = p;
         }
 
         private ILayerPropagator[] CreatePropagatorsByMLP(
+            IMLP mlp,
             ICSharpLayerContainer[] containers
             )
         {
+            if (mlp == null)
+            {
+                throw new ArgumentNullException("mlp");
+            }
             if (containers == null)
             {
                 throw new ArgumentNullException("containers");
@@ -45,12 +47,12 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             var result = new List<ILayerPropagator>();
             result.Add(null); //для первого слоя нет пропагатора
 
-            var layerCount = _mlp.Layers.Length;
+            var layerCount = mlp.Layers.Length;
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
                 var p = new CSharpLayerPropagator(
-                    _mlp.Layers[layerIndex],
+                    mlp.Layers[layerIndex],
                     containers[layerIndex - 1],
                     containers[layerIndex]
                     );
@@ -63,17 +65,23 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
         }
 
         private ICSharpLayerContainer[] CreateMemsByMLP(
+            IMLP mlp
             )
         {
+            if (mlp == null)
+            {
+                throw new ArgumentNullException("mlp");
+            }
+
             var result = new List<ICSharpLayerContainer>();
 
-            var layerCount = _mlp.Layers.Length;
+            var layerCount = mlp.Layers.Length;
 
             for (var layerIndex = 0; layerIndex < layerCount; layerIndex++)
             {
-                var previousLayerTotalNeuronCount = layerIndex > 0 ? _mlp.Layers[layerIndex - 1].Neurons.Length : 0;
-                var currentLayerNonBiasNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
-                var currentLayerTotalNeuronCount = _mlp.Layers[layerIndex].Neurons.Length;
+                var previousLayerTotalNeuronCount = layerIndex > 0 ? mlp.Layers[layerIndex - 1].Neurons.Length : 0;
+                var currentLayerNonBiasNeuronCount = mlp.Layers[layerIndex].NonBiasNeuronCount;
+                var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].Neurons.Length;
 
                 var mc = new CSharpLayerContainer(
                     previousLayerTotalNeuronCount,

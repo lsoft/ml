@@ -59,7 +59,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
                 {
                     _visualizer.SaveAsGrid(
                         s,
-                        netResults.ConvertAll(j => j.State).Take(_visualizeAsGridCount).ToList());
+                        netResults.ConvertAll(j => j.NState).Take(_visualizeAsGridCount).ToList());
 
                     s.Flush();
                 }
@@ -72,7 +72,7 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
                 {
                     var i = new Pair<float[], float[]>(
                         _validationData[cc].Input,
-                        netResults[cc].State);
+                        netResults[cc].NState);
                     pairList.Add(i);
                 }
 

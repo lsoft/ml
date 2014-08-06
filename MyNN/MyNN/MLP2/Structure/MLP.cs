@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.IO;
 using System.Linq;
+using Accord.Math;
 using MyNN.BoltzmannMachines.BinaryBinary.DBN;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation;
@@ -154,6 +155,13 @@ namespace MyNN.MLP2.Structure
             newl[this._layers.Length] = bornLayer;
 
             this._layers = newl;
+        }
+
+        public IMLPConfiguration GetConfiguration()
+        {
+            return 
+                new MLPConfiguration(
+                    this.Layers.ConvertAll(j => j.GetConfiguration()));
         }
     }
 }

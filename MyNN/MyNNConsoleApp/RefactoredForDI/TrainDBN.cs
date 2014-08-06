@@ -35,8 +35,6 @@ using MyNN.MLP2.Backpropagation.Metrics;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
-using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;

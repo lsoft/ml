@@ -9,17 +9,17 @@ using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.Tests.MLP2.Forward.CPU
+namespace MyNN.Tests.MLP2.Forward.Classic.CPU
 {
     /// <summary>
-    /// Summary description for CPUForwardFixture
+    /// Summary description for ForwardOutput2Fixture
     /// </summary>
     [TestClass]
-    public class CPUForward2Fixture
+    public class ForwardOutput2Fixture
     {
         private const float ForwardEpsilon = 1e-6f;
 
-        public CPUForward2Fixture()
+        public ForwardOutput2Fixture()
         {
             //
             // TODO: Add constructor logic here
@@ -67,9 +67,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         #endregion
 
         [TestMethod]
-        public void OpenCLForward_1_1_NoVec_Test0()
+        public void Forward_1_1_NoVec_Test0()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -91,12 +91,13 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.NoVectorization
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.NoVectorization,
+                            mlp,
                             out containers,
                             out propagators);
 
@@ -113,9 +114,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         }
 
         [TestMethod]
-        public void OpenCLForward_1_1_NoVec_Test1()
+        public void Forward_1_1_NoVec_Test1()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -137,12 +138,13 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.NoVectorization
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.NoVectorization,
+                            mlp,
                             out containers,
                             out propagators);
 
@@ -159,9 +161,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         }
 
         [TestMethod]
-        public void OpenCLForward_1_1_Vec4_Test()
+        public void Forward_1_1_Vec4_Test()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -183,15 +185,15 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.VectorizationMode4
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode4,
+                            mlp,
                             out containers,
                             out propagators);
-
 
                         return
                             new ForwardPropagation2(
@@ -206,9 +208,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         }
 
         [TestMethod]
-        public void OpenCLForward_1_1_Vec16_Test()
+        public void Forward_1_1_Vec16_Test()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -230,12 +232,13 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.VectorizationMode16
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
                             out containers,
                             out propagators);
 
@@ -252,9 +255,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         }
 
         [TestMethod]
-        public void OpenCLForward_5_24_24_1_Vec16_Test()
+        public void Forward_5_24_24_1_Vec16_Test()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -274,15 +277,15 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.VectorizationMode16
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
                             out containers,
                             out propagators);
-
 
                         return
                             new ForwardPropagation2(
@@ -305,9 +308,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         }
 
         [TestMethod]
-        public void OpenCLForward_5_24_24_1_Vec4_Test()
+        public void Forward_5_24_24_1_Vec4_Test()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -327,15 +330,15 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.VectorizationMode4
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode4,
+                            mlp,
                             out containers,
                             out propagators);
-
 
                         return
                             new ForwardPropagation2(
@@ -358,9 +361,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         }
 
         [TestMethod]
-        public void OpenCLForward_5_24_24_1_NoVec_Test()
+        public void Forward_5_24_24_1_NoVec_Test()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -380,12 +383,13 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.NoVectorization
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.NoVectorization,
+                            mlp,
                             out containers,
                             out propagators);
 
@@ -410,9 +414,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         }
 
         [TestMethod]
-        public void CPUForward_5_300_1_NoVec_Test()
+        public void Forward_5_300_1_NoVec_Test()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -432,12 +436,13 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.NoVectorization
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.NoVectorization,
+                            mlp,
                             out containers,
                             out propagators);
 
@@ -462,9 +467,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         }
 
         [TestMethod]
-        public void CPUForward_5_300_1_Vec4_Test()
+        public void Forward_5_300_1_Vec4_Test()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -484,12 +489,13 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.VectorizationMode4
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode4,
+                            mlp,
                             out containers,
                             out propagators);
 
@@ -514,9 +520,9 @@ namespace MyNN.Tests.MLP2.Forward.CPU
         }
 
         [TestMethod]
-        public void CPUForward_5_300_1_Vec16_Test()
+        public void Forward_5_300_1_Vec16_Test()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -536,12 +542,13 @@ namespace MyNN.Tests.MLP2.Forward.CPU
                     {
                         var pcc = new CPUPropagatorComponentConstructor(
                             clProvider,
-                            mlp);
+                            VectorizationSizeEnum.VectorizationMode16
+                            );
 
-                        IMemLayerContainer[] containers;
+                        ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
                         pcc.CreateComponents(
-                            VectorizationSizeEnum.VectorizationMode16,
+                            mlp,
                             out containers,
                             out propagators);
 

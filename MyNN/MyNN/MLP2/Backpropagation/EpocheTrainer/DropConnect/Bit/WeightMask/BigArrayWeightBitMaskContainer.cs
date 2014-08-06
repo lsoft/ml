@@ -27,7 +27,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
         private const int AdditionalPartSize = 100000;
 
         private readonly CLProvider _clProvider;
-        private readonly IMLP _mlp;
+        private readonly IMLPConfiguration _mlpConfiguration;
         private readonly IRandomizer _randomizer;
         private readonly float _p;
 
@@ -66,12 +66,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
         /// Constructor
         /// </summary>
         /// <param name="clProvider">OpenCL provider</param>
-        /// <param name="mlp">Trained MLP</param>
+        /// <param name="mlpConfiguration">Configuration of MLP</param>
         /// <param name="randomizer">Random number provider</param>
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
         public BigArrayWeightBitMaskContainer(
             CLProvider clProvider,
-            IMLP mlp,
+            IMLPConfiguration mlpConfiguration,
             IRandomizer randomizer,
             float p = 0.5f)
         {
@@ -79,9 +79,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
             {
                 throw new ArgumentNullException("clProvider");
             }
-            if (mlp == null)
+            if (mlpConfiguration == null)
             {
-                throw new ArgumentNullException("mlp");
+                throw new ArgumentNullException("mlpConfiguration");
             }
             if (randomizer == null)
             {
@@ -93,7 +93,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
             }
 
             _clProvider = clProvider;
-            _mlp = mlp;
+            _mlpConfiguration = mlpConfiguration;
 
             _randomizer = randomizer;
             _p = p;
@@ -101,9 +101,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
             this._bitIndex = 31;
 
             _arraySize = 0;
-            for (var li = 1; li < mlp.Layers.Length; li++)
+            for (var li = 1; li < mlpConfiguration.Layers.Length; li++)
             {
-                var w = mlp.Layers[li - 1].Neurons.Length*mlp.Layers[li].Neurons.Length;
+                var w = mlpConfiguration.Layers[li - 1].Neurons.Length*mlpConfiguration.Layers[li].Neurons.Length;
                 _arraySize += w;
             }
             _arraySize += AdditionalPartSize;
@@ -119,7 +119,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
 
         private void CreateInfrastructure()
         {
-            var layerCount = _mlp.Layers.Length;
+            var layerCount = _mlpConfiguration.Layers.Length;
 
             _array = new uint[_arraySize];
             _currentIterationNumber = 0;
@@ -134,7 +134,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
                 for (var cc = 1; cc < layerCount; cc++)
                 {
                     masks[cc] = _clProvider.CreateUintMem(
-                        _mlp.Layers[cc].NonBiasNeuronCount * _mlp.Layers[cc].Neurons[0].Weights.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                        _mlpConfiguration.Layers[cc].NonBiasNeuronCount * _mlpConfiguration.Layers[cc].Neurons[0].WeightsCount, //without bias neuron at current layer, but include bias neuron at previous layer
                         MemFlags.CopyHostPtr | MemFlags.ReadOnly);
                 }
 
@@ -178,7 +178,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
             var preparingMem = this._maskMem[_currentMaskIndex];
 
             //заполняем мем по текущему рабочему индексу
-            var layerCount = _mlp.Layers.Length;
+            var layerCount = _mlpConfiguration.Layers.Length;
 
             //заполняем слои
             //копируем в мемы
@@ -210,7 +210,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
 
         private void WriteWorkingMem()
         {
-            var layerCount = _mlp.Layers.Length;
+            var layerCount = _mlpConfiguration.Layers.Length;
 
             for (var li = 1; li < layerCount; li++)
             {

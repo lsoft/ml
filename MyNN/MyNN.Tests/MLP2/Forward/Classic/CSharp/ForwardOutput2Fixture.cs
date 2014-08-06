@@ -7,17 +7,17 @@ using MyNN.MLP2.ForwardPropagation.Classic.CSharp;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 
-namespace MyNN.Tests.MLP2.Forward.CSharp
+namespace MyNN.Tests.MLP2.Forward.Classic.CSharp
 {
     /// <summary>
-    /// Summary description for CPUForwardFixture
+    /// Summary description for ForwardOutput2Fixture
     /// </summary>
     [TestClass]
-    public class CSharpForward2Fixture
+    public class ForwardOutput2Fixture
     {
         private const float ForwardEpsilon = 1e-6f;
 
-        public CSharpForward2Fixture()
+        public ForwardOutput2Fixture()
         {
             //
             // TODO: Add constructor logic here
@@ -65,9 +65,9 @@ namespace MyNN.Tests.MLP2.Forward.CSharp
         #endregion
 
         [TestMethod]
-        public void CSharpForward_1_1_Test0()
+        public void Forward_1_1_Test0()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -85,11 +85,12 @@ namespace MyNN.Tests.MLP2.Forward.CSharp
                 (mlp) =>
                 {
                     var pcc = new CSharpPropagatorComponentConstructor(
-                        mlp);
+                        );
 
-                    ICSharpLayerContainer[] containers;
+                    ILayerContainer[] containers;
                     ILayerPropagator[] propagators;
                     pcc.CreateComponents(
+                        mlp,
                         out containers,
                         out propagators);
 
@@ -104,11 +105,10 @@ namespace MyNN.Tests.MLP2.Forward.CSharp
             Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
         }
 
-        
         [TestMethod]
-        public void CSharpForward_1_1_Test1()
+        public void Forward_1_1_Test1()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -126,11 +126,12 @@ namespace MyNN.Tests.MLP2.Forward.CSharp
                 (mlp) =>
                 {
                     var pcc = new CSharpPropagatorComponentConstructor(
-                        mlp);
+                        );
 
-                    ICSharpLayerContainer[] containers;
+                    ILayerContainer[] containers;
                     ILayerPropagator[] propagators;
                     pcc.CreateComponents(
+                        mlp,
                         out containers,
                         out propagators);
 
@@ -144,11 +145,10 @@ namespace MyNN.Tests.MLP2.Forward.CSharp
             Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
         }
 
-
         [TestMethod]
-        public void CSharpForward_5_24_24_1_Test2()
+        public void Forward_5_24_24_1_Test2()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -164,11 +164,12 @@ namespace MyNN.Tests.MLP2.Forward.CSharp
                 (mlp) =>
                 {
                     var pcc = new CSharpPropagatorComponentConstructor(
-                        mlp);
+                        );
 
-                    ICSharpLayerContainer[] containers;
+                    ILayerContainer[] containers;
                     ILayerPropagator[] propagators;
                     pcc.CreateComponents(
+                        mlp,
                         out containers,
                         out propagators);
 
@@ -192,9 +193,9 @@ namespace MyNN.Tests.MLP2.Forward.CSharp
         }
 
         [TestMethod]
-        public void CSharpForward_5_300_1_Test1()
+        public void Forward_5_300_1_Test1()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -210,11 +211,12 @@ namespace MyNN.Tests.MLP2.Forward.CSharp
                 (mlp) =>
                 {
                     var pcc = new CSharpPropagatorComponentConstructor(
-                        mlp);
+                        );
 
-                    ICSharpLayerContainer[] containers;
+                    ILayerContainer[] containers;
                     ILayerPropagator[] propagators;
                     pcc.CreateComponents(
+                        mlp,
                         out containers,
                         out propagators);
 

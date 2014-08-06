@@ -3,6 +3,7 @@ using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.Validation;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;

@@ -52,16 +52,16 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
             }
 
 
-            if (netResults[0].State.Length != 2)
+            if (netResults[0].NState.Length != 2)
             {
                 return;
             }
 
             //рисуем на картинке
-            var maxx = netResults.Max(j => j.State[0]);
-            var minx = netResults.Min(j => j.State[0]);
-            var maxy = netResults.Max(j => j.State[1]);
-            var miny = netResults.Min(j => j.State[1]);
+            var maxx = netResults.Max(j => j.NState[0]);
+            var minx = netResults.Min(j => j.NState[0]);
+            var maxy = netResults.Max(j => j.NState[1]);
+            var miny = netResults.Min(j => j.NState[1]);
 
             const int imageWidth = 500;
             const int imageHeight = 500;
@@ -87,8 +87,8 @@ namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
 
                 foreach (var netResult in netResults)
                 {
-                    var ox = netResult.State[0];
-                    var oy = netResult.State[1];
+                    var ox = netResult.NState[0];
+                    var oy = netResult.NState[1];
 
                     var x = (ox - minx)*(imageWidth - 1)/(maxx - minx);
                     var y = (oy - miny)*(imageHeight - 1)/(maxy - miny);

@@ -35,34 +35,37 @@ namespace MyNN.MLP2.ForwardPropagation.Classic
         }
 
         public ForwardPropagation2(
-            ILayerContainer[] mems,
+            ILayerContainer[] containers,
             ILayerPropagator[] propagators,
             IMLP mlp
             )
         {
-            if (mems == null)
+            if (mlp == null)
             {
-                throw new ArgumentNullException("mems");
+                throw new ArgumentNullException("mlp");
+            }
+
+            #region validate
+
+            if (containers == null)
+            {
+                throw new ArgumentNullException("containers");
             }
             if (propagators == null)
             {
                 throw new ArgumentNullException("propagators");
             }
-            if (mlp == null)
+            if (containers.Length != mlp.Layers.Length)
             {
-                throw new ArgumentNullException("mlp");
-            }
-            if (mems.Length != mlp.Layers.Length)
-            {
-                throw new ArgumentException("mems.Length != mlp.Layers.Length");
+                throw new ArgumentException("containers.Length != mlp.Layers.Length");
             }
             if (propagators.Length != mlp.Layers.Length)
             {
                 throw new ArgumentException("propagators.Length != mlp.Layers.Length");
             }
-            if (mems.Any(j => j == null))
+            if (containers.Any(j => j == null))
             {
-                throw new ArgumentException("mems.Any(j => j == null)");
+                throw new ArgumentException("containers.Any(j => j == null)");
             }
             if (propagators[0] != null)
             {
@@ -73,7 +76,9 @@ namespace MyNN.MLP2.ForwardPropagation.Classic
                 throw new ArgumentException("propagators.Skip(1).Any(j => j == null)");
             }
 
-            _mems = mems;
+            #endregion
+
+            _mems = containers;
             _propagators = propagators;
             _mlp = mlp;
         }

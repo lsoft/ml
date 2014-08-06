@@ -12,7 +12,7 @@ using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.Forward
 {
-    internal class ForwardTester
+    internal class ForwardOutputTester
     {
 
         public float ExecuteTestWith_1_1_MLP(
@@ -63,10 +63,10 @@ namespace MyNN.Tests.MLP2.Forward
             var output = forward.ComputeOutput(dataset);
 
             Assert.IsTrue(output.Count == 1);
-            Assert.IsTrue(output[0].State.Length == 1);
+            Assert.IsTrue(output[0].NState.Length == 1);
 
             return
-                output[0].State[0];
+                output[0].NState[0];
         }
 
         public float ExecuteTestWith_5_24_24_1_MLP(
@@ -116,10 +116,10 @@ namespace MyNN.Tests.MLP2.Forward
             var output = forward.ComputeOutput(dataset);
 
             Assert.IsTrue(output.Count == 1);
-            Assert.IsTrue(output[0].State.Length == 1);
+            Assert.IsTrue(output[0].NState.Length == 1);
 
             return
-                output[0].State[0];
+                output[0].NState[0];
         }
 
         public float ExecuteTestWith_5_300_1_MLP(
@@ -167,10 +167,10 @@ namespace MyNN.Tests.MLP2.Forward
             var output = forward.ComputeOutput(dataset);
 
             Assert.IsTrue(output.Count == 1);
-            Assert.IsTrue(output[0].State.Length == 1);
+            Assert.IsTrue(output[0].NState.Length == 1);
 
             return
-                output[0].State[0];
+                output[0].NState[0];
         }
 
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Accord.Statistics.Testing;
 
 namespace MyNN
 {
@@ -48,6 +49,14 @@ namespace MyNN
             }
         }
 
+        public static void Fill<T>(this T[] a, Func<int, T> value)
+        {
+            for (var cc = 0; cc < a.Length; cc++)
+            {
+                a[cc] = value(cc);
+            }
+        }
+
         public static void Transform<T>(this T[] a, Func<T, T> value)
         {
             for (var cc = 0; cc < a.Length; cc++)
@@ -55,6 +64,7 @@ namespace MyNN
                 a[cc] = value(a[cc]);
             }
         }
+
 
         public static T[] Concatenate<T>(this T[] a, T[] b)
         {
@@ -194,6 +204,26 @@ namespace MyNN
             return true;
         }
 
+        public static TT[] ConvertAll<TF, TT>(this TF[] array, Func<TF, TT> converter)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array");
+            }
+            if (converter == null)
+            {
+                throw new ArgumentNullException("converter");
+            }
+
+            var result = new TT[array.Length];
+
+            for (var cc = 0; cc < array.Length; cc++)
+            {
+                result[cc] = converter(array[cc]);
+            }
+
+            return result;
+        }
     }
 
 }

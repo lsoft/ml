@@ -7,45 +7,49 @@ using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.Two
 {
-    public class GPUPropagatorComponentConstructor
+    public class GPUPropagatorComponentConstructor : IPropagatorComponentConstructor
     {
         private readonly CLProvider _clProvider;
-        private readonly IMLP _mlp;
 
         public GPUPropagatorComponentConstructor(
-            CLProvider clProvider,
-            IMLP mlp
+            CLProvider clProvider
             )
         {
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
             }
+
+            _clProvider = clProvider;
+        }
+
+        public void CreateComponents(
+            IMLP mlp,
+            out ILayerContainer[] containers,
+            out ILayerPropagator[] propagators
+            )
+        {
             if (mlp == null)
             {
                 throw new ArgumentNullException("mlp");
             }
 
-            _clProvider = clProvider;
-            _mlp = mlp;
-        }
-
-        public void CreateComponents(
-            out IMemLayerContainer[] containers,
-            out ILayerPropagator[] propagators
-            )
-        {
-            var c = this.CreateMemsByMLP();
-            var p = this.CreatePropagatorsByMLP(c);
+            var c = this.CreateMemsByMLP(mlp);
+            var p = this.CreatePropagatorsByMLP(mlp, c);
 
             containers = c;
             propagators = p;
         }
 
         private ILayerPropagator[] CreatePropagatorsByMLP(
+            IMLP mlp,
             IMemLayerContainer[] containers
             )
         {
+            if (mlp == null)
+            {
+                throw new ArgumentNullException("mlp");
+            }
             if (containers == null)
             {
                 throw new ArgumentNullException("containers");
@@ -56,7 +60,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.Two
 
             var ks = new GPUKernelSource();
 
-            var layerCount = _mlp.Layers.Length;
+            var layerCount = mlp.Layers.Length;
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
@@ -65,9 +69,9 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.Two
                     ks,
                     containers[layerIndex - 1],
                     containers[layerIndex],
-                    _mlp.Layers[layerIndex].LayerActivationFunction,
-                    _mlp.Layers[layerIndex - 1].Neurons.Length,
-                    _mlp.Layers[layerIndex].NonBiasNeuronCount
+                    mlp.Layers[layerIndex].LayerActivationFunction,
+                    mlp.Layers[layerIndex - 1].Neurons.Length,
+                    mlp.Layers[layerIndex].NonBiasNeuronCount
                     );
 
                 result.Add(p);
@@ -78,17 +82,23 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.Two
         }
 
         private IMemLayerContainer[] CreateMemsByMLP(
+            IMLP mlp
             )
         {
+            if (mlp == null)
+            {
+                throw new ArgumentNullException("mlp");
+            }
+
             var result = new List<IMemLayerContainer>();
 
-            var layerCount = _mlp.Layers.Length;
+            var layerCount = mlp.Layers.Length;
 
             for (var layerIndex = 0; layerIndex < layerCount; layerIndex++)
             {
-                var previousLayerTotalNeuronCount = layerIndex > 0 ? _mlp.Layers[layerIndex - 1].Neurons.Length : 0;
-                var currentLayerNonBiasNeuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
-                var currentLayerTotalNeuronCount = _mlp.Layers[layerIndex].Neurons.Length;
+                var previousLayerTotalNeuronCount = layerIndex > 0 ? mlp.Layers[layerIndex - 1].Neurons.Length : 0;
+                var currentLayerNonBiasNeuronCount = mlp.Layers[layerIndex].NonBiasNeuronCount;
+                var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].Neurons.Length;
 
                 var mc = new CPUMemLayerContainer(
                     _clProvider,

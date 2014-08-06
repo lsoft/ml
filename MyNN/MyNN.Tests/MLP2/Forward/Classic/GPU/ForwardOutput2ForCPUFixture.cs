@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
+using MyNN.MLP2.ForwardPropagation.Classic;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.Two;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
-namespace MyNN.Tests.MLP2.Forward.GPU
+namespace MyNN.Tests.MLP2.Forward.Classic.GPU
 {
     /// <summary>
-    /// Summary description for GPUAlgorithmForwardAtIntelCPUFixture
+    /// Summary description for ForwardOutput2ForCPUFixture
     /// </summary>
     [TestClass]
-    public class GPUAlgorithmForwardAtIntelCPUFixture
+    public class ForwardOutput2ForCPUFixture
     {
         private const float ForwardEpsilon = 1e-6f;
 
-        public GPUAlgorithmForwardAtIntelCPUFixture()
+        public ForwardOutput2ForCPUFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -66,9 +67,9 @@ namespace MyNN.Tests.MLP2.Forward.GPU
         #endregion
 
         [TestMethod]
-        public void GPUForward_1_1_Test0()
+        public void Forward_1_1_Test0()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -88,10 +89,23 @@ namespace MyNN.Tests.MLP2.Forward.GPU
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new GPUPropagatorComponentConstructor(
+                            clProvider
+                            );
+
+                        ILayerContainer[] containers;
+                        ILayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            mlp,
+                            out containers,
+                            out propagators);
+
                         return
-                            new GPUForwardPropagation(
-                                mlp,
-                                clProvider);
+                            new ForwardPropagation2(
+                                containers,
+                                propagators,
+                                mlp
+                                );
                     });
 
                 Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
@@ -99,9 +113,9 @@ namespace MyNN.Tests.MLP2.Forward.GPU
         }
 
         [TestMethod]
-        public void GPUForward_1_1_Test1()
+        public void Forward_1_1_Test1()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -121,10 +135,23 @@ namespace MyNN.Tests.MLP2.Forward.GPU
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new GPUPropagatorComponentConstructor(
+                            clProvider
+                            );
+
+                        ILayerContainer[] containers;
+                        ILayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            mlp,
+                            out containers,
+                            out propagators);
+
                         return
-                            new GPUForwardPropagation(
-                                mlp,
-                                clProvider);
+                            new ForwardPropagation2(
+                                containers,
+                                propagators,
+                                mlp
+                                );
                     });
 
                 Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
@@ -132,114 +159,9 @@ namespace MyNN.Tests.MLP2.Forward.GPU
         }
 
         [TestMethod]
-        public void GPUForward_1_1_Test2()
+        public void Forward_5_24_24_1_Test()
         {
-            var test = new ForwardTester();
-
-            var dataset = new DataSet(
-                new List<DataItem>
-                {
-                    new DataItem(
-                        new[] {2f},
-                        new[] {1f})
-                });
-
-
-            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(true), false))
-            {
-                var result = test.ExecuteTestWith_1_1_MLP(
-                    dataset,
-                    0.5f,
-                    -1f,
-                    () => new SigmoidFunction(1f),
-                    (mlp) =>
-                    {
-                        return
-                            new GPUForwardPropagation(
-                                mlp,
-                                clProvider);
-                    });
-
-                Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
-            }
-        }
-
-        [TestMethod]
-        public void GPUForward_1_1_Test3()
-        {
-            var test = new ForwardTester();
-
-            var dataset = new DataSet(
-                new List<DataItem>
-                {
-                    new DataItem(
-                        new[] {2f},
-                        new[] {1f})
-                });
-
-
-            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(true), false))
-            {
-                var result = test.ExecuteTestWith_1_1_MLP(
-                    dataset,
-                    0.5f,
-                    -1f,
-                    () => new SigmoidFunction(1f),
-                    (mlp) =>
-                    {
-                        return
-                            new GPUForwardPropagation(
-                                mlp,
-                                clProvider);
-                    });
-
-                Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
-            }
-        }
-
-        [TestMethod]
-        public void GPUForward_5_24_24_1_Test0()
-        {
-            var test = new ForwardTester();
-
-            var dataset = new DataSet(
-                new List<DataItem>
-                {
-                    new DataItem(
-                        new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
-                        new[] {1f})
-                });
-
-
-            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(true), false))
-            {
-                var result = test.ExecuteTestWith_5_24_24_1_MLP(
-                    dataset,
-                    () => new LinearFunction(1f), 
-                    (mlp) =>
-                    {
-                        return
-                            new GPUForwardPropagation(
-                                mlp,
-                                clProvider);
-                    });
-
-                const float correctResult = -0.4017001f;
-
-                ConsoleAmbientContext.Console.WriteLine(
-                    string.Format(
-                        "correct = {0}, result = {1}",
-                        correctResult,
-                        result));
-
-                Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
-            }
-        }
-
-        [TestMethod]
-        public void GPUForward_5_24_24_1_Test1()
-        {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -257,10 +179,23 @@ namespace MyNN.Tests.MLP2.Forward.GPU
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new GPUPropagatorComponentConstructor(
+                            clProvider
+                            );
+
+                        ILayerContainer[] containers;
+                        ILayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            mlp,
+                            out containers,
+                            out propagators);
+
                         return
-                            new GPUForwardPropagation(
-                                mlp,
-                                clProvider);
+                            new ForwardPropagation2(
+                                containers,
+                                propagators,
+                                mlp
+                                );
                     });
 
                 const float correctResult = -0.4017001f;
@@ -276,9 +211,9 @@ namespace MyNN.Tests.MLP2.Forward.GPU
         }
 
         [TestMethod]
-        public void GPUForward_5_24_24_1_Test2()
+        public void Forward_5_300_1_Test()
         {
-            var test = new ForwardTester();
+            var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
                 new List<DataItem>
@@ -291,18 +226,31 @@ namespace MyNN.Tests.MLP2.Forward.GPU
 
             using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(true), false))
             {
-                var result = test.ExecuteTestWith_5_24_24_1_MLP(
+                var result = test.ExecuteTestWith_5_300_1_MLP(
                     dataset,
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
+                        var pcc = new GPUPropagatorComponentConstructor(
+                            clProvider
+                            );
+
+                        ILayerContainer[] containers;
+                        ILayerPropagator[] propagators;
+                        pcc.CreateComponents(
+                            mlp,
+                            out containers,
+                            out propagators);
+
                         return
-                            new GPUForwardPropagation(
-                                mlp,
-                                clProvider);
+                            new ForwardPropagation2(
+                                containers,
+                                propagators,
+                                mlp
+                                );
                     });
 
-                const float correctResult = -0.4017001f;
+                const float correctResult = 5.8f;
 
                 ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
@@ -313,5 +261,6 @@ namespace MyNN.Tests.MLP2.Forward.GPU
                 Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
             }
         }
+
     }
 }

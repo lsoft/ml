@@ -6,7 +6,7 @@ namespace MyNN.MLP2.Structure.Layer
 {
     public class LayerState : ILayerState
     {
-        public float[] State
+        public float[] NState
         {
             get;
             private set;
@@ -19,13 +19,13 @@ namespace MyNN.MLP2.Structure.Layer
                 throw new ArgumentNullException("state");
             }
 
-            State = new float[takeCount];
-            Array.Copy(state, 0, State, 0, takeCount);
+            NState = new float[takeCount];
+            Array.Copy(state, 0, NState, 0, takeCount);
         }
 
         public IEnumerator<float> GetEnumerator()
         {
-            var e = this.State.GetEnumerator();
+            var e = this.NState.GetEnumerator();
 
             while (e.MoveNext())
                 yield return (float)e.Current;

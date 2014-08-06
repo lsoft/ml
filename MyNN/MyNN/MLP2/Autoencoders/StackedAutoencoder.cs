@@ -132,7 +132,7 @@ namespace MyNN.MLP2.Autoencoders
             var processingValidationData = validationData;
 
             //итоговый автоенкодер
-            var layerList = new ILayer[_layerInfos.Length * 2 - 1];
+            var layerList = new ILayer[_layerInfos.Length*2 - 1];
             var layerListCount = layerList.Length;
 
             var depth = _layerInfos.Length - 1;
@@ -156,7 +156,7 @@ namespace MyNN.MLP2.Autoencoders
                         _layerInfos[depthIndex + 1].LayerSize,
                         _layerInfos[depthIndex].LayerSize
                     });
-                
+
                 ConsoleAmbientContext.Console.WriteLine("Autoencoder created with conf: " + mlp.GetLayerInformation());
 
                 var mlpContainer = sdaeContainer.GetChildContainer(mlpName);
@@ -201,24 +201,23 @@ namespace MyNN.MLP2.Autoencoders
                     //обновляем обучающие данные (от исходного множества, чтобы без применения возможных деформаций)
                     mlp.AutoencoderCutTail();
 
-                    using (var clProvider = new CLProvider(_deviceChooser, true))
-                    {
-                        var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, mlp);
+                    var forward = _forwardPropagationFactory.Create(
+                        _randomizer,
+                        mlp);
 
-                        var nextTrain = forward.ComputeOutput(processingTrainData);
-                        var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.State));
-                        processingTrainData = newTrainData;
+                    var nextTrain = forward.ComputeOutput(processingTrainData);
+                    var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.NState));
+                    processingTrainData = newTrainData;
 
-                        //обновляем валидационные данные (от исходного множества, чтобы без применения возможных деформаций)
-                        var nextValidation = forward.ComputeOutput(processingValidationData);
-                        var newValidationData = new DataSet(validationData, nextValidation.ConvertAll(j => j.State));
-                        processingValidationData = newValidationData;
-                    }
+                    //обновляем валидационные данные (от исходного множества, чтобы без применения возможных деформаций)
+                    var nextValidation = forward.ComputeOutput(processingValidationData);
+                    var newValidationData = new DataSet(validationData, nextValidation.ConvertAll(j => j.NState));
+                    processingValidationData = newValidationData;
                 }
             }
 
             //приделываем биас-нейроны
-            for (var cc = (layerListCount + 1) / 2; cc < layerListCount - 1; cc++)
+            for (var cc = (layerListCount + 1)/2; cc < layerListCount - 1; cc++)
             {
                 layerList[cc].AddBiasNeuron();
             }
@@ -227,33 +226,30 @@ namespace MyNN.MLP2.Autoencoders
             var combinedNet = _mlpFactory.CreateMLP(
                 sdaeName,
                 layerList);
+            
+            var finalForward = _forwardPropagationFactory.Create(
+                _randomizer,
+                combinedNet);
 
-            using (var clProvider = new CLProvider())
-            {
-                var forward = _forwardPropagationFactory.Create(_randomizer, clProvider, combinedNet);
+            //валидируем его
+            var finalValidation = _validationFactory(
+                validationData,
+                sdaeContainer);
 
-                //валидируем его
-                var finalValidation = _validationFactory(
-                    validationData,
-                    sdaeContainer);
+            var finalAccuracy = finalValidation.Validate(
+                finalForward,
+                0,
+                sdaeContainer
+                );
 
-                var finalAccuracy =finalValidation.Validate(
-                    forward,
-                    0,
-                    sdaeContainer
-                    );
-
-                //сохраняем
-                sdaeContainer.SaveMLP(
-                    combinedNet, 
-                    finalAccuracy
-                    );
-            }
+            //сохраняем
+            sdaeContainer.SaveMLP(
+                combinedNet,
+                finalAccuracy
+                );
 
             return
                 combinedNet;
         }
-
-
     }
 }

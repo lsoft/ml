@@ -30,6 +30,7 @@ namespace MyNN.MLP2.Structure
             int nonBiasNeuronCount,
             bool isNeedBiasNeuron);
 
+        IMLPConfiguration GetConfiguration();
 
     }
 }

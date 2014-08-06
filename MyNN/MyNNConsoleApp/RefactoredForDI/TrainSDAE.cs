@@ -20,7 +20,8 @@ using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
 using MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU;
-using MyNN.MLP2.ForwardPropagationFactory.Classic.OpenCL.CPU;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
+using MyNN.MLP2.ForwardPropagationFactory.Classic;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Factory;
@@ -74,71 +75,77 @@ namespace MyNNConsoleApp.RefactoredForDI
                 new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))
                 );
 
-            var sdae = new StackedAutoencoder(
-                new IntelCPUDeviceChooser(),
-                randomizer,
-                mlpfactory,
-                (IDataSet td) =>
-                {
-                    var result =
-                        new ConverterTrainDataProvider(
-                            new ShuffleDataSetConverter(randomizer),
-                            new NoiseDataProvider(td, noiser)
-                            );
-                    return
-                        result;
-                },
-                (IDataSet vd, IArtifactContainer mlpContainer) =>
-                {
-                    var vda = toa.Convert(vd);
+            using (var clProvider = new CLProvider())
+            {
+                var sdae = new StackedAutoencoder(
+                    new IntelCPUDeviceChooser(),
+                    randomizer,
+                    mlpfactory,
+                    (IDataSet td) =>
+                    {
+                        var result =
+                            new ConverterTrainDataProvider(
+                                new ShuffleDataSetConverter(randomizer),
+                                new NoiseDataProvider(td, noiser)
+                                );
+                        return
+                            result;
+                    },
+                    (IDataSet vd, IArtifactContainer mlpContainer) =>
+                    {
+                        var vda = toa.Convert(vd);
 
-                    return
-                        new Validation(
-                            new MetricsAccuracyCalculator(
-                                new HalfSquaredEuclidianDistance(),
-                                vda),
-                            new GridReconstructDrawer(
-                                new MNISTVisualizer(), 
-                                vda,
-                                300,
-                                100)
-                            );
-                },
-                (int depthIndex) =>
-                {
-                    var lr =
-                        depthIndex == 0
-                            ? 0.005f
-                            : 0.001f;
+                        return
+                            new Validation(
+                                new MetricsAccuracyCalculator(
+                                    new HalfSquaredEuclidianDistance(),
+                                    vda),
+                                new GridReconstructDrawer(
+                                    new MNISTVisualizer(),
+                                    vda,
+                                    300,
+                                    100)
+                                );
+                    },
+                    (int depthIndex) =>
+                    {
+                        var lr =
+                            depthIndex == 0
+                                ? 0.005f
+                                : 0.001f;
 
-                    var conf = new LearningAlgorithmConfig(
-                        new LinearLearningRate(lr, 0.99f),
-                        1,
-                        0.0f,
-                        15,
-                        0f,
-                        -0.0025f);
+                        var conf = new LearningAlgorithmConfig(
+                            new LinearLearningRate(lr, 0.99f),
+                            1,
+                            0.0f,
+                            15,
+                            0f,
+                            -0.0025f);
 
-                    return conf;
-                },
-                new CPUBackpropagationAlgorithmFactory(),
-                new CPUForwardPropagationFactory(),
-                new LayerInfo(784, new RLUFunction()),
-                new LayerInfo(500, new RLUFunction()),
-                new LayerInfo(500, new RLUFunction()),
-                new LayerInfo(1000, new RLUFunction())
-                );
+                        return conf;
+                    },
+                    new CPUBackpropagationAlgorithmFactory(),
+                    new ForwardPropagationFactory(
+                        new CPUPropagatorComponentConstructor(
+                            clProvider,
+                            VectorizationSizeEnum.VectorizationMode16)),
+                    new LayerInfo(784, new RLUFunction()),
+                    new LayerInfo(500, new RLUFunction()),
+                    new LayerInfo(500, new RLUFunction()),
+                    new LayerInfo(1000, new RLUFunction())
+                    );
 
-            var sdaeName = string.Format(
-                "sdae{0}.sdae",
-                DateTime.Now.ToString("yyyyMMddHHmmss"));
+                var sdaeName = string.Format(
+                    "sdae{0}.sdae",
+                    DateTime.Now.ToString("yyyyMMddHHmmss"));
 
-            sdae.Train(
-                sdaeName,
-                rootContainer,
-                trainData,
-                validationData
-                );
+                sdae.Train(
+                    sdaeName,
+                    rootContainer,
+                    trainData,
+                    validationData
+                    );
+            }
         }
     }
 }
