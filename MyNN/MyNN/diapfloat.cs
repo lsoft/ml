@@ -19,6 +19,15 @@ namespace MyNN
             private set;
         }
 
+        public diapfloat(float min, float max, bool nevermind)
+        {
+            _center = min + (max - min)/2f;
+
+            Min = min;
+            Max = max;
+
+        }
+
         public diapfloat(float center, float allowedError)
         {
             if (allowedError < 0f)
@@ -43,7 +52,7 @@ namespace MyNN
         public override string ToString()
         {
             var result = string.Format(
-                "[{0}-{1}]",
+                "[{0} <-> {1}]",
                 Min,
                 Max
                 );

@@ -128,7 +128,11 @@
     <Compile Include="MLP2\Forward\DropConnect\CPU\Bit\ForwardOutputFixture.cs" />
     <Compile Include="MLP2\Forward\ForwardOutputTester.cs" />
     <Compile Include="MLP2\Forward\ForwardStateTester.cs" />
-    <Compile Include="MLP2\MaskContainers\BigArrayWeightBitMaskContainerFixture.cs" />
+    <Compile Include="MLP2\MaskContainers\BigArray\NVidiaGPUFixture.cs" />
+    <Compile Include="MLP2\MaskContainers\BigArray\IntelGPUFixture.cs" />
+    <Compile Include="MLP2\MaskContainers\BigArray\CPUFixture.cs" />
+    <Compile Include="MLP2\MaskContainers\BitMaskContainerTester.cs" />
+    <Compile Include="MLP2\MLPConfigurationConstructor.cs" />
     <Compile Include="MLP2\Reduction\Performance\WarpReductionPerformanceFixture.cs" />
     <Compile Include="MLP2\Reduction\WarpReductionFixture.cs" />
     <Compile Include="MLP2\Sort\SortFixture.cs" />
