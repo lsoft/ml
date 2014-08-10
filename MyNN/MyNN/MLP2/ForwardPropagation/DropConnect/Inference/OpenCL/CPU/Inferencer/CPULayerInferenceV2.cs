@@ -225,6 +225,7 @@ __kernel void
     float lastStateSummator  = 0;
     for(int sampleIndex = workStartRandomIndex; sampleIndex < (workStartRandomIndex + sampleCount); sampleIndex++)
     {
+        //делаем гауссиану с медианой wv_median и сигмой wv_sigma из гауссианы (0;1), пришедшей из C#
         float ogrnd = randomMem[sampleIndex];
         float grnd = ogrnd * wv_sigma + wv_median;
 

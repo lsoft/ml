@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.MLP2.Structure.Neurons;
 

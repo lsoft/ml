@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
-using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
 {
     public class GPUPropagatorComponentConstructor : IPropagatorComponentConstructor
     {
@@ -100,7 +98,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.Two
                 var currentLayerNonBiasNeuronCount = mlp.Layers[layerIndex].NonBiasNeuronCount;
                 var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].Neurons.Length;
 
-                var mc = new CPUMemLayerContainer(
+                var mc = new MemLayerContainer(
                     _clProvider,
                     previousLayerTotalNeuronCount,
                     currentLayerNonBiasNeuronCount,

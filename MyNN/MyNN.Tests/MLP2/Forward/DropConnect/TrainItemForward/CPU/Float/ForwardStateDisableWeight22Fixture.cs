@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Data;
 using MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.CPU;
+using MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Float.OpenCL.CPU;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
-using MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit.MaskContainer;
+using MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.Bit.MaskContainer;
+using MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.Float.MaskContainer;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
+namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.Float
 {
     /// <summary>
     /// Summary description for ForwardStateDisableWeight22Fixture
@@ -88,24 +90,23 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var maskContainer = new MockWeightBitMaskContainer(
+                        var maskContainer = new MockWeightMaskContainer(
                             clProvider,
                             mlp,
-                            1,
                             (int layerIndex, int weightIndex) =>
                             {
-                                uint maskValue = 1;
+                                var maskValue = 1f;
 
                                 if (layerIndex == 2 && weightIndex == 2)
                                 {
-                                    maskValue = 0;
+                                    maskValue = 0f;
                                 }
 
                                 return maskValue;
                             }
                             );
 
-                        var forward = new DropConnectBitOpenCLForwardPropagation(
+                        var forward = new DropConnectOpenCLForwardPropagation(
                             VectorizationSizeEnum.NoVectorization,
                             mlp,
                             clProvider,
@@ -165,24 +166,23 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var maskContainer = new MockWeightBitMaskContainer(
+                        var maskContainer = new MockWeightMaskContainer(
                             clProvider,
                             mlp,
-                            1,
                             (int layerIndex, int weightIndex) =>
                             {
-                                uint maskValue = 1;
+                                var maskValue = 1f;
 
                                 if (layerIndex == 2 && weightIndex == 2)
                                 {
-                                    maskValue = 0;
+                                    maskValue = 0f;
                                 }
 
                                 return maskValue;
                             }
                             );
 
-                        var forward = new DropConnectBitOpenCLForwardPropagation(
+                        var forward = new DropConnectOpenCLForwardPropagation(
                             VectorizationSizeEnum.VectorizationMode4,
                             mlp,
                             clProvider,
@@ -242,24 +242,23 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var maskContainer = new MockWeightBitMaskContainer(
+                        var maskContainer = new MockWeightMaskContainer(
                             clProvider,
                             mlp,
-                            1,
                             (int layerIndex, int weightIndex) =>
                             {
-                                uint maskValue = 1;
+                                var maskValue = 1f;
 
                                 if (layerIndex == 2 && weightIndex == 2)
                                 {
-                                    maskValue = 0;
+                                    maskValue = 0f;
                                 }
 
                                 return maskValue;
                             }
                             );
 
-                        var forward = new DropConnectBitOpenCLForwardPropagation(
+                        var forward = new DropConnectOpenCLForwardPropagation(
                             VectorizationSizeEnum.VectorizationMode16,
                             mlp,
                             clProvider,

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
 using MyNN.MLP2.Structure;
 
 namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp

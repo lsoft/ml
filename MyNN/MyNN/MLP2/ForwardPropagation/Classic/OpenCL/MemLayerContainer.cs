@@ -4,9 +4,9 @@ using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
 {
-    public class CPUMemLayerContainer : IMemLayerContainer
+    public class MemLayerContainer : IMemLayerContainer
     {
         private readonly CLProvider _clProvider;
         private readonly int _previousLayerTotalNeuronCount;
@@ -31,7 +31,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
             private set;
         }
 
-        public CPUMemLayerContainer(
+        public MemLayerContainer(
             CLProvider clProvider,
             int previousLayerTotalNeuronCount,
             int currentLayerNonBiasNeuronCount,

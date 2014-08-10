@@ -120,18 +120,26 @@
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForIntelGPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForCPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForCPUFixture.cs" />
-    <Compile Include="MLP2\Forward\DropConnect\CPU\Bit\ForwardStateDisableWeight22Fixture.cs" />
-    <Compile Include="MLP2\Forward\DropConnect\CPU\Bit\ForwardStateDisableMaskFixture.cs" />
-    <Compile Include="MLP2\Forward\DropConnect\CPU\Bit\ForwardStateDisableWeight10Fixture.cs" />
-    <Compile Include="MLP2\Forward\DropConnect\CPU\Bit\ForwardStateDisableOutputLayerFixture.cs" />
-    <Compile Include="MLP2\Forward\DropConnect\CPU\Bit\MaskContainer\MockWeightBitMaskContainer.cs" />
-    <Compile Include="MLP2\Forward\DropConnect\CPU\Bit\ForwardOutputFixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Bit\ForwardOutputFixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Bit\ForwardStateDisableMaskFixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Bit\ForwardStateDisableOutputLayerFixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Bit\ForwardStateDisableWeight10Fixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Bit\ForwardStateDisableWeight22Fixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Bit\MaskContainer\MockWeightBitMaskContainer.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Float\ForwardOutputFixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Float\ForwardStateDisableMaskFixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Float\ForwardStateDisableOutputLayerFixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Float\ForwardStateDisableWeight10Fixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Float\ForwardStateDisableWeight22Fixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Float\MaskContainer\MockWeightBitMaskContainer.cs" />
     <Compile Include="MLP2\Forward\ForwardOutputTester.cs" />
     <Compile Include="MLP2\Forward\ForwardStateTester.cs" />
-    <Compile Include="MLP2\MaskContainers\BigArray\NVidiaGPUFixture.cs" />
-    <Compile Include="MLP2\MaskContainers\BigArray\IntelGPUFixture.cs" />
-    <Compile Include="MLP2\MaskContainers\BigArray\CPUFixture.cs" />
-    <Compile Include="MLP2\MaskContainers\BitMaskContainerTester.cs" />
+    <Compile Include="MLP2\MaskContainers\Bit\BigArrayFixture.cs" />
+    <Compile Include="MLP2\MaskContainers\Bit\BitMaskContainerTester.cs" />
+    <Compile Include="MLP2\MaskContainers\Float\BGFixture.cs" />
+    <Compile Include="MLP2\MaskContainers\Float\BigArrayFixture.cs" />
+    <Compile Include="MLP2\MaskContainers\Float\CSharpFixture.cs" />
+    <Compile Include="MLP2\MaskContainers\Float\FloatMaskContainerTester.cs" />
     <Compile Include="MLP2\MLPConfigurationConstructor.cs" />
     <Compile Include="MLP2\Reduction\Performance\WarpReductionPerformanceFixture.cs" />
     <Compile Include="MLP2\Reduction\WarpReductionFixture.cs" />
@@ -156,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="BeliefNetwork\" />
+    <Folder Include="MLP2\Forward\DropConnect\Inferencer\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

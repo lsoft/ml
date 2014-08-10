@@ -1,14 +1,18 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask;
 using MyNN.OutputConsole;
+using MyNN.Randomizer;
+using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
-namespace MyNN.Tests.MLP2.MaskContainers.BigArray
+namespace MyNN.Tests.MLP2.MaskContainers.Float
 {
     [TestClass]
-    public class IntelGPUFixture
+    public class BGFixture
     {
         [TestMethod]
-        public void Test05WithCPU()
+        public void Test05()
         {
             var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
                 new int[]
@@ -21,10 +25,21 @@ namespace MyNN.Tests.MLP2.MaskContainers.BigArray
             var p = 0.5f;
             var correctResult = new diapfloat(p, p/100f);
 
-            var result = BitMaskContainerTester.TestContainer(
-                new IntelGPUDeviceChooser(),
-                mlpConfiguration,
-                p
+            var randomizer = new DefaultRandomizer(123);
+            Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
+                (clProvider) =>
+                {
+                    return
+                        new BGWeightMaskContainer(
+                            clProvider,
+                            mlpConfiguration,
+                            randomizer,
+                            p);
+                };
+
+            var result = FloatMaskContainerTester.TestContainer(
+                new IntelCPUDeviceChooser(),
+                containerProvider
                 );
 
             ConsoleAmbientContext.Console.WriteLine(
@@ -38,7 +53,7 @@ namespace MyNN.Tests.MLP2.MaskContainers.BigArray
         }
 
         [TestMethod]
-        public void Test10WithCPU()
+        public void Test10()
         {
             var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
                 new int[]
@@ -51,10 +66,21 @@ namespace MyNN.Tests.MLP2.MaskContainers.BigArray
             var p = 1f;
             var correctResult = new diapfloat(p, p, false);
 
-            var result = BitMaskContainerTester.TestContainer(
-                new IntelGPUDeviceChooser(),
-                mlpConfiguration,
-                p
+            var randomizer = new DefaultRandomizer(123);
+            Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
+                (clProvider) =>
+                {
+                    return
+                        new BGWeightMaskContainer(
+                            clProvider,
+                            mlpConfiguration,
+                            randomizer,
+                            p);
+                };
+
+            var result = FloatMaskContainerTester.TestContainer(
+                new IntelCPUDeviceChooser(),
+                containerProvider
                 );
 
             ConsoleAmbientContext.Console.WriteLine(
@@ -68,7 +94,7 @@ namespace MyNN.Tests.MLP2.MaskContainers.BigArray
         }
 
         [TestMethod]
-        public void Test01WithCPU()
+        public void Test01()
         {
             var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
                 new int[]
@@ -81,10 +107,21 @@ namespace MyNN.Tests.MLP2.MaskContainers.BigArray
             var p = 0.1f;
             var correctResult = new diapfloat(p, p / 100f);
 
-            var result = BitMaskContainerTester.TestContainer(
-                new IntelGPUDeviceChooser(),
-                mlpConfiguration,
-                p
+            var randomizer = new DefaultRandomizer(123);
+            Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
+                (clProvider) =>
+                {
+                    return
+                        new BGWeightMaskContainer(
+                            clProvider,
+                            mlpConfiguration,
+                            randomizer,
+                            p);
+                };
+
+            var result = FloatMaskContainerTester.TestContainer(
+                new IntelCPUDeviceChooser(),
+                containerProvider
                 );
 
             ConsoleAmbientContext.Console.WriteLine(
@@ -98,7 +135,7 @@ namespace MyNN.Tests.MLP2.MaskContainers.BigArray
         }
 
         [TestMethod]
-        public void Test09WithCPU()
+        public void Test09()
         {
             var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
                 new int[]
@@ -111,10 +148,21 @@ namespace MyNN.Tests.MLP2.MaskContainers.BigArray
             var p = 0.9f;
             var correctResult = new diapfloat(p, p / 100f);
 
-            var result = BitMaskContainerTester.TestContainer(
-                new IntelGPUDeviceChooser(),
-                mlpConfiguration,
-                p
+            var randomizer = new DefaultRandomizer(123);
+            Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
+                (clProvider) =>
+                {
+                    return
+                        new BGWeightMaskContainer(
+                            clProvider,
+                            mlpConfiguration,
+                            randomizer,
+                            p);
+                };
+
+            var result = FloatMaskContainerTester.TestContainer(
+                new IntelCPUDeviceChooser(),
+                containerProvider
                 );
 
             ConsoleAmbientContext.Console.WriteLine(

@@ -6,10 +6,10 @@ using MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.CPU;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
-using MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit.MaskContainer;
+using MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.Bit.MaskContainer;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
+namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.Bit
 {
     [TestClass]
     public class ForwardOutputFixture

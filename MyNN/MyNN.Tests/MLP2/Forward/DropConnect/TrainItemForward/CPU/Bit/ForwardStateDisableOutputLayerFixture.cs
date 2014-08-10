@@ -6,20 +6,20 @@ using MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.CPU;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Neurons.Function;
 using MyNN.OutputConsole;
-using MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit.MaskContainer;
+using MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.Bit.MaskContainer;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
+namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.Bit
 {
     /// <summary>
-    /// Summary description for ForwardStateDisableWeight10Fixture
+    /// Summary description for ForwardStateDisableOutputLayerFixture
     /// </summary>
     [TestClass]
-    public class ForwardStateDisableWeight10Fixture
+    public class ForwardStateDisableOutputLayerFixture
     {
         private const float ForwardEpsilon = 1e-6f;
 
-        public ForwardStateDisableWeight10Fixture()
+        public ForwardStateDisableOutputLayerFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -83,8 +83,8 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
             {
                 var result = test.ExecuteTestWith_1_2_2_MLP(
                     dataset,
-                    new List<float> {2f, 1f, 1f, 1f},
-                    new List<float> {4f, 1f, 1f, 2f, 2f, 1f},
+                    new List<float> {1f, 1f, 1f, 1f},
+                    new List<float> {1f, 1f, 1f, 1f, 1f, 1f},
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
@@ -92,18 +92,13 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                             clProvider,
                             mlp,
                             1,
-                            (int layerIndex, int weightIndex) =>
+                            new uint[]
                             {
-                                uint maskValue = 1;
-
-                                if (layerIndex == 1 && weightIndex == 0)
-                                {
-                                    maskValue = 0;
-                                }
-
-                                return maskValue;
+                                1,
+                                1,
+                                0
                             }
-                            );
+                            );// output layer with zero mask
 
                         var forward = new DropConnectBitOpenCLForwardPropagation(
                             VectorizationSizeEnum.NoVectorization,
@@ -116,7 +111,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                             forward;
                     });
 
-                var layer0CorrectResult = new Pair<float, float>(1f, 1.75f);
+                var layer0CorrectResult = new Pair<float, float>(1.75f, 1.75f);
                 ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
                         "layer 0: correct = [{0}; {1}], result = [{2};{3}]",
@@ -126,7 +121,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                         result.First.Second
                         ));
 
-                var layer1CorrectResult = new Pair<float, float>(6.75f, 6.5f);
+                var layer1CorrectResult = new Pair<float, float>(0f, 0f);
                 ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
                         "layer 1: correct = [{0}; {1}], result = [{2};{3}]",
@@ -160,8 +155,8 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
             {
                 var result = test.ExecuteTestWith_1_2_2_MLP(
                     dataset,
-                    new List<float> { 2f, 1f, 1f, 1f },
-                    new List<float> { 4f, 1f, 1f, 2f, 2f, 1f },
+                    new List<float> { 1f, 1f, 1f, 1f },
+                    new List<float> { 1f, 1f, 1f, 1f, 1f, 1f },
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
@@ -169,18 +164,13 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                             clProvider,
                             mlp,
                             1,
-                            (int layerIndex, int weightIndex) =>
+                            new uint[]
                             {
-                                uint maskValue = 1;
-
-                                if (layerIndex == 1 && weightIndex == 0)
-                                {
-                                    maskValue = 0;
-                                }
-
-                                return maskValue;
+                                1,
+                                1,
+                                0
                             }
-                            );
+                            );// output layer with zero mask
 
                         var forward = new DropConnectBitOpenCLForwardPropagation(
                             VectorizationSizeEnum.VectorizationMode4,
@@ -193,7 +183,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                             forward;
                     });
 
-                var layer0CorrectResult = new Pair<float, float>(1f, 1.75f);
+                var layer0CorrectResult = new Pair<float, float>(1.75f, 1.75f);
                 ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
                         "layer 0: correct = [{0}; {1}], result = [{2};{3}]",
@@ -203,7 +193,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                         result.First.Second
                         ));
 
-                var layer1CorrectResult = new Pair<float, float>(6.75f, 6.5f);
+                var layer1CorrectResult = new Pair<float, float>(0f, 0f);
                 ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
                         "layer 1: correct = [{0}; {1}], result = [{2};{3}]",
@@ -237,8 +227,8 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
             {
                 var result = test.ExecuteTestWith_1_2_2_MLP(
                     dataset,
-                    new List<float> { 2f, 1f, 1f, 1f },
-                    new List<float> { 4f, 1f, 1f, 2f, 2f, 1f },
+                    new List<float> { 1f, 1f, 1f, 1f },
+                    new List<float> { 1f, 1f, 1f, 1f, 1f, 1f },
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
@@ -246,18 +236,13 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                             clProvider,
                             mlp,
                             1,
-                            (int layerIndex, int weightIndex) =>
+                            new uint[]
                             {
-                                uint maskValue = 1;
-
-                                if (layerIndex == 1 && weightIndex == 0)
-                                {
-                                    maskValue = 0;
-                                }
-
-                                return maskValue;
+                                1,
+                                1,
+                                0
                             }
-                            );
+                            );// output layer with zero mask
 
                         var forward = new DropConnectBitOpenCLForwardPropagation(
                             VectorizationSizeEnum.VectorizationMode16,
@@ -270,7 +255,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                             forward;
                     });
 
-                var layer0CorrectResult = new Pair<float, float>(1f, 1.75f);
+                var layer0CorrectResult = new Pair<float, float>(1.75f, 1.75f);
                 ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
                         "layer 0: correct = [{0}; {1}], result = [{2};{3}]",
@@ -280,7 +265,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                         result.First.Second
                         ));
 
-                var layer1CorrectResult = new Pair<float, float>(6.75f, 6.5f);
+                var layer1CorrectResult = new Pair<float, float>(0f, 0f);
                 ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
                         "layer 1: correct = [{0}; {1}], result = [{2};{3}]",
@@ -296,6 +281,8 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit
                 Assert.IsTrue(Math.Abs(result.Second.Second - layer1CorrectResult.Second) < ForwardEpsilon);
             }
         }
+
+
 
 
 

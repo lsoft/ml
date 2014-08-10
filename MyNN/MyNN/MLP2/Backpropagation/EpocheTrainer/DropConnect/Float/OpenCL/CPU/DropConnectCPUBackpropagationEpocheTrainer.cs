@@ -153,7 +153,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.OpenCL.CPU
 
             _weightMask = new BigArrayWeightMaskContainer(
                 _clProvider,
-                _mlp,
+                _mlp.GetConfiguration(),
                 _randomizer,
                 _p);
         }

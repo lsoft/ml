@@ -1,10 +1,8 @@
 ﻿using System;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two;
-using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
 {
     public class GPULayerPropagator : ILayerPropagator
     {

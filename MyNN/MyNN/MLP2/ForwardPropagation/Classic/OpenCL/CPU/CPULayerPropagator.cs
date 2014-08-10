@@ -3,7 +3,7 @@ using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU
 {
     public class CPULayerPropagator : ILayerPropagator
     {

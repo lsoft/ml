@@ -22,7 +22,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
         private const int TotalIterationCount = 100000;
 
         private readonly CLProvider _clProvider;
-        private readonly IMLP _mlp;
+        private readonly IMLPConfiguration _mlp;
         private readonly IRandomizer _randomizer;
         private readonly float _p;
 
@@ -46,12 +46,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
         /// Constructor
         /// </summary>
         /// <param name="clProvider">OpenCL provider</param>
-        /// <param name="mlp">Trained MLP</param>
+        /// <param name="mlp">MLP configuration</param>
         /// <param name="randomizer">Random number provider</param>
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
         public BigArrayWeightMaskContainer(
             CLProvider clProvider,
-            IMLP mlp,
+            IMLPConfiguration mlp,
             IRandomizer randomizer,
             float p = 0.5f)
         {
@@ -102,7 +102,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
                 for (var cc = 1; cc < layerCount; cc++)
                 {
                     masks[cc] = _clProvider.CreateFloatMem(
-                        _mlp.Layers[cc].NonBiasNeuronCount * _mlp.Layers[cc].Neurons[0].Weights.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                        _mlp.Layers[cc].NonBiasNeuronCount * _mlp.Layers[cc].Neurons[0].WeightsCount, //without bias neuron at current layer, but include bias neuron at previous layer
                         MemFlags.CopyHostPtr | MemFlags.ReadOnly);
                 }
 

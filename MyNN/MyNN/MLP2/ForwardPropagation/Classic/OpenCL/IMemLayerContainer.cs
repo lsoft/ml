@@ -1,6 +1,6 @@
 ﻿using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU.Two
+namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
 {
     public interface IMemLayerContainer : ILayerContainer
     {

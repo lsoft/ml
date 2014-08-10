@@ -15,7 +15,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
     public class CSharpWeightMaskContainer : IOpenCLWeightMaskContainer
     {
         private readonly CLProvider _clProvider;
-        private readonly IMLP _mlp;
+        private readonly IMLPConfiguration _mlpConfiguration;
         private readonly IRandomizer _randomizer;
         private readonly float _p;
 
@@ -29,12 +29,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
         /// Constructor
         /// </summary>
         /// <param name="clProvider">OpenCL provider</param>
-        /// <param name="mlp">Trained MLP</param>
+        /// <param name="mlpConfiguration">MLP configuration</param>
         /// <param name="randomizer">Random number provider</param>
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
         public CSharpWeightMaskContainer(
             CLProvider clProvider,
-            IMLP mlp,
+            IMLPConfiguration mlpConfiguration,
             IRandomizer randomizer,
             float p = 0.5f)
         {
@@ -42,9 +42,9 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
             {
                 throw new ArgumentNullException("clProvider");
             }
-            if (mlp == null)
+            if (mlpConfiguration == null)
             {
-                throw new ArgumentNullException("mlp");
+                throw new ArgumentNullException("mlpConfiguration");
             }
             if (randomizer == null)
             {
@@ -52,7 +52,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
             }
 
             _clProvider = clProvider;
-            _mlp = mlp;
+            _mlpConfiguration = mlpConfiguration;
 
             _randomizer = randomizer;
             _p = p;
@@ -62,14 +62,14 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
 
         private void CreateInfrastructure()
         {
-            var layerCount = _mlp.Layers.Length;
+            var layerCount = _mlpConfiguration.Layers.Length;
 
             MaskMem = new MemFloat[layerCount];
 
             for (var cc = 1; cc < layerCount; cc++)
             {
                 MaskMem[cc] = _clProvider.CreateFloatMem(
-                    _mlp.Layers[cc].NonBiasNeuronCount * _mlp.Layers[cc].Neurons[0].Weights.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                    _mlpConfiguration.Layers[cc].NonBiasNeuronCount * _mlpConfiguration.Layers[cc].Neurons[0].WeightsCount, //without bias neuron at current layer, but include bias neuron at previous layer
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             }
         }
@@ -78,7 +78,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
         {
             //надо перезаполнить и записать мем
             
-            var layerCount = _mlp.Layers.Length;
+            var layerCount = _mlpConfiguration.Layers.Length;
 
             Parallel.For(1, layerCount, cc =>
             //for (var cc = 1; cc < layerCount; cc++)

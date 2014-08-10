@@ -5,7 +5,7 @@ using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.Tests.MLP2.Forward.DropConnect.CPU.Bit.MaskContainer
+namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.Bit.MaskContainer
 {
     internal class MockWeightBitMaskContainer : IOpenCLWeightBitMaskContainer
     {
