@@ -3,7 +3,7 @@ using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.Validation;
-using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer;
+using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
@@ -78,7 +78,7 @@ namespace MyNN.MLP2.BackpropagationFactory.DropConnect.Bit.OpenCL.CPU
 
             var algo = new BackpropagationAlgorithm(
                 randomizer,
-                new DropConnectBitCPUBackpropagationEpocheTrainer<VectorizedCPULayerInferenceV2>(
+                new DropConnectBitCPUBackpropagationEpocheTrainer<VectorizedLayerInference>(
                     randomizer,
                     VectorizationSizeEnum.VectorizationMode16,
                     net,

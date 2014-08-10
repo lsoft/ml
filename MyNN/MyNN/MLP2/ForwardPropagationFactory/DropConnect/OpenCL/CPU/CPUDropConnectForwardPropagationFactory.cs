@@ -2,7 +2,6 @@
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU;
-using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
 using MyNN.Randomizer;

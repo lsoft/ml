@@ -1,5 +1,4 @@
 ﻿using System;
-using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.Randomizer;
 using OpenCL.Net;
@@ -7,7 +6,7 @@ using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
-namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer
+namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU
 {
     /// <summary>
     /// Naive implementation of layer inferencer that calculate Gaussian random on OpenCL

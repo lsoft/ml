@@ -12,7 +12,7 @@ using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
-namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer
+namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference
 {
     /// <summary>
     /// MLP inferencer dropconnect forward propagation implemented in CPU-oriented OpenCL

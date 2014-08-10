@@ -51,6 +51,7 @@
     <Compile Include="DeviceChooser\IntelCPUDeviceChooser.cs" />
     <Compile Include="DeviceChooser\IntelGPUDeviceChooser.cs" />
     <Compile Include="DeviceChooser\NvidiaOrAmdGPUDeviceChooser.cs" />
+    <EmbeddedResource Include="KernelLibrary\KahanAlgorithm.cl" />
     <Compile Include="Resource\EmbeddedResourceReader.cs" />
     <Compile Include="Kernel.cs" />
     <Compile Include="Mem\BaseMem.cs" />

@@ -6,7 +6,6 @@ using MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference;
 using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU;
-using MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU.Inferencer;
 using MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
