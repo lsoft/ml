@@ -111,53 +111,63 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.CSharp
                 var b = new Bernoulli(this._p);
                 b.RandomSource = new Random(_randomizer.Next(100000));
 
-                var lastStateSummator = 0f;
-                for (var cc = 0; cc < _sampleCount; cc++)
+
+
+            //    var lastStateSummator = 0f;
+            //    for (var cc = 0; cc < _sampleCount; cc++)
+            //    {
+            //        var weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
+
+            //        var sum = 0f;
+            //        for (var plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
+            //        {
+            //            var wv =
+            //                this._weightMem.Array[weightIndex++]
+            //                * this._previousLayerStateMem.Array[plnIndex]
+            //                * b.Sample();
+
+            //            sum += wv;
+            //        }
+
+            //        //compute last state
+            //        var lastState = _currentLayer.LayerActivationFunction.Compute(sum);
+
+            //        lastStateSummator += lastState;
+            //    }
+
+
+
+            var weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
+
+            var lastStateSummator = KahanAlgorithm.Sum(
+                _sampleCount,
+                cc =>
                 {
-                    var weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
+                    var sum = KahanAlgorithm.Sum(
+                        previousLayerNeuronCountTotal,
+                        (plnIndex) =>
+                        {
+                            var wv =
+                                this._weightMem.Array[weightIndex + plnIndex]
+                                * this._previousLayerStateMem.Array[plnIndex]
+                                * b.Sample();
 
-                    var sum = 0f;
-                    for (var plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
-                    {
-                        var wv =
-                            this._weightMem.Array[weightIndex++]
-                            * this._previousLayerStateMem.Array[plnIndex]
-                            * b.Sample();
-
-                        sum += wv;
-                    }
+                            return
+                                wv;
+                        });
 
                     //compute last state
                     var lastState = _currentLayer.LayerActivationFunction.Compute(sum);
 
-                    lastStateSummator += lastState;
-                }
+                    return 
+                        lastState;
+                });
 
-                //var lastStateSummator = KahanAlgorithm.Sum(
-                //    _sampleCount,
-                //    cc =>
-                //    {
-                //        var weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
 
-                //        var sum = KahanAlgorithm.Sum(
-                //            previousLayerNeuronCountTotal,
-                //            (plnIndex) =>
-                //            {
-                //                var wv =
-                //                    this._weightMem.Array[weightIndex++]
-                //                    *this._previousLayerStateMem.Array[plnIndex]
-                //                    *b.Sample();
 
-                //                return
-                //                    wv;
-                //            });
 
-                //        //compute last state
-                //        var lastState = _currentLayer.LayerActivationFunction.Compute(sum);
 
-                //        return 
-                //            lastState;
-                //    });
+
 
                 //усредняем
                 var result = lastStateSummator / this._sampleCount;

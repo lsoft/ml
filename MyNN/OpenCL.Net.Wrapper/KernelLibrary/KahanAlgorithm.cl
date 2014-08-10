@@ -15,14 +15,14 @@ inline KahanAccumulator GetEmptyKahanAcc(
 }
 
 inline void KahanAddElement(
-    KahanAccumulator acc,
+    KahanAccumulator* acc,
     float dataItem
     )
 {
-    float y = dataItem - acc.C;
-    float t = acc.Sum + y;
-    acc.C = (t - acc.Sum) - y;
-    acc.Sum = t;
+    float y = dataItem - acc->C;
+    float t = acc->Sum + y;
+    acc->C = (t - acc->Sum) - y;
+    acc->Sum = t;
 }
 
 inline float KahanSum(

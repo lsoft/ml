@@ -101,7 +101,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
                 //----------------------------------------------------------------------------
 
 //                var inf1 = new InferenceAlias.OpenCL.CPU.DefaultLayerInference(
-                var inf1 = new InferenceAlias.OpenCL.CPU.DefaultLayerInference(
+                var inf1 = new InferenceAlias.CSharp.NaiveLayerInference(
                     new DefaultRandomizer(inferenceRandomizerSeed),
                     clProvider,
                     sampleCount,

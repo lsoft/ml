@@ -8,6 +8,31 @@ namespace MyNN
 {
     public class KahanAlgorithm
     {
+        public class Accumulator
+        {
+            public float Sum;
+            public float C;
+
+            public Accumulator(
+                )
+            {
+                this.Sum = 0f;
+                this.C = 0f;
+            }
+        }
+
+        public static void AddElement(
+            Accumulator acc,
+            float dataItem
+            )
+        {
+            var y = dataItem - acc.C;
+            var t = acc.Sum + y;
+            acc.C = (t - acc.Sum) - y;
+            acc.Sum = t;
+        }
+
+        
         public static float Sum(
             int dataCount,
             Func<int, float> floatProvider

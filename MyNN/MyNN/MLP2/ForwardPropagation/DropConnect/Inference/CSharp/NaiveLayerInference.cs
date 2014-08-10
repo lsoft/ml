@@ -5,6 +5,7 @@ using MyNN.MLP2.Structure.Layer;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCvSharp.CPlusPlus;
 
 namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.CSharp
 {
@@ -116,23 +117,64 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.CSharp
                 //суммируем веса * состояние нейронов пред. слоя и высчитываем медиану и сигма-квадрат для гауссианы
                 var weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
 
-                float wv_median  = 0;
-                float wv_sigmasq = 0;
+
+
+
+                //float wv_median  = 0;
+                //float wv_sigmasq = 0;
+                //for (var plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
+                //{
+                //    var wv = this._weightMem.Array[weightIndex++] * this._previousLayerStateMem.Array[plnIndex];
+
+                //    wv_median += wv;
+                //    wv_sigmasq += wv * wv;
+                //}
+
+
+
+                var accMedian = new KahanAlgorithm.Accumulator();
+                var accSigmaSq = new KahanAlgorithm.Accumulator();
+
                 for (var plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
                 {
                     var wv = this._weightMem.Array[weightIndex++] * this._previousLayerStateMem.Array[plnIndex];
 
-                    wv_median += wv;
-                    wv_sigmasq += wv * wv;
+                    KahanAlgorithm.AddElement(accMedian, wv);
+                    KahanAlgorithm.AddElement(accSigmaSq, wv * wv);
                 }
+
+                var wv_median = accMedian.Sum;
+                var wv_sigmasq = accSigmaSq.Sum;
+
+
+
 
                 wv_median *= this._p;
                 wv_sigmasq *= this._p * (1 - this._p);
 
                 var wv_sigma = (float)Math.Sqrt(wv_sigmasq);
 
-                float lastStateSummator  = 0;
-                for(var sampleIndex = 0; sampleIndex < this._sampleCount; sampleIndex++)
+
+                
+
+
+                //var lastStateSummator  = 0f;
+                //for(var sampleIndex = 0; sampleIndex < this._sampleCount; sampleIndex++)
+                //{
+                //    //делаем гауссиану с медианой wv_median и сигмой wv_sigma из гауссианы (0;1), пришедшей из C#
+                //    var ogrnd = (float)normal.Sample();
+                //    var grnd = ogrnd * wv_sigma + wv_median;
+
+                //    //compute last state
+                //    var lastState = _currentLayer.LayerActivationFunction.Compute(grnd);
+
+                //    lastStateSummator += lastState;
+                //}
+
+
+                var lastStateSummator = KahanAlgorithm.Sum(
+                    this._sampleCount,
+                    sampleIndex => 
                 {
                     //делаем гауссиану с медианой wv_median и сигмой wv_sigma из гауссианы (0;1), пришедшей из C#
                     var ogrnd = (float)normal.Sample();
@@ -141,8 +183,13 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.CSharp
                     //compute last state
                     var lastState = _currentLayer.LayerActivationFunction.Compute(grnd);
 
-                    lastStateSummator += lastState;
+                    return
+                        lastState;
                 }
+                ); //Kahan.Sum
+
+
+
 
                 //усредняем
                 var result = lastStateSummator / this._sampleCount;
