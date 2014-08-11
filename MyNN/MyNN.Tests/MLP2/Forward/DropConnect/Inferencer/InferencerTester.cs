@@ -17,7 +17,8 @@ using InferenceAlias = MyNN.MLP2.ForwardPropagation.DropConnect.Inference;
 
 namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
 {
-    internal class InferencerTester
+    internal class InferencerTester<T>
+        where T : InferenceAlias.ILayerInference
     {
         public void Test(
             IFunction activationFunction,
@@ -100,8 +101,8 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
 
                 //----------------------------------------------------------------------------
 
-//                var inf1 = new InferenceAlias.OpenCL.CPU.DefaultLayerInference(
-                var inf1 = new InferenceAlias.CSharp.NaiveLayerInference(
+                var inf1 = (T)Activator.CreateInstance(
+                    typeof(T),
                     new DefaultRandomizer(inferenceRandomizerSeed),
                     clProvider,
                     sampleCount,

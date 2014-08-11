@@ -193,6 +193,8 @@ __kernel void
 
     //instead of plain summation we use Kahan algorithm due to more precision in floating point ariphmetics
 
+
+
 //    float wv_median  = 0;
 //    float wv_sigmasq = 0;
 //    for (int plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
@@ -202,6 +204,9 @@ __kernel void
 //        wv_median += wv;
 //        wv_sigmasq += wv * wv;
 //    }
+
+
+
 
     KahanAccumulator accMedian = GetEmptyKahanAcc();
     KahanAccumulator accSigmaSq = GetEmptyKahanAcc();
@@ -216,6 +221,9 @@ __kernel void
 
     float wv_median  = accMedian.Sum;
     float wv_sigmasq = accSigmaSq.Sum;
+
+
+
 
     wv_median *= p;
     wv_sigmasq *= p * (1 - p);

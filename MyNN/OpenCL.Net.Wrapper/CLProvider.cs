@@ -128,8 +128,10 @@ namespace OpenCL.Net.Wrapper
             var err = new EmbeddedResourceReader();
 
             var fullTextStringBuilder = new StringBuilder();
-            fullTextStringBuilder.Append(err.GetTextResourceFile("OpenCL.Net.Wrapper.KernelLibrary.KahanAlgorithm.cl"));
             fullTextStringBuilder.Append(err.GetTextResourceFile("OpenCL.Net.Wrapper.KernelLibrary.Reduction.cl"));
+            fullTextStringBuilder.Append(err.GetTextResourceFile("OpenCL.Net.Wrapper.KernelLibrary.KahanAlgorithm.cl"));
+            fullTextStringBuilder.Append(err.GetTextResourceFile("OpenCL.Net.Wrapper.KernelLibrary.KahanAlgorithm4.cl"));
+            fullTextStringBuilder.Append(err.GetTextResourceFile("OpenCL.Net.Wrapper.KernelLibrary.KahanAlgorithm16.cl"));
             fullTextStringBuilder.Append(source);
 
             var fullText = fullTextStringBuilder.ToString();

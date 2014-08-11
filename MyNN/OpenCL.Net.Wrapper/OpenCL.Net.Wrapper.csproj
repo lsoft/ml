@@ -74,6 +74,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="KernelLibrary\Reduction.cl" />
+    <EmbeddedResource Include="KernelLibrary\KahanAlgorithm16.cl" />
+    <EmbeddedResource Include="KernelLibrary\KahanAlgorithm4.cl" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

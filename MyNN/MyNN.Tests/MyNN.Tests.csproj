@@ -121,7 +121,7 @@
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForCPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForCPUFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\Inferencer\InferencerTester.cs" />
-    <Compile Include="MLP2\Forward\DropConnect\Inferencer\CSharpInferenceFixture.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\Inferencer\InferenceFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Bit\ForwardOutputFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Bit\ForwardStateDisableMaskFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Bit\ForwardStateDisableOutputLayerFixture.cs" />
