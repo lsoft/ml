@@ -4,6 +4,17 @@
     float C;
 } KahanAccumulator;
 
+inline KahanAccumulator GetKahanAcc(
+    float startValue
+    )
+{
+    KahanAccumulator result;
+    result.Sum = startValue;
+    result.C = 0.0;
+
+    return result;
+}
+
 inline KahanAccumulator GetEmptyKahanAcc(
     )
 {

@@ -56,7 +56,10 @@ namespace MyNN.Data.TrainDataProvider
             {
                 var noiser = _noiser ?? _noiserProvider(epocheNumber);
 
-                var noisedData = noiser.ApplyNoise(d.Input);
+                var noisedData =
+                    noiser != null
+                        ? noiser.ApplyNoise(d.Input)
+                        : d.Input.CloneArray();
 
                 var di = new DataItem(
                     noisedData,

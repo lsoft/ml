@@ -44,6 +44,8 @@ namespace MyNNConsoleApp
                 //TrainDBN.DoTrainAutoencoder();
                 //TrainDBN.DoTrainMLPOnAE();
 
+                //TrainMLPWithNoNoise.DoTrain();
+
                 Console.WriteLine(".......... press any key to exit");
                 Console.ReadLine();
             }
