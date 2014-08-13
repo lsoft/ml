@@ -278,8 +278,8 @@ namespace MyNNConsoleApp
             fff.Visualize(
                 new MNISTVisualizer(),
                 string.Format("{1}/_{0}_feature.bmp", epocheNumber != null ? epocheNumber.Value : -1, _mlpName),
-                25,
-                5f,
+                10,
+                2f,
                 900,
                 false,
                 true);

@@ -224,6 +224,38 @@ namespace MyNN
 
             return result;
         }
+
+        public static float[] Map(
+            float[] a0, 
+            float[] a1, 
+            Func<float, float, float> mapper)
+        {
+            if (a0 == null)
+            {
+                throw new ArgumentNullException("a0");
+            }
+            if (a1 == null)
+            {
+                throw new ArgumentNullException("a1");
+            }
+            if (mapper == null)
+            {
+                throw new ArgumentNullException("mapper");
+            }
+            if (a0.Length != a1.Length)
+            {
+                throw new ArgumentException("a0.Length != a1.Length");
+            }
+
+            var result = new float[a0.Length];
+
+            for (var cc = 0; cc < a0.Length; cc++)
+            {
+                result[cc] = mapper(a0[cc], a1[cc]);
+            }
+
+            return result;
+        }
     }
 
 }
