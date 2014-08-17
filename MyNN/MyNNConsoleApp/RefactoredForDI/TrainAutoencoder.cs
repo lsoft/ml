@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MyNN;
 using MyNN.Data.DataSetConverter;
 using MyNN.Data.TrainDataProvider;
+using MyNN.Data.TrainDataProvider.Noiser;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.LearningRateController;
 using MyNN.MLP2.ArtifactContainer;
@@ -36,7 +37,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                1000 //int.MaxValue
+                100 //int.MaxValue
                 );
             trainData.Normalize();
             trainData = toa.Convert(trainData);
@@ -98,14 +99,10 @@ namespace MyNNConsoleApp.RefactoredForDI
                         null,
                         new SigmoidFunction(1f), 
                         new SigmoidFunction(1f), 
-                        new SigmoidFunction(1f), 
-                        new SigmoidFunction(1f), 
                     },
                 new int[]
                     {
                         784,
-                        500,
-                        100,
                         500,
                         784
                     });

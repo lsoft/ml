@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN;
@@ -36,7 +35,7 @@ using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.RefactoredForDI
 {
-    public class TrainSDAE
+    public class TrainSDAE2D
     {
         public static void DoTrain()
         {
@@ -69,7 +68,8 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var noiser = new SequenceNoiser(
                 randomizer,
-                true,
+                false,
+                new ElasticNoiser(randomizer, 100, 28, 28, true),
                 new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
                 new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
                 new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
@@ -122,7 +122,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                             new LinearLearningRate(lr, 0.99f),
                             1,
                             0.0f,
-                            50,
+                            75,
                             0f,
                             -0.0025f);
 
@@ -136,11 +136,11 @@ namespace MyNNConsoleApp.RefactoredForDI
                     new LayerInfo(784, new RLUFunction()),
                     new LayerInfo(1000, new RLUFunction()),
                     new LayerInfo(1000, new RLUFunction()),
-                    new LayerInfo(2200, new RLUFunction()),
+                    new LayerInfo(2200, new RLUFunction())
                     );
 
                 var sdaeName = string.Format(
-                    "sdae{0}.sdae",
+                    "sdae2d{0}.sdae",
                     DateTime.Now.ToString("yyyyMMddHHmmss"));
 
                 sdae.Train(

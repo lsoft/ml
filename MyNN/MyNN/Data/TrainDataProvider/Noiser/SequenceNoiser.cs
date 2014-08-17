@@ -10,13 +10,15 @@ namespace MyNN.Data.TrainDataProvider.Noiser
     /// Применяет все нойзеры к каждому итему!
     /// Особенно имеет смысл, если у отдельных нойзеров рандомный IRange
     /// </summary>
-    public class AllNoisers : INoiser
+    public class SequenceNoiser : INoiser
     {
         private readonly IRandomizer _randomizer;
+        private readonly bool _isNeedToShuffle;
         private readonly INoiser[] _noiserList;
 
-        public AllNoisers(
+        public SequenceNoiser(
             IRandomizer randomizer,
+            bool isNeedToShuffle,
             params INoiser[] noiserList)
         {
             if (randomizer == null)
@@ -29,6 +31,7 @@ namespace MyNN.Data.TrainDataProvider.Noiser
             }
 
             _randomizer = randomizer;
+            _isNeedToShuffle = isNeedToShuffle;
             _noiserList = noiserList;
         }
 
@@ -44,7 +47,11 @@ namespace MyNN.Data.TrainDataProvider.Noiser
             var result = new float[length];
             data.CopyTo(result, 0);
 
-            var shuffledNoiserList = CreateShuffledNoiserList();
+            var shuffledNoiserList = 
+                _isNeedToShuffle 
+                ? CreateShuffledNoiserList()
+                : this._noiserList;
+
             foreach (var noiser in shuffledNoiserList)
             {
                 result = noiser.ApplyNoise(result);

@@ -71,6 +71,10 @@ namespace MyNN.MLP2.Backpropagation
                 "EPOCHE TRAINER = {0}",
                 this._backpropagationEpocheTrainer.GetType().Name
                 );
+            ConsoleAmbientContext.Console.WriteLine(
+                "FORWARDER = {0}",
+                _backpropagationEpocheTrainer.ForwardPropagation.GetType().Name
+                );
 
             #region валидируем дефолтовую сеть
 

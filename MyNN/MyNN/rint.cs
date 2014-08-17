@@ -1,31 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using MyNN.Randomizer;
 
 namespace MyNN
 {
-// ReSharper disable once InconsistentNaming
-    public class rfloat
+    // ReSharper disable once InconsistentNaming
+    public class rint
     {
-        public float Min
+        public int Min
         {
             get;
             private set;
         }
 
-        public float Max
+        public int Max
         {
             get;
             private set;
         }
 
         private readonly IRandomizer _randomizer;
-        private readonly float _diff;
+        private readonly int _diff;
 
-        public rfloat(IRandomizer randomizer, float min, float max)
+        public rint(IRandomizer randomizer, int min, int max)
         {
             if (randomizer == null)
             {
@@ -37,28 +33,28 @@ namespace MyNN
             }
 
             _randomizer = randomizer;
-            
+
             Min = min;
             Max = max;
 
             _diff = max - min;
         }
 
-        public float Sample()
+        public int Sample()
         {
-            var rnd = _randomizer.Next();
-            var result = this.Min + rnd * _diff;
-            
+            var diff = _randomizer.Next(_diff);
+            var result = this.Min + diff;
+
             return
                 result;
         }
 
-        public static implicit operator float(rfloat rf)
+        public static implicit operator int(rint rf)
         {
             return
                 rf.Sample();
         }
 
-    
+
     }
 }

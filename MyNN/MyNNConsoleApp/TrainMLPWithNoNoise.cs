@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN;
@@ -126,13 +127,14 @@ namespace MyNNConsoleApp
                             {
                                 if (epochNumber < 50)
                                 {
-                                    var noiser = new AllNoisers(
+                                    var noiser = new SequenceNoiser(
                                         randomizer,
-                                        new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
-                                        new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
-                                        new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer)),
-                                        new SaltAndPepperNoiser(randomizer, 0.1f, new RandomRange(randomizer)),
-                                        new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))
+                                        true,
+                                        new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                                        new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                                        new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                                        new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                                        new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
                                         );
 
                                     if (storedEpochNumber != epochNumber)
@@ -153,13 +155,14 @@ namespace MyNNConsoleApp
                                 {
                                     var coef = (71 - epochNumber)/21f;
 
-                                    var noiser = new AllNoisers(
+                                    var noiser = new SequenceNoiser(
                                         randomizer,
-                                        new GaussNoiser(coef * 0.20f, false, new RandomRange(randomizer)),
-                                        new MultiplierNoiser(randomizer, coef * 1f, new RandomRange(randomizer)),
-                                        new DistanceChangeNoiser(randomizer, coef * 1f, 3, new RandomRange(randomizer)),
-                                        new SaltAndPepperNoiser(randomizer, coef * 0.1f, new RandomRange(randomizer)),
-                                        new ZeroMaskingNoiser(randomizer, coef * 0.25f, new RandomRange(randomizer))
+                                        true,
+                                        new GaussNoiser(coef * 0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                                        new MultiplierNoiser(randomizer, coef * 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                                        new DistanceChangeNoiser(randomizer, coef * 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                                        new SaltAndPepperNoiser(randomizer, coef * 0.1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                                        new ZeroMaskingNoiser(randomizer, coef * 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
                                         );
 
                                     if (storedEpochNumber != epochNumber)

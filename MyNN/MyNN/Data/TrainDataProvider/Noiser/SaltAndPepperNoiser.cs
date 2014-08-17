@@ -51,7 +51,7 @@ namespace MyNN.Data.TrainDataProvider.Noiser
 
             _applyPercent = applyPercent;
             _randomizer = randomizer;
-            _range = new FullRange();
+            _range = null;
         }
 
 
@@ -64,14 +64,15 @@ namespace MyNN.Data.TrainDataProvider.Noiser
 
             var r = new float[data.Length];
 
-            int min = 0, max = data.Length;
-            _range.GetIndexes(data.Length, out min, out max);
+            var range = _range ?? new FullRange(data.Length);
+
+            var mask = range.GetIndexMask();
 
             for (var cc = 0; cc < data.Length; cc++)
             {
                 var v = data[cc];
 
-                if (cc >= min && cc < max)
+                if (mask[cc])
                 {
                     if (_randomizer.Next() < _applyPercent)
                     {

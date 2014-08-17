@@ -189,13 +189,14 @@ namespace MyNNConsoleApp.RefactoredForDI
                 -1f
                 );
 
-            var noiser = new AllNoisers(
+            var noiser = new SequenceNoiser(
                 randomizer,
-                new GaussNoiser(0.20f, false, new RandomRange(randomizer)),
-                new MultiplierNoiser(randomizer, 1f, new RandomRange(randomizer)),
-                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomRange(randomizer)),
-                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomRange(randomizer)),
-                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomRange(randomizer))
+                true,
+                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
                 );
 
             var trainDataProvider =

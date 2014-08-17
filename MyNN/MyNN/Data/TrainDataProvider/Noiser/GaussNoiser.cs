@@ -45,7 +45,7 @@ namespace MyNN.Data.TrainDataProvider.Noiser
         {
             _isNeedToClamp01 = isNeedToClamp01;
             _random = new Normal(0, stddev);
-            _range = new FullRange();
+            _range = null;
         }
 
         public float[] ApplyNoise(float[] data)
@@ -57,14 +57,15 @@ namespace MyNN.Data.TrainDataProvider.Noiser
 
             var r = new float[data.Length];
 
-            int min = 0, max = data.Length;
-            _range.GetIndexes(data.Length, out min, out max);
+            var range = _range ?? new FullRange(data.Length);
+
+            var mask = range.GetIndexMask();
 
             for (var cc = 0; cc < data.Length; cc++)
             {
                 var v = data[cc];
 
-                if (cc >= min && cc < max)
+                if (mask[cc])
                 {
                     v += (float)_random.Sample();
 

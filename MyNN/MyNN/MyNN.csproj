@@ -210,8 +210,13 @@
     <Compile Include="Data\DataSetConverter\ToAutoencoderDataSetConverter.cs" />
     <Compile Include="Data\IDataSet.cs" />
     <Compile Include="Data\TrainDataProvider\ConverterTrainDataProvider.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\AverageNoiser.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\ElasticNoiser.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\NoNoiser.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\Range\RectangleRange.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\Range\TrueRandomRange.cs" />
     <Compile Include="diapfloat.cs" />
+    <Compile Include="diapint.cs" />
     <Compile Include="ISerializationHelper.cs" />
     <Compile Include="KahanAlgorithm.cs" />
     <Compile Include="KNN\CPUOpenCLKNearestFactory.cs" />
@@ -322,12 +327,12 @@
     <Compile Include="Data\TrainDataProvider\ITrainDataProvider.cs" />
     <Compile Include="Data\TrainDataProvider\NoDeformationTrainDataProvider.cs" />
     <Compile Include="Data\TrainDataProvider\NoiseDataProvider.cs" />
-    <Compile Include="Data\TrainDataProvider\Noiser\AllNoisers.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\SequenceNoiser.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\DistanceChangeNoiser.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\MultiplierNoiser.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\Range\FullRange.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\Range\IRange.cs" />
-    <Compile Include="Data\TrainDataProvider\Noiser\Range\RandomRange.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\Range\RandomSeriesRange.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\SetOfNoisers2.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\GaussNoiser.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\SaltAndPepperNoiser.cs" />
@@ -419,6 +424,7 @@
     <Compile Include="Randomizer\NoRandomRandomizer.cs" />
     <Compile Include="Randomizer\TableRandomizer.cs" />
     <Compile Include="rfloat.cs" />
+    <Compile Include="rint.cs" />
     <Compile Include="SerializationHelper.cs" />
     <Compile Include="SplitHelper.cs" />
   </ItemGroup>

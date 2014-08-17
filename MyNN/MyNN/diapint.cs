@@ -1,44 +1,24 @@
-﻿using System;
-
-namespace MyNN
+﻿namespace MyNN
 {
     // ReSharper disable once InconsistentNaming
-    public class diapfloat
+    public class diapint
     {
-        private readonly float _center;
-
-        public float Min
+        public int Min
         {
             get;
             private set;
         }
 
-        public float Max
+        public int Max
         {
             get;
             private set;
         }
 
-        public diapfloat(float min, float max, bool nevermind)
+        public diapint(int min, int max)
         {
-            _center = min + (max - min)/2f;
-
             Min = min;
             Max = max;
-
-        }
-
-        public diapfloat(float center, float allowedError)
-        {
-            if (allowedError < 0f)
-            {
-                throw new ArgumentException("allowedError < 0f");
-            }
-
-            _center = center;
-
-            Min = center - allowedError;
-            Max = center + allowedError;
 
         }
 

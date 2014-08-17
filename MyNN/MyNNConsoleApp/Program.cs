@@ -21,6 +21,7 @@ using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCvSharp;
 
 namespace MyNNConsoleApp
 {
@@ -43,6 +44,9 @@ namespace MyNNConsoleApp
                 //TrainDBN.DoTrainMLPOnDBN();
                 //TrainDBN.DoTrainAutoencoder();
                 //TrainDBN.DoTrainMLPOnAE();
+
+                //TrainSDAE.DoTrain();
+                TrainSDAE2D.DoTrain();
 
                 //TrainMLPWithNoNoise.DoTrain();
 

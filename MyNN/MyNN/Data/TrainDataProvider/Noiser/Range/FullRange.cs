@@ -2,13 +2,20 @@
 {
     public class FullRange : IRange
     {
-        public void GetIndexes(
-            int length,
-            out int minIncludeIndex,
-            out int maxExcludeIndex)
+        private readonly int _dataLength;
+
+        public FullRange(
+            int dataLength)
         {
-            minIncludeIndex = 0;
-            maxExcludeIndex = length;
+            _dataLength = dataLength;
+        }
+
+        public bool[] GetIndexMask()
+        {
+            var result = new bool[_dataLength];
+            result.Fill(true);
+
+            return result;
         }
     }
 }

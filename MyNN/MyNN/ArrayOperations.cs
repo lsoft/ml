@@ -57,6 +57,14 @@ namespace MyNN
             }
         }
 
+        public static void Transform<T>(this T[] a, Func<int, T, T> value)
+        {
+            for (var cc = 0; cc < a.Length; cc++)
+            {
+                a[cc] = value(cc, a[cc]);
+            }
+        }
+
         public static void Transform<T>(this T[] a, Func<T, T> value)
         {
             for (var cc = 0; cc < a.Length; cc++)
@@ -223,6 +231,34 @@ namespace MyNN
             }
 
             return result;
+        }
+
+        public static void MapInto(
+            this float[] a0,
+            float[] a1,
+            Func<float, float, float> mapper)
+        {
+            if (a0 == null)
+            {
+                throw new ArgumentNullException("a0");
+            }
+            if (a1 == null)
+            {
+                throw new ArgumentNullException("a1");
+            }
+            if (mapper == null)
+            {
+                throw new ArgumentNullException("mapper");
+            }
+            if (a0.Length != a1.Length)
+            {
+                throw new ArgumentException("a0.Length != a1.Length");
+            }
+
+            for (var cc = 0; cc < a0.Length; cc++)
+            {
+                a0[cc] = mapper(a0[cc], a1[cc]);
+            }
         }
 
         public static float[] Map(

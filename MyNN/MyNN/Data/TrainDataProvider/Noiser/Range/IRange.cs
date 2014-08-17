@@ -6,10 +6,8 @@ namespace MyNN.Data.TrainDataProvider.Noiser.Range
 {
     public interface IRange
     {
-        void GetIndexes(
-            int length,
-            out int minIncludeIndex,
-            out int maxExcludeIndex);
+        bool[] GetIndexMask(
+            );
 
     }
 }
