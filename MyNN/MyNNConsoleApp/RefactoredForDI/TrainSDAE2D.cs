@@ -66,10 +66,20 @@ namespace MyNNConsoleApp.RefactoredForDI
                 ".",
                 serialization);
 
-            var noiser = new SequenceNoiser(
+            var noiser2d = new SequenceNoiser(
                 randomizer,
                 false,
                 new ElasticNoiser(randomizer, 100, 28, 28, true),
+                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
+                );
+
+            var noiser = new SequenceNoiser(
+                randomizer,
+                true,
                 new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
                 new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
                 new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
@@ -83,15 +93,29 @@ namespace MyNNConsoleApp.RefactoredForDI
                     new IntelCPUDeviceChooser(),
                     randomizer,
                     mlpfactory,
-                    (IDataSet td) =>
+                    (int depthIndex, IDataSet td) =>
                     {
                         var tda = toa.Convert(td);
 
-                        var result =
-                            new ConverterTrainDataProvider(
-                                new ShuffleDataSetConverter(randomizer),
-                                new NoiseDataProvider(tda, noiser)
-                                );
+                        ITrainDataProvider result;
+
+                        if (depthIndex == 0)
+                        {
+                            result =
+                                new ConverterTrainDataProvider(
+                                    new ShuffleDataSetConverter(randomizer),
+                                    new NoiseDataProvider(tda, noiser2d)
+                                    );
+                        }
+                        else
+                        {
+                            result =
+                                new ConverterTrainDataProvider(
+                                    new ShuffleDataSetConverter(randomizer),
+                                    new NoiseDataProvider(tda, noiser)
+                                    );
+                        }
+
                         return
                             result;
                     },

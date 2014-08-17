@@ -25,7 +25,7 @@ namespace MyNN.MLP2.Autoencoders
         private readonly IDeviceChooser _deviceChooser;
         private readonly IRandomizer _randomizer;
         private readonly IMLPFactory _mlpFactory;
-        private readonly Func<IDataSet, ITrainDataProvider> _dataProviderFactory;
+        private readonly Func<int, IDataSet, ITrainDataProvider> _dataProviderFactory;
         private readonly Func<IDataSet, IArtifactContainer, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
         private readonly IBackpropagationAlgorithmFactory _backpropagationAlgorithmFactory;
@@ -36,7 +36,7 @@ namespace MyNN.MLP2.Autoencoders
             IDeviceChooser deviceChooser,
             IRandomizer randomizer,
             IMLPFactory mlpFactory,
-            Func<IDataSet, ITrainDataProvider> dataProviderFactory,
+            Func<int, IDataSet, ITrainDataProvider> dataProviderFactory,
             Func<IDataSet, IArtifactContainer, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
             IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
@@ -161,7 +161,9 @@ namespace MyNN.MLP2.Autoencoders
 
                 var mlpContainer = sdaeContainer.GetChildContainer(mlpName);
 
-                var trainDataProvider = _dataProviderFactory(processingTrainData);
+                var trainDataProvider = _dataProviderFactory(
+                    depthIndex,
+                    processingTrainData);
                 var validation = _validationFactory(
                     processingValidationData,
                     mlpContainer);

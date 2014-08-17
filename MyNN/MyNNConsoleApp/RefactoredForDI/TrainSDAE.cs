@@ -83,7 +83,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     new IntelCPUDeviceChooser(),
                     randomizer,
                     mlpfactory,
-                    (IDataSet td) =>
+                    (int depthIndex, IDataSet td) =>
                     {
                         var tda = toa.Convert(td);
 
