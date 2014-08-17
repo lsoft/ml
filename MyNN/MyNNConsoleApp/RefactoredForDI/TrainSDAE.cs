@@ -136,7 +136,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     new LayerInfo(784, new RLUFunction()),
                     new LayerInfo(1000, new RLUFunction()),
                     new LayerInfo(1000, new RLUFunction()),
-                    new LayerInfo(2200, new RLUFunction()),
+                    new LayerInfo(2200, new RLUFunction())
                     );
 
                 var sdaeName = string.Format(
