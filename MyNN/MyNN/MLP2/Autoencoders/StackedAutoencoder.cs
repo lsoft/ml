@@ -26,7 +26,7 @@ namespace MyNN.MLP2.Autoencoders
         private readonly IRandomizer _randomizer;
         private readonly IMLPFactory _mlpFactory;
         private readonly Func<int, IDataSet, ITrainDataProvider> _dataProviderFactory;
-        private readonly Func<IDataSet, IArtifactContainer, IValidation> _validationFactory;
+        private readonly Func<int, IDataSet, IArtifactContainer, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
         private readonly IBackpropagationAlgorithmFactory _backpropagationAlgorithmFactory;
         private readonly IForwardPropagationFactory _forwardPropagationFactory;
@@ -37,7 +37,7 @@ namespace MyNN.MLP2.Autoencoders
             IRandomizer randomizer,
             IMLPFactory mlpFactory,
             Func<int, IDataSet, ITrainDataProvider> dataProviderFactory,
-            Func<IDataSet, IArtifactContainer, IValidation> validationFactory,
+            Func<int, IDataSet, IArtifactContainer, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
             IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
             IForwardPropagationFactory forwardPropagationFactory,
@@ -165,6 +165,7 @@ namespace MyNN.MLP2.Autoencoders
                     depthIndex,
                     processingTrainData);
                 var validation = _validationFactory(
+                    depthIndex,
                     processingValidationData,
                     mlpContainer);
 
@@ -235,6 +236,7 @@ namespace MyNN.MLP2.Autoencoders
 
             //валидируем его
             var finalValidation = _validationFactory(
+                0,
                 validationData,
                 sdaeContainer);
 

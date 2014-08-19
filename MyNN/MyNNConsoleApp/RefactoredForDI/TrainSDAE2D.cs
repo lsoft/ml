@@ -18,7 +18,7 @@ using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.Metrics;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
-using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
+using MyNN.MLP2.Backpropagation.Validation.Drawer;
 using MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagationFactory.Classic;
@@ -66,27 +66,6 @@ namespace MyNNConsoleApp.RefactoredForDI
                 ".",
                 serialization);
 
-            var noiser2d = new SequenceNoiser(
-                randomizer,
-                false,
-                new ElasticNoiser(randomizer, 100, 28, 28, true),
-                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
-                );
-
-            var noiser = new SequenceNoiser(
-                randomizer,
-                true,
-                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
-                );
-
             using (var clProvider = new CLProvider())
             {
                 var sdae = new StackedAutoencoder(
@@ -101,6 +80,18 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                         if (depthIndex == 0)
                         {
+                            var noiser2d = new SequenceNoiser(
+                                randomizer,
+                                false,
+                                new ElasticNoiser(randomizer, 100, 28, 28, true),
+                                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, tda[0].InputLength))
+                                );
+                            //var noiser2d = new ElasticNoiser(randomizer, 100, 28, 28, true);
+
                             result =
                                 new ConverterTrainDataProvider(
                                     new ShuffleDataSetConverter(randomizer),
@@ -109,6 +100,16 @@ namespace MyNNConsoleApp.RefactoredForDI
                         }
                         else
                         {
+                            var noiser = new SequenceNoiser(
+                                randomizer,
+                                true,
+                                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, tda[0].InputLength))
+                                );
+
                             result =
                                 new ConverterTrainDataProvider(
                                     new ShuffleDataSetConverter(randomizer),
@@ -119,21 +120,37 @@ namespace MyNNConsoleApp.RefactoredForDI
                         return
                             result;
                     },
-                    (IDataSet vd, IArtifactContainer mlpContainer) =>
+                    (int depthIndex, IDataSet vd, IArtifactContainer mlpContainer) =>
                     {
                         var vda = toa.Convert(vd);
 
-                        return
-                            new Validation(
-                                new MetricsAccuracyCalculator(
-                                    new HalfSquaredEuclidianDistance(),
-                                    vda),
-                                new GridReconstructDrawer(
-                                    new MNISTVisualizer(),
-                                    vda,
-                                    300,
-                                    100)
-                                );
+                        IValidation result;
+                        if (depthIndex == 0)
+                        {
+                            result =
+                                new Validation(
+                                    new MetricsAccuracyCalculator(
+                                        new HalfSquaredEuclidianDistance(),
+                                        vda),
+                                    new GridReconstructDrawer(
+                                        new MNISTVisualizer(),
+                                        vda,
+                                        300,
+                                        100)
+                                    );
+                        }
+                        else
+                        {
+                            result =
+                                new Validation(
+                                    new MetricsAccuracyCalculator(
+                                        new HalfSquaredEuclidianDistance(),
+                                        vda),
+                                    null
+                                    );
+                        }
+
+                        return result;
                     },
                     (int depthIndex) =>
                     {
@@ -146,7 +163,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                             new LinearLearningRate(lr, 0.99f),
                             1,
                             0.0f,
-                            75,
+                            50,
                             0f,
                             -0.0025f);
 
@@ -158,9 +175,9 @@ namespace MyNNConsoleApp.RefactoredForDI
                             clProvider,
                             VectorizationSizeEnum.VectorizationMode16)),
                     new LayerInfo(784, new RLUFunction()),
-                    new LayerInfo(1000, new RLUFunction()),
-                    new LayerInfo(1000, new RLUFunction()),
-                    new LayerInfo(2200, new RLUFunction())
+                    new LayerInfo(600, new RLUFunction()),
+                    new LayerInfo(600, new RLUFunction()),
+                    new LayerInfo(1200, new RLUFunction())
                     );
 
                 var sdaeName = string.Format(

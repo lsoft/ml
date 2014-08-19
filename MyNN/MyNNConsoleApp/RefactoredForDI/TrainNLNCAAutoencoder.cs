@@ -22,8 +22,8 @@ using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.Distan
 using MyNN.MLP2.Backpropagation.Metrics;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
+using MyNN.MLP2.Backpropagation.Validation.Drawer;
 using MyNN.MLP2.Backpropagation.Validation.NLNCA;
-using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
 using MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagationFactory.Classic;
@@ -99,7 +99,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                         return
                             result;
                     },
-                    (IDataSet vd, IArtifactContainer mlpContainer) =>
+                    (int depthIndex, IDataSet vd, IArtifactContainer mlpContainer) =>
                     {
                         var vda = toa.Convert(vd);
 

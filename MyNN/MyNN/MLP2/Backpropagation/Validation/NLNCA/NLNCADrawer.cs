@@ -4,9 +4,10 @@ using System.Drawing;
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.ArtifactContainer;
+using MyNN.MLP2.Backpropagation.Validation.Drawer;
 using MyNN.MLP2.Structure.Layer;
 
-namespace MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer
+namespace MyNN.MLP2.Backpropagation.Validation.NLNCA
 {
     public class NLNCADrawer : IDrawer
     {

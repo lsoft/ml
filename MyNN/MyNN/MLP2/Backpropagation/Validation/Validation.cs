@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MyNN.MLP2.AccuracyRecord;
 using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
-using MyNN.MLP2.Backpropagation.Validation.NLNCA.Drawer;
+using MyNN.MLP2.Backpropagation.Validation.Drawer;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.OutputConsole;

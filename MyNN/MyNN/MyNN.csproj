@@ -262,9 +262,9 @@
     <Compile Include="MLP2\Backpropagation\Validation\AccuracyCalculator\ClassificationAccuracyCalculator.cs" />
     <Compile Include="MLP2\Backpropagation\Validation\AccuracyCalculator\IAccuracyCalculator.cs" />
     <Compile Include="MLP2\Backpropagation\Validation\AccuracyCalculator\NLNCAAccuracyCalculator.cs" />
-    <Compile Include="MLP2\Backpropagation\Validation\NLNCA\Drawer\GridReconstructDrawer.cs" />
-    <Compile Include="MLP2\Backpropagation\Validation\NLNCA\Drawer\IDrawer.cs" />
-    <Compile Include="MLP2\Backpropagation\Validation\NLNCA\Drawer\NLNCADrawer.cs" />
+    <Compile Include="MLP2\Backpropagation\Validation\Drawer\GridReconstructDrawer.cs" />
+    <Compile Include="MLP2\Backpropagation\Validation\Drawer\IDrawer.cs" />
+    <Compile Include="MLP2\Backpropagation\Validation\NLNCA\NLNCADrawer.cs" />
     <Compile Include="MLP2\BackpropagationFactory\IBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\BackpropagationFactory\Classic\OpenCL\CPU\CPUBackpropagationAlgorithmFactory.cs" />
     <Compile Include="MLP2\BackpropagationFactory\Classic\OpenCL\CPU\CPUTransposeBackpropagationAlgorithmFactory.cs" />
