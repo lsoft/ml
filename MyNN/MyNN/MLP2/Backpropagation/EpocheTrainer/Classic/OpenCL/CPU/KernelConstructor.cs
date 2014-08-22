@@ -167,9 +167,6 @@ int ComputeWeightIndex(
         previousLayerNeuronCount * neuronIndex;
 }
 
-//const __constant float _alpha = 0.2;
-//const __constant float _beta = 1.0;
-
 __kernel void HiddenLayerTrain(
     __global float * currentLayerNET,
 
@@ -282,7 +279,7 @@ __kernel void OutputLayerTrain(
 
     float n =
         <firstDerivative_nOut>
-        * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);
+        * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]); //!!! HalfSquaredEuclidianDistance, refactor!
 
     currentLayerDeDz[neuronIndex] = n;
 

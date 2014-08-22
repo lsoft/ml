@@ -1,12 +1,18 @@
-
+в бекпропе на opencl (во всех EpocheTrainer) используетс€ HalfSquaredEuclidianDistance, вот в этой строке: (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);  «јћ≈Ќ»“№ Ќј  ј—“ќћ»«»–”≈ћ”ё ‘”Ќ ÷»ё.  http://habrahabr.ru/post/154369/
+в бекпропе на opencl (во всех EpocheTrainer)  исползовать Kahan в агрегации float currentDeDz = 0;
 тест на ComputeState с несколькими скрытыми сло€ми
 
 бекпроп тесты
 додф тесты
-weightmask тесты
 
 выделить из форвардпропагатора пропагатор сло€
+тест на пропагатор сло€
+тест на форвардпропагатор при поддельном пропагаторе сло€
+
+существующие тесты (без замен на фейковые зависимости) обозвать Complex
+
 
 
 
 [done] тесты с более 16 нейронами и 16й векторизацией
+[done] weightmask тесты

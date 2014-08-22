@@ -148,6 +148,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
+    <Compile Include="RefactoredForDI\TrainMLP.cs" />
+    <Compile Include="RefactoredForDI\TrainAutoencoder2D.cs" />
     <Compile Include="RefactoredForDI\TrainSDAE2D.cs" />
     <Compile Include="RefactoredForDI\TrainDBN.cs" />
     <Compile Include="RefactoredForDI\TrainRBM.cs" />
@@ -155,7 +157,7 @@
     <Compile Include="RefactoredForDI\TrainNLNCAMLP.cs" />
     <Compile Include="RefactoredForDI\TrainSDAE.cs" />
     <Compile Include="RefactoredForDI\TrainAutoencoder.cs" />
-    <Compile Include="RefactoredForDI\TrainMLP.cs" />
+    <Compile Include="RefactoredForDI\TrainMLPOnSDAE.cs" />
     <Compile Include="TfidfCalculator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

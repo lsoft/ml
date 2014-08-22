@@ -212,6 +212,7 @@
     <Compile Include="Data\TrainDataProvider\ConverterTrainDataProvider.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\AverageNoiser.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\ElasticNoiser.cs" />
+    <Compile Include="Data\TrainDataProvider\Noiser\NoiserVisualizer.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\NoNoiser.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\Range\RectangleRange.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\Range\TrueRandomRange.cs" />
