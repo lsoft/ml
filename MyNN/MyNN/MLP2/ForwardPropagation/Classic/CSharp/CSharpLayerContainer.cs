@@ -28,11 +28,30 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
         }
 
         public CSharpLayerContainer(
+            int currentLayerNonBiasNeuronCount,
+            int currentLayerTotalNeuronCount
+            )
+        {
+            _previousLayerTotalNeuronCount = 0;
+            _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
+            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
+
+            //нейроны
+            NetMem = new float[currentLayerTotalNeuronCount];
+            StateMem = new float[currentLayerTotalNeuronCount];
+        }
+
+        public CSharpLayerContainer(
             int previousLayerTotalNeuronCount,
             int currentLayerNonBiasNeuronCount,
             int currentLayerTotalNeuronCount
             )
         {
+            if (previousLayerTotalNeuronCount == 0)
+            {
+                throw new ArgumentException("For input layer use another constructor");
+            }
+
             _previousLayerTotalNeuronCount = previousLayerTotalNeuronCount;
             _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
             _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
@@ -42,10 +61,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
             StateMem = new float[currentLayerTotalNeuronCount];
 
             //веса
-            if (previousLayerTotalNeuronCount > 0)
-            {
-                WeightMem = new float[currentLayerTotalNeuronCount*previousLayerTotalNeuronCount];
-            }
+            WeightMem = new float[currentLayerTotalNeuronCount*previousLayerTotalNeuronCount];
         }
 
         public void ClearAndPushHiddenLayers()

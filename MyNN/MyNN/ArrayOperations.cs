@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -288,6 +289,42 @@ namespace MyNN
             for (var cc = 0; cc < a0.Length; cc++)
             {
                 result[cc] = mapper(a0[cc], a1[cc]);
+            }
+
+            return result;
+        }
+
+        public static int Sum(
+            this int[] array)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array");
+            }
+
+            var result = 0;
+
+            for (var cc = 0; cc < array.Length; cc++)
+            {
+                result += array[cc];
+            }
+
+            return result;
+        }
+
+        public static float Sum(
+            this float[] array)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array");
+            }
+
+            var result = 0f;
+
+            for (var cc = 0; cc < array.Length; cc++)
+            {
+                result += array[cc];
             }
 
             return result;

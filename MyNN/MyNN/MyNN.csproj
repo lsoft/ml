@@ -218,6 +218,7 @@
     <Compile Include="Data\TrainDataProvider\Noiser\Range\TrueRandomRange.cs" />
     <Compile Include="diapfloat.cs" />
     <Compile Include="diapint.cs" />
+    <Compile Include="FloatHelper.cs" />
     <Compile Include="ISerializationHelper.cs" />
     <Compile Include="KahanAlgorithm.cs" />
     <Compile Include="KNN\CPUOpenCLKNearestFactory.cs" />

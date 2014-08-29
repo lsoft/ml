@@ -136,6 +136,11 @@
     <Compile Include="MLP2\Forward\DropConnect\TrainItemForward\CPU\Float\MaskContainer\MockWeightBitMaskContainer.cs" />
     <Compile Include="MLP2\Forward\ForwardOutputTester.cs" />
     <Compile Include="MLP2\Forward\ForwardStateTester.cs" />
+    <Compile Include="MLP2\LayerPropagator\CSharp\ComputeLayerFixture.cs" />
+    <Compile Include="MLP2\LayerPropagator\OpenCL\CPU\ComputeLayerFixture.cs" />
+    <Compile Include="MLP2\LayerPropagator\OpenCL\GPU\NVidiaComputeLayerFixture.cs" />
+    <Compile Include="MLP2\LayerPropagator\OpenCL\GPU\IntelGPUComputeLayerFixture.cs" />
+    <Compile Include="MLP2\LayerPropagator\OpenCL\GPU\IntelCPUComputeLayerFixture.cs" />
     <Compile Include="MLP2\MaskContainers\Bit\BigArrayFixture.cs" />
     <Compile Include="MLP2\MaskContainers\Bit\BitMaskContainerTester.cs" />
     <Compile Include="MLP2\MaskContainers\Float\BGFixture.cs" />

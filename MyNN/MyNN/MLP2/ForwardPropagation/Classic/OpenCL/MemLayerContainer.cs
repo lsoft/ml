@@ -33,6 +33,38 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
 
         public MemLayerContainer(
             CLProvider clProvider,
+            int currentLayerNonBiasNeuronCount,
+            int currentLayerTotalNeuronCount
+            )
+        {
+            if (clProvider == null)
+            {
+                throw new ArgumentNullException("clProvider");
+            }
+
+            _clProvider = clProvider;
+            _previousLayerTotalNeuronCount = 0;
+            _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
+            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
+
+            //нейроны
+            var netMem = clProvider.CreateFloatMem(
+                currentLayerTotalNeuronCount,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            netMem.Write(BlockModeEnum.Blocking);
+
+            NetMem = netMem;
+
+            var stateMem = clProvider.CreateFloatMem(
+                currentLayerTotalNeuronCount,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            stateMem.Write(BlockModeEnum.Blocking);
+
+            StateMem = stateMem;
+        }
+
+        public MemLayerContainer(
+            CLProvider clProvider,
             int previousLayerTotalNeuronCount,
             int currentLayerNonBiasNeuronCount,
             int currentLayerTotalNeuronCount
@@ -41,6 +73,10 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
+            }
+            if (previousLayerTotalNeuronCount == 0)
+            {
+                throw new ArgumentException("previousLayerTotalNeuronCount == 0");
             }
 
             _clProvider = clProvider;
@@ -64,27 +100,37 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
             StateMem = stateMem;
 
             //веса
-            if (previousLayerTotalNeuronCount > 0)
-            {
-                var weightMem = clProvider.CreateFloatMem(
-                    currentLayerNonBiasNeuronCount * previousLayerTotalNeuronCount,
-                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-                weightMem.Write(BlockModeEnum.Blocking);
+            var weightMem = clProvider.CreateFloatMem(
+                currentLayerNonBiasNeuronCount*previousLayerTotalNeuronCount,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            weightMem.Write(BlockModeEnum.Blocking);
 
-                WeightMem = weightMem;
-            }
+            WeightMem = weightMem;
         }
 
         public void ClearAndPushHiddenLayers()
         {
+            ClearHiddenLayers();
+
+            PushHiddenLayers();
+        }
+
+        public void ClearHiddenLayers()
+        {
             var nml = this.NetMem.Array.Length;
             Array.Clear(this.NetMem.Array, 0, nml);
             this.NetMem.Array[nml - 1] = 1f;
-            this.NetMem.Write(BlockModeEnum.NonBlocking);
 
             var sml = this.StateMem.Array.Length;
             Array.Clear(this.StateMem.Array, 0, sml);
             this.StateMem.Array[sml - 1] = 1f;
+        }
+
+
+        public void PushHiddenLayers()
+        {
+            this.NetMem.Write(BlockModeEnum.NonBlocking);
+
             this.StateMem.Write(BlockModeEnum.NonBlocking);
         }
 
