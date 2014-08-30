@@ -91,7 +91,9 @@ namespace MyNN.MLP2.Backpropagation
                 );
 
             var afterDefaultValidation = DateTime.Now;
-            ConsoleAmbientContext.Console.WriteLine("Default net validation takes {0}", (afterDefaultValidation - beforeDefaultValidation));
+
+            //?!?
+            //ConsoleAmbientContext.Console.WriteLine("Default net validation takes {0}", (afterDefaultValidation - beforeDefaultValidation));
 
             #endregion
 
@@ -124,7 +126,8 @@ namespace MyNN.MLP2.Backpropagation
                 "---------------------------------------- Epoch #{0} --------------------------------------",
                     epochNumber.ToString("D7"));
 
-                ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
+                //?!?
+                //ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
 
                 //скорость обучения на эту эпоху
                 var learningRate = _config.LearningRateController.GetLearningRate(epochNumber);
@@ -197,15 +200,17 @@ namespace MyNN.MLP2.Backpropagation
                     (currentError >= float.MaxValue ? "не вычислено" : DoubleConverter.ToExactString(currentError))
                     );
 
-                ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
+                //?!?
+                //ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
 
-                ConsoleAmbientContext.Console.WriteLine(
-                    "   "
-                    + "Total: " + (int) ((dtFinish - dtStart).TotalMilliseconds)
-                    + "  Train: " + (int) ((trainTimeEnd - dtStart).TotalMilliseconds)
-                    + "  ErrRecalc: " + (int) ((errorRecalculationTimeEnd - cvFinish).TotalMilliseconds)
-                    + "  Validation: " + (int) ((cvFinish - trainTimeEnd).TotalMilliseconds)
-                    + "  Deform: " + (int) ((dtFinish - deformStart).TotalMilliseconds));
+                //?!?
+                //ConsoleAmbientContext.Console.WriteLine(
+                //    "   "
+                //    + "Total: " + (int) ((dtFinish - dtStart).TotalMilliseconds)
+                //    + "  Train: " + (int) ((trainTimeEnd - dtStart).TotalMilliseconds)
+                //    + "  ErrRecalc: " + (int) ((errorRecalculationTimeEnd - cvFinish).TotalMilliseconds)
+                //    + "  Validation: " + (int) ((cvFinish - trainTimeEnd).TotalMilliseconds)
+                //    + "  Deform: " + (int) ((dtFinish - deformStart).TotalMilliseconds));
 
                 if (needToSaveMLP)
                 {

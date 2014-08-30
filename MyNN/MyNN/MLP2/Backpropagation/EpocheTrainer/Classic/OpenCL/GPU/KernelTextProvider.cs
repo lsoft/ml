@@ -7,12 +7,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
     /// <summary>
     /// Kernel source provider for classic backpropagation epoche trainer that enables GPU-OpenCL
     /// </summary>
-    public class GPUKernelConstructor
+    public class KernelTextProvider : IKernelTextProvider
     {
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public GPUKernelConstructor(
+        public KernelTextProvider(
             IMLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -31,7 +31,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
 
         #region calculation kernels source
 
-        internal string GetOverwriteCalculationKernelsSource(int layerIndex)
+        public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLFirstDerivative("nOut");
             var result = _calculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
@@ -87,7 +87,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             return result;
         }
 
-        internal string GetIncrementCalculationKernelsSource(int layerIndex)
+        public string GetIncrementCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLFirstDerivative("nOut");
             var result = _calculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
@@ -348,44 +348,25 @@ __kernel void OutputLayerTrain(
 
         #region update weight kernel source
 
-        public const string UpdateWeightKernelSource = @"
+        public string UpdateWeightKernelSource
+        {
+            get
+            {
+                return @"
 __kernel void UpdateWeightKernel(
     __global float * currentLayerWeights,
     const __global float * nabla,
     const float batchSize
-    ,const int totalNeuronCount
-    ,const int totalWeightCount
-    , const int totalValueCount
     )
 {
     int gi = get_global_id(0);
 
-//    if(gi >= totalValueCount)
-//    {
-//        return;
-//    }
-
     float newWeight = currentLayerWeights[gi] + nabla[gi] / batchSize;
     currentLayerWeights[gi] = newWeight;
-
-//    int neuronIndex = gi / totalWeightCount;
-//    int weightIndex = gi - neuronIndex * totalWeightCount;
-//    int transposedIndex = weightIndex * totalNeuronCount + neuronIndex;
-//    currentLayerWeights[transposedIndex] = newWeight;
-
-//   for (uint y = get_group_id(0); y < totalNeuronCount; y += get_num_groups(0))
-//   {
-//        const __global float* from_ = nabla + y * totalWeightCount;
-//        __global float* to_ = currentLayerWeights + y * totalWeightCount;
-//
-//        for (uint i = get_local_id(0); i < totalWeightCount; i += get_local_size(0))
-//        {
-//            to_[i] += from_[i] / batchSize;
-//        }
-//
-//    }
 }
 ";
+            }
+        }
 
         #endregion
 

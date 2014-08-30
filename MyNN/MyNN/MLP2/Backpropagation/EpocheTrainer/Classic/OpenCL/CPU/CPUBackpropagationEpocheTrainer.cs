@@ -2,6 +2,7 @@
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.ArtifactContainer;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;
@@ -119,7 +120,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
 
         private void LoadPrograms()
         {
-            var kg = new KernelConstructor(
+            var kg = new KernelTextProvider(
                 _mlp,
                 _config);
 
@@ -149,7 +150,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
 
             //определяем кернел обновления весов
             _updateWeightKernel = _clProvider.CreateKernel(
-                KernelConstructor.UpdateWeightKernelSource,
+                kg.UpdateWeightKernelSource,
                 "UpdateWeightKernel");
         }
 
@@ -316,15 +317,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
                                 .SetKernelArg(14, 4, _config.RegularizationFactor)
                                 .SetKernelArg(15, 4, (float)(data.Count))
                                 .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
-                                //.EnqueueNDRangeKernel(
-                                //    new int[]
-                                //    {
-                                //        currentLayer.NonBiasNeuronCount
-                                //    },
-                                //    new int[]
-                                //    {
-                                //        8
-                                //    });
                         }
                         else
                         {
@@ -346,36 +338,26 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
                                 .SetKernelArg(14, 4, _config.RegularizationFactor)
                                 .SetKernelArg(15, 4, (float)(data.Count))
                                 .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
-                                //.EnqueueNDRangeKernel(
-                                //    new int[]
-                                //    {
-                                //        currentLayer.NonBiasNeuronCount
-                                //    },
-                                //    new int[]
-                                //    {
-                                //        8
-                                //    });
                         }
                     }
             //*/
-                    //// Make sure we're done with everything that's been requested before
-                    //_clProvider.QueueFinish();
 
                     int logStep = data.Count / 100;
                     if (logStep > 0 && currentIndex % logStep == 0)
                     {
-                        ConsoleAmbientContext.Console.Write(
-                            "Epoche progress: {0}%, {1}      ",
-                            (currentIndex * 100 / data.Count),
-                            DateTime.Now.ToString());
+                        //?!?
+                        //ConsoleAmbientContext.Console.Write(
+                        //    "Epoche progress: {0}%, {1}      ",
+                        //    (currentIndex * 100 / data.Count),
+                        //    DateTime.Now.ToString());
 
-                        ConsoleAmbientContext.Console.ReturnCarriage();
+                        //ConsoleAmbientContext.Console.ReturnCarriage();
                     }
                 }
 
                 //update weights and bias into opencl memory wrappers
 
-                for (int layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
+                for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
                 {
                     var weightMem = _containers[layerIndex].WeightMem;
                     var nablaMem = _nablaWeights[layerIndex];

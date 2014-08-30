@@ -167,7 +167,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
 
             //определяем кернел обновления весов
             _updateWeightKernel = _clProvider.CreateKernel(
-                GPUKernelConstructor.UpdateWeightKernelSource,
+                GPUTransposeKernelConstructor.UpdateWeightKernelSource,
                 "UpdateWeightKernel");
         }
 
@@ -191,7 +191,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
 
                 if (i > 1)
                 {
-                    //для ПЕРВОГО СКРЫТОГО слоя не надо траспонера
+                   //для ПЕРВОГО СКРЫТОГО слоя не надо траспозера
 
                     _transposers[i] = new TransposerNvidia(
                         _clProvider,

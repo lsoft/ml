@@ -227,8 +227,14 @@
     <Compile Include="MLP2\AccuracyRecord\ClassificationAccuracyRecord.cs" />
     <Compile Include="MLP2\AccuracyRecord\IAccuracyRecord.cs" />
     <Compile Include="MLP2\AccuracyRecord\MetricAccuracyRecord.cs" />
+    <Compile Include="MLP2\ArtifactContainer\SavelessArtifactContainer.cs" />
     <Compile Include="MLP2\Autoencoders\IStackedAutoencoder.cs" />
     <Compile Include="MLP2\BackpropagationFactory\Classic\OpenCL\CPU\CPUNLNCABackpropagationAlgorithmFactory.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProvider.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProviderWithRegularization.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\OrigKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\IKernelTextProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\DodfDistanceContainer.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\Float\OpenCLDistanceDictProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\Float\VectorizedCpuDistanceDictCalculator.cs" />
@@ -238,7 +244,6 @@
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation2\OpenCLDistanceDictHalfProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation1\GpuNaiveDistanceDictCalculator.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\CPUBackpropagationEpocheTrainer.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculator.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculatorVectorized.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculatorVectorizedDebug.cs" />
@@ -253,7 +258,7 @@
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\CPUTransposeBackpropagationEpocheTrainer.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\TransposeKernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\GPUBackpropagationEpocheTrainer.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\GPUKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelTextProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\GPU\GPUTransposeBackpropagationEpocheTrainer.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\GPU\GPUTransposeKernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\IBackpropagationAlgorithm.cs" />

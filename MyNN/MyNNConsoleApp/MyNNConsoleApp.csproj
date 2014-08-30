@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
+    <Compile Include="RefactoredForDI\TestBackProp.cs" />
     <Compile Include="RefactoredForDI\TrainMLP.cs" />
     <Compile Include="RefactoredForDI\TrainAutoencoder2D.cs" />
     <Compile Include="RefactoredForDI\TrainSDAE2D.cs" />

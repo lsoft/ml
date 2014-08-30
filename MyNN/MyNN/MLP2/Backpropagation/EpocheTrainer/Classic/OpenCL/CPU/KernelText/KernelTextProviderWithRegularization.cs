@@ -2,17 +2,17 @@ using System;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
+namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText
 {
     /// <summary>
     /// Kernel source provider for classic backpropagation epoche trainer that enables CPU-OpenCL
     /// </summary>
-    public class KernelConstructor
+    internal class KernelTextProviderWithRegularization : IKernelTextProvider
     {
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public KernelConstructor(
+        public KernelTextProviderWithRegularization(
             IMLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -24,6 +24,10 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
             {
                 throw new ArgumentNullException("config");
             }
+            if (Math.Abs(config.RegularizationFactor) < float.Epsilon)
+            {
+                throw new ArgumentException("Math.Abs(config.RegularizationFactor) < float.Epsilon");
+            }
 
             _mlp = mlp;
             _config = config;
@@ -31,7 +35,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
 
         #region calculation kernels source
 
-        internal string GetOverwriteCalculationKernelsSource(int layerIndex)
+        public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLFirstDerivative("nOut");
             var result = _calculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
@@ -43,55 +47,17 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
         nabla[currentNablaIndex + currentWeightIndex] = n;
 ");
 
-            result =
-                result.Replace(
-                    "<nabla_regularization1>",
-                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
-                        ? "0"
-                        : @"
-        regularizationFactor * currentLayerWeights[currentWeightIndex4] / dataCount
-"));
-
-            result =
-                result.Replace(
-                    "<nabla_regularization2>",
-                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
-                        ? "0"
-                        : @"
-            regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount
-"));
-
-
             result = result.Replace("<vectorized_weight_update>", string.Empty);
 
             result =
-                result.Replace("<weight_update>", @"
+                result.Replace("<weight_update>",@"
         nabla[nablaNeuronShift + weightIndex] = deltaWeight;
 ");
-
-
-            result =
-                result.Replace(
-                    "<weight_regularization1>",
-                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
-                        ? "0"
-                        : @"
-        + regularizationFactor * currentLayerWeights4 / dataCount
-"));
-
-            result =
-                result.Replace(
-                    "<weight_regularization2>",
-                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
-                        ? "0"
-                        : @"
-        regularizationFactor * currentLayerWeights[nablaNeuronShift + weightIndex] / dataCount
-"));
 
             return result;
         }
 
-        internal string GetIncrementCalculationKernelsSource(int layerIndex)
+        public string GetIncrementCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLFirstDerivative("nOut");
             var result = _calculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
@@ -108,24 +74,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
 ");
 
             result =
-                result.Replace(
-                    "<nabla_regularization1>",
-                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
-                        ? "0"
-                        : @"
-        regularizationFactor * currentLayerWeights[currentWeightIndex4] / dataCount
-"));
-
-            result =
-                result.Replace(
-                    "<nabla_regularization2>",
-                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
-                        ? "0"
-                        : @"
-            regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount
-"));
-
-            result =
                 result.Replace("<vectorized_weight_update>", @"
         float4 nabla4 = vload4(nablaNeuronShift4 + weightIndex4, nabla + nablaNeuronShift4Shift);
         deltaWeight4 += nabla4;
@@ -135,24 +83,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
                 result.Replace("<weight_update>", @"
         nabla[nablaNeuronShift + weightIndex] += deltaWeight;
 ");
-
-            result =
-                result.Replace(
-                    "<weight_regularization1>",
-                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
-                        ? "0"
-                        : @"
-        + regularizationFactor * currentLayerWeights4 / dataCount
-"));
-
-            result =
-                result.Replace(
-                    "<weight_regularization2>",
-                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
-                        ? "0"
-                        : @"
-        regularizationFactor * currentLayerWeights[nablaNeuronShift + weightIndex] / dataCount
-"));
 
             return result;
         }
@@ -223,7 +153,7 @@ __kernel void HiddenLayerTrain(
     {
         float4 prevOut = vload4(currentWeightIndex4, previousLayerLastState);
 
-        float4 regularizationCoef = <nabla_regularization1>;
+        float4 regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex4] / dataCount;
         float4 coef = prevOut + regularizationCoef;
         float4 n = learningRate * currentDeDz * coef;
 
@@ -243,7 +173,7 @@ __kernel void HiddenLayerTrain(
     {
         float prevOut = previousLayerLastState[currentWeightIndex];
 
-        float regularizationCoef = <nabla_regularization2>;
+        float regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount;
         float coef = prevOut + regularizationCoef;
         float n = learningRate * currentDeDz * coef;
 
@@ -299,7 +229,7 @@ __kernel void OutputLayerTrain(
         float4 deltaWeight4 = 
             learningRate *
             n *
-            (previousLayerLastState4 + <weight_regularization1>);
+            (previousLayerLastState4 + regularizationFactor * currentLayerWeights4 / dataCount);
 
         <vectorized_weight_update>
 
@@ -318,7 +248,7 @@ __kernel void OutputLayerTrain(
         float deltaWeight =
             learningRate *
             n *
-            (previousLayerLastState[weightIndex] + <weight_regularization2>);
+            (previousLayerLastState[weightIndex] + regularizationFactor * currentLayerWeights[nablaNeuronShift + weightIndex] / dataCount);
 
         <weight_update>
     }
@@ -329,7 +259,11 @@ __kernel void OutputLayerTrain(
 
         #region update weight kernel source
 
-        public const string UpdateWeightKernelSource = @"
+        public string UpdateWeightKernelSource
+        {
+            get
+            {
+                return @"
 __kernel void UpdateWeightKernel(
     __global float * currentLayerWeights,
     __global float * nabla,
@@ -366,6 +300,8 @@ __kernel void UpdateWeightKernel(
     }
 }
 ";
+            }
+        }
 
         #endregion
 

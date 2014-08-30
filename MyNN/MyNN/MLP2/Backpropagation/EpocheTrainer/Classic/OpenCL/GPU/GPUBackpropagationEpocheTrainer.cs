@@ -120,7 +120,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
 
         private void LoadPrograms()
         {
-            var kg = new GPUKernelConstructor(
+            var kg = new KernelTextProvider(
                 _mlp,
                 _config);
 
@@ -150,7 +150,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
 
             //определяем кернел обновления весов
             _updateWeightKernel = _clProvider.CreateKernel(
-                GPUKernelConstructor.UpdateWeightKernelSource,
+                kg.UpdateWeightKernelSource,
                 "UpdateWeightKernel");
         }
 
@@ -407,31 +407,11 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                     var weightMem = _containers[layerIndex].WeightMem;
                     var nablaMem = _nablaWeights[layerIndex];
 
-                    var neuronCount = _mlp.Layers[layerIndex].NonBiasNeuronCount;
-                    var weightCount = _mlp.Layers[layerIndex - 1].Neurons.Length;
-
-                    //var localSize = 512;
-                    //var globalSize = localSize*256;
-
                     _updateWeightKernel
                         .SetKernelArgMem(0, weightMem)
                         .SetKernelArgMem(1, nablaMem)
-                        //.SetKernelArgLocalMem(2, 4 * weightCount)
                         .SetKernelArg(2, 4, (float)(_config.BatchSize))
-                        .SetKernelArg(3, 4, neuronCount)
-                        .SetKernelArg(4, 4, weightCount)
-                        .SetKernelArg(5, 4, weightMem.Array.Length)
                         .EnqueueNDRangeKernel(weightMem.Array.Length);
-                        //.EnqueueNDRangeKernel(
-                        //    new int[]
-                        //    {
-                        //        globalSize  
-                        //    }
-                        //    , new int[]
-                        //    {
-                        //        localSize
-                        //    }
-                        //    );
                 }
 
                 //// Make sure we're done with everything that's been requested before
