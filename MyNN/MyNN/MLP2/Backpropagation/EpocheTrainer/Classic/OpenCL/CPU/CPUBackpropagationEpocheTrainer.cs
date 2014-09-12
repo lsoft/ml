@@ -345,13 +345,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
                     int logStep = data.Count / 100;
                     if (logStep > 0 && currentIndex % logStep == 0)
                     {
-                        //?!?
-                        //ConsoleAmbientContext.Console.Write(
-                        //    "Epoche progress: {0}%, {1}      ",
-                        //    (currentIndex * 100 / data.Count),
-                        //    DateTime.Now.ToString());
+                        ConsoleAmbientContext.Console.Write(
+                            "Epoche progress: {0}%, {1}      ",
+                            (currentIndex * 100 / data.Count),
+                            DateTime.Now.ToString());
 
-                        //ConsoleAmbientContext.Console.ReturnCarriage();
+                        ConsoleAmbientContext.Console.ReturnCarriage();
                     }
                 }
 

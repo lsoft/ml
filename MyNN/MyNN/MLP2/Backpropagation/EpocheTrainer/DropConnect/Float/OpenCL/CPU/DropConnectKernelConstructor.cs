@@ -49,6 +49,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.OpenCL.CPU
                     (Math.Abs(_config.RegularizationFactor) < float.Epsilon
                         ? "0"
                         : @"
+здесь ошибка в регул€ризации!!! смотри версию дл€ CPU (читаем один флоат из currentLayerWeights[currentWeightIndex4] , а  не 4; надо использовать vload4)
         regularizationFactor * currentLayerWeights[currentWeightIndex4] / dataCount
 "));
 
@@ -113,6 +114,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.OpenCL.CPU
                     (Math.Abs(_config.RegularizationFactor) < float.Epsilon
                         ? "0"
                         : @"
+здесь ошибка в регул€ризации!!! смотри версию дл€ CPU (читаем один флоат из currentLayerWeights[currentWeightIndex4] , а  не 4; надо использовать vload4)
         regularizationFactor * currentLayerWeights[currentWeightIndex4] / dataCount
 "));
 
@@ -159,7 +161,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.OpenCL.CPU
 
 
         private const string _calculationKernelsSource = @"
-int ComputeWeightIndex(
+inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {

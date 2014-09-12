@@ -226,7 +226,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference
 
         private string _kernelSource = @"
 
-int ComputeWeightIndex(
+inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {

@@ -89,7 +89,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText
 
 
         private const string _calculationKernelsSource = @"
-int ComputeWeightIndex(
+inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {
@@ -124,8 +124,9 @@ __kernel void HiddenLayerTrain(
 
     int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
-    //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего
-    float currentDeDz = 0;
+
+    //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего (with Kahan Algorithm)
+    KahanAccumulator accDeDz = GetEmptyKahanAcc();
     for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
     {
         int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex; //не векторизуетс€:(
@@ -134,8 +135,11 @@ __kernel void HiddenLayerTrain(
         float nextNabla = nextLayerDeDz[nextNeuronIndex];
         float multiplied = nextWeight * nextNabla;
 
-        currentDeDz += multiplied;
+        KahanAddElement(&accDeDz, multiplied);
     }
+
+    float currentDeDz = accDeDz.Sum;
+
 
     float nOut = currentLayerNET[neuronIndex];
     currentDeDz *= <firstDerivative_nOut>;
@@ -152,8 +156,9 @@ __kernel void HiddenLayerTrain(
         ++currentWeightIndex4)
     {
         float4 prevOut = vload4(currentWeightIndex4, previousLayerLastState);
+        float4 currentLayerWeights4 = vload4(currentWeightIndex4, currentLayerWeights);
 
-        float4 regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex4] / dataCount;
+        float4 regularizationCoef = regularizationFactor * currentLayerWeights4 / dataCount;
         float4 coef = prevOut + regularizationCoef;
         float4 n = learningRate * currentDeDz * coef;
 

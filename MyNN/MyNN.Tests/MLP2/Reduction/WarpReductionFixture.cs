@@ -64,16 +64,18 @@ __kernel void TestReductionKernel(
     int currentSize
 )
 {
-    float v = 0;
+    KahanAccumulator v = GetEmptyKahanAcc();
     if(get_global_id(0) < currentSize)
     {
         for(int i = get_global_id(0); i < currentSize; i += get_global_size(0))
         {
-            v += gdata[i];
+            KahanAddElement(
+                &v,
+                gdata[i]);
         }
     }
 
-    ldata[get_local_id(0)] = v;
+    ldata[get_local_id(0)] = v.Sum;
 
     barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -85,6 +87,8 @@ __kernel void TestReductionKernel(
     {
         tdata[get_group_id(0)] = ldata[0];
     }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
 }
 ";
 
@@ -201,7 +205,7 @@ __kernel void TestReductionKernel(
 
                         t.Read(BlockModeEnum.Blocking);
 
-                        var gpuSum = t.Array.Sum();
+                        var gpuSum = KahanAlgorithm.Sum(t.Array);
 
                         ConsoleAmbientContext.Console.WriteLine((cpuSum - gpuSum).ToString());
 

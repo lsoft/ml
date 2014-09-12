@@ -1,9 +1,10 @@
 using MyNN.Data.TrainDataProvider;
+using MyNN.MLP2.AccuracyRecord;
 
 namespace MyNN.MLP2.Backpropagation
 {
     public interface IBackpropagationAlgorithm
     {
-        void Train(ITrainDataProvider trainDataProvider);
+        IAccuracyRecord Train(ITrainDataProvider trainDataProvider);
     }
 }

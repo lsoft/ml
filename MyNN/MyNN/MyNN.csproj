@@ -233,7 +233,10 @@
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProviderWithRegularization.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\OrigKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\GPUBackpropagationEpocheTrainer.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelText\KernelTextProvider.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelText\KernelTextProviderWithRegularization.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\IKernelTextProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\DodfDistanceContainer.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation3\Float\OpenCLDistanceDictProvider.cs" />
@@ -257,8 +260,6 @@
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic2\OpenCL\CPU\Transpose2KernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\CPUTransposeBackpropagationEpocheTrainer.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\TransposeKernelConstructor.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\GPUBackpropagationEpocheTrainer.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelTextProvider.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\GPU\GPUTransposeBackpropagationEpocheTrainer.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\GPU\GPUTransposeKernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\IBackpropagationAlgorithm.cs" />

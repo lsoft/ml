@@ -158,17 +158,30 @@ namespace OpenCL.Net.Wrapper
 
             if (error != ErrorCode.Success)
             {
-                var infoBuffer = new InfoBuffer(new IntPtr(90000));
-                IntPtr retSize;
-                Cl.GetProgramBuildInfo(program, _device, ProgramBuildInfo.Log, new IntPtr(90000), infoBuffer, out retSize);
+                using (var infoBuffer = new InfoBuffer(new IntPtr(200000)))
+                {
+                    IntPtr retSize;
+                    Cl.GetProgramBuildInfo(program, _device, ProgramBuildInfo.Log, new IntPtr(200000), infoBuffer, out retSize);
 
-                throw new InvalidProgramException("Error building program:\n" + infoBuffer.ToString());
+                    throw new InvalidProgramException(
+                        string.Format(
+                            "Error building program {0}.\r\n{1}",
+                            infoBuffer,
+                            fullText)
+                        );
+                }
             }
 
             var buildStatus = Cl.GetProgramBuildInfo(program, _device, ProgramBuildInfo.Status, out error).CastTo<BuildStatus>();
+
             if (buildStatus != BuildStatus.Success)
             {
-                throw new InvalidProgramException(string.Format("GetProgramBuildInfo returned {0} for program!", buildStatus));
+                throw new InvalidProgramException(
+                    string.Format(
+                        "GetProgramBuildInfo returned {0} for program!\r\n{1}",
+                        buildStatus,
+                        fullText
+                        ));
             }
 
             var k = new Kernel(

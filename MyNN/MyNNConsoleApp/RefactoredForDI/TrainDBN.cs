@@ -116,7 +116,6 @@ namespace MyNNConsoleApp.RefactoredForDI
                 var mlpContainer = rootContainer.GetChildContainer(mlp.Name);
 
                 var algo = new BackpropagationAlgorithm(
-                    randomizer,
                     new CPUBackpropagationEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
@@ -234,7 +233,6 @@ namespace MyNNConsoleApp.RefactoredForDI
             using (var clProvider = new CLProvider())
             {
                 var algo = new BackpropagationAlgorithm(
-                    randomizer,
                     new CPUBackpropagationEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
@@ -335,7 +333,6 @@ namespace MyNNConsoleApp.RefactoredForDI
                 var mlpContainer = rootContainer.GetChildContainer(mlpName);
 
                 var algo = new BackpropagationAlgorithm(
-                    randomizer,
                     new CPUBackpropagationEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,

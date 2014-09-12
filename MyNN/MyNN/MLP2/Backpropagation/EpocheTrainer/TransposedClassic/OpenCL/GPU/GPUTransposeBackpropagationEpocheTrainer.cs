@@ -2,7 +2,6 @@
 using System.Linq;
 using MyNN.Data;
 using MyNN.MLP2.ArtifactContainer;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;

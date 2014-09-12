@@ -49,7 +49,6 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.GPU
             }
 
             var algo = new BackpropagationAlgorithm(
-                randomizer,
                 new GPUBackpropagationEpocheTrainer(
                     net,
                     config,

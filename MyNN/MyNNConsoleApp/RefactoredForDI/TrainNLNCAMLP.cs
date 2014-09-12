@@ -117,7 +117,6 @@ namespace MyNNConsoleApp.RefactoredForDI
                         );
 
                 var algo = new BackpropagationAlgorithm(
-                    randomizer,
                     new CPUNLNCABackpropagationEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,

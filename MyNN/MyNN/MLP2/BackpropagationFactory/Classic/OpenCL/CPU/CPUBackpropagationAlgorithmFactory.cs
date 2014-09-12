@@ -50,7 +50,6 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU
             }
 
             var algo = new BackpropagationAlgorithm(
-                randomizer,
                 new CPUBackpropagationEpocheTrainer(
                     VectorizationSizeEnum.VectorizationMode16,
                     net,

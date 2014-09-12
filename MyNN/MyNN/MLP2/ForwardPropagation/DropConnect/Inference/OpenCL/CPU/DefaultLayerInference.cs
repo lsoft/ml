@@ -165,7 +165,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU
 
 
         private const string _inferenceKernelSource = @"
-int ComputeWeightIndex(
+inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {

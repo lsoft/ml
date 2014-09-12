@@ -192,7 +192,7 @@ float SampleFromGaussian2(
         SampleFromGaussian(rnd1, rnd2, median, sigma);
 }
 
-int ComputeWeightIndex(
+inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {

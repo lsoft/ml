@@ -77,7 +77,6 @@ namespace MyNN.MLP2.BackpropagationFactory.DropConnect.Bit.OpenCL.CPU
             }
 
             var algo = new BackpropagationAlgorithm(
-                randomizer,
                 new DropConnectBitCPUBackpropagationEpocheTrainer<VectorizedLayerInference>(
                     randomizer,
                     VectorizationSizeEnum.VectorizationMode16,

@@ -48,7 +48,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU
         }
 
         private const string ComputeWeightSource = @"
-int ComputeWeightIndex(
+inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {

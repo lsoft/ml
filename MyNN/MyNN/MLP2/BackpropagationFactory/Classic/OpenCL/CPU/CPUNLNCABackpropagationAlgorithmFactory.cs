@@ -80,7 +80,6 @@ namespace MyNN.MLP2.BackpropagationFactory.Classic.OpenCL.CPU
             var takeIntoAccount = (int)(net.Layers[_ncaLayerIndex].NonBiasNeuronCount*_partOfTakeIntoAccount);
 
             var algo = new BackpropagationAlgorithm(
-                randomizer,
                 new CPUAutoencoderNLNCABackpropagationEpocheTrainer(
                     VectorizationSizeEnum.VectorizationMode16,
                     net,

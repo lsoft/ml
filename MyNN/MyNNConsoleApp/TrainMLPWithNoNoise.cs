@@ -202,7 +202,6 @@ namespace MyNNConsoleApp
                 var mlpContainer = rootContainer.GetChildContainer(mlpName);
 
                 var algo = new BackpropagationAlgorithm(
-                    randomizer,
                     new CPUBackpropagationEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16, 
                         mlp,

@@ -47,6 +47,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
                     (Math.Abs(_config.RegularizationFactor) < float.Epsilon
                         ? "0"
                         : @"
+здесь ошибка в регул€ризации!!! смотри версию дл€ CPU (читаем один флоат из currentLayerWeights[currentWeightIndex4] , а  не 4; надо использовать vload4)
         regularizationFactor * currentLayerWeights[currentWeightIndex4] / dataCount
 "));
 
@@ -103,6 +104,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
                     (Math.Abs(_config.RegularizationFactor) < float.Epsilon
                         ? "0"
                         : @"
+здесь ошибка в регул€ризации!!! смотри версию дл€ CPU (читаем один флоат из currentLayerWeights[currentWeightIndex4] , а  не 4; надо использовать vload4)
         regularizationFactor * currentLayerWeights[currentWeightIndex4] / dataCount
 "));
 

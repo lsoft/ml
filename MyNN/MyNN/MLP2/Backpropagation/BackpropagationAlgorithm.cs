@@ -15,7 +15,6 @@ namespace MyNN.MLP2.Backpropagation
 {
     public class BackpropagationAlgorithm : IBackpropagationAlgorithm
     {
-        private readonly IRandomizer _randomizer;
         private readonly IMLP _mlp;
         private readonly IValidation _validation;
         private readonly ILearningAlgorithmConfig _config;
@@ -25,17 +24,12 @@ namespace MyNN.MLP2.Backpropagation
         private IAccuracyRecord _bestAccuracyRecord;
 
         public BackpropagationAlgorithm(
-            IRandomizer randomizer,
             IBackpropagationEpocheTrainer backpropagationEpocheTrainer,
             IArtifactContainer artifactContainer,
             IMLP mlp,
             IValidation validation,
             ILearningAlgorithmConfig config)
         {
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
-            }
             if (backpropagationEpocheTrainer == null)
             {
                 throw new ArgumentNullException("backpropagationEpocheTrainer");
@@ -49,7 +43,6 @@ namespace MyNN.MLP2.Backpropagation
                 throw new ArgumentNullException("validation");
             }
 
-            _randomizer = randomizer;
             _backpropagationEpocheTrainer = backpropagationEpocheTrainer;
             _artifactContainer = artifactContainer;
             _mlp = mlp;
@@ -57,7 +50,7 @@ namespace MyNN.MLP2.Backpropagation
             _config = config;
         }
 
-        public void Train(ITrainDataProvider trainDataProvider)
+        public IAccuracyRecord Train(ITrainDataProvider trainDataProvider)
         {
             if (trainDataProvider == null)
             {
@@ -92,8 +85,7 @@ namespace MyNN.MLP2.Backpropagation
 
             var afterDefaultValidation = DateTime.Now;
 
-            //?!?
-            //ConsoleAmbientContext.Console.WriteLine("Default net validation takes {0}", (afterDefaultValidation - beforeDefaultValidation));
+            ConsoleAmbientContext.Console.WriteLine("Default net validation takes {0}", (afterDefaultValidation - beforeDefaultValidation));
 
             #endregion
 
@@ -114,6 +106,8 @@ namespace MyNN.MLP2.Backpropagation
                 _config.ReassignBatchSize(trainData.Count);
             }
 
+            IAccuracyRecord epocheAccuracyRecord = null;
+
             //создаем массивы
             this._backpropagationEpocheTrainer.PreTrainInit(trainData);
 
@@ -126,8 +120,7 @@ namespace MyNN.MLP2.Backpropagation
                 "---------------------------------------- Epoch #{0} --------------------------------------",
                     epochNumber.ToString("D7"));
 
-                //?!?
-                //ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
+                ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
 
                 //скорость обучения на эту эпоху
                 var learningRate = _config.LearningRateController.GetLearningRate(epochNumber);
@@ -152,7 +145,7 @@ namespace MyNN.MLP2.Backpropagation
                 #region validation
 
                 //внешняя функция для обсчета на тестовом множестве
-                var epocheAccuracyRecord = _validation.Validate(
+                epocheAccuracyRecord = _validation.Validate(
                     _backpropagationEpocheTrainer.ForwardPropagation,
                     epochNumber,
                     epocheContainer
@@ -200,17 +193,15 @@ namespace MyNN.MLP2.Backpropagation
                     (currentError >= float.MaxValue ? "не вычислено" : DoubleConverter.ToExactString(currentError))
                     );
 
-                //?!?
-                //ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
+                ConsoleAmbientContext.Console.WriteLine("Current time: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
 
-                //?!?
-                //ConsoleAmbientContext.Console.WriteLine(
-                //    "   "
-                //    + "Total: " + (int) ((dtFinish - dtStart).TotalMilliseconds)
-                //    + "  Train: " + (int) ((trainTimeEnd - dtStart).TotalMilliseconds)
-                //    + "  ErrRecalc: " + (int) ((errorRecalculationTimeEnd - cvFinish).TotalMilliseconds)
-                //    + "  Validation: " + (int) ((cvFinish - trainTimeEnd).TotalMilliseconds)
-                //    + "  Deform: " + (int) ((dtFinish - deformStart).TotalMilliseconds));
+                ConsoleAmbientContext.Console.WriteLine(
+                    "   "
+                    + "Total: " + (int)((dtFinish - dtStart).TotalMilliseconds)
+                    + "  Train: " + (int)((trainTimeEnd - dtStart).TotalMilliseconds)
+                    + "  ErrRecalc: " + (int)((errorRecalculationTimeEnd - cvFinish).TotalMilliseconds)
+                    + "  Validation: " + (int)((cvFinish - trainTimeEnd).TotalMilliseconds)
+                    + "  Deform: " + (int)((dtFinish - deformStart).TotalMilliseconds));
 
                 if (needToSaveMLP)
                 {
@@ -242,6 +233,9 @@ namespace MyNN.MLP2.Backpropagation
             } while (epochNumber < _config.MaxEpoches &&
                      currentError > _config.MinError &&
                      Math.Abs(currentError - lastError) > _config.MinErrorChange);
+
+            return
+                epocheAccuracyRecord;
         }
 
     }

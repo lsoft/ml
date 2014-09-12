@@ -86,7 +86,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText
 
 
         private const string _calculationKernelsSource = @"
-int ComputeWeightIndex(
+inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
 {
@@ -121,8 +121,9 @@ __kernel void HiddenLayerTrain(
 
     int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
-    //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего
-    float currentDeDz = 0;
+
+    //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего (with Kahan Algorithm)
+    KahanAccumulator accDeDz = GetEmptyKahanAcc();
     for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
     {
         int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex; //не векторизуетс€:(
@@ -131,8 +132,12 @@ __kernel void HiddenLayerTrain(
         float nextNabla = nextLayerDeDz[nextNeuronIndex];
         float multiplied = nextWeight * nextNabla;
 
-        currentDeDz += multiplied;
+        KahanAddElement(&accDeDz, multiplied);
     }
+
+    float currentDeDz = accDeDz.Sum;
+
+
 
     float nOut = currentLayerNET[neuronIndex];
     currentDeDz *= <firstDerivative_nOut>;
