@@ -2,17 +2,17 @@ using System;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.Structure;
 
-namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText
+namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
 {
     /// <summary>
-    /// Kernel source provider for classic backpropagation epoche trainer that enables CPU-OpenCL
+    /// Kernel source provider for classic backpropagation epoche trainer with transposed weights that enables CPU-OpenCL
     /// </summary>
-    internal class KernelTextProviderWithRegularization : IKernelTextProvider
+    public class KernelConstructor
     {
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public KernelTextProviderWithRegularization(
+        public KernelConstructor(
             IMLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -24,10 +24,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText
             {
                 throw new ArgumentNullException("config");
             }
-            if (Math.Abs(config.RegularizationFactor) < float.Epsilon)
-            {
-                throw new ArgumentException("Math.Abs(config.RegularizationFactor) < float.Epsilon");
-            }
 
             _mlp = mlp;
             _config = config;
@@ -35,10 +31,10 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText
 
         #region calculation kernels source
 
-        public string GetOverwriteCalculationKernelsSource(int layerIndex)
+        internal string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLFirstDerivative("nOut");
-            var result = _calculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
+            var result = CalculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
 
             result =
                 result.Replace("<nabla_update>", @"
@@ -46,17 +42,37 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText
 ");
 
             result =
-                result.Replace("<weight_update>",@"
+                result.Replace(
+                    "<nabla_regularization2>",
+                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
+                        ? "0"
+                        : @"
+            regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount
+"));
+
+
+            result =
+                result.Replace("<weight_update>", @"
         nabla[nablaNeuronShift + weightIndex] = deltaWeight;
 ");
+
+
+            result =
+                result.Replace(
+                    "<weight_regularization2>",
+                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
+                        ? "0"
+                        : @"
+        regularizationFactor * currentLayerWeights[nablaNeuronShift + weightIndex] / dataCount
+"));
 
             return result;
         }
 
-        public string GetIncrementCalculationKernelsSource(int layerIndex)
+        internal string GetIncrementCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLFirstDerivative("nOut");
-            var result = _calculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
+            var result = CalculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
 
             result =
                 result.Replace("<nabla_update>", @"
@@ -64,15 +80,33 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText
 ");
 
             result =
+                result.Replace(
+                    "<nabla_regularization2>",
+                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
+                        ? "0"
+                        : @"
+            regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount
+"));
+
+            result =
                 result.Replace("<weight_update>", @"
         nabla[nablaNeuronShift + weightIndex] += deltaWeight;
 ");
+
+            result =
+                result.Replace(
+                    "<weight_regularization2>",
+                    (Math.Abs(_config.RegularizationFactor) < float.Epsilon
+                        ? "0"
+                        : @"
+        regularizationFactor * currentLayerWeights[nablaNeuronShift + weightIndex] / dataCount
+"));
 
             return result;
         }
 
 
-        private const string _calculationKernelsSource = @"
+        private const string CalculationKernelsSource = @"
 inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
@@ -103,30 +137,26 @@ __kernel void HiddenLayerTrain(
     float dataCount,
 
     __local float * local_accum
-
     )
 {
     int neuronIndex = get_group_id(0);
 
     if(neuronIndex < currentLayerNeuronCount)
     {
-
         int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
-
-        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (with Kahan Algorithm)
-
         KahanAccumulator accDeDz = GetEmptyKahanAcc();
-        for (
-            int nextNeuronIndex = get_local_id(0);
-            nextNeuronIndex < nextLayerNeuronCount; 
-            nextNeuronIndex += get_local_size(0)
-            )
-        {
-            int nextWeightIndex = 
-                ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + 
-                neuronIndex;
 
+        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего
+        for (
+            int nextNeuronIndex = get_local_id(0),
+                nextWeightIndex = ComputeWeightIndex(nextLayerNeuronCount, neuronIndex) + get_local_id(0);
+            nextNeuronIndex < nextLayerNeuronCount; 
+            nextNeuronIndex += get_local_size(0),
+            nextWeightIndex += get_local_size(0)
+            )
+//        for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; nextNeuronIndex++, nextWeightIndex++)
+        {
             float nextWeight = nextLayerWeights[nextWeightIndex];
             float nextNabla = nextLayerDeDz[nextNeuronIndex];
             float multiplied = nextWeight * nextNabla;
@@ -142,13 +172,11 @@ __kernel void HiddenLayerTrain(
         float currentDeDz = local_accum[0];
 
 
-
-
         float nOut = currentLayerNET[neuronIndex];
         currentDeDz *= <firstDerivative_nOut>;
         currentLayerDeDz[neuronIndex] = currentDeDz;
 
-        //невекторизованная часть
+        //просчет изменений в весах нейронов текущего слоя по состоянию нейронов предыдущего
         for (
             int currentWeightIndex = get_local_id(0);
             currentWeightIndex < previousLayerNeuronCount; 
@@ -161,7 +189,7 @@ __kernel void HiddenLayerTrain(
         {
             float prevOut = previousLayerLastState[currentWeightIndex];
 
-            float regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount;
+            float regularizationCoef = <nabla_regularization2>;
             float coef = prevOut + regularizationCoef;
             float n = learningRate * currentDeDz * coef;
 
@@ -188,27 +216,23 @@ __kernel void OutputLayerTrain(
 
     float learningRate,
     float regularizationFactor,
-    float dataCount
-
-    )
+    float dataCount)
 {
     int neuronIndex = get_group_id(0);
 
     if(neuronIndex < currentLayerNeuronCount)
     {
+
         float nOut = currentLayerNET[neuronIndex];
 
         float n =
             <firstDerivative_nOut>
-            * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]); //!!! HalfSquaredEuclidianDistance, refactor!
+            * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);  //!!! HalfSquaredEuclidianDistance, refactor!
 
         currentLayerDeDz[neuronIndex] = n;
 
         int nablaNeuronShift = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
-        int nablaNeuronShift4 = nablaNeuronShift / 4;
-        int nablaNeuronShift4Shift = nablaNeuronShift - nablaNeuronShift4 * 4;
 
-        //невекторизованная часть
         for (
             int weightIndex = get_local_id(0);
             weightIndex < previousLayerNeuronCountTotal; 
@@ -222,7 +246,7 @@ __kernel void OutputLayerTrain(
             float deltaWeight =
                 learningRate *
                 n *
-                (previousLayerLastState[weightIndex] + regularizationFactor * currentLayerWeights[nablaNeuronShift + weightIndex] / dataCount);
+                (previousLayerLastState[weightIndex] + <weight_regularization2>);
 
             <weight_update>
         }
@@ -234,11 +258,7 @@ __kernel void OutputLayerTrain(
 
         #region update weight kernel source
 
-        public string UpdateWeightKernelSource
-        {
-            get
-            {
-                return @"
+        public const string UpdateWeightKernelSource = @"
 __kernel void UpdateWeightKernel(
     __global float * currentLayerWeights,
     const __global float * nabla,
@@ -252,8 +272,6 @@ __kernel void UpdateWeightKernel(
     currentLayerWeights[gi] += shift;
 }
 ";
-            }
-        }
 
         #endregion
 

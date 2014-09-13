@@ -182,9 +182,7 @@ __kernel void OutputLayerTrain(
 
     float learningRate,
     float regularizationFactor,
-    float dataCount,
-
-    __local float * local_accum
+    float dataCount
 
     )
 {

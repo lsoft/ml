@@ -256,7 +256,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                             .SetKernelArg(9, 4, learningRate)
                             .SetKernelArg(10, 4, _config.RegularizationFactor)
                             .SetKernelArg(11, 4, (float)(data.Count))
-                            .SetKernelArgLocalMem(12, 4 * OutputLocalGroupSize)
                             //.EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount)
                             .EnqueueNDRangeKernel(
                                 new[]
@@ -284,7 +283,6 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                             .SetKernelArg(9, 4, learningRate)
                             .SetKernelArg(10, 4, _config.RegularizationFactor)
                             .SetKernelArg(11, 4, (float)(data.Count))
-                            .SetKernelArgLocalMem(12, 4 * OutputLocalGroupSize)
                             //.EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount)
                             .EnqueueNDRangeKernel(
                                 new[]

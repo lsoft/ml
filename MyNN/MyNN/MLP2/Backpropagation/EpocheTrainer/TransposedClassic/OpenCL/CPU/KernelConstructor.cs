@@ -7,12 +7,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU
     /// <summary>
     /// Kernel source provider for classic backpropagation epoche trainer with transposed weights that enables CPU-OpenCL
     /// </summary>
-    public class TransposeKernelConstructor
+    public class KernelConstructor
     {
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public TransposeKernelConstructor(
+        public KernelConstructor(
             IMLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -320,7 +320,7 @@ __kernel void OutputLayerTrain(
 
     float n =
         <firstDerivative_nOut>
-        * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);
+        * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);  //!!! HalfSquaredEuclidianDistance, refactor!
 
     currentLayerDeDz[neuronIndex] = n;
 

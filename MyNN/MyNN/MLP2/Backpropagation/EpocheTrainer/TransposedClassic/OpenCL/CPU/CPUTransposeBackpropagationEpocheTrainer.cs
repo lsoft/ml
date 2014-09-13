@@ -136,7 +136,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU
 
         private void LoadPrograms()
         {
-            var kg = new TransposeKernelConstructor(
+            var kg = new KernelConstructor(
                 _mlp,
                 _config);
 
@@ -166,7 +166,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU
 
             //определяем кернел обновления весов
             _updateWeightKernel = _clProvider.CreateKernel(
-                TransposeKernelConstructor.UpdateWeightKernelSource,
+                KernelConstructor.UpdateWeightKernelSource,
                 "UpdateWeightKernel");
         }
 

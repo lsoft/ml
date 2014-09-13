@@ -259,9 +259,9 @@
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic2\OpenCL\CPU\CPUTranspose2BackpropagationEpocheTrainer.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic2\OpenCL\CPU\Transpose2KernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\CPUTransposeBackpropagationEpocheTrainer.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\TransposeKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\KernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\GPU\GPUTransposeBackpropagationEpocheTrainer.cs" />
-    <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\GPU\GPUTransposeKernelConstructor.cs" />
+    <Compile Include="MLP2\Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\GPU\KernelConstructor.cs" />
     <Compile Include="MLP2\Backpropagation\IBackpropagationAlgorithm.cs" />
     <Compile Include="MLP2\Backpropagation\Metrics\TestPurposeMetric.cs" />
     <Compile Include="MLP2\Backpropagation\Validation\AccuracyCalculator\KNNTester\DefaultKNNTester.cs" />
