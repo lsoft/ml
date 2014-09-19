@@ -77,6 +77,11 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.CSharp
 
         public void PushInput(float[] data)
         {
+            if (data.Length != _currentLayerNonBiasNeuronCount)
+            {
+                throw new ArgumentException("data.Length != _currentLayerNonBiasNeuronCount");
+            }
+
             //записываем значения из сети в объекты OpenCL
             for (var neuronIndex = 0; neuronIndex < _currentLayerTotalNeuronCount; neuronIndex++)
             {

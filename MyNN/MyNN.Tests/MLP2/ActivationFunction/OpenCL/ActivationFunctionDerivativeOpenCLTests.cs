@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
 
 namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL
@@ -66,6 +67,7 @@ __kernel void CalculateDiff(
     float minValue,
     float step)
 {
+
     float DeltaX = 0.01;
 
     int kernelIndex = get_global_id(0);

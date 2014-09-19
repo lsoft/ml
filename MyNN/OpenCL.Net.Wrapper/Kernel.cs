@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCL.Net.Wrapper.Mem.Img;
 
 namespace OpenCL.Net.Wrapper
 {
@@ -52,7 +53,7 @@ namespace OpenCL.Net.Wrapper
             return this;
         }
 
-        public Kernel SetKernelArgMem<T>(uint argId, OpenCL.Net.Wrapper.Mem.Mem<T> mem)
+        public Kernel SetKernelArgMem<T>(uint argId, Mem.Data.Mem<T> mem)
             where T : struct
         {
             if (mem == null)
@@ -67,8 +68,22 @@ namespace OpenCL.Net.Wrapper
                 throw new InvalidProgramException(string.Format("Unable to run Cl.SetKernelArgMem: {0}!", error));
             }
 
+            return this;
+        }
 
-            //_kernel.SetKernelArgMem(argId, mem.GetMem());
+        public Kernel SetKernelArgImg(uint argId, IntensityFloatImg img)
+        {
+            if (img == null)
+            {
+                throw new ArgumentNullException("img");
+            }
+
+            var error = Cl.SetKernelArg(_kernel, argId, img.GetMem());
+
+            if (error != ErrorCode.Success)
+            {
+                throw new InvalidProgramException(string.Format("Unable to run Cl.SetKernelArgMem: {0}!", error));
+            }
 
             return this;
         }
@@ -86,8 +101,6 @@ namespace OpenCL.Net.Wrapper
             {
                 throw new InvalidProgramException(string.Format("Unable to run Cl.SetKernelArg: {0}!", error));
             }
-
-            //_kernel.SetKernelArg(argId, size, data);
 
             return this;
         }

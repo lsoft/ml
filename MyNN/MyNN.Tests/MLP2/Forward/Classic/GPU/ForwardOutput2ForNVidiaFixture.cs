@@ -89,7 +89,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new GPUPropagatorComponentConstructor(
+                        var pcc = new PropagatorComponentConstructor(
                             clProvider
                             );
 
@@ -108,7 +108,15 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                                 );
                     });
 
-                Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
+                const float correctResult = 1.75f;
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "correct = {0}, result = {1}",
+                        correctResult,
+                        result));
+
+                Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
             }
         }
 
@@ -135,7 +143,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new GPUPropagatorComponentConstructor(
+                        var pcc = new PropagatorComponentConstructor(
                             clProvider
                             );
 
@@ -179,7 +187,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new GPUPropagatorComponentConstructor(
+                        var pcc = new PropagatorComponentConstructor(
                             clProvider
                             );
 
@@ -231,7 +239,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new GPUPropagatorComponentConstructor(
+                        var pcc = new PropagatorComponentConstructor(
                             clProvider
                             );
 

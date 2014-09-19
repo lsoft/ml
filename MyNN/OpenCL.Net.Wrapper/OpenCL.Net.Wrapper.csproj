@@ -52,18 +52,18 @@
     <Compile Include="DeviceChooser\IntelGPUDeviceChooser.cs" />
     <Compile Include="DeviceChooser\NvidiaOrAmdGPUDeviceChooser.cs" />
     <EmbeddedResource Include="KernelLibrary\KahanAlgorithm.cl" />
+    <Compile Include="Mem\Data\Mem.cs" />
+    <Compile Include="Mem\Data\MemByte.cs" />
+    <Compile Include="Mem\Data\MemDouble.cs" />
+    <Compile Include="Mem\Data\MemFloat.cs" />
+    <Compile Include="Mem\Data\MemHalf.cs" />
+    <Compile Include="Mem\Data\MemInt.cs" />
+    <Compile Include="Mem\Data\MemUint.cs" />
+    <Compile Include="Mem\Img\IntensityFloatImg.cs" />
     <Compile Include="Resource\EmbeddedResourceReader.cs" />
     <Compile Include="Kernel.cs" />
-    <Compile Include="Mem\BaseMem.cs" />
     <Compile Include="Mem\BlockModeEnum.cs" />
     <Compile Include="Mem\IMemWrapper.cs" />
-    <Compile Include="Mem\Mem.cs" />
-    <Compile Include="Mem\MemByte.cs" />
-    <Compile Include="Mem\MemDouble.cs" />
-    <Compile Include="Mem\MemFloat.cs" />
-    <Compile Include="Mem\MemHalf.cs" />
-    <Compile Include="Mem\MemInt.cs" />
-    <Compile Include="Mem\MemUint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

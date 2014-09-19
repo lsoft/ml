@@ -5,7 +5,7 @@ using MyNN.MLP2.Structure.Neurons.Function;
 
 namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
 {
-    public class GPUKernelSource
+    public class KernelSource
     {
         public string GetKernelSource(
             IFunction function,
@@ -23,7 +23,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
 
             var result = ComputeWeightSource;
 
-            result += KernelSource.Replace(
+            result += KernelSourceCode.Replace(
                 "<activationFunction_lastNET>",
                 activationFunction);
 
@@ -51,7 +51,7 @@ inline int ComputeWeightIndex(
 }
 ";
 
-        private const string KernelSource = @"
+        private const string KernelSourceCode = @"
 __kernel void ComputeLayerKernel(
     const __global float* previousLayerLastState,
     __global float* currentLayerLastNET,

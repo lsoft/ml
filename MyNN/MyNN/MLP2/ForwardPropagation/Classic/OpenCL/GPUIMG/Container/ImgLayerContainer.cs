@@ -3,35 +3,37 @@ using MyNN.MLP2.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCL.Net.Wrapper.Mem.Data;
+using OpenCL.Net.Wrapper.Mem.Img;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
+namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPUIMG.Container
 {
-    public class MemLayerContainer : IMemLayerContainer
+    public class ImgLayerContainer : IImgLayerContainer
     {
         private readonly CLProvider _clProvider;
         private readonly int _previousLayerTotalNeuronCount;
         private readonly int _currentLayerNonBiasNeuronCount;
         private readonly int _currentLayerTotalNeuronCount;
 
-        public MemFloat WeightMem
+        public IntensityFloatImg WeightMem
         {
             get;
             private set;
         }
 
-        public MemFloat NetMem
+        public IntensityFloatImg NetMem
         {
             get;
             private set;
         }
 
-        public MemFloat StateMem
+        public IntensityFloatImg StateMem
         {
             get;
             private set;
         }
 
-        public MemLayerContainer(
+        public ImgLayerContainer(
             CLProvider clProvider,
             int currentLayerNonBiasNeuronCount,
             int currentLayerTotalNeuronCount
@@ -48,22 +50,24 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
             _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
 
             //нейроны
-            var netMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount,
+            var netMem = clProvider.CreateImg(
+                1,
+                (uint)currentLayerTotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             netMem.Write(BlockModeEnum.Blocking);
 
             NetMem = netMem;
 
-            var stateMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount,
+            var stateMem = clProvider.CreateImg(
+                1,
+                (uint)currentLayerTotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             stateMem.Write(BlockModeEnum.Blocking);
 
             StateMem = stateMem;
         }
 
-        public MemLayerContainer(
+        public ImgLayerContainer(
             CLProvider clProvider,
             int previousLayerTotalNeuronCount,
             int currentLayerNonBiasNeuronCount,
@@ -85,23 +89,26 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
             _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
 
             //нейроны
-            var netMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount,
+            var netMem = clProvider.CreateImg(
+                1,
+                (uint)currentLayerTotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             netMem.Write(BlockModeEnum.Blocking);
 
             NetMem = netMem;
 
-            var stateMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount,
+            var stateMem = clProvider.CreateImg(
+                1,
+                (uint)currentLayerTotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             stateMem.Write(BlockModeEnum.Blocking);
 
             StateMem = stateMem;
 
             //веса
-            var weightMem = clProvider.CreateFloatMem(
-                currentLayerNonBiasNeuronCount*previousLayerTotalNeuronCount,
+            var weightMem = clProvider.CreateImg(
+                (uint)previousLayerTotalNeuronCount,
+                (uint)currentLayerNonBiasNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             weightMem.Write(BlockModeEnum.Blocking);
 
@@ -136,6 +143,11 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
 
         public void PushInput(float[] data)
         {
+            if (data.Length != _currentLayerNonBiasNeuronCount)
+            {
+                throw new ArgumentException("data.Length != _currentLayerNonBiasNeuronCount");
+            }
+
             //записываем значения из сети в объекты OpenCL
             for (var neuronIndex = 0; neuronIndex < _currentLayerTotalNeuronCount; neuronIndex++)
             {

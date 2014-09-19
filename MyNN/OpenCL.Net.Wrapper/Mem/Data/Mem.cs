@@ -1,9 +1,7 @@
-﻿
-
-using System;
+﻿using System;
 using OpenCL.Net.Extensions;
 
-namespace OpenCL.Net.Wrapper.Mem
+namespace OpenCL.Net.Wrapper.Mem.Data
 {
     public abstract class Mem<T>
         : IMemWrapper
@@ -60,8 +58,6 @@ namespace OpenCL.Net.Wrapper.Mem
         {
             var blocking = blockMode == BlockModeEnum.Blocking ? Bool.True : Bool.False;
 
-            //var sizeInBytes = _sizeOfT * Array.Length;
-
             Event writeEvent;
             var error = Cl.EnqueueWriteBuffer(_commandQueue, _mem, blocking, Array, 0, null, out writeEvent);
 
@@ -71,8 +67,6 @@ namespace OpenCL.Net.Wrapper.Mem
             }
 
             writeEvent.Dispose();
-
-            //_mem.Write(_commandQueue, _sizeOfT * Array.Length, Array, blockMode);
         }
 
         public void Read(BlockModeEnum blockMode)
@@ -88,8 +82,6 @@ namespace OpenCL.Net.Wrapper.Mem
             }
 
             writeEvent.Dispose();
-
-            //_mem.Read(_commandQueue, _sizeOfT * Array.Length, Array, blockMode);
         }
 
         public virtual void Dispose()

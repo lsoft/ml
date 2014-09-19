@@ -10,6 +10,7 @@ using MyNN.MLP2.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
@@ -20,6 +21,7 @@ using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using System.Threading.Tasks;
+using OpenCL.Net.Wrapper.Mem.Data;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 

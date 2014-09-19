@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.ForwardPropagation.Classic.CSharp;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure.Layer;

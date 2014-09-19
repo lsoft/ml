@@ -102,7 +102,15 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CSharp
                             );
                 });
 
-            Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
+            const float correctResult = 1.75f;
+
+            ConsoleAmbientContext.Console.WriteLine(
+                string.Format(
+                    "correct = {0}, result = {1}",
+                    correctResult,
+                    result));
+
+            Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
         }
 
         [TestMethod]

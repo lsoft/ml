@@ -106,7 +106,7 @@ namespace MyNN.MLP2.ForwardPropagation.Classic
             foreach (var d in dataSet)
             {
                 this.Propagate(d);
-
+                
                 this.PopLastLayerState();
 
                 var ls = _lastContainer.GetLayerState();

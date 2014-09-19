@@ -1,10 +1,11 @@
 ﻿using System;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
 using MyNN.MLP2.Structure.Neurons.Function;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
 {
-    public class GPULayerPropagator : ILayerPropagator
+    public class LayerPropagator : ILayerPropagator
     {
         private readonly CLProvider _clProvider;
         private readonly IMemLayerContainer _previousMemLayerContainer;
@@ -14,9 +15,9 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
 
         private readonly Kernel _kernel;
 
-        public GPULayerPropagator(
+        public LayerPropagator(
             CLProvider clProvider,
-            GPUKernelSource ks,
+            KernelSource ks,
             IMemLayerContainer previousMemLayerContainer,
             IMemLayerContainer currentMemLayerContainer,
             IFunction activationFunction,

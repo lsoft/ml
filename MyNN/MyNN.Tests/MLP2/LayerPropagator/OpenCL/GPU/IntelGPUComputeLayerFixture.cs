@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.ForwardPropagation.Classic.CSharp;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU;
 using MyNN.MLP2.OpenCLHelper;
@@ -36,7 +37,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.OpenCL.GPU
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                GPULayerPropagator lp;
+                MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.LayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -84,7 +85,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.OpenCL.GPU
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                GPULayerPropagator lp;
+                MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.LayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -136,7 +137,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.OpenCL.GPU
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                GPULayerPropagator lp;
+                MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.LayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -185,7 +186,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.OpenCL.GPU
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                GPULayerPropagator lp;
+                MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.LayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -228,7 +229,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.OpenCL.GPU
             out Layer l, 
             out MemLayerContainer plc,
             out MemLayerContainer clc, 
-            out GPULayerPropagator lp)
+            out MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.LayerPropagator lp)
         {
             if (clProvider == null)
             {
@@ -263,9 +264,9 @@ namespace MyNN.Tests.MLP2.LayerPropagator.OpenCL.GPU
                 currentLayerNeuronCount
                 );
 
-            var ks = new GPUKernelSource();
+            var ks = new KernelSource();
 
-            lp = new GPULayerPropagator(
+            lp = new MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.LayerPropagator(
                 clProvider,
                 ks,
                 plc,

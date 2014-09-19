@@ -2,11 +2,11 @@
 
 using System;
 
-namespace OpenCL.Net.Wrapper.Mem
+namespace OpenCL.Net.Wrapper.Mem.Data
 {
-    public class MemInt : Mem<int>
+    public class MemFloat : Mem<float>
     {
-        public MemInt(
+        public MemFloat(
             Action<Guid> memDisposed,
             CommandQueue commandQueue,
             Context context,

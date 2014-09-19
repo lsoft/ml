@@ -5,6 +5,7 @@ using MyNN.Randomizer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCL.Net.Wrapper.Mem.Data;
 
 namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Float.WeightMask
 {

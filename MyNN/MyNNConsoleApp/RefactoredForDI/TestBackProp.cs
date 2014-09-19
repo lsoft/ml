@@ -17,6 +17,8 @@ using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU;
+using MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.GPU;
 using MyNN.MLP2.Backpropagation.Metrics;
 using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
@@ -83,19 +85,40 @@ namespace MyNNConsoleApp.RefactoredForDI
                         );
             };
 
+            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IBackpropagationEpocheTrainer> cpuTranspose2Trainer = (clProvider, mlp, config) =>
+            {
+                return
+                    new CPUTranspose2BackpropagationEpocheTrainer(
+                        VectorizationSizeEnum.NoVectorization, 
+                        mlp,
+                        config,
+                        clProvider
+                        );
+            };
+
+            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IBackpropagationEpocheTrainer> gpuTranspose2Trainer = (clProvider, mlp, config) =>
+            {
+                return
+                    new GPUTranspose2BackpropagationEpocheTrainer(
+                        mlp,
+                        config,
+                        clProvider
+                        );
+            };
+
             const int batchSize = 5;
-            const float regularizationFactor = 1e-2f;
+            const float regularizationFactor = 0f;//1e-2f;
 
             var g0 = DoTestPrivate(
                 gpuChooser,
-                gpuTransposeTrainer,
+                gpuTranspose2Trainer,
                 1,
                 regularizationFactor
                 );
 
             var g1 = DoTestPrivate(
                 gpuChooser,
-                gpuTransposeTrainer,
+                gpuTranspose2Trainer,
                 batchSize,
                 regularizationFactor
                 );
@@ -145,7 +168,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                10
+                10//500
                 );
             trainData = toa.Convert(binarizator.Convert(trainData));
 

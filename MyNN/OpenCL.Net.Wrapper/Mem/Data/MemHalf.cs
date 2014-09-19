@@ -1,7 +1,6 @@
 ﻿using System;
 
-
-namespace OpenCL.Net.Wrapper.Mem
+namespace OpenCL.Net.Wrapper.Mem.Data
 {
     public class MemHalf : Mem<Half>
     {

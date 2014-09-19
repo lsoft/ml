@@ -27,22 +27,22 @@ inline void WarpReductionToFirstElement(
     // Perform parallel reduction
     int local_index = get_local_id(0);
     int local_size = ((get_local_size(0) + 1) / 2) * 2;
-    int current_local_size = get_local_size(0);
+	int current_local_size = get_local_size(0);
 
     for(int offset = local_size / 2; offset > 0; offset = (offset + (offset > 1 ? 1 : 0)) / 2)
     {
         if (local_index < offset)
         {
-            int other_index = local_index + offset;
-            if(other_index < current_local_size)
-            {
-                partialDotProduct[local_index] += partialDotProduct[other_index];
-            }
+			int other_index = local_index + offset;
+			if(other_index < current_local_size)
+			{
+		        partialDotProduct[local_index] += partialDotProduct[other_index];
+			}
         }
 
         barrier(CLK_LOCAL_MEM_FENCE);
 
-        current_local_size = (current_local_size + 1) / 2;
+		current_local_size = (current_local_size + 1) / 2;
     }
 }
 //*/

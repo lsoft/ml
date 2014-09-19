@@ -32,7 +32,7 @@ namespace MyNN.Tests.MLP2.MaskContainers.Float
 
                 var container = containerProvider(clProvider);
 
-                const int IterationCount = 100000;
+                const int IterationCount = 50000;
                 for (var iter = 0; iter < IterationCount; iter++)
                 {
                     container.RegenerateMask();

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
@@ -59,7 +60,6 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
 
                 var previousContainer = new MemLayerContainer(
                     clProvider,
-                    0,
                     layer0.NonBiasNeuronCount,
                     layer1.Neurons.Length
                     );

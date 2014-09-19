@@ -1,6 +1,6 @@
-﻿using OpenCL.Net.Wrapper.Mem;
+﻿using OpenCL.Net.Wrapper.Mem.Data;
 
-namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL
+namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container
 {
     public interface IMemLayerContainer : ILayerContainer
     {

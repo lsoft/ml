@@ -1,18 +1,16 @@
-﻿
+﻿using System;
 
-using System;
-
-namespace OpenCL.Net.Wrapper.Mem
+namespace OpenCL.Net.Wrapper.Mem.Data
 {
-    public class MemFloat : Mem<float>
+    public class MemByte : Mem<byte>
     {
-        public MemFloat(
+        public MemByte(
             Action<Guid> memDisposed,
             CommandQueue commandQueue,
             Context context,
             ulong arrayLength,
             MemFlags flags)
-            : base(memDisposed, commandQueue, context, arrayLength, 4, flags)
+            : base(memDisposed, commandQueue, context, arrayLength, 1, flags)
         {
         }
     }

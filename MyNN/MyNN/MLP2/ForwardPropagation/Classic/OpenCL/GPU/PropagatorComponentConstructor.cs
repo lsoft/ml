@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
 using MyNN.MLP2.Structure;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
 {
-    public class GPUPropagatorComponentConstructor : IPropagatorComponentConstructor
+    public class PropagatorComponentConstructor : IPropagatorComponentConstructor
     {
         private readonly CLProvider _clProvider;
 
-        public GPUPropagatorComponentConstructor(
+        public PropagatorComponentConstructor(
             CLProvider clProvider
             )
         {
@@ -56,13 +57,13 @@ namespace MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU
             var result = new List<ILayerPropagator>();
             result.Add(null); //для первого слоя нет пропагатора
 
-            var ks = new GPUKernelSource();
+            var ks = new KernelSource();
 
             var layerCount = mlp.Layers.Length;
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
-                var p = new GPULayerPropagator(
+                var p = new LayerPropagator(
                     _clProvider,
                     ks,
                     containers[layerIndex - 1],

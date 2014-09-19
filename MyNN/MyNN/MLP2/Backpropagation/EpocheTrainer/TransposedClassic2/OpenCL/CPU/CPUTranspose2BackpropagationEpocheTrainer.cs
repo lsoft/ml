@@ -5,6 +5,7 @@ using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
@@ -13,6 +14,7 @@ using MyNN.OutputConsole;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCL.Net.Wrapper.Mem.Data;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
@@ -79,7 +81,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
             if (clProvider.ChoosedDeviceType == DeviceType.Cpu)
             {
                 ConsoleAmbientContext.Console.WriteLine("========================================= WARNING =========================================");
-                ConsoleAmbientContext.Console.WriteLine("This algorithm are so slow on CPU; it should test this algorithm on GPU hardware and delete it if it will be inferior than the default.");
+                ConsoleAmbientContext.Console.WriteLine("This algorithm are so slow on CPU; it should test this algorithm on GPU hardware and delete it if it will not be inferior than the default.");
             }
 
             _mlp = mlp;
@@ -130,7 +132,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
 
         private void LoadPrograms()
         {
-            var kg = new Transpose2KernelConstructor(
+            var kg = new KernelConstructor(
                 _mlp,
                 _config);
 
@@ -160,7 +162,7 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
 
             //определяем кернел обновления весов
             _updateWeightKernel = _clProvider.CreateKernel(
-                Transpose2KernelConstructor.UpdateWeightKernelSource,
+                KernelConstructor.UpdateWeightKernelSource,
                 "UpdateWeightAndTransposedWeightsKernel");
         }
 

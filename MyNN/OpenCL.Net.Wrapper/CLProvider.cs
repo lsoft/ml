@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,6 +9,8 @@ using System.Text;
 using OpenCL.Net.Extensions;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCL.Net.Wrapper.Mem.Data;
+using OpenCL.Net.Wrapper.Mem.Img;
 using OpenCL.Net.Wrapper.Resource;
 
 namespace OpenCL.Net.Wrapper
@@ -138,7 +141,7 @@ namespace OpenCL.Net.Wrapper
 
             ErrorCode error;
 
-            var program = Cl.CreateProgramWithSource(_context, 1, new[] { fullText }, null, out error);
+            var program = Cl.CreateProgramWithSource(_context, 1, new[] { fullText }, new IntPtr[] { (IntPtr)fullText.Length }, out error);
             if (error != ErrorCode.Success)
             {
                 throw new InvalidProgramException(string.Format("Unable to run Cl.CreateProgramWithSource for program: {0}!", error));
@@ -323,6 +326,7 @@ namespace OpenCL.Net.Wrapper
             return memb;
         }
 
+
         public MemFloat CreateFloatMem(
             long arrayLength,
             MemFlags flags)
@@ -374,6 +378,24 @@ namespace OpenCL.Net.Wrapper
             this._mems.Add(memd);
 
             return memd;
+        }
+
+        public IntensityFloatImg CreateImg(
+            uint width,
+            uint height,
+            MemFlags flags)
+        {
+            var memf = new IntensityFloatImg(
+                MemDisposed,
+                _commandQueue,
+                _context,
+                width,
+                height,
+                flags);
+
+            this._mems.Add(memf);
+
+            return memf;
         }
 
         public void QueueFinish()

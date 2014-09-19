@@ -7,12 +7,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU
     /// <summary>
     /// Kernel source provider.
     /// </summary>
-    public class Transpose2KernelConstructor
+    public class KernelConstructor
     {
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public Transpose2KernelConstructor(
+        public KernelConstructor(
             IMLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -377,7 +377,8 @@ __kernel void UpdateWeightAndTransposedWeightsKernel(
     __global float * transposedCurrentLayerWeights,
     int currentLayerNeuronCountWithoutBias,
     int previousLayerNeuronCountWithBias, 
-    float batchSize)
+    float batchSize
+    )
 {
     int neuronIndex = get_global_id(0);
     int weightIndex = get_global_id(1);

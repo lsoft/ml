@@ -5,6 +5,7 @@ using MyNN.MLP2.Structure.Layer;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCL.Net.Wrapper.Mem.Data;
 
 namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.CSharp
 {

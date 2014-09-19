@@ -6,6 +6,7 @@ using MyNN.MLP2.ArtifactContainer;
 using MyNN.MLP2.ForwardPropagation;
 using MyNN.MLP2.ForwardPropagation.Classic;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;
@@ -15,6 +16,7 @@ using MyNN.OutputConsole;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCL.Net.Wrapper.Mem.Data;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU

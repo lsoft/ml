@@ -2,6 +2,7 @@
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
+using OpenCL.Net.Wrapper.Mem.Data;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP2.Transposer

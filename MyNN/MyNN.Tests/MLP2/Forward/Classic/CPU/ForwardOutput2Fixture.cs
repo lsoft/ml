@@ -109,7 +109,15 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                                 );
                     });
 
-                Assert.IsTrue(Math.Abs(result - 1.75f) < ForwardEpsilon);
+                const float correctResult = 1.75f;
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "correct = {0}, result = {1}",
+                        correctResult,
+                        result));
+
+                Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
             }
         }
 
@@ -250,7 +258,15 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                                 );
                     });
 
-                Assert.IsTrue(Math.Abs(result - 0.5f) < ForwardEpsilon);
+                const float correctResult = 0.5f;
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "correct = {0}, result = {1}",
+                        correctResult,
+                        result));
+
+                Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
             }
         }
 

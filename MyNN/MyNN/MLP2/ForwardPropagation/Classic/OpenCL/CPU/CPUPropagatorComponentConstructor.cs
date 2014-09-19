@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
 using MyNN.MLP2.OpenCLHelper;
 using MyNN.MLP2.Structure;
 using OpenCL.Net.Wrapper;

@@ -114,6 +114,7 @@
     <Compile Include="MLP2\Forward\Classic\CPU\ForwardState2Fixture.cs" />
     <Compile Include="MLP2\Forward\Classic\CSharp\ForwardState2Fixture.cs" />
     <Compile Include="MLP2\Forward\Classic\CSharp\ForwardOutput2Fixture.cs" />
+    <Compile Include="MLP2\Forward\Classic\GPUIMG\ForwardOutput2ForNVidiaFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForNVidiaFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForIntelGPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForNVidiaFixture.cs" />
@@ -158,7 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyNN\MyNN.csproj">
-      <Project>{67074E3D-0BF2-4E4A-A5EB-EDF74F33A5AC}</Project>
+      <Project>{67074e3d-0bf2-4e4a-a5eb-edf74f33a5ac}</Project>
       <Name>MyNN</Name>
     </ProjectReference>
     <ProjectReference Include="..\OpenCL.Net.Wrapper\OpenCL.Net.Wrapper.csproj">

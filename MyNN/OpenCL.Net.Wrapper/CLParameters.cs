@@ -112,6 +112,24 @@ namespace OpenCL.Net.Wrapper
             private set;
         }
 
+        public bool IsImageSupport
+        {
+            get;
+            private set;
+        }
+
+        public uint Image2DMaxWidth
+        {
+            get;
+            private set;
+        }
+
+        public uint Image2DMaxHeight
+        {
+            get;
+            private set;
+        }
+        
         public bool IsVendorIntel
         {
             get
@@ -162,6 +180,10 @@ namespace OpenCL.Net.Wrapper
             PreferredShort = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthShort, out error).CastTo<uint>();
             PreferredInt = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthInt, out error).CastTo<uint>();
             PreferredLong = Cl.GetDeviceInfo(device, DeviceInfo.PreferredVectorWidthLong, out error).CastTo<uint>();
+
+            IsImageSupport = Cl.GetDeviceInfo(device, DeviceInfo.ImageSupport, out error).CastTo<bool>();
+            Image2DMaxWidth = Cl.GetDeviceInfo(device, DeviceInfo.Image2DMaxWidth, out error).CastTo<uint>();
+            Image2DMaxHeight = Cl.GetDeviceInfo(device, DeviceInfo.Image2DMaxHeight, out error).CastTo<uint>();
         }
 
 
@@ -212,6 +234,10 @@ namespace OpenCL.Net.Wrapper
             Console.WriteLine("Preferred vector width short: " + PreferredShort);
             Console.WriteLine("Preferred vector width int: " + PreferredInt);
             Console.WriteLine("Preferred vector width long: " + PreferredLong);
+
+            Console.WriteLine("Image support: " + IsImageSupport);
+            Console.WriteLine("Image2D max width: " + Image2DMaxWidth);
+            Console.WriteLine("Image2D max height: " + Image2DMaxHeight);
         }
     }
 }
