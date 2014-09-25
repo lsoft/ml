@@ -48,20 +48,14 @@ namespace MyNN
                 return 0f;
             }
 
-            var sum = floatProvider(0);
-            var c = 0.0f;
-            for (var i = 1; i < dataCount; i++)
+            var tempArray = new float[dataCount];
+            for (var index = 0; index < dataCount; index++)
             {
-                var datai = floatProvider(i);
-
-                var y = datai - c;
-                var t = sum + y;
-                c = (t - sum) - y;
-
-                sum = t;
+                tempArray[index] = floatProvider(index);
             }
 
-            return sum;
+            return
+                KahanAlgorithm.Sum(tempArray);
         }
 
         public static float Sum(float[] data)

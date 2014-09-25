@@ -19,7 +19,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
     [TestClass]
     public class InferenceFixture
     {
-        private const float Epsilon = 1e-6f;
+        private const float Epsilon = 1e-5f;
 
         [TestMethod]
         public void CSharpNaiveLayerInferencerTest()
