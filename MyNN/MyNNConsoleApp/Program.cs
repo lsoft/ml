@@ -14,6 +14,7 @@ using MyNN.Data.TrainDataProvider.Noiser.Range;
 using MyNN.Data.TypicalDataProvider;
 using MyNN.MLP2;
 using MyNN.MLP2.ForwardPropagation.Classic;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Mem.GPU;
 using MyNN.MLP2.Structure;
 using MyNN.MLP2.Structure.Factory;
 using MyNN.MLP2.Structure.Layer.Factory;
@@ -105,7 +106,7 @@ namespace MyNNConsoleApp
                             5000
                         });
 
-                    var pcc = new MyNN.MLP2.ForwardPropagation.Classic.OpenCL.GPU.PropagatorComponentConstructor(
+                    var pcc = new PropagatorComponentConstructor(
                         clProvider
                         );
 

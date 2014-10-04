@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using MyNN.MLP2.ForwardPropagation.LayerContainer.CSharp;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.MLP2.Structure.Neurons;
 

@@ -77,7 +77,9 @@
     <Compile Include="Mem\Data\MemHalf.cs" />
     <Compile Include="Mem\Data\MemInt.cs" />
     <Compile Include="Mem\Data\MemUint.cs" />
+    <Compile Include="Mem\Img\FloatImg.cs" />
     <Compile Include="Mem\Img\IntensityFloatImg.cs" />
+    <Compile Include="Mem\Img\RGBAFloatImg.cs" />
     <Compile Include="Resource\EmbeddedResourceReader.cs" />
     <Compile Include="Kernel.cs" />
     <Compile Include="Mem\BlockModeEnum.cs" />

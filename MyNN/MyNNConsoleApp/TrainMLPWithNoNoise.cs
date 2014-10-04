@@ -22,7 +22,7 @@ using MyNN.MLP2.Backpropagation.Validation;
 using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP2.Backpropagation.Validation.Drawer;
 using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.CPU;
+using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Mem.CPU;
 using MyNN.MLP2.ForwardPropagationFactory.Classic;
 using MyNN.MLP2.LearningConfig;
 using MyNN.MLP2.OpenCLHelper;

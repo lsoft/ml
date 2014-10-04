@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask;
 using MyNN.MLP2.Structure;
 using MyNN.Randomizer;
@@ -27,11 +28,34 @@ namespace MyNN.Tests.MLP2.MaskContainers.Bit
                 var container = containerProvider(clProvider);
 
                 const int IterationCount = 100000;
+
+                uint previousBitMask = 0;
                 for (var iter = 0; iter < IterationCount; iter++)
                 {
                     container.RegenerateMask();
 
                     var mask = container.BitMask;
+
+                    //проверяем, что маска изменяется
+                    if (previousBitMask != 0)
+                    {
+                        if (previousBitMask == (uint)Math.Pow(2, 31))
+                        {
+                            if (mask != 1)
+                            {
+                                throw new InternalTestFailureException("Маска должна быть равна 1");
+                            }
+                        }
+                        else
+                        {
+                            if (previousBitMask * 2 != mask)
+                            {
+                                throw new InternalTestFailureException(
+                                    "Следующая маска должна быть в два раза больше предыдущей");
+                            }
+                        }
+                    }
+
                     foreach (var w in container.MaskMem)
                     {
                         if (w != null)

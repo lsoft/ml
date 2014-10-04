@@ -20,12 +20,12 @@ namespace MyNN.MLP2.Backpropagation.EpocheTrainer.DropConnect.Bit.WeightMask
         /// <summary>
         /// Iteration count between random array recalculcation
         /// </summary>
-        private const int TotalIterationCount = 10000;
+        private const int TotalIterationCount = 1000;
 
         /// <summary>
         /// Tail of random array (it improves randomness)
         /// </summary>
-        private const int AdditionalPartSize = 100000;
+        private const int AdditionalPartSize = 10000000;
 
         private readonly CLProvider _clProvider;
         private readonly IMLPConfiguration _mlpConfiguration;

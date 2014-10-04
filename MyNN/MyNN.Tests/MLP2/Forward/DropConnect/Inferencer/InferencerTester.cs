@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Container;
+using MyNN.MLP2.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
