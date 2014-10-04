@@ -76,7 +76,6 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var rbm = new RBM(
                 rbmContainer,
-                randomizer,
                 container,
                 algorithm,
                 reconstructor,
@@ -159,7 +158,6 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var rbm = new RBM(
                 rbmContainer,
-                randomizer,
                 container,
                 algorithm,
                 reconstructor,

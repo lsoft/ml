@@ -9,8 +9,10 @@ using MyNN.MLP2.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP2.Structure.Layer;
 using MyNN.MLP2.Structure.Neurons.Factory;
 using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.OutputConsole;
 using MyNN.Randomizer;
 using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
 
 
@@ -22,6 +24,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
         where T : InferenceAlias.ILayerInference
     {
         public void Test(
+            IDeviceChooser deviceChooser,
             IFunction activationFunction,
             int sampleCount,
             float p,
@@ -29,6 +32,10 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
             out float[] test
             )
         {
+            if (deviceChooser == null)
+            {
+                throw new ArgumentNullException("deviceChooser");
+            }
             if (activationFunction == null)
             {
                 throw new ArgumentNullException("activationFunction");
@@ -37,7 +44,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
             const int currentLayerNeuronCount = 50;
             const int previousLayerNeuronCount = 50;
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(deviceChooser, true))
             {
                 var structureRandomizer = new DefaultRandomizer(123);
 
@@ -93,9 +100,13 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
                     p
                     );
 
+                var before0 = DateTime.Now;
+
                 inf0.InferenceLayer();
-                
+
                 currentContainer.StateMem.Read(BlockModeEnum.Blocking);
+
+                var after0 = DateTime.Now;
 
                 orig = currentContainer.StateMem.Array.CloneArray();
 
@@ -114,13 +125,27 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
                     p
                     );
 
+                var before1 = DateTime.Now;
+
                 inf1.InferenceLayer();
 
                 currentContainer.StateMem.Read(BlockModeEnum.Blocking);
 
+                var after1 = DateTime.Now;
+
                 test = currentContainer.StateMem.Array.CloneArray();
 
                 //----------------------------------------------------------------------------
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "1st takes: {0}",
+                        (after0 - before0)));
+
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "2nd takes: {0}",
+                        (after1 - before1)));
 
                 if (orig == null)
                 {

@@ -269,17 +269,19 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
         }
 
         [TestMethod]
-        public void Test0_40_1()
+        public void Test_2_1_WithMask()
         {
+            var mask = new[] { (uint)1, (uint)2, (uint)1 };
+
             const uint bitMask = 2;
-            Func<int, uint> fillFunc = (i) => ((i % 2) > 0 ? (uint)2 : (uint)0);
+            Func<int, uint> fillFunc = (i) => mask[i];
 
             var randomizer = new ConstRandomizer(0.5f);
 
             var nf = new NeuronFactory(
                 randomizer);
 
-            const int previousLayerNeuronCount = 40;
+            const int previousLayerNeuronCount = 2;
             const int currentLayerNeuronCount = 1;
 
             using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(false), false))
@@ -300,15 +302,19 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                     out clc,
                     out lp);
 
-                l.Neurons[0].Weights.Fill((a) => (float) a);
+                l.Neurons[0].Weights[0] = 0.5f;
+                l.Neurons[0].Weights[1] = -0.5f;
 
-                plc.NetMem.Array.Fill(1f);
-                plc.StateMem.Array.Fill(1f);
+                plc.NetMem.Array[0] = -2f;
+                plc.StateMem.Array[0] = -2f;
+                plc.NetMem.Array[1] = 1f;
+                plc.StateMem.Array[1] = 1f;
 
                 plc.PushHiddenLayers();
 
                 clc.ClearAndPushHiddenLayers();
                 clc.PushWeights(l);
+
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -316,65 +322,18 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
 
                 clc.StateMem.Read(BlockModeEnum.Blocking);
 
-                float correctValue = Enumerable.Range(0, previousLayerNeuronCount).Sum();
+                const float CorrectResult = -0.5f;
 
-                Assert.IsTrue(clc.StateMem.Array[0].IsEquals(correctValue, Epsilon));
-            }
-        }
+                float result = clc.StateMem.Array[0];
 
-        [TestMethod]
-        public void Test1_40_1()
-        {
-            const uint bitMask = 2;
-            Func<int, uint> fillFunc = (i) => ((i % 2) > 0 ? (uint)2 : (uint)0);
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "Result = {0}, correct result = {1}",
+                        result,
+                        CorrectResult
+                        ));
 
-            var randomizer = new ConstRandomizer(0.5f);
-
-            var nf = new NeuronFactory(
-                randomizer);
-
-            const int previousLayerNeuronCount = 40;
-            const int currentLayerNeuronCount = 1;
-
-            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(false), false))
-            {
-                Layer l;
-                MemLayerContainer plc;
-                MemLayerContainer clc;
-                MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.GPU2.LayerPropagator lp;
-                ConstuctComponents(
-                    clProvider,
-                    nf,
-                    previousLayerNeuronCount,
-                    currentLayerNeuronCount,
-                    bitMask,
-                    fillFunc,
-                    out l,
-                    out plc,
-                    out clc,
-                    out lp);
-
-                l.Neurons[0].Weights.Fill((a) => (float) a);
-
-                plc.NetMem.Array.Fill((a) => (float) a);
-                plc.StateMem.Array.Fill((a) => (float) a);
-
-                plc.PushHiddenLayers();
-
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
-                clProvider.QueueFinish();
-
-                lp.ComputeLayer();
-                lp.WaitForCalculationFinished();
-
-                clc.StateMem.Read(BlockModeEnum.Blocking);
-
-                var correctArray = Enumerable.Range(0, previousLayerNeuronCount).ToArray();
-                correctArray.Transform((a) => a*a);
-                float correctValue = correctArray.Sum();
-
-                Assert.IsTrue(clc.StateMem.Array[0].IsEquals(correctValue, Epsilon));
+                Assert.IsTrue(result.IsEquals(CorrectResult, Epsilon));
             }
         }
 

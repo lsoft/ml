@@ -262,6 +262,7 @@
     <Compile Include="MLP2\ForwardPropagationFactory\DropConnect\OpenCL\CPU\CPUDropConnectForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagationFactory\IForwardPropagationFactory.cs" />
     <Compile Include="MLP2\ForwardPropagation\Classic\CSharp\CSharpLayerPropagator.cs" />
+    <Compile Include="MLP2\ForwardPropagation\DropConnect\Inference\OpenCL\GPU\GPULayerInference.cs" />
     <Compile Include="MLP2\ForwardPropagation\LayerContainer\CSharp\CSharpLayerContainer.cs" />
     <Compile Include="MLP2\ForwardPropagation\Classic\CSharp\CSharpPropagatorComponentConstructor.cs" />
     <Compile Include="MLP2\ForwardPropagation\LayerContainer\CSharp\ICSharpLayerContainer.cs" />

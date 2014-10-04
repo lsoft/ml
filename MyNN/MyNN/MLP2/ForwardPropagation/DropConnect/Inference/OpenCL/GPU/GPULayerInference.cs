@@ -9,14 +9,14 @@ using OpenCL.Net.Wrapper.Mem;
 using OpenCL.Net.Wrapper.Mem.Data;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
-namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU
+namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.GPU
 {
     /// <summary>
     /// Vectorized implementation of layer inferencer that calculate Gaussian random on C#
     /// It is most efficient implementation in case of CPU-OpenCL.
     /// Recommends to use it in cases inability to obtain discrete GPU hardware.
     /// </summary>
-    public class VectorizedLayerInference : ILayerInference
+    public class GPULayerInference : ILayerInference
     {
 
         private readonly IRandomizer _randomizer;
@@ -46,7 +46,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU
         /// <param name="previousLayerStateMem">State of previous layer neurons</param>
         /// <param name="currentLayerStateMem">State of current layer neurons</param>
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
-        public VectorizedLayerInference(
+        public GPULayerInference(
             IRandomizer randomizer,
             CLProvider clProvider,
             int sampleCount,
@@ -89,7 +89,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU
 
             _randomizer = randomizer;
             _clProvider = clProvider;
-            _sampleCount = sampleCount - sampleCount % 16;
+            _sampleCount = sampleCount;
             _previousLayer = previousLayer;
             _currentLayer = currentLayer;
             _weightMem = weightMem;
@@ -97,15 +97,7 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU
             _currentLayerStateMem = currentLayerStateMem;
             _p = p;
 
-            _randomCount = (_sampleCount * 3) - (_sampleCount * 3) % 16;
-
-            if (_sampleCount != sampleCount)
-            {
-                ConsoleAmbientContext.Console.WriteLine(
-                    "Inferencer: Input sample count {0} has changed to {1} due to vectorization mode 16",
-                    sampleCount,
-                    _sampleCount);
-            }
+            _randomCount = _sampleCount * 32;
 
             RegisterOpenCLComponents();
         }
@@ -125,15 +117,15 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU
             _randomMem.Write(BlockModeEnum.NonBlocking);
 
             //создаем кернел выведения
-            var activationFunction = _currentLayer.LayerActivationFunction.GetOpenCLActivationFunction("grnd16");
+            var activationFunction = _currentLayer.LayerActivationFunction.GetOpenCLActivationFunction("grnd");
 
             var kernelSource = InferenceKernelSource.Replace(
-                "<activationFunction_grnd16>",
+                "<activationFunction_grnd>",
                 activationFunction);
 
             _inferenceKernel = _clProvider.CreateKernel(
                 kernelSource,
-                "InferenceKernel16");
+                "InferenceKernel");
         }
 
         public void InferenceLayer()
@@ -155,17 +147,28 @@ namespace MyNN.MLP2.ForwardPropagation.DropConnect.Inference.OpenCL.CPU
 
             var startRandomIndex = _randomizer.Next(_randomCount);
 
+            const int localSize = 256;
+
             _inferenceKernel
                 .SetKernelArgMem(0, this._randomMem)
                 .SetKernelArgMem(1, this._previousLayerStateMem)
                 .SetKernelArgMem(2, this._weightMem)
                 .SetKernelArgMem(3, this._currentLayerStateMem)
-                .SetKernelArg(4, 4, this._p)
-                .SetKernelArg(5, 4, startRandomIndex)
-                .SetKernelArg(6, 4, _randomCount)
-                .SetKernelArg(7, 4, this._previousLayer.Neurons.Length)
-                .SetKernelArg(8, 4, _sampleCount)
-                .EnqueueNDRangeKernel(_currentLayer.NonBiasNeuronCount);
+                .SetKernelArgLocalMem(4, localSize * sizeof(float))
+                .SetKernelArg(5, 4, this._p)
+                .SetKernelArg(6, 4, startRandomIndex)
+                .SetKernelArg(7, 4, _randomCount)
+                .SetKernelArg(8, 4, this._previousLayer.Neurons.Length)
+                .SetKernelArg(9, 4, _sampleCount)
+                .EnqueueNDRangeKernel(
+                    new[]
+                    {
+                        _currentLayer.NonBiasNeuronCount * localSize
+                    },
+                    new[]
+                    {
+                        localSize
+                    });
 
             // Make sure we're done with everything that's been requested before
             _clProvider.QueueFinish();
@@ -182,54 +185,50 @@ inline int ComputeWeightIndex(
 }
 
 __kernel void
-        InferenceKernel16(
-            __global float * randomMem,
-            __global float * previousLayerLastState,
-            __global float * weights,
+        InferenceKernel(
+            const __global float * randomMem,
+            const __global float * previousLayerLastState,
+            const __global float * weights,
             __global float * currentLayerLastState,
+            __local float * local_results,
             float p,
             int startRandomIndex,
             int randomSize,
             int previousLayerNeuronCountTotal,
             int sampleCount)
 {
-    int neuronIndex = get_global_id(0);
+    int neuronIndex = get_group_id(0);
 
     //суммируем веса * состояние нейронов пред. слоя и высчитываем медиану и сигма-квадрат для гауссианы
-    int weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
-
-
     //instead of plain summation we use Kahan algorithm due to more precision in floating point ariphmetics
-
-
-
-//    float wv_median  = 0;
-//    float wv_sigmasq = 0;
-//    for (int plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
-//    {
-//        float wv = weights[weightIndex++] * previousLayerLastState[plnIndex];
-//
-//        wv_median += wv;
-//        wv_sigmasq += wv * wv;
-//    }
-
-
-
 
     KahanAccumulator accMedian = GetEmptyKahanAcc();
     KahanAccumulator accSigmaSq = GetEmptyKahanAcc();
 
-    for (int plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
+    int plnIndex = get_local_id(0);
+    int weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex) +  get_local_id(0);
+    for (; plnIndex < previousLayerNeuronCountTotal; weightIndex += get_local_size(0), plnIndex += get_local_size(0))
     {
-        float wv = weights[weightIndex++] * previousLayerLastState[plnIndex];
+        float wv = weights[weightIndex] * previousLayerLastState[plnIndex];
 
         KahanAddElement(&accMedian, wv);
         KahanAddElement(&accSigmaSq, wv * wv);
     }
 
-    float wv_median  = accMedian.Sum;
-    float wv_sigmasq = accSigmaSq.Sum;
 
+    local_results[get_local_id(0)] = accMedian.Sum;
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    WarpReductionToFirstElement(local_results);
+    barrier(CLK_LOCAL_MEM_FENCE);
+    float wv_median = local_results[0];
+
+    local_results[get_local_id(0)] = accSigmaSq.Sum;
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    WarpReductionToFirstElement(local_results);
+    barrier(CLK_LOCAL_MEM_FENCE);
+    float wv_sigmasq = local_results[0];
 
 
     wv_median *= p;
@@ -252,72 +251,42 @@ __kernel void
         }
     }
 
-    int workStartRandomIndexD16 = workStartRandomIndex / 16;
-    int ostatok = workStartRandomIndex % 16;
-
     //instead of plain summation we use Kahan algorithm due to more precision in floating point ariphmetics
 
+    KahanAccumulator acc = GetEmptyKahanAcc();
 
-
-
-//    float16 lastStateSummator16 = 0;
-//    for(int sampleIndex = workStartRandomIndexD16; sampleIndex < (workStartRandomIndexD16 + sampleCount / 16); sampleIndex++)
-//    {
-//        float16 ogrnd16 = vload16(sampleIndex, randomMem + ostatok);
-//
-//        float16 grnd16 = ogrnd16 * wv_sigma + wv_median;
-//
-//        //compute last state
-//        float16 lastState16 = <activationFunction_grnd16>;
-//
-//        lastStateSummator16 += lastState16;
-//    }
-//
-//    float lastStateSummator = 
-//          lastStateSummator16.s0 
-//        + lastStateSummator16.s1 
-//        + lastStateSummator16.s2 
-//        + lastStateSummator16.s3
-//        + lastStateSummator16.s4
-//        + lastStateSummator16.s5
-//        + lastStateSummator16.s6
-//        + lastStateSummator16.s7
-//        + lastStateSummator16.s8
-//        + lastStateSummator16.s9
-//        + lastStateSummator16.sa
-//        + lastStateSummator16.sb
-//        + lastStateSummator16.sc
-//        + lastStateSummator16.sd
-//        + lastStateSummator16.se
-//        + lastStateSummator16.sf
-//        ;
-//
-
-
-    KahanAccumulator16 acc16 = GetEmptyKahanAcc16();
-
-    for(int sampleIndex = workStartRandomIndexD16; sampleIndex < (workStartRandomIndexD16 + sampleCount / 16); sampleIndex++)
+    for(int sampleIndex = workStartRandomIndex + get_local_id(0); sampleIndex < (workStartRandomIndex + sampleCount); sampleIndex += get_local_size(0))
     {
-        float16 ogrnd16 = vload16(sampleIndex, randomMem + ostatok);
+        float ogrnd = randomMem[sampleIndex];
 
-        float16 grnd16 = ogrnd16 * wv_sigma + wv_median;
+        float grnd = ogrnd * wv_sigma + wv_median;
 
         //compute last state
-        float16 lastState16 = <activationFunction_grnd16>;
+        float lastState = <activationFunction_grnd>;
 
-        KahanAddElement16(&acc16, lastState16);
+        KahanAddElement(&acc, lastState);
     }
 
-    float lastStateSummator = ReduceAcc16(&acc16);
 
+    local_results[get_local_id(0)] = acc.Sum;
+    barrier(CLK_LOCAL_MEM_FENCE);
 
+    WarpReductionToFirstElement(local_results);
+    barrier(CLK_LOCAL_MEM_FENCE);
 
+    if(get_local_id(0) == 0)
+    {
+        float lastStateSummator = local_results[0];
 
-    //усредняем
-    float result = lastStateSummator / sampleCount;
+        //усредняем
+        float result = lastStateSummator / sampleCount;
 
-    //записываем обратно в хранилище
-    currentLayerLastState[neuronIndex] = result;
+        //записываем обратно в хранилище
+        currentLayerLastState[neuronIndex] = result;
+    }
+
+    barrier(CLK_LOCAL_MEM_FENCE);
+
 }
 
 ";

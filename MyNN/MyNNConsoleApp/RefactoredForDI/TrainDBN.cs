@@ -562,7 +562,6 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 rbm = new RBM(
                     rbmContainer,
-                    _randomizer,
                     container,
                     algorithm,
                     imageReconstructor,
@@ -643,7 +642,6 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 rbm = new RBM(
                     rbmContainer,
-                    _randomizer,
                     container,
                     algorithm,
                     imageReconstructor,

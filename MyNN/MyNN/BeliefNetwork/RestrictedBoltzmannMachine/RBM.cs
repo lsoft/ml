@@ -22,7 +22,6 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
     public class RBM : IRBM
     {
         private readonly IArtifactContainer _rbmContainer;
-        private readonly IRandomizer _randomizer;
         private readonly IContainer _container;
         private readonly IImageReconstructor _imageReconstructor;
         private readonly IFeatureExtractor _featureExtractor;
@@ -31,7 +30,6 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
 
         public RBM(
             IArtifactContainer rbmContainer,
-            IRandomizer randomizer,
             IContainer container,
             IAlgorithm algorithm,
             IImageReconstructor imageReconstructor,
@@ -41,10 +39,6 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             if (rbmContainer == null)
             {
                 throw new ArgumentNullException("rbmContainer");
-            }
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
             }
             if (container == null)
             {
@@ -58,7 +52,6 @@ namespace MyNN.BeliefNetwork.RestrictedBoltzmannMachine
             //featureExtractor allowed to be null
 
             _rbmContainer = rbmContainer;
-            _randomizer = randomizer;
             _container = container;
             _algorithm = algorithm;
             _imageReconstructor = imageReconstructor ?? new MockImageReconstructor();
