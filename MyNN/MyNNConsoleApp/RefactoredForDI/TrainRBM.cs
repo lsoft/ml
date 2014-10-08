@@ -1,19 +1,20 @@
 ﻿using System;
 using MyNN;
-using MyNN.BeliefNetwork.Accuracy;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator;
-using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
-using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
-using MyNN.Data.DataSetConverter;
-using MyNN.Data.TrainDataProvider;
-using MyNN.Data.TypicalDataProvider;
-using MyNN.LearningRateController;
-using MyNN.MLP2.ArtifactContainer;
-using MyNN.Randomizer;
+using MyNN.Boltzmann.BeliefNetwork.Accuracy;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator;
+using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
+using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
+using MyNN.Common.ArtifactContainer;
+using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.TrainDataProvider;
+using MyNN.Common.Data.TypicalDataProvider;
+using MyNN.Common.LearningRateController;
+using MyNN.Common.Other;
+using MyNN.Common.Randomizer;
 
 namespace MyNNConsoleApp.RefactoredForDI
 {

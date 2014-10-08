@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Mem.CPU;
-using MyNN.MLP2.ForwardPropagation.LayerContainer.OpenCL.Mem;
-using MyNN.MLP2.OpenCLHelper;
-using MyNN.MLP2.Structure.Layer;
-using MyNN.MLP2.Structure.Neurons.Factory;
-using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Common.OpenCLHelper;
+using MyNN.Common.Other;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
+using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
+using MyNN.MLP.Structure.Layer;
+using MyNN.MLP.Structure.Neuron.Factory;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 

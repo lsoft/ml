@@ -1,48 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN;
-using MyNN.BeliefNetwork;
-using MyNN.BeliefNetwork.Accuracy;
-using MyNN.BeliefNetwork.ImageReconstructor;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.Container;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator;
-using MyNN.BoltzmannMachines;
-using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
-using MyNN.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
-using MyNN.BoltzmannMachines.DBNInfo;
-using MyNN.Data;
-using MyNN.Data.DataSetConverter;
-using MyNN.Data.TrainDataProvider;
-using MyNN.Data.TrainDataProvider.Noiser;
-using MyNN.Data.TrainDataProvider.Noiser.Range;
-using MyNN.Data.TypicalDataProvider;
-using MyNN.Data.Visualizer;
-using MyNN.LearningRateController;
-using MyNN.MLP2;
-using MyNN.MLP2.ArtifactContainer;
-using MyNN.MLP2.Backpropagation;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
-using MyNN.MLP2.Backpropagation.Metrics;
-using MyNN.MLP2.Backpropagation.Validation;
-using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
-using MyNN.MLP2.Backpropagation.Validation.Drawer;
-using MyNN.MLP2.LearningConfig;
-using MyNN.MLP2.OpenCLHelper;
-using MyNN.MLP2.Structure;
-using MyNN.MLP2.Structure.Factory;
-using MyNN.MLP2.Structure.Layer.Factory;
-using MyNN.MLP2.Structure.Neurons.Factory;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.Randomizer;
+using MyNN.Boltzmann.BeliefNetwork;
+using MyNN.Boltzmann.BeliefNetwork.Accuracy;
+using MyNN.Boltzmann.BeliefNetwork.ImageReconstructor;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.Container;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorithm;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calculator;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator;
+using MyNN.Boltzmann.BoltzmannMachines;
+using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
+using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
+using MyNN.Common.ArtifactContainer;
+using MyNN.Common.Data;
+using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.TrainDataProvider;
+using MyNN.Common.Data.TrainDataProvider.Noiser;
+using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
+using MyNN.Common.Data.TypicalDataProvider;
+using MyNN.Common.LearningRateController;
+using MyNN.Common.OpenCLHelper;
+using MyNN.Common.Other;
+using MyNN.Common.Randomizer;
+using MyNN.MLP.Backpropagation;
+using MyNN.MLP.Backpropagation.Metrics;
+using MyNN.MLP.Backpropagation.Validation;
+using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
+using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
+using MyNN.MLP.DBNInfo;
+using MyNN.MLP.LearningConfig;
+using MyNN.MLP.MLPContainer;
+using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Factory;
+using MyNN.MLP.Structure.Layer.Factory;
+using MyNN.MLP.Structure.Neuron.Factory;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 
 namespace MyNNConsoleApp.RefactoredForDI
@@ -115,12 +114,15 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 var mlpContainer = rootContainer.GetChildContainer(mlp.Name);
 
+                var mlpContainerHelper = new MLPContainerHelper();
+
                 var algo = new BackpropagationAlgorithm(
-                    new CPUBackpropagationEpocheTrainer(
+                    new CPUEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
                         config,
                         clProvider),
+                    mlpContainerHelper,
                     mlpContainer,
                     mlp,
                     validation,
@@ -230,14 +232,17 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var mlpContainer = rootContainer.GetChildContainer(autoencoderName);
 
+            var mlpContainerHelper = new MLPContainerHelper();
+
             using (var clProvider = new CLProvider())
             {
                 var algo = new BackpropagationAlgorithm(
-                    new CPUBackpropagationEpocheTrainer(
+                    new CPUEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
                         config,
                         clProvider),
+                    mlpContainerHelper,
                     mlpContainer,
                     mlp,
                     validation,
@@ -332,12 +337,15 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 var mlpContainer = rootContainer.GetChildContainer(mlpName);
 
+                var mlpContainerHelper = new MLPContainerHelper();
+
                 var algo = new BackpropagationAlgorithm(
-                    new CPUBackpropagationEpocheTrainer(
+                    new CPUEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16,
                         mlp,
                         config,
                         clProvider),
+                    mlpContainerHelper,
                     mlpContainer,
                     mlp,
                     validation,

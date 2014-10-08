@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.Structure;
-using MyNN.MLP2.Structure.Factory;
-using MyNN.MLP2.Structure.Layer.Factory;
-using MyNN.MLP2.Structure.Neurons.Factory;
-using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Common.Data;
+using MyNN.Common.Other;
+using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Factory;
+using MyNN.MLP.Structure.Layer.Factory;
+using MyNN.MLP.Structure.Neuron.Factory;
+using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.Tests.MLP2.Forward
 {

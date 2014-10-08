@@ -1,6 +1,6 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;

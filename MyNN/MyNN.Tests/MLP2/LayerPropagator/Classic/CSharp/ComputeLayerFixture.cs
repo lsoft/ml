@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.MLP2.ForwardPropagation.Classic.CSharp;
-using MyNN.MLP2.ForwardPropagation.LayerContainer.CSharp;
-using MyNN.MLP2.Structure.Layer;
-using MyNN.MLP2.Structure.Neurons.Factory;
-using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.Common.Other;
+using MyNN.MLP.Classic.ForwardPropagation.CSharp;
+using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
+using MyNN.MLP.Structure.Layer;
+using MyNN.MLP.Structure.Neuron.Factory;
+using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.Tests.MLP2.LayerPropagator.Classic.CSharp
 {

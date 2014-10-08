@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation.Classic;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Mem.GPU;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.OutputConsole;
+using MyNN.Common.Data;
+using MyNN.Common.Other;
+using MyNN.Common.OutputConsole;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
+using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
@@ -100,7 +101,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp

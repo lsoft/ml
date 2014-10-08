@@ -1,6 +1,6 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.Tests.MLP2.ActivationFunction.CSharp
 {

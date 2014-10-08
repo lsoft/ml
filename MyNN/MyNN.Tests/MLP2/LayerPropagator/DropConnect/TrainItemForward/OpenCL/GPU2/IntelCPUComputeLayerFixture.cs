@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.MLP2.ForwardPropagation.LayerContainer.OpenCL.Mem;
-using MyNN.MLP2.Structure.Layer;
-using MyNN.MLP2.Structure.Neurons.Factory;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.OutputConsole;
+using MyNN.Common.Other;
+using MyNN.Common.OutputConsole;
+using MyNN.MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2;
+using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
+using MyNN.MLP.Structure.Layer;
+using MyNN.MLP.Structure.Neuron.Factory;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
@@ -36,7 +38,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.GPU2.LayerPropagator lp;
+                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -97,7 +99,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.GPU2.LayerPropagator lp;
+                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -158,7 +160,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.GPU2.LayerPropagator lp;
+                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -220,7 +222,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.GPU2.LayerPropagator lp;
+                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -289,7 +291,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.GPU2.LayerPropagator lp;
+                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -347,7 +349,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
             out Layer currentLayer, 
             out MemLayerContainer plc,
             out MemLayerContainer clc,
-            out MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.GPU2.LayerPropagator lp)
+            out MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp)
         {
             if (clProvider == null)
             {
@@ -391,9 +393,9 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 currentLayerNeuronCount
                 );
 
-            var ks = new MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.GPU2.KernelSource();
+            var ks = new KernelSource();
 
-            var mc = new TestPurposeBitWeightMaskContainer(
+            var mc = new TestPurposeWeightMaskContainer(
                 clProvider,
                 bitMask,
                 previousLayer.GetConfiguration(), 
@@ -401,7 +403,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 fillFunc
                 );
 
-            lp = new MyNN.MLP2.ForwardPropagation.DropConnect.TrainItemForward.Bit.OpenCL.GPU2.LayerPropagator(
+            lp = new MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator(
                 clProvider,
                 ks,
                 mc,

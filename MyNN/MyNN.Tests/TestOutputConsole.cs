@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MyNN.OutputConsole;
+using MyNN.Common.OutputConsole;
 
 namespace MyNN.Tests
 {

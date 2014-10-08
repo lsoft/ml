@@ -1,33 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
-using MathNet.Numerics.Distributions;
-using MyNN;
-using MyNN.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator;
-using MyNN.BoltzmannMachines.DBNInfo;
-using MyNN.Data;
-using MyNN.Data.DataSetConverter;
-using MyNN.Data.TrainDataProvider.Noiser;
-using MyNN.Data.TrainDataProvider.Noiser.Range;
-using MyNN.Data.TypicalDataProvider;
-using MyNN.MLP2;
-using MyNN.MLP2.ForwardPropagation.Classic;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Mem.GPU;
-using MyNN.MLP2.Structure;
-using MyNN.MLP2.Structure.Factory;
-using MyNN.MLP2.Structure.Layer.Factory;
-using MyNN.MLP2.Structure.Neurons.Factory;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.OutputConsole;
-using MyNN.Randomizer;
 using MyNNConsoleApp.RefactoredForDI;
-using OpenCL.Net;
-using OpenCL.Net.Wrapper;
-using OpenCL.Net.Wrapper.DeviceChooser;
-using OpenCL.Net.Wrapper.Mem;
-using OpenCvSharp;
 
 namespace MyNNConsoleApp
 {
@@ -58,6 +30,8 @@ namespace MyNNConsoleApp
                 //TrainSDAE2D.DoTrain();
                 //TrainAutoencoder2D.DoTrain();
                 //TrainMLPOnSDAE.DoTrain();
+
+                /*
 
                 using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(false), true))
                 {
@@ -118,7 +92,7 @@ namespace MyNNConsoleApp
                         out propagators);
 
                     var forward = 
-                        new ForwardPropagation2(
+                        new ForwardPropagation(
                             containers,
                             propagators,
                             mlp
@@ -132,73 +106,74 @@ namespace MyNNConsoleApp
 
                     Console.WriteLine((after - before));
 
-                    /*
-                    var img0 = clProvider.CreateImg(
-                        7,
-                        7,
-                        MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+                    //*/
 
-                    img0.Array.Fill((int i) => (float)i);
+                /*
+                var img0 = clProvider.CreateImg(
+                    7,
+                    7,
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
-                    img0.Write(BlockModeEnum.Blocking);
+                img0.Array.Fill((int i) => (float)i);
 
-                    var mem = clProvider.CreateFloatMem(
-                        1,
-                        MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+                img0.Write(BlockModeEnum.Blocking);
 
-                    mem.Write(BlockModeEnum.Blocking);
+                var mem = clProvider.CreateFloatMem(
+                    1,
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
-                    var img1 = clProvider.CreateImg(
-                        1,
-                        1,
-                        MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+                mem.Write(BlockModeEnum.Blocking);
+
+                var img1 = clProvider.CreateImg(
+                    1,
+                    1,
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
 
-                    var k = clProvider.CreateKernel(@"
+                var k = clProvider.CreateKernel(@"
 constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST;
 
 __kernel void KernelImg(
-    read_only image2d_t img0,
-    __global float* mem,
-    write_only image2d_t img1
-    )
+read_only image2d_t img0,
+__global float* mem,
+write_only image2d_t img1
+)
 {
-    int2 coord = (int2)(1, 1);
-    float4 pixel = read_imagef(img0, sampler, coord);
+int2 coord = (int2)(1, 1);
+float4 pixel = read_imagef(img0, sampler, coord);
     
-    float newvalue = pixel.s0 + 5;
+float newvalue = pixel.s0 + 5;
 
-    mem[0] = newvalue;
-    write_imagef(img1, (int2)(0,0), (float4)(newvalue, newvalue, newvalue, newvalue));
+mem[0] = newvalue;
+write_imagef(img1, (int2)(0,0), (float4)(newvalue, newvalue, newvalue, newvalue));
 }
 ", "KernelImg");
 
-                    k
-                        .SetKernelArgImg(0, img0)
-                        .SetKernelArgMem(1, mem)
-                        .SetKernelArgImg(2, img1)
-                        .EnqueueNDRangeKernel(
-                            new int[]
-                            {
-                                1
-                            });
+                k
+                    .SetKernelArgImg(0, img0)
+                    .SetKernelArgMem(1, mem)
+                    .SetKernelArgImg(2, img1)
+                    .EnqueueNDRangeKernel(
+                        new int[]
+                        {
+                            1
+                        });
 
-                    clProvider.QueueFinish();
+                clProvider.QueueFinish();
 
-                    mem.Read(BlockModeEnum.Blocking);
-                    img1.Read(BlockModeEnum.Blocking);
-                    //*/
+                mem.Read(BlockModeEnum.Blocking);
+                img1.Read(BlockModeEnum.Blocking);
+                //*/
 
-                    Console.ReadLine();
-                }
-
-                return;
-
-                TestBackProp.DoTest();
-
-                Console.WriteLine(".......... press any key to exit");
                 Console.ReadLine();
             }
+
+            return;
+
+            TestBackProp.DoTest();
+
+            Console.WriteLine(".......... press any key to exit");
+            Console.ReadLine();
         }
     }
 }

@@ -4,24 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL;
-using MyNN.MLP2.ForwardPropagation.LayerContainer.OpenCL.Mem;
-using MyNN.MLP2.Structure.Layer;
-using MyNN.MLP2.Structure.Neurons.Factory;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.OutputConsole;
-using MyNN.Randomizer;
+using MyNN.Common.Other;
+using MyNN.Common.OutputConsole;
+using MyNN.Common.Randomizer;
+using MyNN.MLP.DropConnect.ForwardPropagation.Inference;
+using MyNN.MLP.DropConnect.ForwardPropagation.Inference.CSharp;
+using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
+using MyNN.MLP.Structure.Layer;
+using MyNN.MLP.Structure.Neuron.Factory;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
 
 
-using InferenceAlias = MyNN.MLP2.ForwardPropagation.DropConnect.Inference;
-
 namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
 {
     internal class InferencerTester<T>
-        where T : InferenceAlias.ILayerInference
+        where T : ILayerInferencer
     {
         public void Test(
             IDeviceChooser deviceChooser,
@@ -88,7 +88,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
 
                 //----------------------------------------------------------------------------
 
-                var inf0 = new InferenceAlias.CSharp.CorrectInferencer(
+                var inf0 = new CorrectInferencer(
                     new DefaultRandomizer(inferenceRandomizerSeed),
                     clProvider,
                     sampleCount,

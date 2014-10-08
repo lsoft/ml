@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6B97FBA5-C72D-4BEA-88FB-D2C2C115E470}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MyNN.MLP.DropConnect</RootNamespace>
+    <AssemblyName>MyNN.MLP.DropConnect</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OpenCL.Net">
+      <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BackpropagationFactory\DropConnect\OpenCL\CPU\DropConnectOpenCLBackpropagationAlgorithmFactory.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\DropConnect\OpenCL\CPU\DropConnectEpocheTrainer.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\DropConnect\OpenCL\CPU\DropConnectKernelConstructor.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\DropConnect\OpenCL\GPU\DropConnectEpocheTrainer.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\DropConnect\OpenCL\GPU\KernelText\KernelTextProvider.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\DropConnect\OpenCL\GPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\DropConnect\OpenCL\GPU\KernelText\KernelTextProviderWithRegularization.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MyNN.Common\MyNN.Common.csproj">
+      <Project>{2E34B41A-E15F-434C-9554-9BDF5F4ECCC9}</Project>
+      <Name>MyNN.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.DropConnect.ForwardPropagation\MyNN.MLP.DropConnect.ForwardPropagation.csproj">
+      <Project>{03082d83-3645-4cf8-a1c7-bd4b5cfc7fe0}</Project>
+      <Name>MyNN.MLP.DropConnect.ForwardPropagation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.DropConnect.WeightMask\MyNN.MLP.DropConnect.WeightMask.csproj">
+      <Project>{ebeffe64-2b8b-4184-bf79-cb247064e1d4}</Project>
+      <Name>MyNN.MLP.DropConnect.WeightMask</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP\MyNN.MLP.csproj">
+      <Project>{3FFF29DB-D717-48CB-A221-37F3E397A80E}</Project>
+      <Name>MyNN.MLP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OpenCL.Net.Wrapper\OpenCL.Net.Wrapper.csproj">
+      <Project>{A405C95D-FECE-488D-A6A4-B8C6FA184880}</Project>
+      <Name>OpenCL.Net.Wrapper</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets'))" />
+  </Target>
+  <Import Project="..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets" Condition="Exists('..\packages\OpenCL.Net.2.2.9.0\build\net40\OpenCL.Net.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

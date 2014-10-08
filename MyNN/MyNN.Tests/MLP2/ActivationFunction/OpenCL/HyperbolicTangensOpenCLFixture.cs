@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.MLP2.Structure.Neurons.Function;
+using MyNN.MLP.Structure.Neuron.Function;
 using MyNN.Tests.MLP2.ActivationFunction.CSharp;
 
 namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL

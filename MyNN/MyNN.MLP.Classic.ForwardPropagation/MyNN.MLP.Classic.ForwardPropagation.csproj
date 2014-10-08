@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AB04B9C9-BAAB-4394-A14D-0662526C8725}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MyNN.MLP.Classic.ForwardPropagation</RootNamespace>
+    <AssemblyName>MyNN.MLP.Classic.ForwardPropagation</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CSharp\CSharpLayerPropagator.cs" />
+    <Compile Include="CSharp\CSharpPropagatorComponentConstructor.cs" />
+    <Compile Include="OpenCL\Img\GPU\KernelSource.cs" />
+    <Compile Include="OpenCL\Img\GPU\LayerPropagator.cs" />
+    <Compile Include="OpenCL\Img\GPU\PropagatorComponentConstructor.cs" />
+    <Compile Include="OpenCL\Mem\CPU\CPUKernelSource.cs" />
+    <Compile Include="OpenCL\Mem\CPU\CPULayerPropagator.cs" />
+    <Compile Include="OpenCL\Mem\CPU\CPUPropagatorComponentConstructor.cs" />
+    <Compile Include="OpenCL\Mem\GPU\KernelSource.cs" />
+    <Compile Include="OpenCL\Mem\GPU\LayerPropagator.cs" />
+    <Compile Include="OpenCL\Mem\GPU\PropagatorComponentConstructor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MyNN.Common\MyNN.Common.csproj">
+      <Project>{2e34b41a-e15f-434c-9554-9bdf5f4eccc9}</Project>
+      <Name>MyNN.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP\MyNN.MLP.csproj">
+      <Project>{3fff29db-d717-48cb-a221-37f3e397a80e}</Project>
+      <Name>MyNN.MLP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OpenCL.Net.Wrapper\OpenCL.Net.Wrapper.csproj">
+      <Project>{A405C95D-FECE-488D-A6A4-B8C6FA184880}</Project>
+      <Name>OpenCL.Net.Wrapper</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

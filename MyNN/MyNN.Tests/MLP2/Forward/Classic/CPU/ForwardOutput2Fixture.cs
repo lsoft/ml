@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation.Classic;
-using MyNN.MLP2.ForwardPropagation.Classic.OpenCL.Mem.CPU;
-using MyNN.MLP2.OpenCLHelper;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.OutputConsole;
+using MyNN.Common.Data;
+using MyNN.Common.OpenCLHelper;
+using MyNN.Common.Other;
+using MyNN.Common.OutputConsole;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
+using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.Forward.Classic.CPU
@@ -102,7 +103,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp
@@ -157,7 +158,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp
@@ -204,7 +205,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp
@@ -251,7 +252,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp
@@ -304,7 +305,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp
@@ -357,7 +358,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp
@@ -410,7 +411,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp
@@ -463,7 +464,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp
@@ -516,7 +517,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp
@@ -569,7 +570,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
                             out propagators);
 
                         return
-                            new ForwardPropagation2(
+                            new ForwardPropagation(
                                 containers,
                                 propagators,
                                 mlp

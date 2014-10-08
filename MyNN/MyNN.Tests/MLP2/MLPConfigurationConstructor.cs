@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyNN.MLP2.Structure;
-using MyNN.MLP2.Structure.Layer;
-using MyNN.MLP2.Structure.Neurons;
+using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Layer;
+using MyNN.MLP.Structure.Neuron;
 
 namespace MyNN.Tests.MLP2
 {

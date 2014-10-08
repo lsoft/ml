@@ -1,36 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyNN;
-using MyNN.Boosting.SAMMEBoosting;
-using MyNN.Data.DataSetConverter;
-using MyNN.Data.TrainDataProvider;
-using MyNN.Data.TypicalDataProvider;
-using MyNN.LearningRateController;
-using MyNN.MLP2.AccuracyRecord;
-using MyNN.MLP2.ArtifactContainer;
-using MyNN.MLP2.Backpropagation;
-using MyNN.MLP2.Backpropagation.EpocheTrainer;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU;
-using MyNN.MLP2.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.GPU;
-using MyNN.MLP2.Backpropagation.Metrics;
-using MyNN.MLP2.Backpropagation.Validation;
-using MyNN.MLP2.Backpropagation.Validation.AccuracyCalculator;
-using MyNN.MLP2.Backpropagation.Validation.Drawer;
-using MyNN.MLP2.LearningConfig;
-using MyNN.MLP2.OpenCLHelper;
-using MyNN.MLP2.Structure;
-using MyNN.MLP2.Structure.Factory;
-using MyNN.MLP2.Structure.Layer.Factory;
-using MyNN.MLP2.Structure.Neurons.Factory;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.Randomizer;
+using MyNN.Common.ArtifactContainer;
+using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.TrainDataProvider;
+using MyNN.Common.Data.TypicalDataProvider;
+using MyNN.Common.LearningRateController;
+using MyNN.Common.OpenCLHelper;
+using MyNN.Common.Other;
+using MyNN.Common.Randomizer;
+using MyNN.MLP.AccuracyRecord;
+using MyNN.MLP.Backpropagation;
+using MyNN.MLP.Backpropagation.EpocheTrainer;
+using MyNN.MLP.Backpropagation.Metrics;
+using MyNN.MLP.Backpropagation.Validation;
+using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
+using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.GPU;
+using MyNN.MLP.LearningConfig;
+using MyNN.MLP.MLPContainer;
+using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Factory;
+using MyNN.MLP.Structure.Layer.Factory;
+using MyNN.MLP.Structure.Neuron.Factory;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
@@ -43,10 +39,10 @@ namespace MyNNConsoleApp.RefactoredForDI
             var cpuChooser = new IntelCPUDeviceChooser(true);
             var gpuChooser = new NvidiaOrAmdGPUDeviceChooser(true);
 
-            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IBackpropagationEpocheTrainer> cpuTrainer = (clProvider, mlp, config) =>
+            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IEpocheTrainer> cpuTrainer = (clProvider, mlp, config) =>
             {
                 return
-                    new CPUBackpropagationEpocheTrainer(
+                    new CPUEpocheTrainer(
                         VectorizationSizeEnum.NoVectorization,
                         mlp,
                         config,
@@ -54,20 +50,20 @@ namespace MyNNConsoleApp.RefactoredForDI
                         );
             };
 
-            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IBackpropagationEpocheTrainer> gpuTrainer = (clProvider, mlp, config) =>
+            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IEpocheTrainer> gpuTrainer = (clProvider, mlp, config) =>
             {
                 return
-                    new GPUBackpropagationEpocheTrainer(
+                    new GPUEpocheTrainer(
                         mlp,
                         config,
                         clProvider
                         );
             };
 
-            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IBackpropagationEpocheTrainer> cpuTransposeTrainer = (clProvider, mlp, config) =>
+            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IEpocheTrainer> cpuTransposeTrainer = (clProvider, mlp, config) =>
             {
                 return
-                    new CPUTransposeBackpropagationEpocheTrainer(
+                    new CPUTransposeEpocheTrainer(
                         VectorizationSizeEnum.NoVectorization,
                         mlp,
                         config,
@@ -75,20 +71,20 @@ namespace MyNNConsoleApp.RefactoredForDI
                         );
             };
 
-            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IBackpropagationEpocheTrainer> gpuTransposeTrainer = (clProvider, mlp, config) =>
+            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IEpocheTrainer> gpuTransposeTrainer = (clProvider, mlp, config) =>
             {
                 return
-                    new GPUTransposeBackpropagationEpocheTrainer(
+                    new GPUTransposeEpocheTrainer(
                         mlp,
                         config,
                         clProvider
                         );
             };
 
-            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IBackpropagationEpocheTrainer> cpuTranspose2Trainer = (clProvider, mlp, config) =>
+            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IEpocheTrainer> cpuTranspose2Trainer = (clProvider, mlp, config) =>
             {
                 return
-                    new CPUTranspose2BackpropagationEpocheTrainer(
+                    new CPUTranspose2EpocheTrainer(
                         VectorizationSizeEnum.NoVectorization, 
                         mlp,
                         config,
@@ -96,10 +92,10 @@ namespace MyNNConsoleApp.RefactoredForDI
                         );
             };
 
-            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IBackpropagationEpocheTrainer> gpuTranspose2Trainer = (clProvider, mlp, config) =>
+            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IEpocheTrainer> gpuTranspose2Trainer = (clProvider, mlp, config) =>
             {
                 return
-                    new GPUTranspose2BackpropagationEpocheTrainer(
+                    new GPUTranspose2EpocheTrainer(
                         mlp,
                         config,
                         clProvider
@@ -155,7 +151,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
         private static IAccuracyRecord DoTestPrivate(
             IDeviceChooser deviceChooser,
-            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IBackpropagationEpocheTrainer> epocheTrainerFunc,
+            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IEpocheTrainer> epocheTrainerFunc,
             int batchSize,
             float regularizationFactor
             )
@@ -240,12 +236,15 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 var mlpContainer = rootContainer.GetChildContainer(mlpName);
 
+                var mlpContainerHelper = new MLPContainerHelper();
+
                 var algo = new BackpropagationAlgorithm(
                     epocheTrainerFunc(
                         clProvider,
                         mlp,
                         config
                         ),
+                    mlpContainerHelper,
                     mlpContainer,
                     mlp,
                     validation,

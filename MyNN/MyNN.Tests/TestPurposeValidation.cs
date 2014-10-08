@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MyNN.Data;
-using MyNN.MLP2.AccuracyRecord;
-using MyNN.MLP2.ArtifactContainer;
-using MyNN.MLP2.Backpropagation.Metrics;
-using MyNN.MLP2.Backpropagation.Validation;
-using MyNN.MLP2.ForwardPropagation;
+using MyNN.Common.ArtifactContainer;
+using MyNN.Common.Data;
+using MyNN.MLP.AccuracyRecord;
+using MyNN.MLP.Backpropagation.Metrics;
+using MyNN.MLP.Backpropagation.Validation;
+using MyNN.MLP.ForwardPropagation;
 
 namespace MyNN.Tests
 {

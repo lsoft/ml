@@ -62,14 +62,30 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Castle.Core.3.3.0\lib\net45\Castle.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="MathNet.Numerics, Version=2.4.0.26, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\MyNN\NCA\Linear\Libraries\Math.NET\MathNet.Numerics.dll</HintPath>
+      <HintPath>..\packages\Castle.Core.3.3.1\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="Ninject">
       <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
@@ -92,33 +108,31 @@
     </Reference>
     <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140718\lib\net40\OpenCvSharp.dll</HintPath>
+      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140906\lib\net40\OpenCvSharp.dll</HintPath>
     </Reference>
-    <Reference Include="OpenCvSharp.Blob">
-      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140718\lib\net40\OpenCvSharp.Blob.dll</HintPath>
+    <Reference Include="OpenCvSharp.Blob, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140906\lib\net40\OpenCvSharp.Blob.dll</HintPath>
     </Reference>
     <Reference Include="OpenCvSharp.CPlusPlus, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140718\lib\net40\OpenCvSharp.CPlusPlus.dll</HintPath>
+      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140906\lib\net40\OpenCvSharp.CPlusPlus.dll</HintPath>
     </Reference>
     <Reference Include="OpenCvSharp.Extensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140718\lib\net40\OpenCvSharp.Extensions.dll</HintPath>
+      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140906\lib\net40\OpenCvSharp.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="OpenCvSharp.UserInterface">
-      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140718\lib\net40\OpenCvSharp.UserInterface.dll</HintPath>
+    <Reference Include="OpenCvSharp.UserInterface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.9.20140906\lib\net40\OpenCvSharp.UserInterface.dll</HintPath>
     </Reference>
-    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
@@ -143,9 +157,33 @@
       <Project>{1c871681-737c-45f4-9ce4-045366491a46}</Project>
       <Name>System.Half</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MyNN\MyNN.csproj">
-      <Project>{67074E3D-0BF2-4E4A-A5EB-EDF74F33A5AC}</Project>
-      <Name>MyNN</Name>
+    <ProjectReference Include="..\MyNN.Boltzmann\MyNN.Boltzmann.csproj">
+      <Project>{38425657-EBED-4875-9931-8DBA640203BE}</Project>
+      <Name>MyNN.Boltzmann</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.Common\MyNN.Common.csproj">
+      <Project>{2e34b41a-e15f-434c-9554-9bdf5f4eccc9}</Project>
+      <Name>MyNN.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.KNN\MyNN.KNN.csproj">
+      <Project>{4571e6e7-2081-4b82-bbca-4b0110ad7fe4}</Project>
+      <Name>MyNN.KNN</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.Classic.ForwardPropagation\MyNN.MLP.Classic.ForwardPropagation.csproj">
+      <Project>{AB04B9C9-BAAB-4394-A14D-0662526C8725}</Project>
+      <Name>MyNN.MLP.Classic.ForwardPropagation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.Classic\MyNN.MLP.Classic.csproj">
+      <Project>{5843D1AD-3601-4738-89AB-1151CCAD167B}</Project>
+      <Name>MyNN.MLP.Classic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.NLNCA\MyNN.MLP.NLNCA.csproj">
+      <Project>{5A82E05A-C2DA-42F4-A5F7-C79355E48E5F}</Project>
+      <Name>MyNN.MLP.NLNCA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP\MyNN.MLP.csproj">
+      <Project>{3FFF29DB-D717-48CB-A221-37F3E397A80E}</Project>
+      <Name>MyNN.MLP</Name>
     </ProjectReference>
     <ProjectReference Include="..\OpenCL.Net.Wrapper\OpenCL.Net.Wrapper.csproj">
       <Project>{a405c95d-fece-488d-a6a4-b8c6fa184880}</Project>

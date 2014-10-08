@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MyNN.MLP2.AccuracyRecord;
-using MyNN.MLP2.ArtifactContainer;
-using MyNN.MLP2.Backpropagation.Validation;
-using MyNN.MLP2.ForwardPropagation;
+using MyNN.Common.ArtifactContainer;
+using MyNN.MLP.AccuracyRecord;
+using MyNN.MLP.Backpropagation.Validation;
+using MyNN.MLP.ForwardPropagation;
 
 namespace MyNN.Tests.MLP2.EpocheTrainer
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MyNN.Randomizer;
+using MyNN.Common.Randomizer;
 
 namespace MyNN.Tests
 {

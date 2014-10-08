@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.OutputConsole;
-using MyNN.Randomizer;
+using MyNN.Common.OutputConsole;
+using MyNN.Common.Randomizer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;

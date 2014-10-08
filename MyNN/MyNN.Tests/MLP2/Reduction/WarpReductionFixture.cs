@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.OutputConsole;
-using MyNN.Randomizer;
+using MyNN.Common.Other;
+using MyNN.Common.OutputConsole;
+using MyNN.Common.Randomizer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;

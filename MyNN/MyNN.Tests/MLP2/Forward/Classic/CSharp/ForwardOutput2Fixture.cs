@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation.Classic;
-using MyNN.MLP2.ForwardPropagation.Classic.CSharp;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.OutputConsole;
+using MyNN.Common.Data;
+using MyNN.Common.OutputConsole;
+using MyNN.MLP.Classic.ForwardPropagation.CSharp;
+using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.Tests.MLP2.Forward.Classic.CSharp
 {
@@ -96,7 +96,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CSharp
                         out propagators);
 
                     return
-                        new ForwardPropagation2(
+                        new ForwardPropagation(
                             containers,
                             propagators,
                             mlp
@@ -145,7 +145,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CSharp
                         out propagators);
 
                     return
-                        new ForwardPropagation2(
+                        new ForwardPropagation(
                             containers,
                             propagators,
                             mlp);
@@ -183,7 +183,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CSharp
                         out propagators);
 
                     return
-                        new ForwardPropagation2(
+                        new ForwardPropagation(
                             containers,
                             propagators,
                             mlp
@@ -230,7 +230,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CSharp
                         out propagators);
 
                     return
-                        new ForwardPropagation2(
+                        new ForwardPropagation(
                             containers,
                             propagators,
                             mlp

@@ -1,13 +1,12 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.Structure;
-using MyNN.MLP2.Structure.Factory;
-using MyNN.MLP2.Structure.Layer.Factory;
-using MyNN.MLP2.Structure.Neurons.Factory;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.Randomizer;
+using MyNN.Common.Data;
+using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Factory;
+using MyNN.MLP.Structure.Layer.Factory;
+using MyNN.MLP.Structure.Neuron.Factory;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.Forward

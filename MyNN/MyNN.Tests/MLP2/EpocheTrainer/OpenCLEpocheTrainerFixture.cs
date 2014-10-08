@@ -4,10 +4,9 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Data;
-using MyNN.MLP2.ForwardPropagation;
-using MyNN.MLP2.Structure.Neurons.Function;
-using MyNN.OutputConsole;
+using MyNN.Common.Data;
+using MyNN.Common.OutputConsole;
+using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.Tests.MLP2.EpocheTrainer
 {
