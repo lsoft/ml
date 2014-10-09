@@ -8,7 +8,7 @@ namespace MyNN.MLP.DropConnect.WeightMask
     public interface IOpenCLWeightMaskContainer : IWeightMaskContainer
     {
         /// <summary>
-        /// Bit mask, used in current iteration (from 2^0 to 2^32)
+        /// Bit mask, used in current iteration (in sequence of 2^0, 2^1, 2^2, 2^3 ... to 2^32)
         /// </summary>
         uint BitMask
         {

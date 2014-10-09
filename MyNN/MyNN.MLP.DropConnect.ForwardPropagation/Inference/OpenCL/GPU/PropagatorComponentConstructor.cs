@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyNN.MLP.DropConnect.Inferencer;
+using MyNN.MLP.DropConnect.Inferencer.Factory;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure;

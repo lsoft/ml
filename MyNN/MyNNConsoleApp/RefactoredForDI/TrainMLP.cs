@@ -110,7 +110,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 var mlpContainerHelper = new MLPContainerHelper();
 
-                var algo = new BackpropagationAlgorithm(
+                var algo = new Backpropagation(
                     new CPUEpocheTrainer(
                         VectorizationSizeEnum.VectorizationMode16, 
                         mlp,

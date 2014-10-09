@@ -19,6 +19,7 @@ using MyNN.MLP.Backpropagation.Validation.Drawer;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU;
 using MyNN.MLP.DropConnect.Inferencer;
+using MyNN.MLP.DropConnect.Inferencer.Factory;
 using MyNN.MLP.DropConnect.WeightMask.Factory;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
@@ -73,8 +74,8 @@ namespace MyNNConsoleApp.RefactoredForDI
                     100)
                 );
 
-            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(true), false))
-            //using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
+            //using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(true), false))
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var mlpName = string.Format(
                     "mlp{0}.dropconnect.mlp",
@@ -115,34 +116,34 @@ namespace MyNNConsoleApp.RefactoredForDI
                 var mlpContainer = rootContainer.GetChildContainer(mlpName);
 
 
-                //const int sampleCount = 10000;
-                //const float p = 0.5f;
+                const int sampleCount = 10000;
+                const float p = 0.75f;
 
-                //var maskContainerFactory = new BigArrayWeightMaskContainerFactory(
-                //    randomizer,
-                //    clProvider);
+                var maskContainerFactory = new BigArrayWeightMaskContainerFactory(
+                    randomizer,
+                    clProvider);
 
-                //var inferencerFactory = new GPULayerInferencerFactory(
-                //    randomizer,
-                //    clProvider,
-                //    sampleCount,
-                //    p);
+                var inferencerFactory = new GPULayerInferencerFactory(
+                    randomizer,
+                    clProvider,
+                    sampleCount,
+                    p);
 
-                var algo = new BackpropagationAlgorithm(
-                    new CPUEpocheTrainer(
-                        VectorizationSizeEnum.VectorizationMode16,
-                        mlp,
-                        config,
-                        clProvider
-                        ), 
-                    //new DropConnectEpocheTrainer(
+                var algo = new Backpropagation(
+                    //new CPUEpocheTrainer(
+                    //    VectorizationSizeEnum.VectorizationMode16,
                     //    mlp,
                     //    config,
-                    //    maskContainerFactory,
-                    //    inferencerFactory,
-                    //    clProvider,
-                    //    sampleCount,
-                    //    p),
+                    //    clProvider
+                    //    ), 
+                    new DropConnectEpocheTrainer(
+                        mlp,
+                        config,
+                        maskContainerFactory,
+                        inferencerFactory,
+                        clProvider,
+                        sampleCount,
+                        p),
                     mlpContainerHelper,
                     mlpContainer,
                     mlp,

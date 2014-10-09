@@ -80,7 +80,7 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                     );
 
                 var alg =
-                    new BackpropagationAlgorithm(
+                    new Backpropagation(
                         new CPUEpocheTrainer(
                             VectorizationSizeEnum.NoVectorization,
                             mlp,

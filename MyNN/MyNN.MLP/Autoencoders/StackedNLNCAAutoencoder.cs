@@ -226,7 +226,7 @@
             using (var clProvider = new CLProvider())
             {
 
-                var algo = new BackpropagationAlgorithm(
+                var algo = new Backpropagation(
                     _randomizer,
                     (currentMLP, currentConfig) =>
                         new CPUAutoencoderNLNCABackpropagationEpocheTrainer(

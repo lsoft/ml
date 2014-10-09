@@ -19,6 +19,7 @@ using MyNN.MLP.Backpropagation.Validation.Drawer;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.CPU;
 using MyNN.MLP.DropConnect.Inferencer;
+using MyNN.MLP.DropConnect.Inferencer.Factory;
 using MyNN.MLP.DropConnect.WeightMask.Factory;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
@@ -127,7 +128,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     sampleCount,
                     p);
 
-                var algo = new BackpropagationAlgorithm(
+                var algo = new Backpropagation(
                     new DropConnectEpocheTrainer(
                         mlp,
                         config,

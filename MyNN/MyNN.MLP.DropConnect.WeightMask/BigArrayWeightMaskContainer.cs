@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using MathNet.Numerics.Distributions;
+using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
@@ -188,12 +190,8 @@ namespace MyNN.MLP.DropConnect.WeightMask
         /// </summary>
         private void InternalRegenerateArray()
         {
-            var brnd = new Bernoulli(_p)
-            {
-                RandomSource = new Random(_randomizer.Next(1000000000))
-            };
-
-            for (var i = 0; i < _arraySize; i++)
+            Parallel.For(0, _arraySize, () => GetBernoulliRandom(), (i, loop, brnd) =>
+            //for (var i = 0; i < _arraySize; i++)
             {
                 uint ci = 0;
 
@@ -206,7 +204,21 @@ namespace MyNN.MLP.DropConnect.WeightMask
                 }
 
                 _array[i] = ci;
-            }
+
+                return brnd;
+            },
+            (brnd) => { }
+            );//Parallel.For
+        }
+
+        private Bernoulli GetBernoulliRandom()
+        {
+            var brnd = new Bernoulli(_p)
+            {
+                RandomSource = new Random(_randomizer.Next(1000000000))
+            };
+
+            return brnd;
         }
     }
 }

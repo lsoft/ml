@@ -1,20 +1,20 @@
 ﻿using System;
 using MyNN.Common.Randomizer;
-using MyNN.MLP.DropConnect.Inferencer.OpenCL.GPU;
+using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure.Layer;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP.DropConnect.Inferencer
+namespace MyNN.MLP.DropConnect.Inferencer.Factory
 {
-    public class GPULayerInferencerFactory : ILayerInferencerFactory
+    public class CPULayerInferencerFactory : ILayerInferencerFactory
     {
         private readonly IRandomizer _randomizer;
         private readonly CLProvider _clProvider;
         private readonly int _sampleCount;
         private readonly float _p;
 
-        public GPULayerInferencerFactory(
+        public CPULayerInferencerFactory(
             IRandomizer randomizer, 
             CLProvider clProvider, 
             int sampleCount, 
@@ -60,8 +60,8 @@ namespace MyNN.MLP.DropConnect.Inferencer
                 throw new ArgumentNullException("currentLayerContainer");
             }
 
-            return 
-                new GPULayerInferencer(
+            return
+                new VectorizedLayerInferencer(
                     _randomizer,
                     _clProvider,
                     _sampleCount,

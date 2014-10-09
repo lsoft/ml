@@ -13,7 +13,7 @@ using MyNN.MLP.Structure;
 
 namespace MyNN.MLP.Backpropagation
 {
-    public class BackpropagationAlgorithm : IBackpropagationAlgorithm
+    public class Backpropagation : IBackpropagation
     {
         private readonly IMLP _mlp;
         private readonly IValidation _validation;
@@ -24,7 +24,7 @@ namespace MyNN.MLP.Backpropagation
 
         private IAccuracyRecord _bestAccuracyRecord;
 
-        public BackpropagationAlgorithm(
+        public Backpropagation(
             IEpocheTrainer epocheTrainer,
             IMLPContainerHelper mlpContainerHelper,
             IArtifactContainer artifactContainer,
@@ -212,7 +212,7 @@ namespace MyNN.MLP.Backpropagation
 
                 if (needToSaveMLP)
                 {
-                    ConsoleAmbientContext.Console.WriteLine("Saved!");
+                    ConsoleAmbientContext.Console.WriteWarning("Saved!");
                 }
 
                 ConsoleAmbientContext.Console.WriteLine(

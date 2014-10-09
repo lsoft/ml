@@ -31,7 +31,7 @@ namespace MyNNConsoleApp
                 //TrainAutoencoder2D.DoTrain();
                 //TrainMLPOnSDAE.DoTrain();
 
-                TrainCPUDropConnect.DoTrain();
+                TrainGPUDropConnect.DoTrain();
 
                 /*
 

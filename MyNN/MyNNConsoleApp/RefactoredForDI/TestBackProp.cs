@@ -238,7 +238,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 var mlpContainerHelper = new MLPContainerHelper();
 
-                var algo = new BackpropagationAlgorithm(
+                var algo = new Backpropagation(
                     epocheTrainerFunc(
                         clProvider,
                         mlp,

@@ -28,7 +28,7 @@ namespace MyNN.MLP.Autoencoders
         private readonly Func<int, IDataSet, ITrainDataProvider> _dataProviderFactory;
         private readonly Func<int, IDataSet, IArtifactContainer, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
-        private readonly IBackpropagationAlgorithmFactory _backpropagationAlgorithmFactory;
+        private readonly IBackpropagationFactory _backpropagationFactory;
         private readonly IForwardPropagationFactory _forwardPropagationFactory;
         private readonly LayerInfo[] _layerInfos;
 
@@ -40,7 +40,7 @@ namespace MyNN.MLP.Autoencoders
             Func<int, IDataSet, ITrainDataProvider> dataProviderFactory,
             Func<int, IDataSet, IArtifactContainer, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
-            IBackpropagationAlgorithmFactory backpropagationAlgorithmFactory,
+            IBackpropagationFactory backpropagationFactory,
             IForwardPropagationFactory forwardPropagationFactory,
             params LayerInfo[] layerInfos)
         {
@@ -96,7 +96,7 @@ namespace MyNN.MLP.Autoencoders
             _dataProviderFactory = dataProviderFactory;
             _validationFactory = validationFactory;
             _configFactory = configFactory;
-            _backpropagationAlgorithmFactory = backpropagationAlgorithmFactory;
+            _backpropagationFactory = backpropagationFactory;
             _forwardPropagationFactory = forwardPropagationFactory;
             _layerInfos = layerInfos;
         }
@@ -180,7 +180,7 @@ namespace MyNN.MLP.Autoencoders
                 //обучаем автоенкодер
                 using (var clProvider = new CLProvider())
                 {
-                    var algo = _backpropagationAlgorithmFactory.GetBackpropagationAlgorithm(
+                    var algo = _backpropagationFactory.CreateBackpropagation(
                         _randomizer,
                         clProvider,
                         mlpContainer,

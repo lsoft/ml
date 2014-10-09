@@ -39,9 +39,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackpropagationFactory\Classic\OpenCL\CPU\CPUBackpropagationAlgorithmFactory.cs" />
-    <Compile Include="BackpropagationFactory\Classic\OpenCL\GPU\GPUBackpropagationAlgorithmFactory.cs" />
-    <Compile Include="BackpropagationFactory\TransposedClassic\OpenCL\CPU\CPUTransposeBackpropagationAlgorithmFactory.cs" />
+    <Compile Include="BackpropagationFactory\Classic\OpenCL\CPU\CPUBackpropagationFactory.cs" />
+    <Compile Include="BackpropagationFactory\Classic\OpenCL\GPU\GPUBackpropagationFactory.cs" />
+    <Compile Include="BackpropagationFactory\TransposedClassic\OpenCL\CPU\CPUTransposeBackpropagationFactory.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\CPUEpocheTrainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProvider.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProviderWithoutRegularization.cs" />

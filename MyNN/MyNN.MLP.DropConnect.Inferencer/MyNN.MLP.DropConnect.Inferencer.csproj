@@ -52,12 +52,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CPULayerInferencerFactory.cs" />
+    <Compile Include="Factory\CPULayerInferencerFactory.cs" />
     <Compile Include="CSharp\CorrectInferencer.cs" />
     <Compile Include="CSharp\NaiveLayerInferencer.cs" />
-    <Compile Include="GPULayerInferencerFactory.cs" />
+    <Compile Include="Factory\GPULayerInferencerFactory.cs" />
     <Compile Include="ILayerInferencer.cs" />
-    <Compile Include="ILayerInferencerFactory.cs" />
+    <Compile Include="Factory\ILayerInferencerFactory.cs" />
     <Compile Include="OpenCL\CPU\DefaultLayerInferencer.cs" />
     <Compile Include="OpenCL\CPU\NaiveLayerInferencer.cs" />
     <Compile Include="OpenCL\CPU\VectorizedLayerInferencer.cs" />

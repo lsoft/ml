@@ -11,6 +11,7 @@ using MyNN.MLP.DropConnect.ForwardPropagation.Inference;
 using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU;
 using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU.LayerPropagator;
 using MyNN.MLP.DropConnect.Inferencer;
+using MyNN.MLP.DropConnect.Inferencer.Factory;
 using MyNN.MLP.DropConnect.WeightMask;
 using MyNN.MLP.DropConnect.WeightMask.Factory;
 using MyNN.MLP.ForwardPropagation;

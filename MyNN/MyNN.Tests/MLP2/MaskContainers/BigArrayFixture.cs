@@ -38,9 +38,20 @@ namespace MyNN.Tests.MLP2.MaskContainers
                             p);
                 };
 
+            var before = DateTime.Now;
+
             var result = MaskContainerTester.TestContainer(
                 containerProvider
                 );
+
+            var after = DateTime.Now;
+            var diff = after - before;
+
+            ConsoleAmbientContext.Console.WriteLine(
+                string.Format(
+                    "Test takes {0}",
+                    diff
+                    ));
 
             ConsoleAmbientContext.Console.WriteLine(
                 string.Format(

@@ -40,7 +40,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackpropagationFactory\OpenCL\CPU\CPUNLNCABackpropagationAlgorithmFactory.cs" />
+    <Compile Include="BackpropagationFactory\OpenCL\CPU\CPUNLNCABackpropagationFactory.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\NLNCA\AutoencoderMLP\OpenCL\CPU\AutoendoderNLNCAKernelConstructor.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\NLNCA\AutoencoderMLP\OpenCL\CPU\CPUAutoencoderNLNCAEpocheTrainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\NLNCA\ClassificationMLP\OpenCL\CPU\CPUNLNCAEpocheTrainer.cs" />

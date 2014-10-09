@@ -5,22 +5,22 @@ using MyNN.Common.Randomizer;
 using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.BackpropagationFactory;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
+namespace MyNN.MLP.Classic.BackpropagationFactory.TransposedClassic.OpenCL.CPU
 {
     /// <summary>
-    /// Factory for classic backpropagation algorithm enables CPU-OpenCL
+    /// Factory for classic backpropagation algorithm enables CPU-OpenCL with transposed weights
     /// </summary>
-    public class CPUBackpropagationAlgorithmFactory : IBackpropagationAlgorithmFactory
+    public class CPUTransposeBackpropagationFactory : IBackpropagationFactory
     {
         private readonly IMLPContainerHelper _mlpContainerHelper;
 
-        public CPUBackpropagationAlgorithmFactory(
+        public CPUTransposeBackpropagationFactory(
             IMLPContainerHelper mlpContainerHelper
             )
         {
@@ -28,11 +28,10 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
             {
                 throw new ArgumentNullException("mlpContainerHelper");
             }
-
             _mlpContainerHelper = mlpContainerHelper;
         }
 
-        public BackpropagationAlgorithm GetBackpropagationAlgorithm(
+        public IBackpropagation CreateBackpropagation(
             IRandomizer randomizer,
             CLProvider clProvider,
             IArtifactContainer artifactContainer,
@@ -65,8 +64,8 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
                 throw new ArgumentNullException("config");
             }
 
-            var algo = new BackpropagationAlgorithm(
-                new CPUEpocheTrainer(
+            var algo = new MLP.Backpropagation.Backpropagation(
+                new CPUTransposeEpocheTrainer(
                     VectorizationSizeEnum.VectorizationMode16,
                     net,
                     config,

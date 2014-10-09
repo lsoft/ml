@@ -46,11 +46,11 @@
     <Compile Include="Autoencoders\IStackedAutoencoder.cs" />
     <Compile Include="Autoencoders\StackedAutoencoder.cs" />
     <Compile Include="Autoencoders\StackedNLNCAAutoencoder.cs" />
-    <Compile Include="BackpropagationFactory\IBackpropagationAlgorithmFactory.cs" />
-    <Compile Include="Backpropagation\BackpropagationAlgorithm.cs" />
+    <Compile Include="BackpropagationFactory\IBackpropagationFactory.cs" />
+    <Compile Include="Backpropagation\Backpropagation.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\IEpocheTrainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\IKernelTextProvider.cs" />
-    <Compile Include="Backpropagation\IBackpropagationAlgorithm.cs" />
+    <Compile Include="Backpropagation\IBackpropagation.cs" />
     <Compile Include="Backpropagation\Metrics\HalfSquaredEuclidianDistance.cs" />
     <Compile Include="Backpropagation\Metrics\IMetrics.cs" />
     <Compile Include="Backpropagation\Metrics\Loglikelihood.cs" />

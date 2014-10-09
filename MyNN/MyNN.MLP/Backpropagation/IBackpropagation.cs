@@ -3,7 +3,7 @@ using MyNN.MLP.AccuracyRecord;
 
 namespace MyNN.MLP.Backpropagation
 {
-    public interface IBackpropagationAlgorithm
+    public interface IBackpropagation
     {
         IAccuracyRecord Train(ITrainDataProvider trainDataProvider);
     }

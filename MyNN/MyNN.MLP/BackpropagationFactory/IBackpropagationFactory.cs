@@ -11,7 +11,7 @@ namespace MyNN.MLP.BackpropagationFactory
     /// <summary>
     /// Factory for backpropagation algorithm
     /// </summary>
-    public interface IBackpropagationAlgorithmFactory
+    public interface IBackpropagationFactory
     {
         /// <summary>
         /// Factory method
@@ -23,7 +23,7 @@ namespace MyNN.MLP.BackpropagationFactory
         /// <param name="validationDataProvider">Validation provider</param>
         /// <param name="config">Learning algorithm config</param>
         /// <returns>Backpropagation algorithm</returns>
-        BackpropagationAlgorithm GetBackpropagationAlgorithm(
+        IBackpropagation CreateBackpropagation(
             IRandomizer randomizer,
             CLProvider clProvider,
             IArtifactContainer artifactContainer,

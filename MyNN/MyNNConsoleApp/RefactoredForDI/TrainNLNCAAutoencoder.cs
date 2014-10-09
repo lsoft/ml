@@ -132,7 +132,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                         return conf;
                     },
-                    new CPUNLNCABackpropagationAlgorithmFactory(
+                    new CPUNLNCABackpropagationFactory(
                         mlpContainerHelper,
                         (data) =>
                             new DodfCalculatorOpenCL(

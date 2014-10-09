@@ -15,11 +15,11 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
     /// <summary>
     /// Factory for classic backpropagation algorithm enables GPU-OpenCL
     /// </summary>
-    public class GPUBackpropagationAlgorithmFactory : IBackpropagationAlgorithmFactory
+    public class GPUBackpropagationFactory : IBackpropagationFactory
     {
         private readonly IMLPContainerHelper _mlpContainerHelper;
 
-        public GPUBackpropagationAlgorithmFactory(
+        public GPUBackpropagationFactory(
             IMLPContainerHelper mlpContainerHelper
             )
         {
@@ -31,7 +31,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
             _mlpContainerHelper = mlpContainerHelper;
         }
 
-        public BackpropagationAlgorithm GetBackpropagationAlgorithm(
+        public IBackpropagation CreateBackpropagation(
             IRandomizer randomizer,
             CLProvider clProvider,
             IArtifactContainer artifactContainer,
@@ -64,7 +64,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
                 throw new ArgumentNullException("config");
             }
 
-            var algo = new BackpropagationAlgorithm(
+            var algo = new MLP.Backpropagation.Backpropagation(
                 new GPUEpocheTrainer(
                     net,
                     config,
