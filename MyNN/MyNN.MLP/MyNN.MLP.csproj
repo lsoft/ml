@@ -98,9 +98,11 @@
     <Compile Include="Structure\Layer\ILayerConfiguration.cs" />
     <Compile Include="Structure\Layer\ILayerState.cs" />
     <Compile Include="Structure\Layer\Layer.cs" />
+    <Compile Include="Structure\Layer\LayerConfiguration.cs" />
     <Compile Include="Structure\Layer\LayerInfo.cs" />
     <Compile Include="Structure\Layer\LayerState.cs" />
     <Compile Include="Structure\MLP.cs" />
+    <Compile Include="Structure\MLPConfiguration.cs" />
     <Compile Include="Structure\MLPState.cs" />
     <Compile Include="Structure\MLPVisualizer.cs" />
     <Compile Include="Structure\Neuron\BiasNeuron.cs" />
@@ -118,6 +120,7 @@
     <Compile Include="Structure\Neuron\INeuronConfiguration.cs" />
     <Compile Include="Structure\Neuron\InputNeuron.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Structure\Neuron\NeuronConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyNN.Boltzmann\MyNN.Boltzmann.csproj">

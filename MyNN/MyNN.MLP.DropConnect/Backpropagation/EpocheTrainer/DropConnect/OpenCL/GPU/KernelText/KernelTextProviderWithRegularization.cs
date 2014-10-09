@@ -6,7 +6,7 @@ using MyNN.MLP.Structure;
 namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU.KernelText
 {
     /// <summary>
-    /// Kernel source provider for classic backpropagation epoche trainer that enables CPU-OpenCL
+    /// Kernel source provider for classic backpropagation epoche trainer that enables GPU-OpenCL
     /// </summary>
     internal class KernelTextProviderWithRegularization : IKernelTextProvider
     {

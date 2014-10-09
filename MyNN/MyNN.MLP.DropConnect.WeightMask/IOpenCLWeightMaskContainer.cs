@@ -18,7 +18,7 @@ namespace MyNN.MLP.DropConnect.WeightMask
         /// <summary>
         /// OpenCL buffer for mask
         /// </summary>
-        MemUint[] MaskMem
+        MemUint MaskMem
         {
             get;
         }

@@ -99,7 +99,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
                 var currentLayerNonBiasNeuronCount = mlp.Layers[layerIndex].NonBiasNeuronCount;
                 var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].Neurons.Length;
 
-                MemLayerContainer mc;
+                IMemLayerContainer mc;
                 if (layerIndex > 0)
                 {
                     var previousLayerTotalNeuronCount = mlp.Layers[layerIndex - 1].Neurons.Length;

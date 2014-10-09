@@ -32,7 +32,8 @@ namespace MyNN.Tests.MLP2.MaskContainers
                     return
                         new BigArrayWeightMaskContainer(
                             clProvider,
-                            mlpConfiguration,
+                            mlpConfiguration.Layers[1],
+                            mlpConfiguration.Layers[2],
                             randomizer,
                             p);
                 };
@@ -72,7 +73,8 @@ namespace MyNN.Tests.MLP2.MaskContainers
                     return
                         new BigArrayWeightMaskContainer(
                             clProvider,
-                            mlpConfiguration,
+                            mlpConfiguration.Layers[1],
+                            mlpConfiguration.Layers[2],
                             randomizer,
                             p);
                 };
@@ -112,7 +114,8 @@ namespace MyNN.Tests.MLP2.MaskContainers
                     return
                         new BigArrayWeightMaskContainer(
                             clProvider,
-                            mlpConfiguration,
+                            mlpConfiguration.Layers[1],
+                            mlpConfiguration.Layers[2],
                             randomizer,
                             p);
                 };
@@ -152,7 +155,8 @@ namespace MyNN.Tests.MLP2.MaskContainers
                     return
                         new BigArrayWeightMaskContainer(
                             clProvider,
-                            mlpConfiguration,
+                            mlpConfiguration.Layers[1],
+                            mlpConfiguration.Layers[2],
                             randomizer,
                             p);
                 };

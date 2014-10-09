@@ -2,6 +2,7 @@
 using MyNN.Common.Other;
 using MyNN.MLP.DropConnect.WeightMask;
 using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
@@ -13,18 +14,23 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.MaskContainer
     {
         public MockWeightMaskContainer(
             CLProvider clProvider,
-            IMLP mlp,
+            ILayerConfiguration previousLayerConfiguration,
+            ILayerConfiguration currentLayerConfiguration,
             uint bitMask,
-            Func<int, int, uint> layerMasks
+            Func<int, uint> layerMasks
             )
         {
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
             }
-            if (mlp == null)
+            if (previousLayerConfiguration == null)
             {
-                throw new ArgumentNullException("mlp");
+                throw new ArgumentNullException("previousLayerConfiguration");
+            }
+            if (currentLayerConfiguration == null)
+            {
+                throw new ArgumentNullException("currentLayerConfiguration");
             }
             if (layerMasks == null)
             {
@@ -33,64 +39,19 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.MaskContainer
 
             this.BitMask = bitMask;
 
-            var layerCount = mlp.Layers.Length;
+            this.MaskMem = clProvider.CreateUintMem(
+                currentLayerConfiguration.NonBiasNeuronCount * previousLayerConfiguration.Neurons.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
-            this.MaskMem = new MemUint[layerCount];
+            this.MaskMem.Array.Fill(layerMasks);
 
-            for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
-            {
-                this.MaskMem[layerIndex] = clProvider.CreateUintMem(
-                    mlp.Layers[layerIndex].NonBiasNeuronCount * mlp.Layers[layerIndex].Neurons[0].Weights.Length, //without bias neuron at current layer, but include bias neuron at previous layer
-                    MemFlags.CopyHostPtr | MemFlags.ReadOnly);
-
-                this.MaskMem[layerIndex].Array.Fill(
-                    (weightIndex) => layerMasks(layerIndex, weightIndex));
-
-                this.MaskMem[layerIndex].Write(BlockModeEnum.Blocking);
-            }
+            this.MaskMem.Write(BlockModeEnum.Blocking);
         }
 
         public MockWeightMaskContainer(
             CLProvider clProvider,
-            IMLP mlp,
-            uint bitMask,
-            uint[] layerMasks
-            )
-        {
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
-            }
-            if (mlp == null)
-            {
-                throw new ArgumentNullException("mlp");
-            }
-            if (layerMasks == null)
-            {
-                throw new ArgumentNullException("layerMasks");
-            }
-
-            this.BitMask = bitMask;
-
-            var layerCount = mlp.Layers.Length;
-
-            this.MaskMem = new MemUint[layerCount];
-
-            for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
-            {
-                this.MaskMem[layerIndex] = clProvider.CreateUintMem(
-                    mlp.Layers[layerIndex].NonBiasNeuronCount * mlp.Layers[layerIndex].Neurons[0].Weights.Length, //without bias neuron at current layer, but include bias neuron at previous layer
-                    MemFlags.CopyHostPtr | MemFlags.ReadOnly);
-
-                this.MaskMem[layerIndex].Array.Fill(layerMasks[layerIndex]);
-
-                this.MaskMem[layerIndex].Write(BlockModeEnum.Blocking);
-            }
-        }
-
-        public MockWeightMaskContainer(
-            CLProvider clProvider,
-            IMLP mlp,
+            ILayerConfiguration previousLayerConfiguration,
+            ILayerConfiguration currentLayerConfiguration,
             uint bitMask,
             uint mask
             )
@@ -99,27 +60,24 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.MaskContainer
             {
                 throw new ArgumentNullException("clProvider");
             }
-            if (mlp == null)
+            if (previousLayerConfiguration == null)
             {
-                throw new ArgumentNullException("mlp");
+                throw new ArgumentNullException("previousLayerConfiguration");
+            }
+            if (currentLayerConfiguration == null)
+            {
+                throw new ArgumentNullException("currentLayerConfiguration");
             }
 
             this.BitMask = bitMask;
 
-            var layerCount = mlp.Layers.Length;
+            this.MaskMem = clProvider.CreateUintMem(
+                currentLayerConfiguration.NonBiasNeuronCount * previousLayerConfiguration.Neurons.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
-            this.MaskMem = new MemUint[layerCount];
+            this.MaskMem.Array.Fill(mask);
 
-            for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
-            {
-                this.MaskMem[layerIndex] = clProvider.CreateUintMem(
-                    mlp.Layers[layerIndex].NonBiasNeuronCount * mlp.Layers[layerIndex].Neurons[0].Weights.Length, //without bias neuron at current layer, but include bias neuron at previous layer
-                    MemFlags.CopyHostPtr | MemFlags.ReadOnly);
-
-                this.MaskMem[layerIndex].Array.Fill(mask);
-
-                this.MaskMem[layerIndex].Write(BlockModeEnum.Blocking);
-            }
+            this.MaskMem.Write(BlockModeEnum.Blocking);
         }
 
         public void RegenerateMask()
@@ -133,7 +91,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.MaskContainer
             private set;
         }
         
-        public MemUint[] MaskMem
+        public MemUint MaskMem
         {
             get;
             private set;

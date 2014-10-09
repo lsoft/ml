@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using MathNet.Numerics.Distributions;
 using MyNN.Common.Randomizer;
-using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
@@ -25,23 +24,17 @@ namespace MyNN.MLP.DropConnect.WeightMask
         /// <summary>
         /// Tail of random array (it improves randomness)
         /// </summary>
-        private const int AdditionalPartSize = 10000000;
+        private const int AdditionalPartSize = 10 * 1024 * 1024;
 
-        private readonly CLProvider _clProvider;
-        private readonly IMLPConfiguration _mlpConfiguration;
         private readonly IRandomizer _randomizer;
         private readonly float _p;
 
         private readonly int _arraySize;
+        private readonly uint[] _array;
 
         private readonly uint[] _bitmask;
 
-        private uint[] _array;
         private int _currentIterationNumber;
-
-        private List<MemUint[]> _maskMem;
-        private int _currentMaskIndex;
-        private MemUint[] _preparedMem;
 
         private uint _bitIndex;
         public uint BitMask
@@ -55,34 +48,36 @@ namespace MyNN.MLP.DropConnect.WeightMask
             }
         }
 
-        public MemUint[] MaskMem
+        public MemUint MaskMem
         {
             get;
             private set;
         }
 
-        private Thread _workThread;
+        private Thread _refreshThread;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="clProvider">OpenCL provider</param>
-        /// <param name="mlpConfiguration">Configuration of MLP</param>
+        /// <param name="previousLayerConfiguration">Previous layer configuration</param>
+        /// <param name="currentLayerConfiguration">Current layer configuration</param>
         /// <param name="randomizer">Random number provider</param>
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
         public BigArrayWeightMaskContainer(
             CLProvider clProvider,
-            IMLPConfiguration mlpConfiguration,
+            ILayerConfiguration previousLayerConfiguration,
+            ILayerConfiguration currentLayerConfiguration,
             IRandomizer randomizer,
             float p = 0.5f)
         {
-            if (clProvider == null)
+            if (previousLayerConfiguration == null)
             {
-                throw new ArgumentNullException("clProvider");
+                throw new ArgumentNullException("previousLayerConfiguration");
             }
-            if (mlpConfiguration == null)
+            if (currentLayerConfiguration == null)
             {
-                throw new ArgumentNullException("mlpConfiguration");
+                throw new ArgumentNullException("currentLayerConfiguration");
             }
             if (randomizer == null)
             {
@@ -93,107 +88,81 @@ namespace MyNN.MLP.DropConnect.WeightMask
                 throw new ArgumentOutOfRangeException("p");
             }
 
-            _clProvider = clProvider;
-            _mlpConfiguration = mlpConfiguration;
-
-            _randomizer = randomizer;
-            _p = p;
+            this._randomizer = randomizer;
+            this._p = p;
 
             this._bitIndex = 31;
 
-            _arraySize = 0;
-            for (var li = 1; li < mlpConfiguration.Layers.Length; li++)
-            {
-                var w = mlpConfiguration.Layers[li - 1].Neurons.Length*mlpConfiguration.Layers[li].Neurons.Length;
-                _arraySize += w;
-            }
-            _arraySize += AdditionalPartSize;
+            this._arraySize = previousLayerConfiguration.Neurons.Length * currentLayerConfiguration.Neurons.Length;
+            this._arraySize += AdditionalPartSize;
 
-            _bitmask = new uint[32];
+            this._array = new uint[_arraySize];
+            this._currentIterationNumber = 0;
+
+            this._bitmask = new uint[32];
             for (var i = 0; i < 32; i++)
             {
-                _bitmask[i] = (uint)(Math.Pow(2, i));
+                this._bitmask[i] = (uint)(Math.Pow(2, i));
             }
 
-            this.CreateInfrastructure();
-        }
-
-        private void CreateInfrastructure()
-        {
-            var layerCount = _mlpConfiguration.Layers.Length;
-
-            _array = new uint[_arraySize];
-            _currentIterationNumber = 0;
+            MaskMem = clProvider.CreateUintMem(
+                currentLayerConfiguration.NonBiasNeuronCount * previousLayerConfiguration.Neurons.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
             InternalRegenerateArray();
-
-            _maskMem = new List<MemUint[]>();
-            for (var mc = 0; mc < 2; mc++)
-            {
-                var masks = new MemUint[layerCount];
-
-                for (var cc = 1; cc < layerCount; cc++)
-                {
-                    masks[cc] = _clProvider.CreateUintMem(
-                        _mlpConfiguration.Layers[cc].NonBiasNeuronCount * _mlpConfiguration.Layers[cc].Neurons[0].WeightsCount, //without bias neuron at current layer, but include bias neuron at previous layer
-                        MemFlags.CopyHostPtr | MemFlags.ReadOnly);
-                }
-
-                _maskMem.Add(masks);
-            }
-
-            _currentMaskIndex = 0;
 
             FillMem();
         }
 
         public void RegenerateMask()
         {
+            //если битовая маска "не износилась", то просто меняем ее
+            //без необходимости мучаться обновлением буфера
             if (++this._bitIndex < 32)
             {
                 return;
             }
 
-            if (_workThread != null)
+            //дожидаемся пока актуализация содержимого мема
+            //и буфера не закончится
+            if (_refreshThread != null)
             {
-                _workThread.Join();
+                _refreshThread.Join();
             }
 
-            this.MaskMem = _preparedMem;
+            //битовая маска "износилась", освежаем всё
             this._bitIndex = 0;
 
-            WriteWorkingMem();
+            //записываем мем в память OpenCL устройства
+            //(мем был обновлен на предыдущей итерации RegenerateMask)
+            WriteRefreshedMem();
 
-            ThreadFillMem();
+            //снова запускаем рефреш внутреннего буфера
+            //рефреш внутреннего буфера заключается в том, что
+            //1) со случайного места в буфере копируется кусок в мем
+            //(это относительно быстрая операция копирования блока памяти)
+            //2) (если уже давно не обновляли содержмое буфера), то
+            //буфер перегенерируется целиком, чтобы на следующей
+            //итерации FillMem замениться на шаге 1
+            AsyncFillMem();
         }
 
-        private void ThreadFillMem()
+        /// <summary>
+        /// Асинхронное перезаполнение содержимого мемам из внутреннего буфера
+        /// </summary>
+        private void AsyncFillMem()
         {
-            _workThread = new Thread(FillMem);
-            _workThread.Start();
+            _refreshThread = new Thread(FillMem);
+            _refreshThread.Start();
         }
 
+        /// <summary>
+        /// Перезаполнение содержимого мема из внутреннего буфера
+        /// </summary>
         private void FillMem()
         {
-            //заполняемый мем
-            var preparingMem = this._maskMem[_currentMaskIndex];
-
-            //заполняем мем по текущему рабочему индексу
-            var layerCount = _mlpConfiguration.Layers.Length;
-
-            //заполняем слои
-            //копируем в мемы
-            for (var li = 1; li < layerCount; li++)
-            {
-                var mem = preparingMem[li];
-
-                var arrayIndex = _randomizer.Next(_array.Length - mem.Array.Length);
-
-                Array.Copy(_array, arrayIndex, mem.Array, 0, mem.Array.Length);
-            }
-
-            //копируем в подготовленный
-            _preparedMem = preparingMem;
+            var arrayIndex = _randomizer.Next(_array.Length - MaskMem.Array.Length);
+            Array.Copy(_array, arrayIndex, MaskMem.Array, 0, MaskMem.Array.Length);
 
             //обновляем рабочие индексы
             _currentIterationNumber++;
@@ -204,26 +173,24 @@ namespace MyNN.MLP.DropConnect.WeightMask
 
                 _currentIterationNumber = 0;
             }
-
-            _currentMaskIndex = 1 - _currentMaskIndex;
-
         }
 
-        private void WriteWorkingMem()
+        /// <summary>
+        /// Запись мема в память OpenCL устройства
+        /// </summary>
+        private void WriteRefreshedMem()
         {
-            var layerCount = _mlpConfiguration.Layers.Length;
-
-            for (var li = 1; li < layerCount; li++)
-            {
-                this.MaskMem[li].Write(BlockModeEnum.NonBlocking);
-            }
+            this.MaskMem.Write(BlockModeEnum.NonBlocking);
         }
 
+        /// <summary>
+        /// Освежение внутреннего буфера с помощью распределения Бернулли
+        /// </summary>
         private void InternalRegenerateArray()
         {
             var brnd = new Bernoulli(_p)
             {
-                RandomSource = new Random(_randomizer.Next(1000000))
+                RandomSource = new Random(_randomizer.Next(1000000000))
             };
 
             for (var i = 0; i < _arraySize; i++)
@@ -241,6 +208,5 @@ namespace MyNN.MLP.DropConnect.WeightMask
                 _array[i] = ci;
             }
         }
-
     }
 }

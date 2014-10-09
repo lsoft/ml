@@ -61,8 +61,8 @@ __kernel void ComputeLayerKernel(
     __local float* partialDotProduct
     )
 {
-    uint width = {PREVIOUS_LAYER_NEURON_COUNT};
-    uint height = {CURRENT_LAYER_NEURON_COUNT};
+    const uint width = {PREVIOUS_LAYER_NEURON_COUNT};
+    const uint height = {CURRENT_LAYER_NEURON_COUNT};
 
    for (uint y = get_group_id(0); y < height; y += get_num_groups(0))
    {

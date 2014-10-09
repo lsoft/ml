@@ -1,6 +1,6 @@
 ﻿using System;
 using MyNN.Common.Other;
-using MyNN.MLP.DropConnect.ForwardPropagation.WeightMaskContainer2;
+using MyNN.MLP.DropConnect.WeightMask;
 using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
@@ -9,7 +9,7 @@ using OpenCL.Net.Wrapper.Mem.Data;
 
 namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GPU2
 {
-    internal class TestPurposeWeightMaskContainer : IOpenCLWeightMaskContainer2
+    internal class TestPurposeWeightMaskContainer : IOpenCLWeightMaskContainer
     {
         public uint BitMask
         {

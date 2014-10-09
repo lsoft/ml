@@ -52,6 +52,10 @@
       <Project>{2e34b41a-e15f-434c-9554-9bdf5f4eccc9}</Project>
       <Name>MyNN.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.DropConnect.ForwardPropagation\MyNN.MLP.DropConnect.ForwardPropagation.csproj">
+      <Project>{03082D83-3645-4CF8-A1C7-BD4B5CFC7FE0}</Project>
+      <Name>MyNN.MLP.DropConnect.ForwardPropagation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP\MyNN.MLP.csproj">
       <Project>{3fff29db-d717-48cb-a221-37f3e397a80e}</Project>
       <Name>MyNN.MLP</Name>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MyNN.Common.Other;
 using MyNN.MLP.DropConnect.WeightMask;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
@@ -37,7 +38,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
                     //проверяем, что маска изменяется
                     if (previousBitMask != 0)
                     {
-                        if (previousBitMask == (uint)Math.Pow(2, 31))
+                        if (previousBitMask == (uint) Math.Pow(2, 31))
                         {
                             if (mask != 1)
                             {
@@ -46,7 +47,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
                         }
                         else
                         {
-                            if (previousBitMask * 2 != mask)
+                            if (previousBitMask*2 != mask)
                             {
                                 throw new InternalTestFailureException(
                                     "Следующая маска должна быть в два раза больше предыдущей");
@@ -54,17 +55,17 @@ namespace MyNN.Tests.MLP2.MaskContainers
                         }
                     }
 
-                    foreach (var w in container.MaskMem)
-                    {
-                        if (w != null)
-                        {
-                            var total = w.Array.Length;
-                            var ones = w.Array.Count(j => (j & mask) > 0);
+                    var maskMem = container.MaskMem;
 
-                            totalTotal += total;
-                            totalOnes += ones;
-                        }
-                    }
+                    var masked = maskMem.Array.ConvertAll(j => (j & mask));
+
+                    var total = masked.Length;
+                    var ones = masked.Count(j => j > 0);
+
+                    totalTotal += total;
+                    totalOnes += ones;
+
+                    previousBitMask = mask;
                 }
 
                 var result = (float) (totalOnes/(double) totalTotal);

@@ -115,8 +115,6 @@
     <Compile Include="MLP2\LayerPropagator\Classic\OpenCL\GPU\IntelCPUComputeLayerFixture.cs" />
     <Compile Include="MLP2\LayerPropagator\DropConnect\TrainItemForward\OpenCL\GPU2\IntelCPUComputeLayerFixture.cs" />
     <Compile Include="MLP2\LayerPropagator\DropConnect\TrainItemForward\OpenCL\GPU2\TestPurposeWeightMaskContainer.cs" />
-    <Compile Include="MLP2\MaskContainers2\BigArrayFixture.cs" />
-    <Compile Include="MLP2\MaskContainers2\MaskContainerTester.cs" />
     <Compile Include="MLP2\MaskContainers\BigArrayFixture.cs" />
     <Compile Include="MLP2\MaskContainers\MaskContainerTester.cs" />
     <Compile Include="MLP2\MLPConfigurationConstructor.cs" />
@@ -144,6 +142,10 @@
     <ProjectReference Include="..\MyNN.MLP.DropConnect.ForwardPropagation\MyNN.MLP.DropConnect.ForwardPropagation.csproj">
       <Project>{03082D83-3645-4CF8-A1C7-BD4B5CFC7FE0}</Project>
       <Name>MyNN.MLP.DropConnect.ForwardPropagation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.DropConnect.Inferencer\MyNN.MLP.DropConnect.Inferencer.csproj">
+      <Project>{a8501494-9230-4fb0-b2f7-e84b31e9e63a}</Project>
+      <Name>MyNN.MLP.DropConnect.Inferencer</Name>
     </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.DropConnect.WeightMask\MyNN.MLP.DropConnect.WeightMask.csproj">
       <Project>{EBEFFE64-2B8B-4184-BF79-CB247064E1D4}</Project>

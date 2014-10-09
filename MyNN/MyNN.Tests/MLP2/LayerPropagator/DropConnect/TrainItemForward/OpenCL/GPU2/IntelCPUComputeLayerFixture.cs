@@ -3,7 +3,8 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
-using MyNN.MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2;
+using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU;
+using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPropagator;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Neuron.Factory;
@@ -38,7 +39,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
+                DropConnectLayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -99,7 +100,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
+                DropConnectLayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -160,7 +161,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
+                DropConnectLayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -222,7 +223,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
+                DropConnectLayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -291,7 +292,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 Layer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
-                MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp;
+                DropConnectLayerPropagator lp;
                 ConstuctComponents(
                     clProvider,
                     nf,
@@ -349,7 +350,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
             out Layer currentLayer, 
             out MemLayerContainer plc,
             out MemLayerContainer clc,
-            out MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator lp)
+            out DropConnectLayerPropagator lp)
         {
             if (clProvider == null)
             {
@@ -403,7 +404,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GP
                 fillFunc
                 );
 
-            lp = new MLP.DropConnect.ForwardPropagation.TrainItemForward.OpenCL.GPU2.LayerPropagator(
+            lp = new DropConnectLayerPropagator(
                 clProvider,
                 ks,
                 mc,

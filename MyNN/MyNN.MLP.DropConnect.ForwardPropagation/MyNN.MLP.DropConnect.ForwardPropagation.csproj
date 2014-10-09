@@ -42,31 +42,30 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Inference\CSharp\CorrectInferencer.cs" />
-    <Compile Include="Inference\CSharp\NaiveLayerInferencer.cs" />
-    <Compile Include="Inference\ILayerInferencer.cs" />
-    <Compile Include="Inference\InferenceOpenCLForwardPropagation.cs" />
-    <Compile Include="Inference\OpenCL\CPU\DefaultLayerInferencer.cs" />
-    <Compile Include="Inference\OpenCL\CPU\NaiveLayerInferencer.cs" />
-    <Compile Include="Inference\OpenCL\CPU\VectorizedLayerInferencer.cs" />
-    <Compile Include="Inference\OpenCL\GPU2\KernelSource.cs" />
-    <Compile Include="Inference\OpenCL\GPU2\LayerPropagator.cs" />
-    <Compile Include="Inference\OpenCL\GPU2\PropagatorComponentConstructor.cs" />
-    <Compile Include="Inference\OpenCL\GPU\GPULayerInferencer.cs" />
+    <Compile Include="Inference\OpenCL\CPU\KernelSource.cs" />
+    <Compile Include="Inference\OpenCL\CPU\LayerPropagator.cs" />
+    <Compile Include="Inference\OpenCL\CPU\PropagatorComponentConstructor.cs" />
+    <Compile Include="Inference\OpenCL\GPU\KernelSource.cs" />
+    <Compile Include="Inference\OpenCL\GPU\LayerPropagator.cs" />
+    <Compile Include="Inference\OpenCL\GPU\PropagatorComponentConstructor.cs" />
+    <Compile Include="MaskForward\OpenCL\CPU\KernelSource.cs" />
+    <Compile Include="MaskForward\OpenCL\CPU\LayerPropagator\DropConnectLayerPropagator.cs" />
+    <Compile Include="MaskForward\OpenCL\CPU\LayerPropagator\IDropConnectLayerPropagator.cs" />
+    <Compile Include="MaskForward\OpenCL\CPU\PropagatorComponentConstructor.cs" />
+    <Compile Include="MaskForward\OpenCL\GPU\LayerPropagator\IDropConnectLayerPropagator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrainItemForward\OpenCL\CPU\DropConnectOpenCLForwardPropagation.cs" />
-    <Compile Include="TrainItemForward\OpenCL\CPU\Factory\CPUDropConnectForwardPropagationFactory.cs" />
-    <Compile Include="TrainItemForward\OpenCL\GPU2\KernelSource.cs" />
-    <Compile Include="TrainItemForward\OpenCL\GPU2\LayerPropagator.cs" />
-    <Compile Include="TrainItemForward\OpenCL\GPU2\PropagatorComponentConstructor.cs" />
-    <Compile Include="WeightMaskContainer2\BigArrayWeightMaskContainer2.cs" />
-    <Compile Include="WeightMaskContainer2\Factory\IOpenCLWeightBitMaskContainer2Factory.cs" />
-    <Compile Include="WeightMaskContainer2\IOpenCLWeightMaskContainer2.cs" />
+    <Compile Include="MaskForward\OpenCL\GPU\KernelSource.cs" />
+    <Compile Include="MaskForward\OpenCL\GPU\LayerPropagator\DropConnectLayerPropagator.cs" />
+    <Compile Include="MaskForward\OpenCL\GPU\PropagatorComponentConstructor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyNN.Common\MyNN.Common.csproj">
       <Project>{2E34B41A-E15F-434C-9554-9BDF5F4ECCC9}</Project>
       <Name>MyNN.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.DropConnect.Inferencer\MyNN.MLP.DropConnect.Inferencer.csproj">
+      <Project>{a8501494-9230-4fb0-b2f7-e84b31e9e63a}</Project>
+      <Name>MyNN.MLP.DropConnect.Inferencer</Name>
     </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.DropConnect.WeightMask\MyNN.MLP.DropConnect.WeightMask.csproj">
       <Project>{EBEFFE64-2B8B-4184-BF79-CB247064E1D4}</Project>

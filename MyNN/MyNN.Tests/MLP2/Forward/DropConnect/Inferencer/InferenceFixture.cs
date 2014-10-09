@@ -1,13 +1,13 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.OutputConsole;
-using MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.CPU;
-using MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU;
+using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU;
+using MyNN.MLP.DropConnect.Inferencer.OpenCL.GPU;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
-using NaiveLayerInferencer = MyNN.MLP.DropConnect.ForwardPropagation.Inference.CSharp.NaiveLayerInferencer;
+using NaiveLayerInferencer = MyNN.MLP.DropConnect.Inferencer.CSharp.NaiveLayerInferencer;
 
 namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
 {
@@ -74,7 +74,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
         [TestMethod]
         public void OpenCLCPUNaiveLayerInferencerTest()
         {
-            var tester = new InferencerTester<MLP.DropConnect.ForwardPropagation.Inference.OpenCL.CPU.NaiveLayerInferencer>(
+            var tester = new InferencerTester<MLP.DropConnect.Inferencer.OpenCL.CPU.NaiveLayerInferencer>(
                 );
 
             float[] orig;

@@ -31,6 +31,8 @@ namespace MyNNConsoleApp
                 //TrainAutoencoder2D.DoTrain();
                 //TrainMLPOnSDAE.DoTrain();
 
+                TrainCPUDropConnect.DoTrain();
+
                 /*
 
                 using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(false), true))
