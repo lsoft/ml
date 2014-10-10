@@ -62,10 +62,9 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
                 throw new ArgumentNullException("mlp");
             }
 
-            var result = new List<IOpenCLWeightMaskContainer>();
-            result.Add(null); //для первого слоя нет маски
-
             var layerCount = mlp.Layers.Length;
+
+            var result = new IOpenCLWeightMaskContainer[layerCount];
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
@@ -74,11 +73,11 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
                     mlp.Layers[layerIndex].GetConfiguration()
                     );
 
-                result.Add(maskContainer);
+                result[layerIndex] = maskContainer;
             }
 
             return
-                result.ToArray();
+                result;
         }
 
         private ILayerPropagator[] CreatePropagatorsByMLP(

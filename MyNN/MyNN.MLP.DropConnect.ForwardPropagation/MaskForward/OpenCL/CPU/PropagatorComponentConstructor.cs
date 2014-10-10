@@ -67,8 +67,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
 
             var result = new IOpenCLWeightMaskContainer[layerCount];
 
-            Parallel.For(1, layerCount, layerIndex =>
-            //for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
+            for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
                 var maskContainer = _maskContainerFactory.CreateContainer(
                     mlp.Layers[layerIndex - 1].GetConfiguration(),
@@ -77,7 +76,6 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
 
                 result[layerIndex] = maskContainer;
             }
-            ); //Parallel.For
 
             return
                 result;
