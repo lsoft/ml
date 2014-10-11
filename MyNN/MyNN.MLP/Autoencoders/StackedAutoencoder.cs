@@ -5,6 +5,7 @@ using MyNN.Common.Data;
 using MyNN.Common.Data.Set;
 using MyNN.Common.Data.Set.Item;
 using MyNN.Common.Data.TrainDataProvider;
+using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.Backpropagation.Validation;
@@ -32,7 +33,7 @@ namespace MyNN.MLP.Autoencoders
         private readonly Func<int, IDataSet, IArtifactContainer, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
         private readonly IBackpropagationFactory _backpropagationFactory;
-        private readonly IForwardPropagationFactory _forwardPropagationFactory;
+        private readonly Func<CLProvider, IForwardPropagationFactory> _forwardPropagationFactoryFunc;
         private readonly LayerInfo[] _layerInfos;
 
         public StackedAutoencoder(
@@ -45,7 +46,7 @@ namespace MyNN.MLP.Autoencoders
             Func<int, IDataSet, IArtifactContainer, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
             IBackpropagationFactory backpropagationFactory,
-            IForwardPropagationFactory forwardPropagationFactory,
+            Func<CLProvider, IForwardPropagationFactory> forwardPropagationFactoryFunc,
             params LayerInfo[] layerInfos)
         {
             if (deviceChooser == null)
@@ -80,9 +81,9 @@ namespace MyNN.MLP.Autoencoders
             {
                 throw new ArgumentNullException("configFactory");
             }
-            if (forwardPropagationFactory == null)
+            if (forwardPropagationFactoryFunc == null)
             {
-                throw new ArgumentNullException("forwardPropagationFactory");
+                throw new ArgumentNullException("forwardPropagationFactoryFunc");
             }
             if (layerInfos == null)
             {
@@ -106,7 +107,7 @@ namespace MyNN.MLP.Autoencoders
             _validationFactory = validationFactory;
             _configFactory = configFactory;
             _backpropagationFactory = backpropagationFactory;
-            _forwardPropagationFactory = forwardPropagationFactory;
+            _forwardPropagationFactoryFunc = forwardPropagationFactoryFunc;
             _layerInfos = layerInfos;
         }
 
@@ -187,7 +188,7 @@ namespace MyNN.MLP.Autoencoders
                 var config = _configFactory(depthIndex);
 
                 //обучаем автоенкодер
-                using (var clProvider = new CLProvider())
+                using (var clProvider = new CLProvider(_deviceChooser, true))
                 {
                     var algo = _backpropagationFactory.CreateBackpropagation(
                         _randomizer,
@@ -219,24 +220,29 @@ namespace MyNN.MLP.Autoencoders
                     //обновляем обучающие данные (от исходного множества, чтобы без применения возможных деформаций)
                     mlp.AutoencoderCutTail();
 
-                    var forward = _forwardPropagationFactory.Create(
-                        _randomizer,
-                        mlp);
+                    using (var clProvider = new CLProvider(_deviceChooser, true))
+                    {
+                        var forwardPropagationFactory = _forwardPropagationFactoryFunc(clProvider);
 
-                    var nextTrain = forward.ComputeOutput(processingTrainData);
-                    var newTrainData = new DataSet(
-                        trainData,
-                        nextTrain.ConvertAll(j => j.NState),
-                        _dataItemFactory);
-                    processingTrainData = newTrainData;
+                        var forward = forwardPropagationFactory.Create(
+                            _randomizer,
+                            mlp);
 
-                    //обновляем валидационные данные (от исходного множества, чтобы без применения возможных деформаций)
-                    var nextValidation = forward.ComputeOutput(processingValidationData);
-                    var newValidationData = new DataSet(
-                        validationData,
-                        nextValidation.ConvertAll(j => j.NState),
-                        _dataItemFactory);
-                    processingValidationData = newValidationData;
+                        var nextTrain = forward.ComputeOutput(processingTrainData);
+                        var newTrainData = new DataSet(
+                            trainData,
+                            nextTrain.ConvertAll(j => j.NState),
+                            _dataItemFactory);
+                        processingTrainData = newTrainData;
+
+                        //обновляем валидационные данные (от исходного множества, чтобы без применения возможных деформаций)
+                        var nextValidation = forward.ComputeOutput(processingValidationData);
+                        var newValidationData = new DataSet(
+                            validationData,
+                            nextValidation.ConvertAll(j => j.NState),
+                            _dataItemFactory);
+                        processingValidationData = newValidationData;
+                    }
                 }
             }
 
@@ -250,29 +256,34 @@ namespace MyNN.MLP.Autoencoders
             var combinedNet = _mlpFactory.CreateMLP(
                 sdaeName,
                 layerList);
-            
-            var finalForward = _forwardPropagationFactory.Create(
-                _randomizer,
-                combinedNet);
 
-            //валидируем его
-            var finalValidation = _validationFactory(
-                0,
-                validationData,
-                sdaeContainer);
+            using (var clProvider = new CLProvider(_deviceChooser, true))
+            {
+                var forwardPropagationFactory = _forwardPropagationFactoryFunc(clProvider);
 
-            var finalAccuracy = finalValidation.Validate(
-                finalForward,
-                0,
-                sdaeContainer
-                );
+                var finalForward = forwardPropagationFactory.Create(
+                    _randomizer,
+                    combinedNet);
 
-            //сохраняем
-            _mlpContainerHelper.SaveMLP(
-                sdaeContainer,
-                combinedNet,
-                finalAccuracy
-                );
+                //валидируем его
+                var finalValidation = _validationFactory(
+                    0,
+                    validationData,
+                    sdaeContainer);
+
+                var finalAccuracy = finalValidation.Validate(
+                    finalForward,
+                    0,
+                    sdaeContainer
+                    );
+
+                //сохраняем
+                _mlpContainerHelper.SaveMLP(
+                    sdaeContainer,
+                    combinedNet,
+                    finalAccuracy
+                    );
+            }
 
             return
                 combinedNet;

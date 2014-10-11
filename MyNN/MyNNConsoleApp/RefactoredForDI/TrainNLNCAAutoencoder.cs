@@ -89,91 +89,88 @@ namespace MyNNConsoleApp.RefactoredForDI
             const float partTakeOfAccount = 0.5f;
 
             var mlpContainerHelper = new MLPContainerHelper();
+            
+            var sa = new StackedAutoencoder(
+                new IntelCPUDeviceChooser(),
+                mlpContainerHelper,
+                randomizer,
+                dataItemFactory,
+                mlpf,
+                (int depthIndex, IDataSet td) =>
+                {
+                    var tda = toa.Convert(td);
 
-            using (var clProvider = new CLProvider())
-            {
-                var sa = new StackedAutoencoder(
-                    new IntelCPUDeviceChooser(),
+                    var result =
+                        new ConverterTrainDataProvider(
+                            new ShuffleDataSetConverter(randomizer),
+                            new NoiseDataProvider(tda, noiser, dataItemFactory)
+                            );
+                    return
+                        result;
+                },
+                (int depthIndex, IDataSet vd, IArtifactContainer mlpContainer) =>
+                {
+                    var vda = toa.Convert(vd);
+
+                    return
+                        new Validation(
+                            new MetricsAccuracyCalculator(
+                                new RMSE(),
+                                vda),
+                            new GridReconstructDrawer(
+                                new MNISTVisualizer(),
+                                vda,
+                                300,
+                                100)
+                            );
+                },
+                (int depthIndex) =>
+                {
+                    var lr =
+                        depthIndex == 0
+                            ? 0.005f
+                            : 0.001f;
+
+                    var conf = new LearningAlgorithmConfig(
+                        new LinearLearningRate(lr, 0.99f),
+                        250,
+                        0.0f,
+                        25,
+                        0f,
+                        -0.0025f);
+
+                    return conf;
+                },
+                new CPUNLNCABackpropagationFactory(
                     mlpContainerHelper,
-                    randomizer,
-                    dataItemFactory,
-                    mlpf,
-                    (int depthIndex, IDataSet td) =>
-                    {
-                        var tda = toa.Convert(td);
+                    (data) =>
+                        new DodfCalculatorOpenCL(
+                            data,
+                            new VectorizedCpuDistanceDictCalculator() //generation 1
+                            ),
+                    1,
+                    lambda,
+                    partTakeOfAccount),
+                (clProvider) => new ForwardPropagationFactory(
+                    new CPUPropagatorComponentConstructor(
+                        clProvider,
+                        VectorizationSizeEnum.VectorizationMode16)),
+                new LayerInfo(firstLayerSize, new RLUFunction()),
+                new LayerInfo(400, new RLUFunction()),
+                new LayerInfo(800, new RLUFunction())
+                );
 
-                        var result =
-                            new ConverterTrainDataProvider(
-                                new ShuffleDataSetConverter(randomizer),
-                                new NoiseDataProvider(tda, noiser, dataItemFactory)
-                                );
-                        return
-                            result;
-                    },
-                    (int depthIndex, IDataSet vd, IArtifactContainer mlpContainer) =>
-                    {
-                        var vda = toa.Convert(vd);
-
-                        return
-                            new Validation(
-                                new MetricsAccuracyCalculator(
-                                    new RMSE(),
-                                    vda),
-                                new GridReconstructDrawer(
-                                    new MNISTVisualizer(),
-                                    vda,
-                                    300,
-                                    100)
-                                );
-                    },
-                    (int depthIndex) =>
-                    {
-                        var lr =
-                            depthIndex == 0
-                                ? 0.005f
-                                : 0.001f;
-
-                        var conf = new LearningAlgorithmConfig(
-                            new LinearLearningRate(lr, 0.99f),
-                            250,
-                            0.0f,
-                            25,
-                            0f,
-                            -0.0025f);
-
-                        return conf;
-                    },
-                    new CPUNLNCABackpropagationFactory(
-                        mlpContainerHelper,
-                        (data) =>
-                            new DodfCalculatorOpenCL(
-                                data,
-                                new VectorizedCpuDistanceDictCalculator() //generation 1
-                                ),
-                        1,
-                        lambda,
-                        partTakeOfAccount),
-                    new ForwardPropagationFactory(
-                        new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            VectorizationSizeEnum.VectorizationMode16)),
-                    new LayerInfo(firstLayerSize, new RLUFunction()),
-                    new LayerInfo(400, new RLUFunction()),
-                    new LayerInfo(800, new RLUFunction())
-                    );
-
-                var mlpName = string.Format(
-                    "nlnca_ae{0}.sdae",
-                    DateTime.Now.ToString("yyyyMMddHHmmss"));
+            var mlpName = string.Format(
+                "nlnca_ae{0}.sdae",
+                DateTime.Now.ToString("yyyyMMddHHmmss"));
 
 
-                var combinedNet = sa.Train(
-                    mlpName,
-                    new FileSystemArtifactContainer(".", serialization),
-                    trainData,
-                    validationData
-                    );
-            }
+            var combinedNet = sa.Train(
+                mlpName,
+                new FileSystemArtifactContainer(".", serialization),
+                trainData,
+                validationData
+                );
         }
     }
 }

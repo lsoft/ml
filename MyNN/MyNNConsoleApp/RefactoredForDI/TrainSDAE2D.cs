@@ -41,8 +41,8 @@ namespace MyNNConsoleApp.RefactoredForDI
     {
         public static void DoTrain()
         {
-            var dataItemFactory = new DenseDataItemFactory(); 
-            
+            var dataItemFactory = new DenseDataItemFactory();
+
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
                 int.MaxValue,
@@ -77,135 +77,132 @@ namespace MyNNConsoleApp.RefactoredForDI
                 serialization);
 
             var mlpContainerHelper = new MLPContainerHelper();
- 
-            using (var clProvider = new CLProvider())
-            {
-                var sdae = new StackedAutoencoder(
-                    new IntelCPUDeviceChooser(),
-                    mlpContainerHelper,
-                    randomizer,
-                    dataItemFactory,
-                    mlpfactory,
-                    (int depthIndex, IDataSet td) =>
+            
+            var sdae = new StackedAutoencoder(
+                new IntelCPUDeviceChooser(),
+                mlpContainerHelper,
+                randomizer,
+                dataItemFactory,
+                mlpfactory,
+                (int depthIndex, IDataSet td) =>
+                {
+                    var tda = toa.Convert(td);
+
+                    ITrainDataProvider result;
+
+                    if (depthIndex == 0)
                     {
-                        var tda = toa.Convert(td);
+                        var noiser2d = new SequenceNoiser(
+                            randomizer,
+                            false,
+                            new ElasticNoiser(randomizer, 100, 28, 28, true),
+                            new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                            new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                            new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                            new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                            new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, tda[0].InputLength))
+                            );
+                        //var noiser2d = new ElasticNoiser(randomizer, 100, 28, 28, true);
 
-                        ITrainDataProvider result;
-
-                        if (depthIndex == 0)
-                        {
-                            var noiser2d = new SequenceNoiser(
-                                randomizer,
-                                false,
-                                new ElasticNoiser(randomizer, 100, 28, 28, true),
-                                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, tda[0].InputLength)),
-                                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
-                                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, tda[0].InputLength)),
-                                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
-                                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, tda[0].InputLength))
+                        result =
+                            new ConverterTrainDataProvider(
+                                new ShuffleDataSetConverter(randomizer),
+                                new NoiseDataProvider(tda, noiser2d, dataItemFactory)
                                 );
-                            //var noiser2d = new ElasticNoiser(randomizer, 100, 28, 28, true);
+                    }
+                    else
+                    {
+                        var noiser = new SequenceNoiser(
+                            randomizer,
+                            true,
+                            new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                            new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                            new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                            new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
+                            new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, tda[0].InputLength))
+                            );
 
-                            result =
-                                new ConverterTrainDataProvider(
-                                    new ShuffleDataSetConverter(randomizer),
-                                    new NoiseDataProvider(tda, noiser2d, dataItemFactory)
-                                    );
-                        }
-                        else
-                        {
-                            var noiser = new SequenceNoiser(
-                                randomizer,
-                                true,
-                                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, tda[0].InputLength)),
-                                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
-                                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, tda[0].InputLength)),
-                                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, tda[0].InputLength)),
-                                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, tda[0].InputLength))
+                        result =
+                            new ConverterTrainDataProvider(
+                                new ShuffleDataSetConverter(randomizer),
+                                new NoiseDataProvider(tda, noiser, dataItemFactory)
                                 );
+                    }
 
-                            result =
-                                new ConverterTrainDataProvider(
-                                    new ShuffleDataSetConverter(randomizer),
-                                    new NoiseDataProvider(tda, noiser, dataItemFactory)
-                                    );
-                        }
+                    return
+                        result;
+                },
+                (int depthIndex, IDataSet vd, IArtifactContainer mlpContainer) =>
+                {
+                    var vda = toa.Convert(vd);
 
-                        return
-                            result;
-                    },
-                    (int depthIndex, IDataSet vd, IArtifactContainer mlpContainer) =>
+                    IValidation result;
+                    if (depthIndex == 0)
                     {
-                        var vda = toa.Convert(vd);
-
-                        IValidation result;
-                        if (depthIndex == 0)
-                        {
-                            result =
-                                new Validation(
-                                    new MetricsAccuracyCalculator(
-                                        new HalfSquaredEuclidianDistance(),
-                                        vda),
-                                    new GridReconstructDrawer(
-                                        new MNISTVisualizer(),
-                                        vda,
-                                        300,
-                                        100)
-                                    );
-                        }
-                        else
-                        {
-                            result =
-                                new Validation(
-                                    new MetricsAccuracyCalculator(
-                                        new HalfSquaredEuclidianDistance(),
-                                        vda),
-                                    null
-                                    );
-                        }
-
-                        return result;
-                    },
-                    (int depthIndex) =>
+                        result =
+                            new Validation(
+                                new MetricsAccuracyCalculator(
+                                    new HalfSquaredEuclidianDistance(),
+                                    vda),
+                                new GridReconstructDrawer(
+                                    new MNISTVisualizer(),
+                                    vda,
+                                    300,
+                                    100)
+                                );
+                    }
+                    else
                     {
-                        var lr =
-                            depthIndex == 0
-                                ? 0.005f
-                                : 0.001f;
+                        result =
+                            new Validation(
+                                new MetricsAccuracyCalculator(
+                                    new HalfSquaredEuclidianDistance(),
+                                    vda),
+                                null
+                                );
+                    }
 
-                        var conf = new LearningAlgorithmConfig(
-                            new LinearLearningRate(lr, 0.99f),
-                            1,
-                            0.0f,
-                            50,
-                            0f,
-                            -0.0025f);
+                    return result;
+                },
+                (int depthIndex) =>
+                {
+                    var lr =
+                        depthIndex == 0
+                            ? 0.005f
+                            : 0.001f;
 
-                        return conf;
-                    },
-                    new CPUBackpropagationFactory(
-                        mlpContainerHelper),
-                    new ForwardPropagationFactory(
-                        new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            VectorizationSizeEnum.VectorizationMode16)),
-                    new LayerInfo(784, new RLUFunction()),
-                    new LayerInfo(600, new RLUFunction()),
-                    new LayerInfo(600, new RLUFunction()),
-                    new LayerInfo(1200, new RLUFunction())
-                    );
+                    var conf = new LearningAlgorithmConfig(
+                        new LinearLearningRate(lr, 0.99f),
+                        1,
+                        0.0f,
+                        50,
+                        0f,
+                        -0.0025f);
 
-                var sdaeName = string.Format(
-                    "sdae2d{0}.sdae",
-                    DateTime.Now.ToString("yyyyMMddHHmmss"));
+                    return conf;
+                },
+                new CPUBackpropagationFactory(
+                    mlpContainerHelper),
+                (clProvider) => new ForwardPropagationFactory(
+                    new CPUPropagatorComponentConstructor(
+                        clProvider,
+                        VectorizationSizeEnum.VectorizationMode16)),
+                new LayerInfo(784, new RLUFunction()),
+                new LayerInfo(600, new RLUFunction()),
+                new LayerInfo(600, new RLUFunction()),
+                new LayerInfo(1200, new RLUFunction())
+                );
 
-                sdae.Train(
-                    sdaeName,
-                    rootContainer,
-                    trainData,
-                    validationData
-                    );
-            }
+            var sdaeName = string.Format(
+                "sdae2d{0}.sdae",
+                DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+            sdae.Train(
+                sdaeName,
+                rootContainer,
+                trainData,
+                validationData
+                );
         }
     }
 }

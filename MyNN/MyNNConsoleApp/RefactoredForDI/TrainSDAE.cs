@@ -88,83 +88,80 @@ namespace MyNNConsoleApp.RefactoredForDI
                 );
 
             var mlpContainerHelper = new MLPContainerHelper();
+            
+            var sdae = new StackedAutoencoder(
+                new IntelCPUDeviceChooser(),
+                mlpContainerHelper,
+                randomizer,
+                dataItemFactory,
+                mlpfactory,
+                (int depthIndex, IDataSet td) =>
+                {
+                    var tda = toa.Convert(td);
 
-            using (var clProvider = new CLProvider())
-            {
-                var sdae = new StackedAutoencoder(
-                    new IntelCPUDeviceChooser(),
-                    mlpContainerHelper,
-                    randomizer,
-                    dataItemFactory,
-                    mlpfactory,
-                    (int depthIndex, IDataSet td) =>
-                    {
-                        var tda = toa.Convert(td);
+                    var result =
+                        new ConverterTrainDataProvider(
+                            new ShuffleDataSetConverter(randomizer),
+                            new NoiseDataProvider(tda, noiser, dataItemFactory)
+                            );
+                    return
+                        result;
+                },
+                (int depthIndex, IDataSet vd, IArtifactContainer mlpContainer) =>
+                {
+                    var vda = toa.Convert(vd);
 
-                        var result =
-                            new ConverterTrainDataProvider(
-                                new ShuffleDataSetConverter(randomizer),
-                                new NoiseDataProvider(tda, noiser, dataItemFactory)
-                                );
-                        return
-                            result;
-                    },
-                    (int depthIndex, IDataSet vd, IArtifactContainer mlpContainer) =>
-                    {
-                        var vda = toa.Convert(vd);
+                    return
+                        new Validation(
+                            new MetricsAccuracyCalculator(
+                                new HalfSquaredEuclidianDistance(),
+                                vda),
+                            new GridReconstructDrawer(
+                                new MNISTVisualizer(),
+                                vda,
+                                300,
+                                100)
+                            );
+                },
+                (int depthIndex) =>
+                {
+                    var lr =
+                        depthIndex == 0
+                            ? 0.005f
+                            : 0.001f;
 
-                        return
-                            new Validation(
-                                new MetricsAccuracyCalculator(
-                                    new HalfSquaredEuclidianDistance(),
-                                    vda),
-                                new GridReconstructDrawer(
-                                    new MNISTVisualizer(),
-                                    vda,
-                                    300,
-                                    100)
-                                );
-                    },
-                    (int depthIndex) =>
-                    {
-                        var lr =
-                            depthIndex == 0
-                                ? 0.005f
-                                : 0.001f;
+                    var conf = new LearningAlgorithmConfig(
+                        new LinearLearningRate(lr, 0.99f),
+                        1,
+                        0.0f,
+                        50,
+                        0f,
+                        -0.0025f);
 
-                        var conf = new LearningAlgorithmConfig(
-                            new LinearLearningRate(lr, 0.99f),
-                            1,
-                            0.0f,
-                            50,
-                            0f,
-                            -0.0025f);
+                    return conf;
+                },
+                new CPUBackpropagationFactory(
+                    mlpContainerHelper),
+                (clProvider) => new ForwardPropagationFactory(
+                    new CPUPropagatorComponentConstructor(
+                        clProvider,
+                        VectorizationSizeEnum.VectorizationMode16)),
+                new LayerInfo(784, new RLUFunction()),
+                new LayerInfo(1000, new RLUFunction()),
+                new LayerInfo(1000, new RLUFunction()),
+                new LayerInfo(2200, new RLUFunction())
+                );
 
-                        return conf;
-                    },
-                    new CPUBackpropagationFactory(
-                        mlpContainerHelper),
-                    new ForwardPropagationFactory(
-                        new CPUPropagatorComponentConstructor(
-                            clProvider,
-                            VectorizationSizeEnum.VectorizationMode16)),
-                    new LayerInfo(784, new RLUFunction()),
-                    new LayerInfo(1000, new RLUFunction()),
-                    new LayerInfo(1000, new RLUFunction()),
-                    new LayerInfo(2200, new RLUFunction())
-                    );
+            var sdaeName = string.Format(
+                "sdae{0}.sdae",
+                DateTime.Now.ToString("yyyyMMddHHmmss"));
 
-                var sdaeName = string.Format(
-                    "sdae{0}.sdae",
-                    DateTime.Now.ToString("yyyyMMddHHmmss"));
-
-                sdae.Train(
-                    sdaeName,
-                    rootContainer,
-                    trainData,
-                    validationData
-                    );
-            }
+            sdae.Train(
+                sdaeName,
+                rootContainer,
+                trainData,
+                validationData
+                );
         }
     }
 }
