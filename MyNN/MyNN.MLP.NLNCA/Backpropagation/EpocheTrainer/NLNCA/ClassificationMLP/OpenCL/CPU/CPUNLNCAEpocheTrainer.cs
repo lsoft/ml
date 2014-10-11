@@ -32,7 +32,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.O
         private readonly ILearningAlgorithmConfig _config;
 
         private readonly CLProvider _clProvider;
-        private readonly Func<List<DataItem>, IDodfCalculator> _dodfCalculatorFactory;
+        private readonly Func<List<IDataItem>, IDodfCalculator> _dodfCalculatorFactory;
 
         private MemFloat[] _deDz;
         private MemFloat[] _nablaWeights;
@@ -65,7 +65,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.O
             IMLP mlp,
             ILearningAlgorithmConfig config,
             CLProvider clProvider,
-            Func<List<DataItem>, IDodfCalculator> dodfCalculatorFactory
+            Func<List<IDataItem>, IDodfCalculator> dodfCalculatorFactory
             )
         {
             if (mlp == null)
@@ -260,12 +260,12 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.O
 
                 var nlncaOutput = _forwardPropagation.ComputeOutput(data);
 
-                var uzkii = new List<DataItem>();
+                var uzkii = new List<IDataItem>();
                 var uzkiiIndex = 0;
                 foreach (var d in nlncaOutput)
                 {
                     uzkii.Add(
-                        new DataItem(d.NState, data[uzkiiIndex].Output));
+                        new DenseDataItem(d.NState, data[uzkiiIndex].Output));
 
                     uzkiiIndex++;
                 }

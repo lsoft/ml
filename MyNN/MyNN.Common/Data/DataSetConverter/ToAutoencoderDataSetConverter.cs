@@ -13,7 +13,7 @@ namespace MyNN.Common.Data.DataSetConverter
 
             var result =
                 new DataSet(
-                    beforeTransformation.Data.ConvertAll(j => new DataItem(j.Input, j.Input))
+                    beforeTransformation.Data.ConvertAll(j => (IDataItem)new DenseDataItem(j.Input, j.Input))
                     );
 
             return result;

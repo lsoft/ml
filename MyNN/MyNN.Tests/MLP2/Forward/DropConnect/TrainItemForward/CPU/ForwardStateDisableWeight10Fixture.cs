@@ -71,9 +71,9 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //        var test = new ForwardStateTester();
 
     //        var dataset = new DataSet(
-    //            new List<DataItem>
+    //            new List<IDataItem>
     //            {
-    //                new DataItem(
+    //                new DenseDataItem(
     //                    new[] {0.75f},
     //                    new[] {1f})
     //            });
@@ -148,9 +148,9 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //        var test = new ForwardStateTester();
 
     //        var dataset = new DataSet(
-    //            new List<DataItem>
+    //            new List<IDataItem>
     //            {
-    //                new DataItem(
+    //                new DenseDataItem(
     //                    new[] {0.75f},
     //                    new[] {1f})
     //            });
@@ -225,9 +225,9 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //        var test = new ForwardStateTester();
 
     //        var dataset = new DataSet(
-    //            new List<DataItem>
+    //            new List<IDataItem>
     //            {
-    //                new DataItem(
+    //                new DenseDataItem(
     //                    new[] {0.75f},
     //                    new[] {1f})
     //            });

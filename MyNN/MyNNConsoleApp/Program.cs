@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using MyNN.Common.Estimator;
 using MyNNConsoleApp.RefactoredForDI;
 
 namespace MyNNConsoleApp
@@ -39,7 +41,7 @@ namespace MyNNConsoleApp
                 {
                     var randomizer = new DefaultRandomizer(1098);
 
-                    var dil = new List<DataItem>();
+                    var dil = new List<IDataItem>();
                     for (var cc = 0; cc < 100; cc++)
                     {
                         var iff = new float[5000];
@@ -47,7 +49,7 @@ namespace MyNNConsoleApp
 
                         var off = new float[] {0f};
 
-                        var di = new DataItem(
+                        var di = new DenseDataItem(
                             iff,
                             off);
 

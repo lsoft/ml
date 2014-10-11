@@ -14,7 +14,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
     /// </summary>
     public class OpenCLDistanceDictProvider : CLProvider
     {
-        private readonly List<DataItem> _fxwList;
+        private readonly new List<IDataItem> _fxwList;
         private readonly int _distanceMemElementCount;
 
         public MemInt IndexMem
@@ -38,7 +38,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
         public OpenCLDistanceDictProvider(
             IDeviceChooser deviceChooser,
             bool silentStart,
-            List<DataItem> fxwList,
+            List<IDataItem> fxwList,
             int distanceMemElementCount)
             : base(deviceChooser, silentStart)
         {

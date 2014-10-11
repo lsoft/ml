@@ -24,7 +24,7 @@ namespace MyNN.Common.Data.TypicalDataProvider
             var originalImagesCount = toDeformDataSet.Count;
             var newImagesCount = originalImagesCount * (deformationEpocheCount + 1);
 
-            var resultItemList = new List<DataItem>(newImagesCount + 100);
+            var resultItemList = new List<IDataItem>(newImagesCount + 100);
 
             for (var dd = 0; dd < deformationEpocheCount; dd++)
             {
@@ -67,7 +67,7 @@ namespace MyNN.Common.Data.TypicalDataProvider
 
                     //if (changed)
                     {
-                        resultItemList.Add(new DataItem(d1, o.Output));
+                        resultItemList.Add(new DenseDataItem(d1, o.Output));
                     }
                 }
 

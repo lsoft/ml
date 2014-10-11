@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 namespace MyNN.Common.Data
 {
-    public interface IDataSet : IEnumerable<DataItem>
+    public interface IDataSet : IEnumerable<IDataItem>
     {
-        List<DataItem> Data
+        List<IDataItem> Data
         {
             get;
         }
@@ -19,12 +19,12 @@ namespace MyNN.Common.Data
             get;
         }
 
-        int InputLength        
+        int InputLength
         {
             get;
         }
 
-        DataItem this[int i]
+        IDataItem this[int i]
         {
             get;
         }

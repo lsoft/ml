@@ -14,7 +14,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
     /// </summary>
     public class OpenCLDistanceDictHalfProvider : CLProvider
     {
-        private readonly List<DataItem> _fxwList;
+        private readonly new List<IDataItem> _fxwList;
 
         public MemInt IndexMem
         {
@@ -37,7 +37,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
         public OpenCLDistanceDictHalfProvider(
             IDeviceChooser deviceChooser, 
             bool silentStart, 
-            List<DataItem> fxwList)
+            List<IDataItem> fxwList)
                 : base(deviceChooser, silentStart)
         {
             if (fxwList == null)
@@ -52,7 +52,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
             this.WriteMems();
         }
 
-        public OpenCLDistanceDictHalfProvider(List<DataItem> fxwList)
+        public OpenCLDistanceDictHalfProvider(List<IDataItem> fxwList)
             : this(
                 new IntelCPUDeviceChooser(false),
                 true,

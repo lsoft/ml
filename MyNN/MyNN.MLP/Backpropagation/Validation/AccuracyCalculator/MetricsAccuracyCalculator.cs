@@ -46,13 +46,13 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
 
             netResults = forwardPropagation.ComputeOutput(_validationData);
 
-            //преобразуем в вид, когда в DataItem.Input - правильный ¬џ’ќƒ (обучаемый выход),
-            //а в DataItem.Output - –≈јЋ№Ќџ… выход, а их разница - ошибка обучени€
-            var d = new List<DataItem>(_validationData.Count + 1);
+            //преобразуем в вид, когда в DenseDataItem.Input - правильный ¬џ’ќƒ (обучаемый выход),
+            //а в DenseDataItem.Output - –≈јЋ№Ќџ… выход, а их разница - ошибка обучени€
+            var d = new List<IDataItem>(_validationData.Count + 1);
             for (var i = 0; i < _validationData.Count; i++)
             {
                 d.Add(
-                    new DataItem(
+                    new DenseDataItem(
                         _validationData[i].Output,
                         netResults[i].NState));
             }

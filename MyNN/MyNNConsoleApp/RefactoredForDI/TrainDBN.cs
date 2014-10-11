@@ -732,13 +732,13 @@ namespace MyNNConsoleApp.RefactoredForDI
                     throw new ArgumentNullException("beforeTransformation");
                 }
 
-                var newdiList = new List<DataItem>();
+                var newdiList = new List<IDataItem>();
                 foreach (var di in beforeTransformation)
                 {
                     _container.SetInput(di.Input);
                     var nextLayer = _algorithm.CalculateHidden();
 
-                    var newdi = new DataItem(
+                    var newdi = new DenseDataItem(
                         nextLayer,
                         di.Output);
 

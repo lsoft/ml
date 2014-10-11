@@ -9,7 +9,7 @@ namespace MyNN.Common.Other
 {
     public class SerializationHelper : ISerializationHelper
     {
-        public List<DataItem> ReadDataFromFile(string fileName, int totalCount)
+        public List<IDataItem> ReadDataFromFile(string fileName, int totalCount)
         {
             using (var reader = new BinaryReader(File.Open(fileName, FileMode.Open)))
             {
@@ -17,7 +17,7 @@ namespace MyNN.Common.Other
 
                 Console.WriteLine("Loading " + fileName + ", total: " + dataCount);
 
-                var result = new List<DataItem>(dataCount + 1);//1 - запас
+                var result = new List<IDataItem>(dataCount + 1);//1 - запас
 
                 for (var cc = 0; cc < dataCount; cc++)
                 {
@@ -36,7 +36,7 @@ namespace MyNN.Common.Other
                         o[oo] = reader.ReadSingle();
                     }
 
-                    var di = new DataItem(i, o);
+                    var di = new DenseDataItem(i, o);
                     result.Add(di);
                 }
 
@@ -44,7 +44,7 @@ namespace MyNN.Common.Other
             }
         }
 
-        public void SaveDataToFile(List<DataItem> obj, string fileName)
+        public void SaveDataToFile(List<IDataItem> obj, string fileName)
         {
             using (var writer = new BinaryWriter(File.Open(fileName, FileMode.Create)))
             {

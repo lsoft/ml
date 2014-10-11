@@ -51,11 +51,11 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.AccuracyCalculator.KNNTester
             //просчитываем обучающее множество
             var trainOutputList = forwardPropagation.ComputeOutput(_trainData);
 
-            var forknn = new List<DataItem>();
+            var forknn = new List<IDataItem>();
             for (var cc = 0; cc < trainOutputList.Count; cc++)
             {
                 forknn.Add(
-                    new DataItem(
+                    new DenseDataItem(
                         trainOutputList[cc].Take(takeIntoAccount).ToArray(),
                         _trainData[cc].Output));
             }

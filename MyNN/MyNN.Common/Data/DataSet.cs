@@ -8,7 +8,7 @@ namespace MyNN.Common.Data
     [Serializable]
     public class DataSet : IDataSet
     {
-        public List<DataItem> Data
+        public List<IDataItem> Data
         {
             get;
             private set;
@@ -61,11 +61,11 @@ namespace MyNN.Common.Data
 
         public DataSet()
         {
-            Data = new List<DataItem>();
+            Data = new List<IDataItem>();
         }
 
         public DataSet(
-            List<DataItem> data
+            List<IDataItem> data
             )
         {
             if (data == null)
@@ -93,7 +93,7 @@ namespace MyNN.Common.Data
 
             #endregion
 
-            Data = new List<DataItem>(dataSet.Data.Take(takeCount));
+            Data = new List<IDataItem>(dataSet.Data.Take(takeCount));
         }
 
         public DataSet(
@@ -116,16 +116,16 @@ namespace MyNN.Common.Data
                 throw new InvalidOperationException("ƒатасет и данные должны быть одного размера");
             }
 
-            this.Data = new List<DataItem>();
+            this.Data = new List<IDataItem>();
 
             for (var i = 0; i < dataSet.Count; i++)
             {
-                var di = new DataItem(inputPart[i], dataSet[i].Output);
+                var di = new DenseDataItem(inputPart[i], dataSet[i].Output);
                 this.Data.Add(di);
             }
         }
 
-        public DataItem this[int i]
+        public IDataItem this[int i]
         {
             get
             {
@@ -232,7 +232,7 @@ namespace MyNN.Common.Data
 
         #region get enumerator interface implementation
 
-        public IEnumerator<DataItem> GetEnumerator()
+        public IEnumerator<IDataItem> GetEnumerator()
         {
             return
                 this.Data.GetEnumerator();

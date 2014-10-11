@@ -14,7 +14,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
     /// </summary>
     public class DodfCalculatorOpenCL : IDodfCalculator
     {
-        private readonly List<DataItem> _fxwList;
+        private readonly List<IDataItem> _fxwList;
         private readonly int _len;
 
         private readonly Dictionary<int, List<int>> _fxwDict;
@@ -22,7 +22,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
 
 
         public DodfCalculatorOpenCL(
-            List<DataItem> fxwList,
+            List<IDataItem> fxwList,
             IDistanceDictCalculator distanceDictCalculator)
         {
             #region validate

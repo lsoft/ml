@@ -3,10 +3,10 @@ using System;
 namespace MyNN.Common.Data
 {
     [Serializable]
-    public class DataItem
+    public class DenseDataItem : IDataItem
     {
-        private float[] _input = null;
-        private float[] _output = null;
+        private readonly float[] _input;
+        private readonly float[] _output;
 
         public int InputLength
         {
@@ -45,26 +45,42 @@ namespace MyNN.Common.Data
             }
         }
 
-        public DataItem()
+        private DenseDataItem()
         {
         }
 
-        public DataItem(float[] input, float[] output)
+        public DenseDataItem(
+            float[] input,
+            float[] output
+            )
         {
+            if (input == null)
+            {
+                throw new ArgumentNullException("input");
+            }
+            if (output == null)
+            {
+                throw new ArgumentNullException("output");
+            }
+
             _input = input;
             _output = output;
         }
 
         public float[] Input
         {
-            get { return _input; }
-            set { _input = value; }
+            get
+            {
+                return _input;
+            }
         }
 
         public float[] Output
         {
-            get { return _output; }
-            set { _output = value; }
+            get
+            {
+                return _output;
+            }
         }
     }
     //*/

@@ -11,7 +11,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
     /// </summary>
     public class DodfCalculator : IDodfCalculator
     {
-        private readonly List<DataItem> _fxwList;
+        private readonly new List<IDataItem> _fxwList;
         private readonly int _len;
 
         private readonly Dictionary<int, List<int>> _fxwDict;
@@ -19,7 +19,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
 
 
         public DodfCalculator(
-            List<DataItem> fxwList)
+            List<IDataItem> fxwList)
         {
             #region validate
 

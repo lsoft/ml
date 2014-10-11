@@ -29,7 +29,7 @@ namespace MyNN.Common.Data.DataSetConverter
                 throw new ArgumentNullException("beforeTransformation");
             }
 
-            var cloned = new List<DataItem>(beforeTransformation.Data);
+            var cloned = new List<IDataItem>(beforeTransformation.Data);
             for (int i = 0; i < cloned.Count - 1; i++)
             {
                 if (_randomizer.Next() >= 0.5d)

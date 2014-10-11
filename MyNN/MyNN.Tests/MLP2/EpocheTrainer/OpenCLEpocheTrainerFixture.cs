@@ -77,9 +77,9 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
             var trainer = new EpocheTrainer_1_1_Test();
 
             var dataset = new DataSet(
-                new List<DataItem>
+                new List<IDataItem>
                 {
-                    new DataItem(
+                    new DenseDataItem(
                         new[] {0.5f},
                         new[] {2f})
                 });

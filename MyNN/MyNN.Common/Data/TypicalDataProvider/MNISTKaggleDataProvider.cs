@@ -17,7 +17,7 @@ namespace MyNN.Common.Data.TypicalDataProvider
             Console.Write("Processing images...");
             var till = DateTime.Now;
 
-            var resultList = new List<DataItem>();
+            var resultList = new List<IDataItem>();
 
             var c0 = File.ReadAllLines(Path.Combine(root, filename));
             var c1 = c0.Skip(1);
@@ -40,14 +40,18 @@ namespace MyNN.Common.Data.TypicalDataProvider
                     //Console.WriteLine(label);
                     //Console.WriteLine(pixels);
 
-                    var d = new DataItem();
-                    d.Input = pixels.ConvertAll(j => (float)j).ToArray();
-                    d.Output = new float[10];
+                    var dinput = pixels.ConvertAll(j => (float)j).ToArray();
+                    var doutput = new float[10];
 
                     for (var cc = 0; cc < 10; cc++)
                     {
-                        d.Output[cc] = cc == label ? 1.0f : 0.0f;
+                        doutput[cc] = cc == label ? 1.0f : 0.0f;
                     }
+
+                    var d = new DenseDataItem(
+                        dinput,
+                        doutput
+                        );
 
                     resultList.Add(d);
                 }
@@ -63,13 +67,16 @@ namespace MyNN.Common.Data.TypicalDataProvider
                     //Console.WriteLine(label);
                     //Console.WriteLine(pixels);
 
-                    var d = new DataItem();
-                    d.Input = pixels.ConvertAll(
+                    var input = pixels.ConvertAll(
                         j =>
                             binarize
                             ? (j >= 0.5f ? 1f : 0f)
                             : j).ToArray();
-                    d.Output = new float[10];
+                    var output = new float[10];
+
+                    var d = new DenseDataItem(
+                        input,
+                        output);
 
                     resultList.Add(d);
                 }

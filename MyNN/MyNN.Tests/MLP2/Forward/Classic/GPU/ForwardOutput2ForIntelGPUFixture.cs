@@ -72,9 +72,9 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
             var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
-                new List<DataItem>
+                new List<IDataItem>
                 {
-                    new DataItem(
+                    new DenseDataItem(
                         new[] {0.75f},
                         new[] {1f})
                 });
@@ -118,9 +118,9 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
             var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
-                new List<DataItem>
+                new List<IDataItem>
                 {
-                    new DataItem(
+                    new DenseDataItem(
                         new[] {2f},
                         new[] {1f})
                 });
@@ -164,9 +164,9 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
             var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
-                new List<DataItem>
+                new List<IDataItem>
                 {
-                    new DataItem(
+                    new DenseDataItem(
                         new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
                         new[] {1f})
                 });
@@ -216,9 +216,9 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
             var test = new ForwardOutputTester();
 
             var dataset = new DataSet(
-                new List<DataItem>
+                new List<IDataItem>
                 {
-                    new DataItem(
+                    new DenseDataItem(
                         new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
                         new[] {1f})
                 });

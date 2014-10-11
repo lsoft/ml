@@ -60,7 +60,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
 
         private float CalculateForDataItem(
             float[] weights, 
-            DataItem vd)
+            IDataItem vd)
         {
             if (weights == null)
             {
@@ -98,7 +98,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
 
         private float CalculateXj(
             float[] weights, 
-            DataItem vd, 
+            IDataItem vd, 
             int j)
         {
             var xj = 0f;
