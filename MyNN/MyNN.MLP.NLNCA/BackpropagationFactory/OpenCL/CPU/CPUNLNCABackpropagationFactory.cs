@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.Backpropagation;

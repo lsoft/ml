@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MyNN;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
@@ -33,11 +34,17 @@ namespace MyNNConsoleApp
     {
         public static void DoTrain()
         {
-            var toa = new ToAutoencoderDataSetConverter();
+            var dataItemFactory = new DenseDataItemFactory(); 
+            
+            var toa = new ToAutoencoderDataSetConverter(
+                dataItemFactory
+                );
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             trainData.Normalize();
 
@@ -45,7 +52,9 @@ namespace MyNNConsoleApp
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             validationData.Normalize();
 
@@ -75,7 +84,9 @@ namespace MyNNConsoleApp
                         mlpName,
                         clProvider,
                         new HalfSquaredEuclidianDistance(),
-                        validationData),
+                        validationData,
+                        dataItemFactory
+                        ),
                     new GridReconstructDrawer(
                         new MNISTVisualizer(),
                         validationData,
@@ -187,7 +198,8 @@ namespace MyNNConsoleApp
                                     return
                                         null;
                                 }
-                            })
+                            },
+                            dataItemFactory)
                         );
 
                 var mlpContainer = rootContainer.GetChildContainer(mlpName);

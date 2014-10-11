@@ -20,6 +20,9 @@ using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
@@ -50,15 +53,21 @@ namespace MyNNConsoleApp.RefactoredForDI
     {
         public static void DoTrainMLPOnAE()
         {
+            var dataItemFactory = new DenseDataItemFactory();
+
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             trainData.GNormalize();
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             validationData.GNormalize();
 
@@ -137,20 +146,25 @@ namespace MyNNConsoleApp.RefactoredForDI
 
         public static void DoTrainAutoencoder()
         {
-            var toa = new ToAutoencoderDataSetConverter();
+            var dataItemFactory = new DenseDataItemFactory(); 
+            
+            var toa = new ToAutoencoderDataSetConverter(
+                dataItemFactory);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                //100
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             trainData.GNormalize();
             trainData = toa.Convert(trainData);
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                //100
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             validationData.GNormalize();
             validationData = toa.Convert(validationData);
@@ -203,7 +217,7 @@ namespace MyNNConsoleApp.RefactoredForDI
             var trainDataProvider =
                 new ConverterTrainDataProvider(
                     new ShuffleDataSetConverter(randomizer),
-                    new NoiseDataProvider(trainData, noiser)
+                    new NoiseDataProvider(trainData, noiser, dataItemFactory)
                     );
 
             var dbnInformation = new FileDBNInformation(
@@ -254,15 +268,21 @@ namespace MyNNConsoleApp.RefactoredForDI
 
         public static void DoTrainMLPOnDBN()
         {
+            var dataItemFactory = new DenseDataItemFactory();
+
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             trainData.GNormalize();
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             validationData.GNormalize();
 
@@ -362,17 +382,21 @@ namespace MyNNConsoleApp.RefactoredForDI
         {
             var randomizer = new DefaultRandomizer(123);
 
+            var dataItemFactory = new DenseDataItemFactory();
+
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                //300
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             trainData.GNormalize();
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                //100
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             validationData.GNormalize();
 
@@ -385,7 +409,10 @@ namespace MyNNConsoleApp.RefactoredForDI
                     "dbn{0}",
                     DateTime.Now.ToString("yyyyMMddHHmmss")));
 
-            var rbmFactory = new RBMLNRELUCDFactory(randomizer);
+            var rbmFactory = new RBMLNRELUCDFactory(
+                randomizer,
+                dataItemFactory
+                );
 
             var dbn = new DBN(
                 dbnContainer,
@@ -431,18 +458,25 @@ namespace MyNNConsoleApp.RefactoredForDI
         {
             var randomizer = new DefaultRandomizer(123);
 
-            var binarizer = new BinarizeDataSetConverter(randomizer);
+            var dataItemFactory = new DenseDataItemFactory(); 
+            
+            var binarizer = new BinarizeDataSetConverter(
+                randomizer,
+                dataItemFactory
+                );
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                300
-                //int.MaxValue
+                300,
+                true,
+                dataItemFactory
                 );
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                100
-                //int.MaxValue
+                100,
+                true,
+                dataItemFactory
                 );
             validationData = binarizer.Convert(validationData);
 
@@ -455,7 +489,10 @@ namespace MyNNConsoleApp.RefactoredForDI
                     "dbn{0}",
                     DateTime.Now.ToString("yyyyMMddHHmmss")));
 
-            var rbmFactory = new RBMBBCDFactory(randomizer);
+            var rbmFactory = new RBMBBCDFactory(
+                randomizer,
+                dataItemFactory
+                );
 
             var dbn = new DBN(
                 dbnContainer,
@@ -480,7 +517,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                 (layerTrainData) =>
                     new ConverterTrainDataProvider(
                         new ListDataSetConverter( 
-                            new BinarizeDataSetConverter(randomizer),
+                            new BinarizeDataSetConverter(randomizer, dataItemFactory),
                             new ShuffleDataSetConverter(randomizer)),
                     new NoDeformationTrainDataProvider(layerTrainData));
 
@@ -515,17 +552,24 @@ namespace MyNNConsoleApp.RefactoredForDI
         private class RBMLNRELUCDFactory : IRBMFactory
         {
             private readonly IRandomizer _randomizer;
+            private readonly IDataItemFactory _dataItemFactory;
 
             public RBMLNRELUCDFactory(
-                IRandomizer randomizer
+                IRandomizer randomizer,
+                IDataItemFactory dataItemFactory
                 )
             {
                 if (randomizer == null)
                 {
                     throw new ArgumentNullException("randomizer");
                 }
+                if (dataItemFactory == null)
+                {
+                    throw new ArgumentNullException("dataItemFactory");
+                }
 
                 _randomizer = randomizer;
+                _dataItemFactory = dataItemFactory;
             }
 
             public void CreateRBM(
@@ -578,7 +622,9 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 forwardDataSetConverter = new ForwardDataSetConverter(
                     container,
-                    algorithm);
+                    algorithm,
+                    _dataItemFactory
+                    );
 
                 dataArrayConverter = new ImageReconstructorDataConverter(
                     container,
@@ -589,17 +635,24 @@ namespace MyNNConsoleApp.RefactoredForDI
         private class RBMBBCDFactory : IRBMFactory
         {
             private readonly IRandomizer _randomizer;
+            private readonly IDataItemFactory _dataItemFactory;
 
             public RBMBBCDFactory(
-                IRandomizer randomizer
+                IRandomizer randomizer,
+                IDataItemFactory dataItemFactory
                 )
             {
                 if (randomizer == null)
                 {
                     throw new ArgumentNullException("randomizer");
                 }
+                if (dataItemFactory == null)
+                {
+                    throw new ArgumentNullException("dataItemFactory");
+                }
 
                 _randomizer = randomizer;
+                _dataItemFactory = dataItemFactory;
             }
 
             public void CreateRBM(
@@ -658,7 +711,9 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 forwardDataSetConverter = new ForwardDataSetConverter(
                     container,
-                    algorithm);
+                    algorithm,
+                    _dataItemFactory
+                    );
 
                 dataArrayConverter = new ImageReconstructorDataConverter(
                     container,
@@ -707,10 +762,12 @@ namespace MyNNConsoleApp.RefactoredForDI
         {
             private readonly IContainer _container;
             private readonly IAlgorithm _algorithm;
+            private readonly IDataItemFactory _dataItemFactory;
 
             public ForwardDataSetConverter(
                 IContainer container,
-                IAlgorithm algorithm)
+                IAlgorithm algorithm,
+                IDataItemFactory dataItemFactory)
             {
                 if (container == null)
                 {
@@ -720,9 +777,14 @@ namespace MyNNConsoleApp.RefactoredForDI
                 {
                     throw new ArgumentNullException("algorithm");
                 }
+                if (dataItemFactory == null)
+                {
+                    throw new ArgumentNullException("dataItemFactory");
+                }
 
                 _container = container;
                 _algorithm = algorithm;
+                _dataItemFactory = dataItemFactory;
             }
 
             public IDataSet Convert(IDataSet beforeTransformation)
@@ -738,7 +800,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     _container.SetInput(di.Input);
                     var nextLayer = _algorithm.CalculateHidden();
 
-                    var newdi = new DenseDataItem(
+                    var newdi = _dataItemFactory.CreateDataItem(
                         nextLayer,
                         di.Output);
 

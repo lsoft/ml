@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TypicalDataProvider;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
@@ -24,12 +27,14 @@ namespace MyNNConsoleApp
         private readonly CLProvider _clProvider;
         private readonly IMetrics _metrics;
         private readonly IDataSet _validationData;
+        private readonly IDataItemFactory _dataItemFactory;
 
         public FeatureAndMetricsAccuracyCalculator(
             string mlpName,
             CLProvider clProvider,
             IMetrics metrics,
-            IDataSet validationData
+            IDataSet validationData,
+            IDataItemFactory dataItemFactory
             )
         {
             if (mlpName == null)
@@ -48,11 +53,16 @@ namespace MyNNConsoleApp
             {
                 throw new ArgumentNullException("validationData");
             }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
+            }
 
             _mlpName = mlpName;
             _clProvider = clProvider;
             _metrics = metrics;
             _validationData = validationData;
+            _dataItemFactory = dataItemFactory;
         }
 
         public void CalculateAccuracy(
@@ -73,7 +83,9 @@ namespace MyNNConsoleApp
                 new ForwardPropagationFactory(
                     new CPUPropagatorComponentConstructor(
                         _clProvider,
-                        VectorizationSizeEnum.VectorizationMode16)));
+                        VectorizationSizeEnum.VectorizationMode16)),
+                _dataItemFactory
+                );
 
             fff.Visualize(
                 new MNISTVisualizer(),
@@ -92,7 +104,7 @@ namespace MyNNConsoleApp
             for (var i = 0; i < _validationData.Count; i++)
             {
                 d.Add(
-                    new DenseDataItem(
+                    _dataItemFactory.CreateDataItem(
                         _validationData[i].Output,
                         netResults[i].NState));
             }

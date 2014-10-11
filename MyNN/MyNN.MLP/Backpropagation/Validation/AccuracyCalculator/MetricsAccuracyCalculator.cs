@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
+using MyNN.Common.Other;
 using MyNN.MLP.AccuracyRecord;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.ForwardPropagation;
@@ -48,17 +52,17 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
 
             //преобразуем в вид, когда в DenseDataItem.Input - правильный ¬џ’ќƒ (обучаемый выход),
             //а в DenseDataItem.Output - –≈јЋ№Ќџ… выход, а их разница - ошибка обучени€
-            var d = new List<IDataItem>(_validationData.Count + 1);
+            var d = new List<Pair<float[], float[]>>(_validationData.Count + 1);
             for (var i = 0; i < _validationData.Count; i++)
             {
                 d.Add(
-                    new DenseDataItem(
+                    new Pair<float[], float[]>(
                         _validationData[i].Output,
                         netResults[i].NState));
             }
 
             var totalError = d.AsParallel().Sum(
-                j => _metrics.Calculate(j.Input, j.Output));
+                j => _metrics.Calculate(j.First, j.Second));
 
             var perItemError = totalError / _validationData.Count;
 

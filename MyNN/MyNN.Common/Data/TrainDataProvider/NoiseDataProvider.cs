@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Other;
 
@@ -9,11 +12,14 @@ namespace MyNN.Common.Data.TrainDataProvider
     {
         private readonly IDataSet _trainData;
         private readonly INoiser _noiser;
+        private readonly IDataItemFactory _dataItemFactory;
         private readonly Func<int, INoiser> _noiserProvider;
 
         public NoiseDataProvider(
             IDataSet trainData,
-            INoiser noiser)
+            INoiser noiser,
+            IDataItemFactory dataItemFactory
+            )
         {
             if (trainData == null)
             {
@@ -23,15 +29,22 @@ namespace MyNN.Common.Data.TrainDataProvider
             {
                 throw new ArgumentNullException("noiser");
             }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
+            }
 
             _trainData = trainData;
             _noiser = noiser;
+            _dataItemFactory = dataItemFactory;
             _noiserProvider = null;
         }
 
         public NoiseDataProvider(
             IDataSet trainData,
-            Func<int, INoiser> noiserProvider)
+            Func<int, INoiser> noiserProvider,
+            IDataItemFactory dataItemFactory
+            )
         {
             if (trainData == null)
             {
@@ -41,10 +54,15 @@ namespace MyNN.Common.Data.TrainDataProvider
             {
                 throw new ArgumentNullException("noiserProvider");
             }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
+            }
 
             _trainData = trainData;
             _noiser = null;
             _noiserProvider = noiserProvider;
+            _dataItemFactory = dataItemFactory;
         }
 
         public IDataSet GetDataSet(int epocheNumber)
@@ -60,7 +78,7 @@ namespace MyNN.Common.Data.TrainDataProvider
                         ? noiser.ApplyNoise(d.Input)
                         : d.Input.CloneArray();
 
-                var di = new DenseDataItem(
+                var di = _dataItemFactory.CreateDataItem(
                     noisedData,
                     d.Output);
 

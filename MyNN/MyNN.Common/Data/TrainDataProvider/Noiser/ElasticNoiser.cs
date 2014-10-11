@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using MyNN.Common.Data.Set;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
 using OpenCvSharp;

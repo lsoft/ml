@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
@@ -266,6 +269,9 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.O
                 {
                     uzkii.Add(
                         new DenseDataItem(d.NState, data[uzkiiIndex].Output));
+                    //пускай здесь остается принудительно DenseDataItem, так как вряд ли
+                    //будет реалистичный сценарий, когда будет эффективнее другой тип
+                    //датаитема в этом месте
 
                     uzkiiIndex++;
                 }

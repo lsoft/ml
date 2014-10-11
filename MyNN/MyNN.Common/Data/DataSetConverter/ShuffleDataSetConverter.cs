@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
 using MyNN.Common.Randomizer;
 
 namespace MyNN.Common.Data.DataSetConverter

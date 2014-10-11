@@ -7,6 +7,8 @@ using MyNN;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
@@ -41,21 +43,29 @@ namespace MyNNConsoleApp.RefactoredForDI
     {
         public static void DoTrain()
         {
+            var dataItemFactory = new DenseDataItemFactory();
+
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                1000//int.MaxValue
+                1000,
+                true,
+                dataItemFactory
                 );
             trainData.Normalize();
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                300//int.MaxValue
+                300,
+                true,
+                dataItemFactory
                 );
             validationData.Normalize();
 
             var randomizer = new DefaultRandomizer(123);
 
-            var toa = new ToAutoencoderDataSetConverter();
+            var toa = new ToAutoencoderDataSetConverter(
+                dataItemFactory
+                );
 
             var noiser = new SequenceNoiser(
                 randomizer,
@@ -86,6 +96,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     new IntelCPUDeviceChooser(),
                     mlpContainerHelper,
                     randomizer,
+                    dataItemFactory,
                     mlpf,
                     (int depthIndex, IDataSet td) =>
                     {
@@ -94,7 +105,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                         var result =
                             new ConverterTrainDataProvider(
                                 new ShuffleDataSetConverter(randomizer),
-                                new NoiseDataProvider(tda, noiser)
+                                new NoiseDataProvider(tda, noiser, dataItemFactory)
                                 );
                         return
                             result;

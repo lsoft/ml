@@ -1,6 +1,7 @@
 ﻿using System;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TypicalDataProvider;
 using MyNN.Common.LearningRateController;
@@ -158,19 +159,29 @@ namespace MyNNConsoleApp.RefactoredForDI
         {
             var randomizer = new DefaultRandomizer(123);
 
+            var dataItemFactory = new DenseDataItemFactory();
+
             var binarizator = new BinarizeDataSetConverter(
-                randomizer);
-            var toa = new ToAutoencoderDataSetConverter();
+                randomizer,
+                dataItemFactory
+                )
+                ;
+            var toa = new ToAutoencoderDataSetConverter(
+                dataItemFactory);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                10//500
+                10,
+                true,
+                dataItemFactory
                 );
             trainData = toa.Convert(binarizator.Convert(trainData));
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                10
+                10,
+                true,
+                dataItemFactory
                 );
             validationData = toa.Convert(binarizator.Convert(validationData));
 

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.Visualizer;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
@@ -16,12 +19,14 @@ namespace MyNN.MLP
     {
         private readonly IMLP _mlp;
         private readonly IForwardPropagationFactory _forwardPropagationFactory;
+        private readonly IDataItemFactory _dataItemFactory;
         private readonly IRandomizer _randomizer;
 
         public FileSystemFeatureVisualization(
             IRandomizer randomizer,
             IMLP mlp,
-            IForwardPropagationFactory forwardPropagationFactory
+            IForwardPropagationFactory forwardPropagationFactory,
+            IDataItemFactory dataItemFactory
             )
         {
             if (randomizer == null)
@@ -36,10 +41,15 @@ namespace MyNN.MLP
             {
                 throw new ArgumentNullException("forwardPropagationFactory");
             }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
+            }
 
             _randomizer = randomizer;
             _mlp = mlp;
             _forwardPropagationFactory = forwardPropagationFactory;
+            _dataItemFactory = dataItemFactory;
         }
 
         public void Visualize(
@@ -88,7 +98,7 @@ namespace MyNN.MLP
 
                 var output = new float[1];
 
-                var di = new DenseDataItem(input, output);
+                var di = _dataItemFactory.CreateDataItem(input, output);
                 diList.Add(di);
             }
 

@@ -1,11 +1,17 @@
 using System.Collections.Generic;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
 
 namespace MyNN.Common.Other
 {
     public interface ISerializationHelper
     {
-        List<IDataItem> ReadDataFromFile(string fileName, int totalCount);
+        List<IDataItem> ReadDataFromFile(
+            string fileName, 
+            int totalCount,
+            IDataItemFactory dataItemFactory
+            );
 
         void SaveDataToFile(List<IDataItem> obj, string fileName);
 

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 
 namespace MyNN.Common.Data.TypicalDataProvider
 {
@@ -12,8 +15,23 @@ namespace MyNN.Common.Data.TypicalDataProvider
             string filename,
             bool isTrainSet,
             int maxCountFilesInCategory,
-            bool binarize = false)
+            bool binarize,
+            IDataItemFactory dataItemFactory
+            )
         {
+            if (root == null)
+            {
+                throw new ArgumentNullException("root");
+            }
+            if (filename == null)
+            {
+                throw new ArgumentNullException("filename");
+            }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
+            }
+
             Console.Write("Processing images...");
             var till = DateTime.Now;
 
@@ -48,7 +66,7 @@ namespace MyNN.Common.Data.TypicalDataProvider
                         doutput[cc] = cc == label ? 1.0f : 0.0f;
                     }
 
-                    var d = new DenseDataItem(
+                    var d = dataItemFactory.CreateDataItem(
                         dinput,
                         doutput
                         );
@@ -74,7 +92,7 @@ namespace MyNN.Common.Data.TypicalDataProvider
                             : j).ToArray();
                     var output = new float[10];
 
-                    var d = new DenseDataItem(
+                    var d = dataItemFactory.CreateDataItem(
                         input,
                         output);
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MyNN;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
@@ -31,18 +32,25 @@ namespace MyNNConsoleApp.RefactoredForDI
     {
         public static void DoTrain()
         {
-            var toa = new ToAutoencoderDataSetConverter();
+            var dataItemFactory = new DenseDataItemFactory();
+
+            var toa = new ToAutoencoderDataSetConverter(
+                dataItemFactory);
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             trainData.Normalize();
             trainData = toa.Convert(trainData);
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             validationData.Normalize();
             validationData = toa.Convert(validationData);
@@ -90,7 +98,7 @@ namespace MyNNConsoleApp.RefactoredForDI
             var trainDataProvider = 
                 new ConverterTrainDataProvider(
                     new ShuffleDataSetConverter(randomizer), 
-                    new NoiseDataProvider(trainData, noiser2d)
+                    new NoiseDataProvider(trainData, noiser2d, dataItemFactory)
                     );
 
             var mlp = serialization.LoadFromFile<MLP>(

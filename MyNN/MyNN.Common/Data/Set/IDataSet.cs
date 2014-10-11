@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using MyNN.Common.Data.Set.Item;
 
-namespace MyNN.Common.Data
+namespace MyNN.Common.Data.Set
 {
     public interface IDataSet : IEnumerable<IDataItem>
     {

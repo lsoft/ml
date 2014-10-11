@@ -2,6 +2,8 @@
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
@@ -24,6 +26,7 @@ namespace MyNN.MLP.Autoencoders
         private readonly IDeviceChooser _deviceChooser;
         private readonly IMLPContainerHelper _mlpContainerHelper;
         private readonly IRandomizer _randomizer;
+        private readonly IDataItemFactory _dataItemFactory;
         private readonly IMLPFactory _mlpFactory;
         private readonly Func<int, IDataSet, ITrainDataProvider> _dataProviderFactory;
         private readonly Func<int, IDataSet, IArtifactContainer, IValidation> _validationFactory;
@@ -36,6 +39,7 @@ namespace MyNN.MLP.Autoencoders
             IDeviceChooser deviceChooser,
             IMLPContainerHelper mlpContainerHelper,
             IRandomizer randomizer,
+            IDataItemFactory dataItemFactory,
             IMLPFactory mlpFactory,
             Func<int, IDataSet, ITrainDataProvider> dataProviderFactory,
             Func<int, IDataSet, IArtifactContainer, IValidation> validationFactory,
@@ -55,6 +59,10 @@ namespace MyNN.MLP.Autoencoders
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
+            }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
             }
             if (mlpFactory == null)
             {
@@ -92,6 +100,7 @@ namespace MyNN.MLP.Autoencoders
             _deviceChooser = deviceChooser;
             _mlpContainerHelper = mlpContainerHelper;
             _randomizer = randomizer;
+            _dataItemFactory = dataItemFactory;
             _mlpFactory = mlpFactory;
             _dataProviderFactory = dataProviderFactory;
             _validationFactory = validationFactory;
@@ -215,12 +224,18 @@ namespace MyNN.MLP.Autoencoders
                         mlp);
 
                     var nextTrain = forward.ComputeOutput(processingTrainData);
-                    var newTrainData = new DataSet(trainData, nextTrain.ConvertAll(j => j.NState));
+                    var newTrainData = new DataSet(
+                        trainData,
+                        nextTrain.ConvertAll(j => j.NState),
+                        _dataItemFactory);
                     processingTrainData = newTrainData;
 
                     //обновляем валидационные данные (от исходного множества, чтобы без применения возможных деформаций)
                     var nextValidation = forward.ComputeOutput(processingValidationData);
-                    var newValidationData = new DataSet(validationData, nextValidation.ConvertAll(j => j.NState));
+                    var newValidationData = new DataSet(
+                        validationData,
+                        nextValidation.ConvertAll(j => j.NState),
+                        _dataItemFactory);
                     processingValidationData = newValidationData;
                 }
             }

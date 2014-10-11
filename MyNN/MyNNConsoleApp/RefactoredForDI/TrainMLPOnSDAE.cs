@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MyNN;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TypicalDataProvider;
 using MyNN.Common.LearningRateController;
@@ -30,15 +31,21 @@ namespace MyNNConsoleApp.RefactoredForDI
     {
         public static void DoTrain()
         {
+            var dataItemFactory = new DenseDataItemFactory();
+
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             trainData.Normalize();
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                int.MaxValue
+                int.MaxValue,
+                true,
+                dataItemFactory
                 );
             validationData.Normalize();
 

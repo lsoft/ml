@@ -2,12 +2,13 @@ using System;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Other;
 
-namespace MyNN.Common.Data
+namespace MyNN.Common.Data.Set.Item.Lazy
 {
     [Serializable]
     public class LazyDataItem : IDataItem
     {
-        private readonly IDataItem _dataItem;
+        private readonly float[] _input;
+        private readonly float[] _output;
         private readonly INoiser _noiser;
         private readonly ISerializationHelper _serializationHelper;
 
@@ -16,7 +17,7 @@ namespace MyNN.Common.Data
             get
             {
                 return
-                    _dataItem.InputLength;
+                    this._input.Length;
             }
         }
 
@@ -25,7 +26,7 @@ namespace MyNN.Common.Data
             get
             {
                 return
-                    _dataItem.OutputLength;
+                    _output.Length;
             }
         }
 
@@ -33,8 +34,18 @@ namespace MyNN.Common.Data
         {
             get
             {
-                return
-                    _dataItem.OutputIndex;
+                var result = -1;
+
+                for (var cc = 0; cc < _output.Length; cc++)
+                {
+                    if (_output[cc] >= float.Epsilon)
+                    {
+                        result = cc;
+                        break;
+                    }
+                }
+
+                return result;
             }
         }
 
@@ -42,14 +53,14 @@ namespace MyNN.Common.Data
         {
             get
             {
-                //Запрашиваем массив из внутреннего итема
-                var inner = _dataItem.Input;
+                //клонируем массив, чтобы не испортить оригинал
+                var clonedInput = _input.CloneArray();
 
                 //клонировать надо, чтобы каждый запрос LazyDataItem.Input выдавал одно и то же
                 var clonedNoiser = _serializationHelper.DeepClone(_noiser);
 
                 //применяем шум
-                var result = clonedNoiser.ApplyNoise(inner);
+                var result = clonedNoiser.ApplyNoise(clonedInput);
 
                 return result;
             }
@@ -60,19 +71,24 @@ namespace MyNN.Common.Data
             get
             {
                 return
-                    _dataItem.Output;
+                    _output;
             }
         }
 
         public LazyDataItem(
-            IDataItem dataItem,
+            float[] input,
+            float[] output,
             INoiser noiser,
             ISerializationHelper serializationHelper
             )
         {
-            if (dataItem == null)
+            if (input == null)
             {
-                throw new ArgumentNullException("dataItem");
+                throw new ArgumentNullException("input");
+            }
+            if (output == null)
+            {
+                throw new ArgumentNullException("output");
             }
             if (noiser == null)
             {
@@ -83,7 +99,8 @@ namespace MyNN.Common.Data
                 throw new ArgumentNullException("serializationHelper");
             }
 
-            _dataItem = dataItem;
+            _input = input;
+            _output = output;
             _noiser = noiser;
             _serializationHelper = serializationHelper;
         }

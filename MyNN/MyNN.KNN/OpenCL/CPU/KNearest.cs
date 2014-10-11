@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
 using MyNN.Common.Other;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;

@@ -1,5 +1,6 @@
 using System;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
 
 namespace MyNN.KNN.OpenCL.CPU.Factory
 {

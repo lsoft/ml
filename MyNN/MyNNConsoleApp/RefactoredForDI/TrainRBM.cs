@@ -10,6 +10,7 @@ using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TypicalDataProvider;
 using MyNN.Common.LearningRateController;
@@ -24,16 +25,21 @@ namespace MyNNConsoleApp.RefactoredForDI
         {
             var randomizer = new DefaultRandomizer(123);
 
+            var dataItemFactory = new DenseDataItemFactory();
+
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                1000
-                //int.MaxValue
+                1000,
+                true,
+                dataItemFactory
                 );
             trainData.GNormalize();
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                300//int.MaxValue
+                300,
+                true,
+                dataItemFactory
                 );
             validationData.GNormalize();
 
@@ -103,17 +109,25 @@ namespace MyNNConsoleApp.RefactoredForDI
         {
             var randomizer = new DefaultRandomizer(123);
 
-            var binarizer = new BinarizeDataSetConverter(randomizer);
+            var dataItemFactory = new DenseDataItemFactory(); 
+            
+            var binarizer = new BinarizeDataSetConverter(
+                randomizer,
+                dataItemFactory
+                );
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                1000
-                //int.MaxValue
+                1000,
+                true,
+                dataItemFactory
                 );
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                300//int.MaxValue
+                300,
+                true,
+                dataItemFactory
                 );
             validationData = binarizer.Convert(validationData);
 
@@ -167,7 +181,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var trainDataProvider = new ConverterTrainDataProvider(
                 new ListDataSetConverter( 
-                    new BinarizeDataSetConverter(randomizer),
+                    new BinarizeDataSetConverter(randomizer, dataItemFactory),
                     new ShuffleDataSetConverter(randomizer)),
                 new NoDeformationTrainDataProvider(trainData)
                 );
