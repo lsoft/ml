@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyNN;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.DataSetConverter;
 using MyNN.Common.Data.TrainDataProvider;
@@ -26,27 +21,23 @@ using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 
-namespace MyNNConsoleApp.RefactoredForDI
+namespace MyNNConsoleApp
 {
-    public class TrainAutoencoder
+    public class TrainMLP
     {
         public static void DoTrain()
         {
-            var toa = new ToAutoencoderDataSetConverter();
-
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                100 //int.MaxValue
+                1000//int.MaxValue
                 );
             trainData.Normalize();
-            trainData = toa.Convert(trainData);
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                300 //int.MaxValue
+                300//int.MaxValue
                 );
             validationData.Normalize();
-            validationData = toa.Convert(validationData);
 
             var randomizer = new DefaultRandomizer(123);
 
@@ -62,7 +53,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                 serialization);
 
             var validation = new Validation(
-                new MetricsAccuracyCalculator( 
+                new ClassificationAccuracyCalculator(
                     new HalfSquaredEuclidianDistance(),
                     validationData),
                 new GridReconstructDrawer(
@@ -72,49 +63,51 @@ namespace MyNNConsoleApp.RefactoredForDI
                     100)
                 );
 
-            var config = new LearningAlgorithmConfig(
-                new LinearLearningRate(0.1f, 0.99f),
-                1,
-                0f,
-                15,
-                -1f,
-                -1f
-                );
+            using (var clProvider = new CLProvider())
+            {
+                var mlpName = string.Format(
+                    "justmlp{0}.mlp",
+                    DateTime.Now.ToString("yyyyMMddHHmmss"));
 
-            var trainDataProvider = 
-                new ConverterTrainDataProvider(
-                    new ShuffleDataSetConverter(randomizer), 
-                    new NoDeformationTrainDataProvider(trainData)
-                    );
-
-            var autoencoderName = string.Format(
-                "ae{0}.ae",
-                DateTime.Now.ToString("yyyyMMddHHmmss"));
-
-            var mlp = mlpfactory.CreateMLP(
-                autoencoderName,
-                new IFunction[]
+                var mlp = mlpfactory.CreateMLP(
+                    mlpName,
+                    new IFunction[]
                     {
                         null,
                         new SigmoidFunction(1f), 
                         new SigmoidFunction(1f), 
+                        new SigmoidFunction(1f), 
                     },
-                new int[]
+                    new int[]
                     {
                         784,
                         500,
-                        784
+                        500,
+                        10
                     });
 
-            var mlpContainer = rootContainer.GetChildContainer(autoencoderName);
+                var config = new LearningAlgorithmConfig(
+                    new LinearLearningRate(0.1f, 0.99f),
+                    1,
+                    0f,
+                    15,
+                    -1f,
+                    -1f
+                    );
 
-            var mlpContainerHelper = new MLPContainerHelper();
+                var trainDataProvider =
+                    new ConverterTrainDataProvider(
+                        new ShuffleDataSetConverter(randomizer),
+                        new NoDeformationTrainDataProvider(trainData)
+                        );
 
-            using (var clProvider = new CLProvider())
-            {
+                var mlpContainer = rootContainer.GetChildContainer(mlpName);
+
+                var mlpContainerHelper = new MLPContainerHelper();
+
                 var algo = new Backpropagation(
                     new CPUEpocheTrainer(
-                        VectorizationSizeEnum.VectorizationMode16,
+                        VectorizationSizeEnum.VectorizationMode16, 
                         mlp,
                         config,
                         clProvider),
@@ -122,9 +115,12 @@ namespace MyNNConsoleApp.RefactoredForDI
                     mlpContainer,
                     mlp,
                     validation,
-                    config);
+                    config
+                    );
 
-                algo.Train(trainDataProvider);
+                algo.Train(
+                    trainDataProvider
+                    );
             }
         }
     }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyNN;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
 using MyNN.Common.Data.DataSetConverter;
@@ -20,13 +17,11 @@ using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
 using MyNN.MLP.ForwardPropagationFactory;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
-using MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL;
-using MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation1;
-using MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU;
 using MyNN.MLP.Structure.Factory;
 using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Layer.Factory;
@@ -35,29 +30,69 @@ using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
-namespace MyNNConsoleApp.RefactoredForDI
+namespace MyNNConsoleApp
 {
-    public class TrainNLNCAAutoencoder
+    public class TrainSDAE
     {
         public static void DoTrain()
         {
-            var trainData = MNISTDataProvider.GetDataSet(
-                "_MNIST_DATABASE/mnist/trainingset/",
-                1000//int.MaxValue
+            var combinedData = SAMRDataProvider.GetDataSet(
+                "..\\..\\..\\..\\..\\data #1\\bin\\combineddata.bin",
+                int.MaxValue
                 );
-            trainData.Normalize();
 
-            var validationData = MNISTDataProvider.GetDataSet(
-                "_MNIST_DATABASE/mnist/testset/",
-                300//int.MaxValue
-                );
-            validationData.Normalize();
+            {
+                var randomizer2 = new DefaultRandomizer(898989);
+
+                for (int i = 0; i < combinedData.Count - 1; i++)
+                {
+                    if (randomizer2.Next() >= 0.5d)
+                    {
+                        var newIndex = randomizer2.Next(combinedData.Count);
+
+                        var tmp = combinedData[i];
+                        combinedData[i] = combinedData[newIndex];
+                        combinedData[newIndex] = tmp;
+                    }
+                }
+
+            }
+
+            combinedData = combinedData.Take(100000).ToList();
+
+            GC.Collect();
+
+            const int ItemSize = 17525;
+
+            var trainpart = (int)(0.9f * combinedData.Count);
+
+            var trainData = new DataSet(combinedData.Take(trainpart).ToList());
+            var validationData = new DataSet(combinedData.Skip(trainpart).ToList());
 
             var randomizer = new DefaultRandomizer(123);
 
+            var mlpfactory = new MLPFactory(
+                new LayerFactory(
+                    new NeuronFactory(
+                        randomizer)));
+
+            var serialization = new SerializationHelper();
+
             var toa = new ToAutoencoderDataSetConverter();
 
-            var noiser = new SequenceNoiser(
+            var rootContainer = new FileSystemArtifactContainer(
+                ".",
+                serialization);
+
+            var oneDepthNoiser = new SequenceNoiser(
+                randomizer,
+                true,
+                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
+                );
+
+            var deepDepthNoiser = new SequenceNoiser(
                 randomizer,
                 true,
                 new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
@@ -67,26 +102,15 @@ namespace MyNNConsoleApp.RefactoredForDI
                 new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
                 );
 
-            var serialization = new SerializationHelper();
-
-            var mlpf = new MLPFactory(
-                new LayerFactory(
-                    new NeuronFactory(
-                        randomizer)));
-
-            var firstLayerSize = trainData[0].Input.Length;
-            const float lambda = 0.5f;
-            const float partTakeOfAccount = 0.5f;
-
             var mlpContainerHelper = new MLPContainerHelper();
 
             using (var clProvider = new CLProvider())
             {
-                var sa = new StackedAutoencoder(
+                var sdae = new StackedAutoencoder(
                     new IntelCPUDeviceChooser(),
                     mlpContainerHelper,
                     randomizer,
-                    mlpf,
+                    mlpfactory,
                     (int depthIndex, IDataSet td) =>
                     {
                         var tda = toa.Convert(td);
@@ -94,7 +118,11 @@ namespace MyNNConsoleApp.RefactoredForDI
                         var result =
                             new ConverterTrainDataProvider(
                                 new ShuffleDataSetConverter(randomizer),
-                                new NoiseDataProvider(tda, noiser)
+                                new NoiseDataProvider(
+                                    tda, 
+                                    depthIndex == 0
+                                        ? oneDepthNoiser
+                                        : deepDepthNoiser)
                                 );
                         return
                             result;
@@ -106,25 +134,21 @@ namespace MyNNConsoleApp.RefactoredForDI
                         return
                             new Validation(
                                 new MetricsAccuracyCalculator(
-                                    new RMSE(),
+                                    new HalfSquaredEuclidianDistance(),
                                     vda),
-                                new GridReconstructDrawer(
-                                    new MNISTVisualizer(),
-                                    vda,
-                                    300,
-                                    100)
+                                null
                                 );
                     },
                     (int depthIndex) =>
                     {
                         var lr =
                             depthIndex == 0
-                                ? 0.005f
+                                ? 0.001f
                                 : 0.001f;
 
                         var conf = new LearningAlgorithmConfig(
                             new LinearLearningRate(lr, 0.99f),
-                            250,
+                            10,
                             0.0f,
                             25,
                             0f,
@@ -132,33 +156,25 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                         return conf;
                     },
-                    new CPUNLNCABackpropagationFactory(
-                        mlpContainerHelper,
-                        (data) =>
-                            new DodfCalculatorOpenCL(
-                                data,
-                                new VectorizedCpuDistanceDictCalculator() //generation 1
-                                ),
-                        1,
-                        lambda,
-                        partTakeOfAccount),
+                    new CPUBackpropagationFactory(
+                        mlpContainerHelper),
                     new ForwardPropagationFactory(
                         new CPUPropagatorComponentConstructor(
                             clProvider,
                             VectorizationSizeEnum.VectorizationMode16)),
-                    new LayerInfo(firstLayerSize, new RLUFunction()),
-                    new LayerInfo(400, new RLUFunction()),
-                    new LayerInfo(800, new RLUFunction())
+                    new LayerInfo(ItemSize, new RLUFunction()),
+                    new LayerInfo(3000, new RLUFunction()),
+                    new LayerInfo(3000, new RLUFunction()),
+                    new LayerInfo(6000, new RLUFunction())
                     );
 
-                var mlpName = string.Format(
-                    "nlnca_ae{0}.sdae",
+                var sdaeName = string.Format(
+                    "sdae{0}.sdae",
                     DateTime.Now.ToString("yyyyMMddHHmmss"));
 
-
-                var combinedNet = sa.Train(
-                    mlpName,
-                    new FileSystemArtifactContainer(".", serialization),
+                sdae.Train(
+                    sdaeName,
+                    rootContainer,
                     trainData,
                     validationData
                     );
