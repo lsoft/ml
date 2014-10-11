@@ -122,5 +122,63 @@ inline floatv {METHOD_NAME}(floatv incoming)
 
             return result;
         }
+
+        public string GetOpenCLDerivativeMethod(
+            string methodName,
+            VectorizationSizeEnum vse
+            )
+        {
+            if (methodName == null)
+            {
+                throw new ArgumentNullException("methodName");
+            }
+
+            const string methodBody = @"
+inline floatv {METHOD_NAME}(floatv incoming)
+{
+    const floatv one = 1.0;
+    const floatv lamda = {LAMBDA};
+    const floatv mu = {MU};
+
+    floatv emi = exp(mu * incoming);
+    floatv emi1 = emi + one;
+    floatv emi1sq = emi1 * emi1;
+
+    floatv eli = exp(lamda * incoming);
+
+    floatv result = (exp(incoming * (mu - lamda)) * (lamda * (emi + one)  + mu * (eli - one)) ) / emi1sq;
+
+    return result;
+}
+";
+
+            var vsize = VectorizationHelper.GetVectorizationSuffix(vse);
+
+            var result = methodBody;
+
+            result = result.Replace(
+                "floatv",
+                string.Format(
+                    "float{0}",
+                    vsize));
+
+            result = result.Replace(
+                "{LAMBDA}",
+                _lambda.ToString(CultureInfo.InvariantCulture)
+                );
+
+            result = result.Replace(
+                "{MU}",
+                _mu.ToString(CultureInfo.InvariantCulture)
+                );
+
+            result = result.Replace(
+                "{METHOD_NAME}",
+                methodName
+                );
+
+            return result;
+        }
+
     }
 }

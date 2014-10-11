@@ -96,5 +96,17 @@ inline floatv {METHOD_NAME}(floatv incoming)
             return result;
         }
 
+        public string GetOpenCLDerivativeMethod(
+            string methodName,
+            VectorizationSizeEnum vse
+            )
+        {
+            if (methodName == null)
+            {
+                throw new ArgumentNullException("methodName");
+            }
+
+            throw new NotImplementedException();
+        }
     }
 }

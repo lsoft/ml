@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using MyNN.Common.OpenCLHelper;
 
 namespace MyNN.MLP.Structure.Neuron.Function
@@ -102,5 +103,76 @@ inline floatv {METHOD_NAME}(floatv incoming)
             return result;
         }
 
+        public string GetOpenCLDerivativeMethod(
+            string methodName, 
+            VectorizationSizeEnum vse
+            )
+        {
+            if (methodName == null)
+            {
+                throw new ArgumentNullException("methodName");
+            }
+
+            const string methodBody = @"
+{ACTIVATION_METHOD}
+
+inline floatv {METHOD_NAME}(floatv incoming)
+{
+    const floatv one = 1.0;
+    const floatv alpha = {ALPHA};
+
+    floatv activation = {ACTIVATION_METHOD_NAME}(incoming);
+
+    floatv result = alpha * activation * (one - activation);
+
+    return result;
+}
+";
+
+
+            var activationKernelName =
+                string.Format(
+                    "ActivationKernel{0}",
+                    Guid.NewGuid());
+
+            activationKernelName = activationKernelName.Replace("-", "");
+
+            var activationKernel = this.GetOpenCLActivationMethod(
+                activationKernelName,
+                vse);
+
+
+            var vsize = VectorizationHelper.GetVectorizationSuffix(vse);
+
+            var result = methodBody;
+
+            result = result.Replace(
+                "{ACTIVATION_METHOD}",
+                activationKernel
+                );
+
+            result = result.Replace(
+                "{ACTIVATION_METHOD_NAME}",
+                activationKernelName
+                );
+
+            result = result.Replace(
+                "floatv",
+                string.Format(
+                    "float{0}",
+                    vsize));
+
+            result = result.Replace(
+                "{ALPHA}",
+                _alpha.ToString(CultureInfo.InvariantCulture)
+                );
+
+            result = result.Replace(
+                "{METHOD_NAME}",
+                methodName
+                );
+
+            return result;
+        }
     }
 }

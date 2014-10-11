@@ -49,6 +49,15 @@ namespace MyNN.MLP.Structure.Neuron
             {
                 throw new NotSupportedException("Для этой функции этот метод не должен быть вызван");
             }
+
+            public string GetOpenCLDerivativeMethod(
+                string methodName,
+                VectorizationSizeEnum vse
+                )
+            {
+                throw new NotSupportedException("Для этой функции этот метод не должен быть вызван");
+            }
+
         }
 
         #endregion

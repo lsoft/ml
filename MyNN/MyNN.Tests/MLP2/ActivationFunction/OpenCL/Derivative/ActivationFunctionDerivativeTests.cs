@@ -1,11 +1,13 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MyNN.Common.OpenCLHelper;
+using MyNN.Common.OutputConsole;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative
+namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative.newmethod
 {
     internal class ActivationFunctionDerivativeTests
     {
@@ -24,12 +26,20 @@ namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative
 
             using (var clProvider = new CLProvider())
             {
-                var diffk0 = DiffKernel.Replace("<activationFunction_leftValue>", f.GetOpenCLActivationFunction("leftValue"));
-                var diffk1 = diffk0.Replace("<activationFunction_rightValue>", f.GetOpenCLActivationFunction("rightValue"));
-                var diffk2 = diffk1.Replace("<activationFunction_derivative_cc>", f.GetOpenCLFirstDerivative("cc"));
+                var diffk = DiffKernel.Replace(
+                    "<GetDerivativeFunction>",
+                    f.GetOpenCLDerivativeMethod(
+                        "GetDerivativeFunction", 
+                        VectorizationSizeEnum.NoVectorization));
+
+                diffk = diffk.Replace(
+                    "<GetActivationFunction>",
+                    f.GetOpenCLActivationMethod(
+                        "GetActivationFunction",
+                        VectorizationSizeEnum.NoVectorization));
 
                 var diffKernel = clProvider.CreateKernel(
-                    diffk2,
+                    diffk,
                     "CalculateDiff");
 
                 var count = (int)((right - left) / step);
@@ -48,6 +58,12 @@ namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative
 
                 diffMem.Read(BlockModeEnum.Blocking);
 
+                ConsoleAmbientContext.Console.WriteLine(
+                    string.Format(
+                        "Разница: {0}",
+                        string.Join(
+                            "   ",
+                            diffMem.Array)));
 
                 for (var cc = 0; cc < diffMem.Array.Length; cc++)
                 {
@@ -61,10 +77,14 @@ namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative
 
 
         private const string DiffKernel = @"
+<GetActivationFunction>
+
+<GetDerivativeFunction>
+
 __kernel void CalculateDiff(
     __global float * diffMem,
-    float minValue,
-    float step)
+    const float minValue,
+    const float step)
 {
 
     float DeltaX = 0.01;
@@ -73,24 +93,19 @@ __kernel void CalculateDiff(
     float cc = minValue + kernelIndex * step;
 
     float leftValue = cc - DeltaX;
-    float left =
-        //f.Compute(leftValue);
-        <activationFunction_leftValue>;
+    float left = GetActivationFunction(leftValue);
 
     float rightValue = cc + DeltaX;
-    float right = 
-        //f.Compute(rightValue);
-        <activationFunction_rightValue>;
+    float right = GetActivationFunction(rightValue);
 
     float cDerivative = (right - left) / (2.0 * DeltaX);
-    float fDerivative = 
-        //f.ComputeFirstDerivative(cc);
-        <activationFunction_derivative_cc>;
+    float fDerivative = GetDerivativeFunction(cc);
 
     float diff = fabs(cDerivative - fDerivative);
 
     diffMem[kernelIndex] = diff;
 }
+
 ";
     }
 }

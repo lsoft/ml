@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP.Structure.Neuron.Function;
 
-namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative
+namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative.newmethod
 {
     /// <summary>
     /// Summary description for SparsifierOpenCLFixture

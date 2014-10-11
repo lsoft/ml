@@ -20,8 +20,19 @@ namespace MyNN.MLP.Structure.Neuron.Function
         /// </summary>
         /// <param name="methodName">Название метода</param>
         /// <param name="vse">Тип векторизации, применяемый в кернеле</param>
-        /// <returns></returns>
+        /// <returns>Текст метода</returns>
         string GetOpenCLActivationMethod(
+            string methodName,
+            VectorizationSizeEnum vse
+            );
+
+        /// <summary>
+        /// Получить функцию производной как метод
+        /// </summary>
+        /// <param name="methodName">Название метода</param>
+        /// <param name="vse">Тип векторизации, применяемый в кернеле</param>
+        /// <returns>Текст метода</returns>
+        string GetOpenCLDerivativeMethod(
             string methodName,
             VectorizationSizeEnum vse
             );
