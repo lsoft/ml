@@ -1,4 +1,6 @@
-﻿namespace MyNN.MLP.Structure.Neuron.Function
+﻿using MyNN.Common.OpenCLHelper;
+
+namespace MyNN.MLP.Structure.Neuron.Function
 {
     public interface IFunction
     {
@@ -12,5 +14,16 @@
 
         string GetOpenCLFirstDerivative(string varName);
         string GetOpenCLActivationFunction(string varName);
+
+        /// <summary>
+        /// Получить функцию активации как метод
+        /// </summary>
+        /// <param name="methodName">Название метода</param>
+        /// <param name="vse">Тип векторизации, применяемый в кернеле</param>
+        /// <returns></returns>
+        string GetOpenCLActivationMethod(
+            string methodName,
+            VectorizationSizeEnum vse
+            );
     }
 }

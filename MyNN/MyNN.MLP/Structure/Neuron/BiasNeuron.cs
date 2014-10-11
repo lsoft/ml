@@ -1,4 +1,5 @@
 ﻿using System;
+using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.MLP.Structure.Neuron
@@ -27,18 +28,26 @@ namespace MyNN.MLP.Structure.Neuron
 
             public float ComputeFirstDerivative(float x)
             {
-                throw new InvalidOperationException("Неприменимо");
+                throw new NotSupportedException("Для этой функции этот метод не должен быть вызван");
             }
 
             public string GetOpenCLFirstDerivative(string varName)
             {
-                throw new InvalidOperationException("Неприменимо");
+                throw new NotSupportedException("Для этой функции этот метод не должен быть вызван");
             }
 
             public string GetOpenCLActivationFunction(string varName)
             {
                 return
                     "(1.0)";
+            }
+
+            public string GetOpenCLActivationMethod(
+                string methodName,
+                VectorizationSizeEnum vse
+                )
+            {
+                throw new NotSupportedException("Для этой функции этот метод не должен быть вызван");
             }
         }
 

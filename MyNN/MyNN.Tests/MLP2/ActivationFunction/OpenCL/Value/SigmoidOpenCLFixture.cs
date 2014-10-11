@@ -1,16 +1,15 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP.Structure.Neuron.Function;
-using MyNN.Tests.MLP2.ActivationFunction.CSharp;
 
-namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL
+namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Value
 {
     /// <summary>
-    /// Summary description for HyperbolicTangensOpenCLFixture
+    /// Summary description for SigmoidOpenCLFixture
     /// </summary>
     [TestClass]
-    public class HyperbolicTangensOpenCLFixture
+    public class SigmoidOpenCLFixture
     {
-        public HyperbolicTangensOpenCLFixture()
+        public SigmoidOpenCLFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -58,20 +57,20 @@ namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL
         #endregion
 
         [TestMethod]
-        public void HyperbolicTangensTestWithOneOneCoef_OpenCL()
+        public void SigmoidTestWithOne_OpenCL()
         {
-            var sf = new HyperbolicTangensFunction(1f, 1f);
+            var sf = new SigmoidFunction(1f);
 
-            var tests = new ActivationFunctionDerivativeTests();
+            var tests = new ActivationFunctionValueTests();
             tests.ExecuteTests(sf);
         }
 
         [TestMethod]
-        public void HyperbolicTangensTestWithDefaultCoef_OpenCL()
+        public void SigmoidTestWithNotOne_OpenCL()
         {
-            var sf = new HyperbolicTangensFunction();
+            var sf = new SigmoidFunction(0.4567f);
 
-            var tests = new ActivationFunctionDerivativeOpenCLTests();
+            var tests = new ActivationFunctionValueTests();
             tests.ExecuteTests(sf);
         }
     }

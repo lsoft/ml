@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using MyNN.Common.OpenCLHelper;
 
 namespace MyNN.MLP.Structure.Neuron.Function
 {
@@ -47,6 +48,16 @@ namespace MyNN.MLP.Structure.Neuron.Function
             return fd;
         }
 
+        public string GetOpenCLFirstDerivative(string varName)
+        {
+            return
+                string.Format(
+                    "((exp({2} * ({1} - {0})) * ({0} * (exp({1} * {2}) + 1.0)  + {1} * (exp({0} * {2}) - 1.0)) ) / ((exp({1} * {2}) + 1.0)*(exp({1} * {2}) + 1.0)))",
+                    _lambda.ToString(CultureInfo.InvariantCulture),
+                    _mu.ToString(CultureInfo.InvariantCulture),
+                    varName);
+        }
+
         public string GetOpenCLActivationFunction(string varName)
         {
             return
@@ -57,14 +68,59 @@ namespace MyNN.MLP.Structure.Neuron.Function
                     varName);
         }
 
-        public string GetOpenCLFirstDerivative(string varName)
+        public string GetOpenCLActivationMethod(
+            string methodName, 
+            VectorizationSizeEnum vse
+            )
         {
-            return
+            if (methodName == null)
+            {
+                throw new ArgumentNullException("methodName");
+            }
+
+            const string methodBody = @"
+inline floatv {METHOD_NAME}(floatv incoming)
+{
+    const floatv one = 1.0;
+    const floatv mone = -1.0;
+    const floatv lamda = {LAMBDA};
+    const floatv mu = {MU};
+
+    floatv mul0 = mone * lamda * incoming;
+    floatv mul1 = mone * mu * incoming;
+
+    floatv result = (one - exp(mul0)) / (one + exp(mul1));
+
+    return result;
+}
+";
+
+            var vsize = VectorizationHelper.GetVectorizationSuffix(vse);
+
+            var result = methodBody;
+
+            result = result.Replace(
+                "floatv",
                 string.Format(
-                    "((exp({2} * ({1} - {0})) * ({0} * (exp({1} * {2}) + 1.0)  + {1} * (exp({0} * {2}) - 1.0)) ) / ((exp({1} * {2}) + 1.0)*(exp({1} * {2}) + 1.0)))",
-                    _lambda.ToString(CultureInfo.InvariantCulture),
-                    _mu.ToString(CultureInfo.InvariantCulture),
-                    varName);
+                    "float{0}",
+                    vsize));
+
+            result = result.Replace(
+                "{LAMBDA}",
+                _lambda.ToString(CultureInfo.InvariantCulture)
+                );
+
+            result = result.Replace(
+                "{MU}",
+                _mu.ToString(CultureInfo.InvariantCulture)
+                );
+
+            result = result.Replace(
+                "{METHOD_NAME}",
+                methodName
+                );
+
+            return result;
         }
     }
 }

@@ -4,6 +4,21 @@ namespace MyNN.Common.OpenCLHelper
 {
     public class VectorizationHelper
     {
+        public static string GetVectorizationSuffix(VectorizationSizeEnum vse)
+        {
+            switch (vse)
+            {
+                case VectorizationSizeEnum.NoVectorization:
+                    return string.Empty;
+                case VectorizationSizeEnum.VectorizationMode4:
+                    return "4";
+                case VectorizationSizeEnum.VectorizationMode16:
+                    return "16";
+                default:
+                    throw new ArgumentOutOfRangeException("vse");
+            }
+        }
+
         public static int GetVectorizationSize(VectorizationSizeEnum vse)
         {
             switch (vse)

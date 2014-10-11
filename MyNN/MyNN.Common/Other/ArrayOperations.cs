@@ -324,6 +324,34 @@ namespace MyNN.Common.Other
 
             return result;
         }
+
+        public static float[] DiffArrays(
+            float[] first,
+            float[] second
+            )
+        {
+            if (first == null)
+            {
+                throw new ArgumentNullException("first");
+            }
+            if (second == null)
+            {
+                throw new ArgumentNullException("second");
+            }
+            if (first.Length != second.Length)
+            {
+                throw new ArgumentException("first.Length != second.Length");
+            }
+
+            var result = new float[first.Length];
+
+            for (var cc = 0; cc < first.Length; cc++)
+            {
+                result[cc] = first[cc] - second[cc];
+            }
+
+            return result;
+        }
     }
 
 }

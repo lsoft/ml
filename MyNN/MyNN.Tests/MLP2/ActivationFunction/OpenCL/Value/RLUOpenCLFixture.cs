@@ -1,15 +1,15 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP.Structure.Neuron.Function;
 
-namespace MyNN.Tests.MLP2.ActivationFunction.CSharp
+namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Value
 {
     /// <summary>
-    /// Summary description for HyperbolicTangensFixture
+    /// Summary description for RLUOpenCLFixture
     /// </summary>
     [TestClass]
-    public class HyperbolicTangensFixture
+    public class RLUOpenCLFixture
     {
-        public HyperbolicTangensFixture()
+        public RLUOpenCLFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -57,20 +57,11 @@ namespace MyNN.Tests.MLP2.ActivationFunction.CSharp
         #endregion
 
         [TestMethod]
-        public void HyperbolicTangensTestWithOneOneCoef()
+        public void RLUTest_OpenCL()
         {
-            var sf = new HyperbolicTangensFunction(1f, 1f);
+            var sf = new RLUFunction();
 
-            var tests = new ActivationFunctionDerivativeTests();
-            tests.ExecuteTests(sf);
-        }
-
-        [TestMethod]
-        public void HyperbolicTangensTestWithDefaultCoef()
-        {
-            var sf = new HyperbolicTangensFunction();
-
-            var tests = new ActivationFunctionDerivativeTests();
+            var tests = new ActivationFunctionValueTests();
             tests.ExecuteTests(sf);
         }
     }

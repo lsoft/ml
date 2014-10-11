@@ -2,7 +2,7 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP.Structure.Neuron.Function;
 
-namespace MyNN.Tests.MLP2.ActivationFunction.CSharp
+namespace MyNN.Tests.MLP2.ActivationFunction.CSharp.Derivative
 {
     internal class ActivationFunctionDerivativeTests
     {

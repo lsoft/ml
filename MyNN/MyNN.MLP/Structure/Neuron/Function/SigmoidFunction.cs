@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using MyNN.Common.OpenCLHelper;
 
 namespace MyNN.MLP.Structure.Neuron.Function
 {
@@ -37,6 +38,17 @@ namespace MyNN.MLP.Structure.Neuron.Function
                 (float)(_alpha * computed * (1.0 - computed));
         }
 
+        public string GetOpenCLFirstDerivative(string varName)
+        {
+            var computed = this.GetOpenCLActivationFunction(varName);
+
+            return
+                string.Format(
+                    "({0} * {1} * (1.0 - {1}))",
+                    _alpha.ToString(CultureInfo.InvariantCulture),
+                    computed);
+        }
+
         public string GetOpenCLActivationFunction(string varName)
         {
             return
@@ -46,15 +58,49 @@ namespace MyNN.MLP.Structure.Neuron.Function
                     varName);
         }
 
-        public string GetOpenCLFirstDerivative(string varName)
+        public string GetOpenCLActivationMethod(
+            string methodName,
+            VectorizationSizeEnum vse)
         {
-            var computed = this.GetOpenCLActivationFunction(varName);
+            if (methodName == null)
+            {
+                throw new ArgumentNullException("methodName");
+            }
 
-            return
+            const string methodBody = @"
+inline floatv {METHOD_NAME}(floatv incoming)
+{
+    const floatv one = 1.0;
+    const floatv minusAlpha = -{ALPHA};
+
+    floatv result = one / (one + exp(minusAlpha * incoming));
+
+    return result;
+}
+";
+
+            var vsize = VectorizationHelper.GetVectorizationSuffix(vse);
+
+            var result = methodBody;
+
+            result = result.Replace(
+                "floatv",
                 string.Format(
-                    "({0} * {1} * (1.0 - {1}))", 
-                    _alpha.ToString(CultureInfo.InvariantCulture),
-                    computed);
+                    "float{0}",
+                    vsize));
+
+            result = result.Replace(
+                "{ALPHA}",
+                _alpha.ToString(CultureInfo.InvariantCulture)
+                );
+
+            result = result.Replace(
+                "{METHOD_NAME}", 
+                methodName
+                );
+
+            return result;
         }
+
     }
 }

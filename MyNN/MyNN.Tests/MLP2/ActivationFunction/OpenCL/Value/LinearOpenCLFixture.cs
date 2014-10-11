@@ -1,15 +1,15 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP.Structure.Neuron.Function;
 
-namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL
+namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Value
 {
     /// <summary>
-    /// Summary description for RLUOpenCLFixture
+    /// Summary description for LinearOpenCLFixture
     /// </summary>
     [TestClass]
-    public class RLUOpenCLFixture
+    public class LinearOpenCLFixture
     {
-        public RLUOpenCLFixture()
+        public LinearOpenCLFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -57,11 +57,20 @@ namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL
         #endregion
 
         [TestMethod]
-        public void RLUTest_OpenCL()
+        public void LinearTestWithOneCoef_OpenCL()
         {
-            var sf = new RLUFunction();
+            var sf = new LinearFunction(1f);
 
-            var tests = new ActivationFunctionDerivativeOpenCLTests();
+            var tests = new ActivationFunctionValueTests();
+            tests.ExecuteTests(sf);
+        }
+
+        [TestMethod]
+        public void LinearTestWithNonOneCoef_OpenCL()
+        {
+            var sf = new LinearFunction(0.678f);
+
+            var tests = new ActivationFunctionValueTests();
             tests.ExecuteTests(sf);
         }
     }
