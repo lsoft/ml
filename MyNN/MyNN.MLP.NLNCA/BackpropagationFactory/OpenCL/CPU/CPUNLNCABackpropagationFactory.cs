@@ -22,14 +22,14 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
     public class CPUNLNCABackpropagationFactory : IBackpropagationFactory
     {
         private readonly IMLPContainerHelper _mlpContainerHelper;
-        private readonly Func<List<DataItem>, IDodfCalculator> _dodfCalculatorFactory;
+        private readonly Func<List<IDataItem>, IDodfCalculator> _dodfCalculatorFactory;
         private readonly int _ncaLayerIndex;
         private readonly float _lambda;
         private readonly float _partOfTakeIntoAccount;
 
         public CPUNLNCABackpropagationFactory(
             IMLPContainerHelper mlpContainerHelper,
-            Func<List<DataItem>, IDodfCalculator> dodfCalculatorFactory,
+            Func<List<IDataItem>, IDodfCalculator> dodfCalculatorFactory,
             int ncaLayerIndex,
             float lambda,
             float partOfTakeIntoAccount)

@@ -12,7 +12,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
     /// </summary>
     public class PabCalculatorOpenCL 
     {
-        private readonly List<DataItem> _fxwList;
+        private readonly List<IDataItem> _fxwList;
         private readonly int _inputLength;
 
         private readonly DodfDistanceContainer _expDistanceDict;
@@ -22,7 +22,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
 
         public PabCalculatorOpenCL(
             IDistanceDictCalculator createDistanceDictCalculator,
-            List<DataItem> fxwList)
+            List<IDataItem> fxwList)
         {
             if (createDistanceDictCalculator == null)
             {

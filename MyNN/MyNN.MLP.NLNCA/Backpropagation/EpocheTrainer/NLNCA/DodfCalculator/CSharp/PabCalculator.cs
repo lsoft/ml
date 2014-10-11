@@ -10,7 +10,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
     /// </summary>
     public class PabCalculator
     {
-        private readonly List<DataItem> _fxwList;
+        private readonly new List<IDataItem> _fxwList;
         private readonly int _len;
 
         private float _znamenatel = 0.0f;
@@ -19,7 +19,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
         private readonly Dictionary<int, Dictionary<int, float>> _distanceDict;
 
         public PabCalculator(
-            List<DataItem> fxwList)
+            List<IDataItem> fxwList)
         {
             #region validate
 

@@ -158,7 +158,7 @@ namespace MyNN.MLP.ForwardPropagation
             }
         }
 
-        public void Propagate(DataItem d)
+        public void Propagate(IDataItem d)
         {
             if (d == null)
             {

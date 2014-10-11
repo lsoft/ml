@@ -15,7 +15,7 @@ namespace MyNN.Common.Data.TypicalDataProvider
             Console.WriteLine("Processing images...");
             var till = DateTime.Now;
 
-            var resultList = new List<DataItem>();
+            var resultList = new List<IDataItem>();
 
             //готовим файл с данными
             using (var trainSet = File.OpenRead(root + "\\images.idx3-ubyte"))
@@ -72,9 +72,7 @@ namespace MyNN.Common.Data.TypicalDataProvider
 
                     for (var imageIndex = 0; imageIndex < Math.Min((long)imageCount, (long)(maxCountFilesInCategory) * 10); imageIndex++)
                     {
-                        var d = new DataItem();
-                        d.Input = new float[784];
-                        d.Output = new float[10];
+                        var dinput = new float[784];
 
                         var inImageIndex = 0;
                         for (var h = 0; h < imageHeight; h++)
@@ -83,7 +81,7 @@ namespace MyNN.Common.Data.TypicalDataProvider
                             {
                                 var value = imageBuffer[(imageIndex * imageHeight * imageWidth) + inImageIndex];
 
-                                d.Input[inImageIndex] = 
+                                dinput[inImageIndex] = 
                                     binarize
                                         ? (value >= 128 ? 1f : 0f)
                                         : value / 255.0f;
@@ -92,11 +90,16 @@ namespace MyNN.Common.Data.TypicalDataProvider
                             }
                         }
 
-                        var output = labelsb[imageIndex];
+                        var doutput = new float[10];
+                        var outputIndex = labelsb[imageIndex];
                         for (var cc = 0; cc < 10; cc++)
                         {
-                            d.Output[cc] = cc == output ? 1.0f : 0.0f;
+                            doutput[cc] = cc == outputIndex ? 1.0f : 0.0f;
                         }
+
+                        var d = new DenseDataItem(
+                            dinput,
+                            doutput);
 
                         resultList.Add(d);
                     }

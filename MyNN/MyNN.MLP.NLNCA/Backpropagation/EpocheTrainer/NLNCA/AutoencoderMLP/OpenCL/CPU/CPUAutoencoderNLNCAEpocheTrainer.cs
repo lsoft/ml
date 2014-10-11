@@ -33,7 +33,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
         private readonly ILearningAlgorithmConfig _config;
 
         private readonly CLProvider _clProvider;
-        private readonly Func<List<DataItem>, IDodfCalculator> _dodfCalculatorFactory;
+        private readonly Func<List<IDataItem>, IDodfCalculator> _dodfCalculatorFactory;
 
         /// <summary>
         /// Номер слоя, на который оказывается давление NCA
@@ -87,7 +87,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
             IMLP mlp,
             ILearningAlgorithmConfig config,
             CLProvider clProvider,
-            Func<List<DataItem>, IDodfCalculator> dodfCalculatorFactory,
+            Func<List<IDataItem>, IDodfCalculator> dodfCalculatorFactory,
             int ncaLayerIndex,
             float lambda,
             int takeIntoAccount)
@@ -294,7 +294,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
             {
                 #region obtain dodf calculator
 
-                List<DataItem> uzkii;
+                List<IDataItem> uzkii;
                 List<int> uzSootv;
                 
                 this.ObtainUzkiiData(
@@ -561,7 +561,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
         private void ObtainUzkiiData(
             IDataSet data,
             out List<int> uzSootv,
-            out List<DataItem> uzkii)
+            out List<IDataItem> uzkii)
         {
             if (data == null)
             {
@@ -569,7 +569,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
             }
 
             uzSootv = new List<int>();
-            uzkii = new List<DataItem>();
+            uzkii = new List<IDataItem>();
 
             var state = this._forwardPropagation.ComputeState(data);
             var output = state.ConvertAll(j => j.LState[_ncaLayerIndex]).ToList().ConvertAll(j => j.NState);
@@ -581,7 +581,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
                 if (d.OutputIndex >= 0)
                 {
                     uzkii.Add(
-                        new DataItem(
+                        new DenseDataItem(
                             output[uzIndex].Take(_takeIntoAccount).ToArray(),
                             d.Output));
 

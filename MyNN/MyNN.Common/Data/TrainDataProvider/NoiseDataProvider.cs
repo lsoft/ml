@@ -49,7 +49,7 @@ namespace MyNN.Common.Data.TrainDataProvider
 
         public IDataSet GetDataSet(int epocheNumber)
         {
-            var result = new List<DataItem>();
+            var result = new List<IDataItem>();
 
             foreach (var d in this._trainData)
             {
@@ -60,7 +60,7 @@ namespace MyNN.Common.Data.TrainDataProvider
                         ? noiser.ApplyNoise(d.Input)
                         : d.Input.CloneArray();
 
-                var di = new DataItem(
+                var di = new DenseDataItem(
                     noisedData,
                     d.Output);
 

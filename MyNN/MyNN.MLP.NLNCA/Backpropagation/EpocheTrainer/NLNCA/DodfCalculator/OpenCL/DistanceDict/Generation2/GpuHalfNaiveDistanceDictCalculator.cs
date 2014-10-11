@@ -28,7 +28,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
             _deviceChooser = deviceChooser;
         }
 
-        public DodfDistanceContainer CalculateDistances(List<DataItem> fxwList)
+        public DodfDistanceContainer CalculateDistances(List<IDataItem> fxwList)
         {
             TimeSpan takenTime;
 
@@ -36,7 +36,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
                 CreateDistanceDict(fxwList, out takenTime);
         }
 
-        public DodfDistanceContainer CreateDistanceDict(List<DataItem> fxwList, out TimeSpan takenTime)
+        public DodfDistanceContainer CreateDistanceDict(List<IDataItem> fxwList, out TimeSpan takenTime)
         {
             var result = new DodfDistanceContainer(fxwList.Count);
 

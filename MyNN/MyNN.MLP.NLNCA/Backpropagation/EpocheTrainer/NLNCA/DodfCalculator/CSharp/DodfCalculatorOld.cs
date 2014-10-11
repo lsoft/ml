@@ -14,7 +14,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
     {
 
         public DodfCalculatorOld(
-            List<DataItem> fxwList)
+            List<IDataItem> fxwList)
         {
             if (fxwList == null)
             {
@@ -129,10 +129,10 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
 
         private float _zn = 0.0f;
         private int _fixA = int.MinValue;
-        private readonly List<DataItem> _fxwList;
+        private readonly new List<IDataItem> _fxwList;
 
         private void FixForA(
-            List<DataItem> fxwList,
+            List<IDataItem> fxwList,
             int a)
         {
             var zn = 0f;
@@ -149,7 +149,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
         }
 
         private float GetPab(
-            List<DataItem> fxwList,
+            List<IDataItem> fxwList,
             int a,
             int b
             )
@@ -178,7 +178,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
         }
 
         private float GetExpDistanceab(
-            List<DataItem> fxwList,
+            List<IDataItem> fxwList,
             int a,
             int b)
         {
@@ -193,7 +193,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
         }
 
         private float[] GetDab(
-            List<DataItem> fxwList,
+            List<IDataItem> fxwList,
             int a,
             int b)
         {

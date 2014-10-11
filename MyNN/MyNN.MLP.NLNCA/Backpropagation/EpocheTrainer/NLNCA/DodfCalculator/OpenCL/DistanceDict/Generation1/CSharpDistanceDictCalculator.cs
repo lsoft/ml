@@ -11,7 +11,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
     /// </summary>
     public class CSharpDistanceDictCalculator : IDistanceDictCalculator
     {
-        public DodfDistanceContainer CalculateDistances(List<DataItem> fxwList)
+        public DodfDistanceContainer CalculateDistances(List<IDataItem> fxwList)
         {
             var inputLength = fxwList[0].Input.Length;
 
@@ -58,7 +58,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
 
 
         private float GetExpDistanceDab(
-            List<DataItem> fxwList,
+            List<IDataItem> fxwList,
             int inputLength,
             int a,
             int b)

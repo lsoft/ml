@@ -13,7 +13,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
     /// </summary>
     public class PabCalculatorVectorizedDebug
     {
-        private readonly List<DataItem> _fxwList;
+        private readonly new List<IDataItem> _fxwList;
         private readonly int _inputLength;
 
         private readonly Dictionary<int, float[]> _expDistanceDict;
@@ -22,7 +22,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
         private readonly List<float> _znList;
 
         public PabCalculatorVectorizedDebug(
-            List<DataItem> fxwList)
+            List<IDataItem> fxwList)
         {
             #region validate
 

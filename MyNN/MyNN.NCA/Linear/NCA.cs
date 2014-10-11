@@ -38,7 +38,7 @@ namespace MyNN.NCA.Linear
 
         public void Train(
             int aMatrixRowCount,
-            List<DataItem> trainData,
+            List<IDataItem> trainData,
             float learningRate,
             int epocheCount,
             int batchSize)

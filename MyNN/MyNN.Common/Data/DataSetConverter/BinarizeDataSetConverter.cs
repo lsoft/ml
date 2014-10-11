@@ -33,7 +33,7 @@ namespace MyNN.Common.Data.DataSetConverter
                 throw new ArgumentNullException("beforeTransformation");
             }
 
-            var cloned = new List<DataItem>();
+            var cloned = new List<IDataItem>();
             foreach (var di in beforeTransformation.Data)
             {
                 if (di.Input.Any(j => j < 0f || j > 1f))
@@ -43,7 +43,7 @@ namespace MyNN.Common.Data.DataSetConverter
 
                 var bi = di.Input.ToList().ConvertAll(j => (_randomizer.Next() < j) ? 1f : 0f);
 
-                var ndi = new DataItem(bi.ToArray(), di.Output);
+                var ndi = new DenseDataItem(bi.ToArray(), di.Output);
                 cloned.Add(ndi);
             }
 

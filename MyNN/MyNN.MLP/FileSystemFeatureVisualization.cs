@@ -76,7 +76,7 @@ namespace MyNN.MLP
 
             var inputLayerSize = _mlp.Layers.First().NonBiasNeuronCount;
 
-            var diList = new List<DataItem>();
+            var diList = new List<IDataItem>();
             for (var cc = 0; cc < inputLayerSize; cc++)
             {
                 var input = new float[inputLayerSize];
@@ -88,7 +88,7 @@ namespace MyNN.MLP
 
                 var output = new float[1];
 
-                var di = new DataItem(input, output);
+                var di = new DenseDataItem(input, output);
                 diList.Add(di);
             }
 

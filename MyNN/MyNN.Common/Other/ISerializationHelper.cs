@@ -5,9 +5,9 @@ namespace MyNN.Common.Other
 {
     public interface ISerializationHelper
     {
-        List<DataItem> ReadDataFromFile(string fileName, int totalCount);
+        List<IDataItem> ReadDataFromFile(string fileName, int totalCount);
 
-        void SaveDataToFile(List<DataItem> obj, string fileName);
+        void SaveDataToFile(List<IDataItem> obj, string fileName);
 
         T LoadLastFile<T>(string dirname, string mask);
 

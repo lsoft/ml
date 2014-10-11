@@ -50,13 +50,13 @@ namespace MyNN.Tests
 
             var netResults = forwardPropagation.ComputeOutput(_validationData);
 
-            //преобразуем в вид, когда в DataItem.Input - правильный ВЫХОД (обучаемый выход),
-            //а в DataItem.Output - РЕАЛЬНЫЙ выход, а их разница - ошибка обучения
-            var d = new List<DataItem>(_validationData.Count + 1);
+            //преобразуем в вид, когда в DenseDataItem.Input - правильный ВЫХОД (обучаемый выход),
+            //а в DenseDataItem.Output - РЕАЛЬНЫЙ выход, а их разница - ошибка обучения
+            var d = new List<IDataItem>(_validationData.Count + 1);
             for (int i = 0; i < _validationData.Count; i++)
             {
                 d.Add(
-                    new DataItem(
+                    new DenseDataItem(
                         _validationData[i].Output,
                         netResults[i].NState));
             }

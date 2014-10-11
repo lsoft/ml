@@ -10,11 +10,11 @@ namespace MyNNConsoleApp
 {
     public class SAMRDataProvider
     {
-        public static List<DataItem> GetDataSet(
+        public static List<IDataItem> GetDataSet(
             string filepath, 
             int maxValue)
         {
-            var result = new List<DataItem>();
+            var result = new List<IDataItem>();
 
             using (var fs = new FileStream(filepath, FileMode.Open, FileAccess.Read))
             {
@@ -42,7 +42,7 @@ namespace MyNNConsoleApp
                         output[label] = 1f;
                     }
 
-                    var di = new DataItem(
+                    var di = new DenseDataItem(
                         input.ToArray(),
                         output
                         );
