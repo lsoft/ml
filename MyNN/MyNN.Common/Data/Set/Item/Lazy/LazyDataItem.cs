@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Other;
 
@@ -7,43 +9,29 @@ namespace MyNN.Common.Data.Set.Item.Lazy
     [Serializable]
     public class LazyDataItem : IDataItem
     {
-        private readonly float[] _input;
-        private readonly float[] _output;
+        private readonly Pair<int, float>[] _inputTable;
+        private readonly Pair<int, float>[] _outputTable;
+
         private readonly INoiser _noiser;
         private readonly ISerializationHelper _serializationHelper;
 
         public int InputLength
         {
-            get
-            {
-                return
-                    this._input.Length;
-            }
+            get;
+            private set;
         }
 
         public int OutputLength
         {
-            get
-            {
-                return
-                    _output.Length;
-            }
+            get;
+            private set;
         }
 
         public int OutputIndex
         {
             get
             {
-                var result = -1;
-
-                for (var cc = 0; cc < _output.Length; cc++)
-                {
-                    if (_output[cc] >= float.Epsilon)
-                    {
-                        result = cc;
-                        break;
-                    }
-                }
+                var result = this._outputTable.Min(k => k.First);
 
                 return result;
             }
@@ -54,9 +42,14 @@ namespace MyNN.Common.Data.Set.Item.Lazy
             get
             {
                 //клонируем массив, чтобы не испортить оригинал
-                var clonedInput = _input.CloneArray();
+                var clonedInput = new float[InputLength];
 
-                //клонировать надо, чтобы каждый запрос LazyDataItem.Input выдавал одно и то же
+                foreach (var ii in _inputTable)
+                {
+                    clonedInput[ii.First] = ii.Second;
+                }
+
+                //клонировать нойзер надо, чтобы каждый запрос LazyDataItem.Input выдавал одно и то же
                 var clonedNoiser = _serializationHelper.DeepClone(_noiser);
 
                 //применяем шум
@@ -70,8 +63,15 @@ namespace MyNN.Common.Data.Set.Item.Lazy
         {
             get
             {
-                return
-                    _output;
+                //клонируем массив, чтобы не испортить оригинал
+                var result = new float[OutputLength];
+
+                foreach (var ii in _outputTable)
+                {
+                    result[ii.First] = ii.Second;
+                }
+
+                return result;
             }
         }
 
@@ -99,10 +99,35 @@ namespace MyNN.Common.Data.Set.Item.Lazy
                 throw new ArgumentNullException("serializationHelper");
             }
 
-            _input = input;
-            _output = output;
             _noiser = noiser;
             _serializationHelper = serializationHelper;
+
+            InputLength = input.Length;
+            OutputLength = output.Length;
+
+            _inputTable = ConvertToTable(input).ToArray();
+            _outputTable = ConvertToTable(output).ToArray();
         }
+
+        #region private method
+
+        private List<Pair<int, float>> ConvertToTable(
+            float[] array)
+        {
+            var table = new List<Pair<int, float>>();
+            for (var cc = 0; cc < array.Length; cc++)
+            {
+                var v = array[cc];
+
+                if (v >= float.Epsilon || v <= -float.Epsilon)
+                {
+                    table.Add(
+                        new Pair<int, float>(cc, v));
+                }
+            }
+            return table;
+        }
+
+        #endregion
     }
 }

@@ -69,6 +69,7 @@ namespace MyNN.Common.Data.TrainDataProvider
         {
             var result = new List<IDataItem>();
 
+            var index = 0;
             foreach (var d in this._trainData)
             {
                 var noiser = _noiser ?? _noiserProvider(epocheNumber);
@@ -81,6 +82,11 @@ namespace MyNN.Common.Data.TrainDataProvider
                     );
 
                 result.Add(di);
+
+                if ((++index)%100 == 0)
+                {
+                    GC.Collect();
+                }
             }
 
             return
