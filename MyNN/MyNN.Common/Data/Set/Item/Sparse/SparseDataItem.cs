@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MyNN.Common.Other;
 
 namespace MyNN.Common.Data.Set.Item.Sparse
@@ -8,7 +9,7 @@ namespace MyNN.Common.Data.Set.Item.Sparse
     public class SparseDataItem : IDataItem
     {
         private readonly Pair<int, float>[] _inputTable;
-        private readonly float[] _output;
+        private readonly Pair<int, float>[] _outputTable;
 
         public int InputLength
         {
@@ -18,27 +19,15 @@ namespace MyNN.Common.Data.Set.Item.Sparse
 
         public int OutputLength
         {
-            get
-            {
-                return
-                    _output.Length;
-            }
+            get;
+            private set;
         }
 
         public int OutputIndex
         {
             get
             {
-                var result = -1;
-
-                for (var cc = 0; cc < _output.Length; cc++)
-                {
-                    if (_output[cc] >= float.Epsilon)
-                    {
-                        result = cc;
-                        break;
-                    }
-                }
+                var result = this._outputTable.Min(k => k.First);
 
                 return result;
             }
@@ -50,22 +39,24 @@ namespace MyNN.Common.Data.Set.Item.Sparse
 
         public SparseDataItem(
             int inputLength,
+            int outputLength,
             Pair<int, float>[] inputTable,
-            float[] output
+            Pair<int, float>[] outputTable
             )
         {
             if (inputTable == null)
             {
                 throw new ArgumentNullException("inputTable");
             }
-            if (output == null)
+            if (outputTable == null)
             {
-                throw new ArgumentNullException("output");
+                throw new ArgumentNullException("outputTable");
             }
 
             InputLength = inputLength;
+            OutputLength = outputLength;
             _inputTable = inputTable;
-            _output = output;
+            _outputTable = outputTable;
         }
 
         public SparseDataItem(
@@ -83,20 +74,10 @@ namespace MyNN.Common.Data.Set.Item.Sparse
             }
 
             InputLength = input.Length;
-            _output = output;
+            OutputLength = output.Length;
 
-            var table = new List<Pair<int, float>>();
-            for (var cc = 0; cc < input.Length; cc++)
-            {
-                var v = input[cc];
-
-                if (v >= float.Epsilon || v <= -float.Epsilon)
-                {
-                    table.Add(
-                        new Pair<int, float>(cc, v));
-                }
-            }
-            _inputTable = table.ToArray();
+            _inputTable = ConvertToTable(input).ToArray();
+            _outputTable = ConvertToTable(output).ToArray();
         }
 
         public float[] Input
@@ -118,8 +99,36 @@ namespace MyNN.Common.Data.Set.Item.Sparse
         {
             get
             {
-                return _output;
+                var result = new float[OutputLength];
+
+                foreach (var ii in _outputTable)
+                {
+                    result[ii.First] = ii.Second;
+                }
+
+                return result;
             }
         }
+
+        #region private method
+
+        private List<Pair<int, float>> ConvertToTable(
+            float[] array)
+        {
+            var table = new List<Pair<int, float>>();
+            for (var cc = 0; cc < array.Length; cc++)
+            {
+                var v = array[cc];
+
+                if (v >= float.Epsilon || v <= -float.Epsilon)
+                {
+                    table.Add(
+                        new Pair<int, float>(cc, v));
+                }
+            }
+            return table;
+        }
+
+        #endregion
     }
 }

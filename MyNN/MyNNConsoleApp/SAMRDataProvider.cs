@@ -24,7 +24,8 @@ namespace MyNNConsoleApp
                 var br = new BinaryReader(
                     fs);
 
-                var itemSize = br.ReadInt32();
+                var inputLength = br.ReadInt32();
+                const int outputLength = 5;
 
                 var iteration = 0;
                 while (fs.Position < fs.Length && iteration < maxValue)
@@ -38,19 +39,13 @@ namespace MyNNConsoleApp
                         inputIndex.Add(oneIndex);
                     }
 
-                    var label = br.ReadInt32();
-
-                    var output = new float[5];
-
-                    if (label >= 0)
-                    {
-                        output[label] = 1f;
-                    }
+                    var outputIndex = br.ReadInt32();
 
                     var di = new SparseDataItem(
-                        itemSize,
+                        inputLength,
+                        outputLength,
                         inputIndex.ConvertAll(j => new Pair<int, float>(j, 1f)).ToArray(),
-                        output
+                        new[] { new Pair<int, float>(outputIndex, 1f) }
                         );
 
                     result.Add(di);
