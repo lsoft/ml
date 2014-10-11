@@ -118,11 +118,12 @@ namespace MyNNConsoleApp
                         var result =
                             new ConverterTrainDataProvider(
                                 new ShuffleDataSetConverter(randomizer),
-                                new NoiseDataProvider(
+                                new LazyNoiseDataProvider(
                                     tda, 
                                     depthIndex == 0
                                         ? oneDepthNoiser
-                                        : deepDepthNoiser)
+                                        : deepDepthNoiser,
+                                    serialization)
                                 );
                         return
                             result;

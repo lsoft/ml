@@ -11,10 +11,12 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
     /// может меняться внутри одного итема!
     /// Не перекрывается!
     /// </summary>
+    [Serializable]
     public class SetOfNoisers2 : INoiser
     {
         private readonly IRandomizer _randomizer;
 
+        [Serializable]
         private class ProbabilityNoiserContainer
         {
             public float From

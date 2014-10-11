@@ -11,6 +11,7 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
     /// <summary>
     /// Эластичный нойзер
     /// </summary>
+    [Serializable]
     public class ElasticNoiser : INoiser
     {
         private readonly IRandomizer _randomizer;

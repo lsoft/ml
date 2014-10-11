@@ -9,6 +9,7 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
     /// Применяет все нойзеры к каждому итему!
     /// Особенно имеет смысл, если у отдельных нойзеров рандомный IRange
     /// </summary>
+    [Serializable]
     public class SequenceNoiser : INoiser
     {
         private readonly IRandomizer _randomizer;

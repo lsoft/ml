@@ -1,7 +1,9 @@
-﻿using MyNN.Common.Other;
+﻿using System;
+using MyNN.Common.Other;
 
 namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
 {
+    [Serializable]
     public class FullRange : IRange
     {
         private readonly int _dataLength;

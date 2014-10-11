@@ -7,6 +7,7 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
     /// <summary>
     /// Формирует маску по квадрату.
     /// </summary>
+    [Serializable]
     public class RectangleRange : IRange
     {
         private readonly IRandomizer _randomizer;

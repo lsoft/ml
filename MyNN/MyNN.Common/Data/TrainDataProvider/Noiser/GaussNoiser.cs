@@ -4,10 +4,12 @@ using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
 
 namespace MyNN.Common.Data.TrainDataProvider.Noiser
 {
+    [Serializable]
     public class GaussNoiser : INoiser
     {
+        private readonly float _stddev;
         private readonly bool _isNeedToClamp01;
-        private readonly Normal _random;
+        private readonly Random _random;
         private readonly IRange _range;
 
         /// <summary>
@@ -26,9 +28,11 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
                 throw new ArgumentNullException("range");
             }
 
+            _stddev = stddev;
             _isNeedToClamp01 = isNeedToClamp01;
-            _random = new Normal(0, stddev);
             _range = range;
+
+            _random = new Random();
         }
 
         /// <summary>
@@ -40,9 +44,11 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
             float stddev,
             bool isNeedToClamp01)
         {
+            _stddev = stddev;
             _isNeedToClamp01 = isNeedToClamp01;
-            _random = new Normal(0, stddev);
             _range = null;
+
+            _random = new Random();
         }
 
         public float[] ApplyNoise(float[] data)
@@ -52,19 +58,21 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
                 throw new ArgumentNullException("data");
             }
 
+            var gaussRandom = new Normal(0, _stddev);
+            gaussRandom.RandomSource = _random;
+
             var r = new float[data.Length];
 
             var range = _range ?? new FullRange(data.Length);
 
             var mask = range.GetIndexMask();
-
             for (var cc = 0; cc < data.Length; cc++)
             {
                 var v = data[cc];
 
                 if (mask[cc])
                 {
-                    v += (float)_random.Sample();
+                    v += (float)gaussRandom.Sample();
 
                     if (_isNeedToClamp01)
                     {

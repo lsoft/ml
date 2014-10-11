@@ -4,6 +4,7 @@ using MyNN.Common.Randomizer;
 
 namespace MyNN.Common.Data.TrainDataProvider.Noiser
 {
+    [Serializable]
     public class SaltAndPepperNoiser : INoiser
     {
         private readonly double _applyPercent;

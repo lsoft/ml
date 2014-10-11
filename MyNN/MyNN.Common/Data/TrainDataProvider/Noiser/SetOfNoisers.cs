@@ -9,10 +9,12 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
     /// <summary>
     /// Применяет случайный нойзер к каждому итему
     /// </summary>
+    [Serializable]
     public class SetOfNoisers : INoiser
     {
         private readonly IRandomizer _randomizer;
 
+        [Serializable]
         private class ProbabilityNoiserContainer
         {
             public float From

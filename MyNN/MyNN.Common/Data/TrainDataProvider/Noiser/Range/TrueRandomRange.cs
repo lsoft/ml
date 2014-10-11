@@ -4,6 +4,7 @@ using MyNN.Common.Randomizer;
 
 namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
 {
+    [Serializable]
     public class TrueRandomRange : IRange
     {
         private readonly IRandomizer _randomizer;

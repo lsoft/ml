@@ -1,5 +1,8 @@
-﻿namespace MyNN.Common.Data.TrainDataProvider.Noiser
+﻿using System;
+
+namespace MyNN.Common.Data.TrainDataProvider.Noiser
 {
+    [Serializable]
     public class NoNoiser : INoiser
     {
         public float[] ApplyNoise(float[] data)
