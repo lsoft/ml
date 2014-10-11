@@ -21,16 +21,18 @@ namespace MyNNConsoleApp
                 var br = new BinaryReader(
                     fs);
 
-                var itemsize = br.ReadInt32();
+                var itemSize = br.ReadInt32();
 
                 var iteration = 0;
                 while (fs.Position < fs.Length && iteration < maxValue)
                 {
-                    var input = new List<float>();
-                    for (var cc = 0; cc < itemsize; cc++)
+                    var indexCount = br.ReadInt32();
+
+                    var inputIndex = new List<int>();
+                    for (var cc = 0; cc < indexCount; cc++)
                     {
-                        var onefloat = br.ReadSingle();
-                        input.Add(onefloat);
+                        var oneIndex = br.ReadInt32();
+                        inputIndex.Add(oneIndex);
                     }
 
                     var label = br.ReadInt32();
@@ -42,8 +44,9 @@ namespace MyNNConsoleApp
                         output[label] = 1f;
                     }
 
-                    var di = new DenseDataItem(
-                        input.ToArray(),
+                    var di = new SparseDataItem(
+                        itemSize,
+                        inputIndex.ToArray(),
                         output
                         );
 
