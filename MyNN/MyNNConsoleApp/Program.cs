@@ -1,6 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
+using MathNet.Numerics.Distributions;
+using MyNN.Common.Data;
+using MyNN.Common.Data.TrainDataProvider;
+using MyNN.Common.Data.TrainDataProvider.Noiser;
+using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
 using MyNN.Common.Estimator;
+using MyNN.Common.Other;
+using MyNN.Common.Randomizer;
 using MyNNConsoleApp.RefactoredForDI;
 
 namespace MyNNConsoleApp

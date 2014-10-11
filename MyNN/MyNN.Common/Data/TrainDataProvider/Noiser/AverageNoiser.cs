@@ -9,6 +9,7 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
     /// дочерних нойзеров и усреднения!
     /// Особенно имеет смысл, если у отдельных нойзеров рандомный IRange
     /// </summary>
+    [Serializable]
     public class AverageNoiser : INoiser
     {
         private readonly INoiser[] _noiserList;

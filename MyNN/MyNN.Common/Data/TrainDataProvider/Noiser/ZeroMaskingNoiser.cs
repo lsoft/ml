@@ -4,6 +4,7 @@ using MyNN.Common.Randomizer;
 
 namespace MyNN.Common.Data.TrainDataProvider.Noiser
 {
+    [Serializable]
     public class ZeroMaskingNoiser : INoiser
     {
         private readonly float _zeroPercent;
