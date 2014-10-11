@@ -59,6 +59,7 @@
     <Compile Include="Data\DataSetConverter\ToAutoencoderDataSetConverter.cs" />
     <Compile Include="Data\IDataItem.cs" />
     <Compile Include="Data\IDataSet.cs" />
+    <Compile Include="Data\SparseDataItem.cs" />
     <Compile Include="Data\TrainDataProvider\ConverterTrainDataProvider.cs" />
     <Compile Include="Data\TrainDataProvider\ITrainDataProvider.cs" />
     <Compile Include="Data\TrainDataProvider\NoDeformationTrainDataProvider.cs" />
