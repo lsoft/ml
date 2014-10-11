@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU;
+using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Default;
+using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Vectorized;
 using MyNN.MLP.DropConnect.Inferencer.OpenCL.GPU;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
@@ -74,7 +76,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
         [TestMethod]
         public void OpenCLCPUNaiveLayerInferencerTest()
         {
-            var tester = new InferencerTester<MLP.DropConnect.Inferencer.OpenCL.CPU.NaiveLayerInferencer>(
+            var tester = new InferencerTester<MLP.DropConnect.Inferencer.OpenCL.CPU.Naive.NaiveLayerInferencer>(
                 );
 
             float[] orig;

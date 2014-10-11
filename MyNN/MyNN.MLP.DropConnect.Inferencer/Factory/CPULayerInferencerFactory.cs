@@ -1,6 +1,7 @@
 ﻿using System;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU;
+using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Vectorized;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure.Layer;
 using OpenCL.Net.Wrapper;

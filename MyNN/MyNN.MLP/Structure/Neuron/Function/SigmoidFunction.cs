@@ -41,7 +41,6 @@ namespace MyNN.MLP.Structure.Neuron.Function
         {
             return
                 string.Format(
-                    //"(1.0 / (1.0 + exp(-1.0 * {0} * {1})))",
                     "((float)(1.0) / ((float)(1.0) + exp((float)(-{0}) * {1})))",
                     _alpha.ToString(CultureInfo.InvariantCulture),
                     varName);
