@@ -1,4 +1,4 @@
-namespace MyNN.Common.Data
+namespace MyNN.Common.Data.Set.Item
 {
     public interface IDataItem
     {

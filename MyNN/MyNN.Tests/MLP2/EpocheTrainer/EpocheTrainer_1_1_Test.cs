@@ -1,6 +1,7 @@
 using System;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.LearningRateController;
 using MyNN.Common.OpenCLHelper;

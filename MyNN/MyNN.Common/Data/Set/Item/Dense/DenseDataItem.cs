@@ -1,6 +1,6 @@
 using System;
 
-namespace MyNN.Common.Data
+namespace MyNN.Common.Data.Set.Item.Dense
 {
     [Serializable]
     public class DenseDataItem : IDataItem

@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 
-namespace MyNN.Common.Data
+namespace MyNN.Common.Data.Set
 {
     [Serializable]
     public class DataSet : IDataSet
@@ -98,11 +100,10 @@ namespace MyNN.Common.Data
 
         public DataSet(
             IDataSet dataSet,
-            List<float[]> inputPart
+            List<float[]> inputPart,
+            IDataItemFactory dataItemFactory
             )
         {
-            //visualizer allowed to be null
-
             if (dataSet == null)
             {
                 throw new ArgumentNullException("dataSet");
@@ -110,6 +111,10 @@ namespace MyNN.Common.Data
             if (inputPart == null)
             {
                 throw new ArgumentNullException("inputPart");
+            }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
             }
             if (dataSet.Count != inputPart.Count)
             {
@@ -120,7 +125,7 @@ namespace MyNN.Common.Data
 
             for (var i = 0; i < dataSet.Count; i++)
             {
-                var di = new DenseDataItem(inputPart[i], dataSet[i].Output);
+                var di = dataItemFactory.CreateDataItem(inputPart[i], dataSet[i].Output);
                 this.Data.Add(di);
             }
         }

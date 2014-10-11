@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 
 namespace MyNN.Common.Data.TypicalDataProvider
 {
@@ -10,8 +13,19 @@ namespace MyNN.Common.Data.TypicalDataProvider
         public static IDataSet GetDataSet(
             string root,
             int maxCountFilesInCategory,
-            bool binarize = false)
+            bool binarize,
+            IDataItemFactory dataItemFactory
+            )
         {
+            if (root == null)
+            {
+                throw new ArgumentNullException("root");
+            }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
+            }
+
             Console.WriteLine("Processing images...");
             var till = DateTime.Now;
 
@@ -97,7 +111,7 @@ namespace MyNN.Common.Data.TypicalDataProvider
                             doutput[cc] = cc == outputIndex ? 1.0f : 0.0f;
                         }
 
-                        var d = new DenseDataItem(
+                        var d = dataItemFactory.CreateDataItem(
                             dinput,
                             doutput);
 

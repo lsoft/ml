@@ -1,5 +1,6 @@
 ﻿using System;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
 using OpenCvSharp;

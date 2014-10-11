@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Img.GPU;
 using MyNN.MLP.ForwardPropagation;

@@ -5,6 +5,7 @@ using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set;
 
 namespace MyNN.Boltzmann.BeliefNetwork
 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
 using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Layer;
 

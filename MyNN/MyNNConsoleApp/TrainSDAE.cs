@@ -4,6 +4,10 @@ using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Lazy;
+using MyNN.Common.Data.Set.Item.Sparse;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
@@ -71,14 +75,24 @@ namespace MyNNConsoleApp
 
             var randomizer = new DefaultRandomizer(123);
 
+            var serialization = new SerializationHelper();
+
+            var sparseDataItemFactory = new SparseDataItemFactory();
+            Func<INoiser, IDataItemFactory> lazyDataItemFactoryFunc = 
+                (INoiser noiser) =>
+                    new LazyDataItemFactory(
+                        noiser,
+                        serialization
+                        );
+
             var mlpfactory = new MLPFactory(
                 new LayerFactory(
                     new NeuronFactory(
                         randomizer)));
 
-            var serialization = new SerializationHelper();
-
-            var toa = new ToAutoencoderDataSetConverter();
+            var toa = new ToAutoencoderDataSetConverter(
+                sparseDataItemFactory
+                );
 
             var rootContainer = new FileSystemArtifactContainer(
                 ".",
@@ -110,6 +124,7 @@ namespace MyNNConsoleApp
                     new IntelCPUDeviceChooser(),
                     mlpContainerHelper,
                     randomizer,
+                    sparseDataItemFactory,
                     mlpfactory,
                     (int depthIndex, IDataSet td) =>
                     {
@@ -123,7 +138,7 @@ namespace MyNNConsoleApp
                                     depthIndex == 0
                                         ? oneDepthNoiser
                                         : deepDepthNoiser,
-                                    serialization)
+                                   lazyDataItemFactoryFunc)
                                 );
                         return
                             result;

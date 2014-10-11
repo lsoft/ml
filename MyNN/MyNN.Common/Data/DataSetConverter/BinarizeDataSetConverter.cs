@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Randomizer;
 
 namespace MyNN.Common.Data.DataSetConverter
@@ -13,16 +16,24 @@ namespace MyNN.Common.Data.DataSetConverter
     public class BinarizeDataSetConverter : IDataSetConverter
     {
         private readonly IRandomizer _randomizer;
+        private readonly IDataItemFactory _dataItemFactory;
 
         public BinarizeDataSetConverter(
-            IRandomizer randomizer)
+            IRandomizer randomizer,
+            IDataItemFactory dataItemFactory
+            )
         {
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
             }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
+            }
 
             _randomizer = randomizer;
+            _dataItemFactory = dataItemFactory;
         }
 
         public IDataSet Convert(
@@ -43,7 +54,11 @@ namespace MyNN.Common.Data.DataSetConverter
 
                 var bi = di.Input.ToList().ConvertAll(j => (_randomizer.Next() < j) ? 1f : 0f);
 
-                var ndi = new DenseDataItem(bi.ToArray(), di.Output);
+                var ndi = _dataItemFactory.CreateDataItem(
+                    bi.ToArray(),
+                    di.Output
+                    );
+                
                 cloned.Add(ndi);
             }
 

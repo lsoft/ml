@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Linq;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
 
 namespace MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
 {

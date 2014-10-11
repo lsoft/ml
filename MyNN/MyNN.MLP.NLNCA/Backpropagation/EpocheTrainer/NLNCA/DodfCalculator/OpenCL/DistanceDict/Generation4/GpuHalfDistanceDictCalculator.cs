@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation4.Sorter;
 using OpenCL.Net.Wrapper.DeviceChooser;

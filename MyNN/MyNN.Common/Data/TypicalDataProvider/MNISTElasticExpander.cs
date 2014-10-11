@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Randomizer;
 using OpenCvSharp;
 
@@ -17,8 +20,14 @@ namespace MyNN.Common.Data.TypicalDataProvider
             IRandomizer randomizer,
             IDataSet toDeformDataSet,
             int deformationEpocheCount,
-            int stepRefreshGaussMap)
+            int stepRefreshGaussMap,
+            IDataItemFactory dataItemFactory
+            )
         {
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
+            }
             Console.WriteLine("Deformations starts...");
 
             var originalImagesCount = toDeformDataSet.Count;
@@ -67,7 +76,10 @@ namespace MyNN.Common.Data.TypicalDataProvider
 
                     //if (changed)
                     {
-                        resultItemList.Add(new DenseDataItem(d1, o.Output));
+                        resultItemList.Add(
+                            dataItemFactory.CreateDataItem(
+                                d1, 
+                                o.Output));
                     }
                 }
 

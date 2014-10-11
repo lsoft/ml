@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Factory;

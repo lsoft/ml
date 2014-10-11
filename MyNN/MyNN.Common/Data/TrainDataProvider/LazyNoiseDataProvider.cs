@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Lazy;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Other;
 
@@ -9,13 +12,13 @@ namespace MyNN.Common.Data.TrainDataProvider
     {
         private readonly IDataSet _trainData;
         private readonly INoiser _noiser;
-        private readonly ISerializationHelper _serializationHelper;
+        private readonly Func<INoiser, IDataItemFactory> _dataItemFactoryFunc;
         private readonly Func<int, INoiser> _noiserProvider;
 
         public LazyNoiseDataProvider(
             IDataSet trainData,
             INoiser noiser,
-            ISerializationHelper serializationHelper
+            Func<INoiser, IDataItemFactory> dataItemFactoryFunc
             )
         {
             if (trainData == null)
@@ -26,20 +29,22 @@ namespace MyNN.Common.Data.TrainDataProvider
             {
                 throw new ArgumentNullException("noiser");
             }
-            if (serializationHelper == null)
+            if (dataItemFactoryFunc == null)
             {
-                throw new ArgumentNullException("serializationHelper");
+                throw new ArgumentNullException("dataItemFactoryFunc");
             }
 
             _trainData = trainData;
             _noiser = noiser;
-            _serializationHelper = serializationHelper;
+            _dataItemFactoryFunc = dataItemFactoryFunc;
             _noiserProvider = null;
         }
 
         public LazyNoiseDataProvider(
             IDataSet trainData,
-            Func<int, INoiser> noiserProvider)
+            Func<int, INoiser> noiserProvider,
+            Func<INoiser, IDataItemFactory> dataItemFactoryFunc
+            )
         {
             if (trainData == null)
             {
@@ -49,10 +54,15 @@ namespace MyNN.Common.Data.TrainDataProvider
             {
                 throw new ArgumentNullException("noiserProvider");
             }
+            if (dataItemFactoryFunc == null)
+            {
+                throw new ArgumentNullException("dataItemFactoryFunc");
+            }
 
             _trainData = trainData;
             _noiser = null;
             _noiserProvider = noiserProvider;
+            _dataItemFactoryFunc = dataItemFactoryFunc;
         }
 
         public IDataSet GetDataSet(int epocheNumber)
@@ -63,10 +73,11 @@ namespace MyNN.Common.Data.TrainDataProvider
             {
                 var noiser = _noiser ?? _noiserProvider(epocheNumber);
 
-                var di = new LazyDataItem(
-                    d,
-                    _serializationHelper.DeepClone(noiser),
-                    _serializationHelper
+                var dataItemFactory = _dataItemFactoryFunc(noiser);
+
+                var di = dataItemFactory.CreateDataItem(
+                    d.Input,
+                    d.Output
                     );
 
                 result.Add(di);

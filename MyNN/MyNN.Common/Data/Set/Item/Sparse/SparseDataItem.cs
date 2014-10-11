@@ -1,11 +1,13 @@
 using System;
+using System.Collections.Generic;
+using MyNN.Common.Other;
 
-namespace MyNN.Common.Data
+namespace MyNN.Common.Data.Set.Item.Sparse
 {
     [Serializable]
     public class SparseDataItem : IDataItem
     {
-        private readonly int[] _inputIndex;
+        private readonly Pair<int, float>[] _inputTable;
         private readonly float[] _output;
 
         public int InputLength
@@ -48,13 +50,13 @@ namespace MyNN.Common.Data
 
         public SparseDataItem(
             int inputLength,
-            int[] inputIndex,
+            Pair<int, float>[] inputTable,
             float[] output
             )
         {
-            if (inputIndex == null)
+            if (inputTable == null)
             {
-                throw new ArgumentNullException("inputIndex");
+                throw new ArgumentNullException("inputTable");
             }
             if (output == null)
             {
@@ -62,8 +64,39 @@ namespace MyNN.Common.Data
             }
 
             InputLength = inputLength;
-            _inputIndex = inputIndex;
+            _inputTable = inputTable;
             _output = output;
+        }
+
+        public SparseDataItem(
+            float[] input,
+            float[] output
+            )
+        {
+            if (input == null)
+            {
+                throw new ArgumentNullException("input");
+            }
+            if (output == null)
+            {
+                throw new ArgumentNullException("output");
+            }
+
+            InputLength = input.Length;
+            _output = output;
+
+            var table = new List<Pair<int, float>>();
+            for (var cc = 0; cc < input.Length; cc++)
+            {
+                var v = input[cc];
+
+                if (v >= float.Epsilon || v <= -float.Epsilon)
+                {
+                    table.Add(
+                        new Pair<int, float>(cc, v));
+                }
+            }
+            _inputTable = table.ToArray();
         }
 
         public float[] Input
@@ -72,9 +105,9 @@ namespace MyNN.Common.Data
             {
                 var result = new float[InputLength];
 
-                foreach (var ii in _inputIndex)
+                foreach (var ii in _inputTable)
                 {
-                    result[ii] = 1f;
+                    result[ii.First] = ii.Second;
                 }
 
                 return result;

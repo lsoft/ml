@@ -1,5 +1,6 @@
 ﻿using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
 using MyNN.MLP.Structure;
 
 namespace MyNN.MLP.Autoencoders

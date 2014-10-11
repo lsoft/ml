@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Sparse;
+using MyNN.Common.Other;
 
 namespace MyNNConsoleApp
 {
@@ -46,7 +49,7 @@ namespace MyNNConsoleApp
 
                     var di = new SparseDataItem(
                         itemSize,
-                        inputIndex.ToArray(),
+                        inputIndex.ConvertAll(j => new Pair<int, float>(j, 1f)).ToArray(),
                         output
                         );
 

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.OutputConsole;
 using MyNN.KNN;
 using MyNN.MLP.ForwardPropagation;
@@ -58,6 +61,10 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.AccuracyCalculator.KNNTester
                     new DenseDataItem(
                         trainOutputList[cc].Take(takeIntoAccount).ToArray(),
                         _trainData[cc].Output));
+
+                //пускай здесь остается принудительно DenseDataItem, так как вряд ли
+                //будет реалистичный сценарий, когда будет эффективнее другой тип
+                //датаитема в этом месте
             }
 
             //инициализируем knn

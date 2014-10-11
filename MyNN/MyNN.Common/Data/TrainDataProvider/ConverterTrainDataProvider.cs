@@ -1,5 +1,6 @@
 ﻿using System;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set;
 
 namespace MyNN.Common.Data.TrainDataProvider
 {

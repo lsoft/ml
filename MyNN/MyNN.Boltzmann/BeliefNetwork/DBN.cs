@@ -7,6 +7,7 @@ using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.LearningRateController;
 

@@ -4,13 +4,29 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Set.Item.Dense;
 
 namespace MyNN.Common.Other
 {
     public class SerializationHelper : ISerializationHelper
     {
-        public List<IDataItem> ReadDataFromFile(string fileName, int totalCount)
+        public List<IDataItem> ReadDataFromFile(
+            string fileName,
+            int totalCount,
+            IDataItemFactory dataItemFactory
+            )
         {
+            if (fileName == null)
+            {
+                throw new ArgumentNullException("fileName");
+            }
+            if (dataItemFactory == null)
+            {
+                throw new ArgumentNullException("dataItemFactory");
+            }
+
             using (var reader = new BinaryReader(File.Open(fileName, FileMode.Open)))
             {
                 var dataCount = Math.Min(totalCount, reader.ReadInt32());
@@ -36,7 +52,7 @@ namespace MyNN.Common.Other
                         o[oo] = reader.ReadSingle();
                     }
 
-                    var di = new DenseDataItem(i, o);
+                    var di = dataItemFactory.CreateDataItem(i, o);
                     result.Add(di);
                 }
 

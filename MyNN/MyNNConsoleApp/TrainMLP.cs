@@ -1,6 +1,7 @@
 ﻿using System;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TypicalDataProvider;
 using MyNN.Common.LearningRateController;
@@ -27,15 +28,21 @@ namespace MyNNConsoleApp
     {
         public static void DoTrain()
         {
+            var dataItemFactory = new DenseDataItemFactory();
+
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                1000//int.MaxValue
+                1000,
+                true,
+                dataItemFactory
                 );
             trainData.Normalize();
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                300//int.MaxValue
+                300,
+                true,
+                dataItemFactory
                 );
             validationData.Normalize();
 
