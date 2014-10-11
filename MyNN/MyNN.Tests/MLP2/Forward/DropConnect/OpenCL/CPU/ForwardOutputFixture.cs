@@ -1,16 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Common.Data;
-using MyNN.Common.OpenCLHelper;
-using MyNN.Common.Other;
-using MyNN.Common.OutputConsole;
-
-using MyNN.MLP.Structure.Neuron.Function;
-using MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.MaskContainer;
-using OpenCL.Net.Wrapper;
-
-namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
+﻿namespace MyNN.Tests.MLP2.Forward.DropConnect.OpenCL.CPU
 {
     //!!! починить!
     //[TestClass]

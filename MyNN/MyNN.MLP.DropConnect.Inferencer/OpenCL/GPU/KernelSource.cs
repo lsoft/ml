@@ -21,7 +21,7 @@ namespace MyNN.MLP.DropConnect.Inferencer.OpenCL.GPU
                 "<activationFunction_grnd>",
                 activationFunction);
 
-            kernelName = "InferenceKernel1";
+            kernelName = "InferenceKernel";
 
             return
                 result;

@@ -1,14 +1,13 @@
 ﻿using System;
 using MyNN.Common.Other;
 using MyNN.MLP.DropConnect.WeightMask;
-using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using OpenCL.Net.Wrapper.Mem.Data;
 
-namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.MaskContainer
+namespace MyNN.Tests.MLP2.Forward.DropConnect.OpenCL.CPU.MaskContainer
 {
     internal class MockWeightMaskContainer : IOpenCLWeightMaskContainer
     {

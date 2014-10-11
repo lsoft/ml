@@ -1,17 +1,14 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.OutputConsole;
-using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU;
+using MyNN.MLP.DropConnect.Inferencer.CSharp;
 using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Default;
 using MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Vectorized;
 using MyNN.MLP.DropConnect.Inferencer.OpenCL.GPU;
 using MyNN.MLP.Structure.Neuron.Function;
-using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
-using OpenCL.Net.Wrapper.Mem;
-using NaiveLayerInferencer = MyNN.MLP.DropConnect.Inferencer.CSharp.NaiveLayerInferencer;
 
-namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
+namespace MyNN.Tests.MLP2.Inferencer
 {
     [TestClass]
     public class InferenceFixture

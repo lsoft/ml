@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
-using MyNN.MLP.DropConnect.ForwardPropagation.Inference;
 using MyNN.MLP.DropConnect.Inferencer;
 using MyNN.MLP.DropConnect.Inferencer.CSharp;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
@@ -18,8 +13,7 @@ using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
 
-
-namespace MyNN.Tests.MLP2.Forward.DropConnect.Inferencer
+namespace MyNN.Tests.MLP2.Inferencer
 {
     internal class InferencerTester<T>
         where T : ILayerInferencer

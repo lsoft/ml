@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
@@ -13,7 +12,7 @@ using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GPU2
+namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.OpenCL.GPU2
 {
     [TestClass]
     public class IntelCPUComputeLayerFixture

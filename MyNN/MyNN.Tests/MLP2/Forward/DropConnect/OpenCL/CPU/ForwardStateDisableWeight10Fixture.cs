@@ -1,24 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Common.Data;
-using MyNN.Common.OpenCLHelper;
-using MyNN.Common.Other;
-using MyNN.Common.OutputConsole;
-
-using MyNN.MLP.Structure.Neuron.Function;
-using MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU.MaskContainer;
-using OpenCL.Net.Wrapper;
-
-namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
+﻿namespace MyNN.Tests.MLP2.Forward.DropConnect.OpenCL.CPU
 {
     //!!! починить!
     //[TestClass]
-    //public class ForwardStateDisableOutputLayerFixture
+    //public class ForwardStateDisableWeight10Fixture
     //{
     //    private const float ForwardEpsilon = 1e-6f;
 
-    //    public ForwardStateDisableOutputLayerFixture()
+    //    public ForwardStateDisableWeight10Fixture()
     //    {
     //        //
     //        // TODO: Add constructor logic here
@@ -82,8 +70,8 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //        {
     //            var result = test.ExecuteTestWith_1_2_2_MLP(
     //                dataset,
-    //                new List<float> {1f, 1f, 1f, 1f},
-    //                new List<float> {1f, 1f, 1f, 1f, 1f, 1f},
+    //                new List<float> {2f, 1f, 1f, 1f},
+    //                new List<float> {4f, 1f, 1f, 2f, 2f, 1f},
     //                () => new LinearFunction(1f),
     //                (mlp) =>
     //                {
@@ -91,13 +79,18 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //                        clProvider,
     //                        mlp,
     //                        1,
-    //                        new uint[]
+    //                        (int layerIndex, int weightIndex) =>
     //                        {
-    //                            1,
-    //                            1,
-    //                            0
+    //                            uint maskValue = 1;
+
+    //                            if (layerIndex == 1 && weightIndex == 0)
+    //                            {
+    //                                maskValue = 0;
+    //                            }
+
+    //                            return maskValue;
     //                        }
-    //                        );// output layer with zero mask
+    //                        );
 
     //                    var forward = new DropConnectOpenCLForwardPropagation(
     //                        VectorizationSizeEnum.NoVectorization,
@@ -110,7 +103,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //                        forward;
     //                });
 
-    //            var layer0CorrectResult = new Pair<float, float>(1.75f, 1.75f);
+    //            var layer0CorrectResult = new Pair<float, float>(1f, 1.75f);
     //            ConsoleAmbientContext.Console.WriteLine(
     //                string.Format(
     //                    "layer 0: correct = [{0}; {1}], result = [{2};{3}]",
@@ -120,7 +113,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //                    result.First.Second
     //                    ));
 
-    //            var layer1CorrectResult = new Pair<float, float>(0f, 0f);
+    //            var layer1CorrectResult = new Pair<float, float>(6.75f, 6.5f);
     //            ConsoleAmbientContext.Console.WriteLine(
     //                string.Format(
     //                    "layer 1: correct = [{0}; {1}], result = [{2};{3}]",
@@ -154,8 +147,8 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //        {
     //            var result = test.ExecuteTestWith_1_2_2_MLP(
     //                dataset,
-    //                new List<float> { 1f, 1f, 1f, 1f },
-    //                new List<float> { 1f, 1f, 1f, 1f, 1f, 1f },
+    //                new List<float> { 2f, 1f, 1f, 1f },
+    //                new List<float> { 4f, 1f, 1f, 2f, 2f, 1f },
     //                () => new LinearFunction(1f),
     //                (mlp) =>
     //                {
@@ -163,13 +156,18 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //                        clProvider,
     //                        mlp,
     //                        1,
-    //                        new uint[]
+    //                        (int layerIndex, int weightIndex) =>
     //                        {
-    //                            1,
-    //                            1,
-    //                            0
+    //                            uint maskValue = 1;
+
+    //                            if (layerIndex == 1 && weightIndex == 0)
+    //                            {
+    //                                maskValue = 0;
+    //                            }
+
+    //                            return maskValue;
     //                        }
-    //                        );// output layer with zero mask
+    //                        );
 
     //                    var forward = new DropConnectOpenCLForwardPropagation(
     //                        VectorizationSizeEnum.VectorizationMode4,
@@ -182,7 +180,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //                        forward;
     //                });
 
-    //            var layer0CorrectResult = new Pair<float, float>(1.75f, 1.75f);
+    //            var layer0CorrectResult = new Pair<float, float>(1f, 1.75f);
     //            ConsoleAmbientContext.Console.WriteLine(
     //                string.Format(
     //                    "layer 0: correct = [{0}; {1}], result = [{2};{3}]",
@@ -192,7 +190,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //                    result.First.Second
     //                    ));
 
-    //            var layer1CorrectResult = new Pair<float, float>(0f, 0f);
+    //            var layer1CorrectResult = new Pair<float, float>(6.75f, 6.5f);
     //            ConsoleAmbientContext.Console.WriteLine(
     //                string.Format(
     //                    "layer 1: correct = [{0}; {1}], result = [{2};{3}]",
@@ -226,8 +224,8 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //        {
     //            var result = test.ExecuteTestWith_1_2_2_MLP(
     //                dataset,
-    //                new List<float> { 1f, 1f, 1f, 1f },
-    //                new List<float> { 1f, 1f, 1f, 1f, 1f, 1f },
+    //                new List<float> { 2f, 1f, 1f, 1f },
+    //                new List<float> { 4f, 1f, 1f, 2f, 2f, 1f },
     //                () => new LinearFunction(1f),
     //                (mlp) =>
     //                {
@@ -235,13 +233,18 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //                        clProvider,
     //                        mlp,
     //                        1,
-    //                        new uint[]
+    //                        (int layerIndex, int weightIndex) =>
     //                        {
-    //                            1,
-    //                            1,
-    //                            0
+    //                            uint maskValue = 1;
+
+    //                            if (layerIndex == 1 && weightIndex == 0)
+    //                            {
+    //                                maskValue = 0;
+    //                            }
+
+    //                            return maskValue;
     //                        }
-    //                        );// output layer with zero mask
+    //                        );
 
     //                    var forward = new DropConnectOpenCLForwardPropagation(
     //                        VectorizationSizeEnum.VectorizationMode16,
@@ -254,7 +257,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //                        forward;
     //                });
 
-    //            var layer0CorrectResult = new Pair<float, float>(1.75f, 1.75f);
+    //            var layer0CorrectResult = new Pair<float, float>(1f, 1.75f);
     //            ConsoleAmbientContext.Console.WriteLine(
     //                string.Format(
     //                    "layer 0: correct = [{0}; {1}], result = [{2};{3}]",
@@ -264,7 +267,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //                    result.First.Second
     //                    ));
 
-    //            var layer1CorrectResult = new Pair<float, float>(0f, 0f);
+    //            var layer1CorrectResult = new Pair<float, float>(6.75f, 6.5f);
     //            ConsoleAmbientContext.Console.WriteLine(
     //                string.Format(
     //                    "layer 1: correct = [{0}; {1}], result = [{2};{3}]",
@@ -280,8 +283,6 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.TrainItemForward.CPU
     //            Assert.IsTrue(Math.Abs(result.Second.Second - layer1CorrectResult.Second) < ForwardEpsilon);
     //        }
     //    }
-
-
 
 
 

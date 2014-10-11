@@ -7,7 +7,7 @@ using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using OpenCL.Net.Wrapper.Mem.Data;
 
-namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.TrainItemForward.OpenCL.GPU2
+namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.OpenCL.GPU2
 {
     internal class TestPurposeWeightMaskContainer : IOpenCLWeightMaskContainer
     {
