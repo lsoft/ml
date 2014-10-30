@@ -1,10 +1,13 @@
 ﻿using System;
+using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Naive
 {
-    internal class KernelSource
+    public class KernelSource
     {
+        private const string ActivationMethodName = "Activate";
+
         public string GetKernelSource(
             IFunction function,
             out string kernelName
@@ -15,11 +18,18 @@ namespace MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Naive
                 throw new ArgumentNullException("function");
             }
 
-            var activationFunction = function.GetOpenCLActivationFunction("grnd");
-
             var result = InferenceKernelSource.Replace(
-                "<activationFunction_grnd>",
-                activationFunction);
+                "<ActivationMethodCall>",
+                ActivationMethodName);
+
+            var activationMethod = function.GetOpenCLActivationMethod(
+                ActivationMethodName,
+                VectorizationSizeEnum.NoVectorization
+                );
+
+            result = result.Replace(
+                "<ActivationMethodBody>",
+                activationMethod);
 
             kernelName = "InferenceKernel1";
 
@@ -60,6 +70,8 @@ float SampleFromGaussian2(
     return
         SampleFromGaussian(rnd1, rnd2, median, sigma);
 }
+
+<ActivationMethodBody>
 
 inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
@@ -139,7 +151,7 @@ __kernel void
 //            sqrt(wv_sigmasq));
 //
 //        //compute last state
-//        float lastState = <activationFunction_grnd>;
+//        float lastState = <ActivationMethodCall>(grnd);
 //
 //        lastStateSummator += lastState;
 //    }
@@ -158,7 +170,7 @@ __kernel void
             sqrt(wv_sigmasq));
 
         //compute last state
-        float lastState = <activationFunction_grnd>;
+        float lastState = <ActivationMethodCall>(grnd);
 
         KahanAddElement(&accState, lastState);
     }

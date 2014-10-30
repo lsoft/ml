@@ -7,9 +7,12 @@ using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
 using MyNN.Common.Estimator;
+using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
+using MyNN.MLP.Structure.Neuron.Function;
 using MyNNConsoleApp.RefactoredForDI;
+using OpenCL.Net.Wrapper;
 
 namespace MyNNConsoleApp
 {
@@ -19,6 +22,25 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+                using (var clprovider = new CLProvider())
+                {
+                    var ks = new MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU.CPUKernelSource();
+
+                    string kernelName;
+                    var kernel = ks.GetKernelSource(
+                        VectorizationSizeEnum.VectorizationMode16, 
+                        new HyperbolicTangensFunction(2f, 8f),
+                        out kernelName
+                        );
+
+                    var k = clprovider.CreateKernel(
+                        kernel,
+                        kernelName
+                        );
+
+                    Console.WriteLine("", kernel, kernelName);
+                }
+
                 //TrainMLP.DoTrain();
                 //TrainAutoencoder.DoTrain();
                 //TrainNLNCAMLP.DoTrain();

@@ -6,6 +6,8 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
 {
     public class CPUKernelSource
     {
+        private const string ActivationMethodName = "Activate";
+
         public string GetKernelSource(
             VectorizationSizeEnum vse,
             IFunction function,
@@ -33,13 +35,20 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
                     throw new ArgumentOutOfRangeException("vse");
             }
 
-            var activationFunction = function.GetOpenCLActivationFunction("lastNET");
-
             var result = ComputeWeightSource;
 
             result += kernelSource.Replace(
-                "<activationFunction_lastNET>",
-                activationFunction);
+                "<ActivationMethodCall>",
+                ActivationMethodName);
+
+            var activationMethod = function.GetOpenCLActivationMethod(
+                ActivationMethodName,
+                VectorizationSizeEnum.NoVectorization
+                );
+
+            result = result.Replace(
+                "<ActivationMethodBody>",
+                activationMethod);
 
             kernelName = "ComputeLayerKernel";
 
@@ -58,6 +67,8 @@ inline int ComputeWeightIndex(
 ";
 
         private const string KernelSource1 = @"
+<ActivationMethodBody>
+
 __kernel void
         ComputeLayerKernel(
             __global float * previousLayerLastState,
@@ -92,12 +103,14 @@ __kernel void
 
     //compute last state
 
-    float lastState = <activationFunction_lastNET>;
+    float lastState = <ActivationMethodCall>(lastNET);
     currentLayerLastState[neuronIndex] = lastState;
 }
 ";
 
         private const string KernelSource4 = @"
+<ActivationMethodBody>
+
 __kernel void
         ComputeLayerKernel(
             __global float * previousLayerLastState,
@@ -161,12 +174,14 @@ __kernel void
 
     //compute last state
 
-    float lastState = <activationFunction_lastNET>;
+    float lastState = <ActivationMethodCall>(lastNET);
     currentLayerLastState[neuronIndex] = lastState;
 }
 ";
 
         private const string KernelSource16 = @"
+<ActivationMethodBody>
+
 __kernel void
         ComputeLayerKernel(
             __global float * previousLayerLastState,
@@ -229,7 +244,7 @@ __kernel void
 
     //compute last state
 
-    float lastState = <activationFunction_lastNET>;
+    float lastState = <ActivationMethodCall>(lastNET);
     currentLayerLastState[neuronIndex] = lastState;
 }
 ";

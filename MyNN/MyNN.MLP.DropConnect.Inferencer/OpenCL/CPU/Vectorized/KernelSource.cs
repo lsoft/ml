@@ -1,10 +1,13 @@
 ﻿using System;
+using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Vectorized
 {
-    internal class KernelSource
+    public class KernelSource
     {
+        private const string ActivationMethodName = "Activate";
+
         public string GetKernelSource(
             IFunction function,
             out string kernelName
@@ -15,11 +18,18 @@ namespace MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Vectorized
                 throw new ArgumentNullException("function");
             }
 
-            var activationFunction = function.GetOpenCLActivationFunction("grnd16");
-
             var result = InferenceKernelSource.Replace(
-                "<activationFunction_grnd16>",
-                activationFunction);
+                "<ActivationMethodCall>",
+                ActivationMethodName);
+
+            var activationMethod = function.GetOpenCLActivationMethod(
+                ActivationMethodName,
+                VectorizationSizeEnum.VectorizationMode16
+                );
+
+            result = result.Replace(
+                "<ActivationMethodBody>",
+                activationMethod);
 
             kernelName = "InferenceKernel16";
 
@@ -36,6 +46,8 @@ inline int ComputeWeightIndex(
     return
         previousLayerNeuronCount * neuronIndex;
 }
+
+<ActivationMethodBody>
 
 __kernel void
         InferenceKernel16(
@@ -124,7 +136,7 @@ __kernel void
 //        float16 grnd16 = ogrnd16 * wv_sigma + wv_median;
 //
 //        //compute last state
-//        float16 lastState16 = <activationFunction_grnd16>;
+//        float16 lastState16 = <ActivationMethodCall>(grnd16);
 //
 //        lastStateSummator16 += lastState16;
 //    }
@@ -159,7 +171,7 @@ __kernel void
         float16 grnd16 = ogrnd16 * wv_sigma + wv_median;
 
         //compute last state
-        float16 lastState16 = <activationFunction_grnd16>;
+        float16 lastState16 = <ActivationMethodCall>(grnd16);
 
         KahanAddElement16(&acc16, lastState16);
     }

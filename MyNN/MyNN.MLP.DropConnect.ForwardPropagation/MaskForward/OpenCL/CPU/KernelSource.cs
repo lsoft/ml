@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Globalization;
+using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
 {
     public class KernelSource
     {
+        private const string ActivationMethodName = "Activate";
+
         public string GetKernelSource(
             IFunction function,
             int currentLayerNonBiasNeuronCount,
@@ -18,13 +21,20 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
                 throw new ArgumentNullException("function");
             }
 
-            var activationFunction = function.GetOpenCLActivationFunction("lastNET");
-
             var result = ComputeWeightSource;
 
             result += KernelSourceCode.Replace(
-                "<activationFunction_lastNET>",
-                activationFunction);
+                "<ActivationMethodCall>",
+                ActivationMethodName);
+
+            var activationMethod = function.GetOpenCLActivationMethod(
+                ActivationMethodName,
+                VectorizationSizeEnum.NoVectorization
+                );
+
+            result = result.Replace(
+                "<ActivationMethodBody>",
+                activationMethod);
 
             result = result.Replace(
                 "{CURRENT_LAYER_NEURON_COUNT}",
@@ -51,6 +61,8 @@ inline int ComputeWeightIndex(
 ";
 
         private const string KernelSourceCode = @"
+<ActivationMethodBody>
+
 __kernel void ComputeLayerKernel(
     const __global float* previousLayerLastState,
     __global float* currentLayerLastNET,
@@ -84,7 +96,7 @@ __kernel void ComputeLayerKernel(
     currentLayerLastNET[y] = lastNET;
 
     //compute last state
-    float lastState = <activationFunction_lastNET>;
+    float lastState = <ActivationMethodCall>(lastNET);
     currentLayerLastState[y] = lastState;
 }
 ";

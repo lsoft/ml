@@ -188,6 +188,10 @@
       <Project>{5843D1AD-3601-4738-89AB-1151CCAD167B}</Project>
       <Name>MyNN.MLP.Classic</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.DropConnect.ForwardPropagation\MyNN.MLP.DropConnect.ForwardPropagation.csproj">
+      <Project>{03082d83-3645-4cf8-a1c7-bd4b5cfc7fe0}</Project>
+      <Name>MyNN.MLP.DropConnect.ForwardPropagation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.DropConnect.Inferencer\MyNN.MLP.DropConnect.Inferencer.csproj">
       <Project>{A8501494-9230-4FB0-B2F7-E84B31E9E63A}</Project>
       <Name>MyNN.MLP.DropConnect.Inferencer</Name>

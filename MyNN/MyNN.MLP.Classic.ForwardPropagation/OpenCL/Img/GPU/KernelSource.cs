@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Globalization;
+using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Img.GPU
 {
     public class KernelSource
     {
+        private const string ActivationMethodName = "Activate";
+
         public string GetKernelSource(
             IFunction function,
             int currentLayerNonBiasNeuronCount,
@@ -18,13 +21,20 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Img.GPU
                 throw new ArgumentNullException("function");
             }
 
-            var activationFunction = function.GetOpenCLActivationFunction("lastNET");
-
             var result = ComputeWeightSource;
 
             result += KernelSourceCode.Replace(
-                "<activationFunction_lastNET>",
-                activationFunction);
+                "<ActivationMethodCall>",
+                ActivationMethodName);
+
+            var activationMethod = function.GetOpenCLActivationMethod(
+                ActivationMethodName,
+                VectorizationSizeEnum.NoVectorization
+                );
+
+            result = result.Replace(
+                "<ActivationMethodBody>",
+                activationMethod);
 
             result = result.Replace(
                 "{CURRENT_LAYER_NEURON_COUNT}",
@@ -51,6 +61,8 @@ inline int ComputeWeightIndex(
 ";
 
         private const string KernelSourceCode = @"
+<ActivationMethodBody>
+
 constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST;
 
 __kernel void ComputeLayerKernel(
@@ -91,7 +103,7 @@ __kernel void ComputeLayerKernel(
          write_imagef(currentLayerLastNET, (int2)(0, y), (float4)(lastNET, lastNET, lastNET, lastNET));
 
          //compute last state
-         float lastState = <activationFunction_lastNET>;
+         float lastState = <ActivationMethodCall>(lastNET);
          write_imagef(currentLayerLastState, (int2)(0, y), (float4)(lastState, lastState, lastState, lastState));
       }
 
