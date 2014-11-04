@@ -19,7 +19,7 @@ using Kernel = OpenCL.Net.Wrapper.Kernel;
 namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.GPU
 {
     /// <summary>
-    /// Implementation of classic backpropagation with transposed weights.
+    /// Implementation of classic backpropagation with transposed weights for GPU-OpenCL.
     /// It's different kind of tranposed algorithm.
     /// </summary>
     public class GPUTranspose2EpocheTrainer : IEpocheTrainer

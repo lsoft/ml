@@ -79,6 +79,7 @@
     <Compile Include="MLP2\ActivationFunction\CSharp\Derivative\SigmoidFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\CSharp\Derivative\SparsifierFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\ActivationFunctionDerivativeTests.cs" />
+    <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\LinearOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\HyperbolicTangensOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\RLUOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\SigmoidOpenCLFixture.cs" />

@@ -4,12 +4,12 @@ using MyNN.MLP.Structure.Neuron.Function;
 namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative
 {
     /// <summary>
-    /// Summary description for SparsifierOpenCLFixture
+    /// Summary description for RLUOpenCLFixture
     /// </summary>
     [TestClass]
-    public class SparsifierOpenCLFixture
+    public class LinearOpenCLFixture
     {
-        public SparsifierOpenCLFixture()
+        public LinearOpenCLFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -57,21 +57,12 @@ namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative
         #endregion
 
         [TestMethod]
-        public void SparsifierTestWithDefaultCoef_OpenCL()
+        public void LinearTest_OpenCL()
         {
-            var sf = new SparsifierFunction();
+            var sf = new LinearFunction(1f);
 
             var tests = new ActivationFunctionDerivativeTests();
-            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
-        }
-
-        [TestMethod]
-        public void SparsifierTestWithOneTwoCoef_OpenCL()
-        {
-            var sf = new SparsifierFunction(1f, 2f);
-
-            var tests = new ActivationFunctionDerivativeTests();
-            tests.ExecuteTests(sf, -10.05f, 3f, 0.013f, 0.006f);
+            tests.ExecuteTests(sf);
         }
     }
 }

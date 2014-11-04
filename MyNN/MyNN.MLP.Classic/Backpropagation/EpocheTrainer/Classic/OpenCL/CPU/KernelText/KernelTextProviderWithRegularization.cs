@@ -1,4 +1,5 @@
 using System;
+using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
@@ -10,6 +11,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
     /// </summary>
     internal class KernelTextProviderWithRegularization : IKernelTextProvider
     {
+        private const string DerivativeMethodName = "Derivative";
+
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
@@ -38,8 +41,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
 
         public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
-            var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLFirstDerivative("nOut");
-            var result = _calculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
+            var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
+            var result = _calculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+
+            result = result.Replace("<DerivativeMethodCall>", DerivativeMethodName);
 
             result = result.Replace("<vectorized_nabla_update>", string.Empty);
 
@@ -60,8 +65,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
 
         public string GetIncrementCalculationKernelsSource(int layerIndex)
         {
-            var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLFirstDerivative("nOut");
-            var result = _calculationKernelsSource.Replace("<firstDerivative_nOut>", fDerivative);
+            var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
+            var result = _calculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+
+            result = result.Replace("<DerivativeMethodCall>", DerivativeMethodName);
 
             result =
                 result.Replace("<vectorized_nabla_update>", @"
@@ -90,6 +97,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
 
 
         private const string _calculationKernelsSource = @"
+<DerivativeMethodBody>
+
 inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
     int neuronIndex)
@@ -143,7 +152,7 @@ __kernel void HiddenLayerTrain(
 
 
     float nOut = currentLayerNET[neuronIndex];
-    currentDeDz *= <firstDerivative_nOut>;
+    currentDeDz *= <DerivativeMethodCall>(nOut);
     currentLayerDeDz[neuronIndex] = currentDeDz;
 
     int currentNablaIndex4 = currentNablaIndex / 4;
@@ -212,9 +221,10 @@ __kernel void OutputLayerTrain(
     int neuronIndex = get_global_id(0);
 
     float nOut = currentLayerNET[neuronIndex];
+    float deri = <DerivativeMethodCall>(nOut);
 
     float n =
-        <firstDerivative_nOut>
+        deri
         * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]); //!!! HalfSquaredEuclidianDistance, refactor!
 
     currentLayerDeDz[neuronIndex] = n;

@@ -1,15 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using MathNet.Numerics.Distributions;
+using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
+using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
+using MyNN.Common.Data.TypicalDataProvider;
 using MyNN.Common.Estimator;
+using MyNN.Common.LearningRateController;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
+using MyNN.MLP.Backpropagation;
+using MyNN.MLP.Backpropagation.Metrics;
+using MyNN.MLP.Backpropagation.Validation;
+using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
+using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.GPU;
+using MyNN.MLP.LearningConfig;
+using MyNN.MLP.MLPContainer;
+using MyNN.MLP.Structure.Factory;
+using MyNN.MLP.Structure.Layer.Factory;
+using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
 using MyNNConsoleApp.RefactoredForDI;
 using OpenCL.Net.Wrapper;
@@ -22,24 +44,122 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                using (var clprovider = new CLProvider())
+                var dataItemFactory = new DenseDataItemFactory();
+
+                var trainData = MNISTDataProvider.GetDataSet(
+                    "_MNIST_DATABASE/mnist/trainingset/",
+                    10,
+                    true,
+                    dataItemFactory
+                    );
+                trainData.Normalize();
+
+                var validationData = MNISTDataProvider.GetDataSet(
+                    "_MNIST_DATABASE/mnist/testset/",
+                    10,
+                    true,
+                    dataItemFactory
+                    );
+                validationData.Normalize();
+
+                var randomizer = new DefaultRandomizer(123);
+
+                var mlpfactory = new MLPFactory(
+                    new LayerFactory(
+                        new NeuronFactory(
+                            randomizer)));
+
+                var serialization = new SerializationHelper();
+
+                var rootContainer = new SavelessArtifactContainer(
+                    ".",
+                    serialization);
+
+                var validation = new Validation(
+                    new ClassificationAccuracyCalculator(
+                        new HalfSquaredEuclidianDistance(),
+                        validationData),
+                    null
+                    );
+
+                using (var clProvider = new CLProvider())
                 {
-                    var ks = new MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU.CPUKernelSource();
+                    var mlpName = string.Format(
+                        "_test{0}.mlp",
+                        DateTime.Now.ToString("yyyyMMddHHmmss"));
 
-                    string kernelName;
-                    var kernel = ks.GetKernelSource(
-                        VectorizationSizeEnum.VectorizationMode16, 
-                        new HyperbolicTangensFunction(2f, 8f),
-                        out kernelName
+                    var mlp = mlpfactory.CreateMLP(
+                        mlpName,
+                        new IFunction[]
+                        {
+                            null,
+                            new LinearFunction(1f),
+                        },
+                        new int[]
+                        {
+                            784,
+                            10
+                        });
+
+                    var config = new LearningAlgorithmConfig(
+                        new LinearLearningRate(0.001f, 0.99f),
+                        1,
+                        0.00f,
+                        1,
+                        -1f,
+                        -1f
                         );
 
-                    var k = clprovider.CreateKernel(
-                        kernel,
-                        kernelName
+                    var trainDataProvider =
+                        new ConverterTrainDataProvider(
+                            new ShuffleDataSetConverter(randomizer),
+                            new NoDeformationTrainDataProvider(trainData)
+                            );
+
+                    var mlpContainer = rootContainer.GetChildContainer(mlpName);
+
+                    var mlpContainerHelper = new MLPContainerHelper();
+
+                    var algo = new Backpropagation(
+                        new GPUTranspose2EpocheTrainer(
+                            mlp,
+                            config,
+                            clProvider), 
+                        mlpContainerHelper,
+                        mlpContainer,
+                        mlp,
+                        validation,
+                        config
                         );
 
-                    Console.WriteLine("", kernel, kernelName);
+                    var accr = algo.Train(
+                        trainDataProvider
+                        );
+
+                    var pie = accr.PerItemError;
+                    var correctpie = 1.34918714f;
+                    var diff = pie - correctpie;
+
+                    if (Math.Abs(diff) >= 0.0001f)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                    }
+
+                    Console.WriteLine(
+                        "PIE={0}, CPIE={1}, DIFF={2}",
+                        pie,
+                        correctpie,
+                        diff
+                        );
                 }
+
+                Console.ResetColor();
+                Console.ReadLine();
+                return;
 
                 //TrainMLP.DoTrain();
                 //TrainAutoencoder.DoTrain();

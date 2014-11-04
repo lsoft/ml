@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.MLP.Structure.Neuron.Function;
 
-namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative.newmethod
+namespace MyNN.Tests.MLP2.ActivationFunction.OpenCL.Derivative
 {
     /// <summary>
     /// Summary description for HyperbolicTangensOpenCLFixture

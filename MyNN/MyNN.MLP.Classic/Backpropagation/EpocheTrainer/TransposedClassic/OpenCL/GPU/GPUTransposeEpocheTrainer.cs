@@ -22,7 +22,7 @@ using Kernel = OpenCL.Net.Wrapper.Kernel;
 namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU
 {
     /// <summary>
-    /// Classic backpropagation epoche trainer that enables CPU-OpenCL with transposed weights.
+    /// Classic backpropagation epoche trainer that enables GPU-OpenCL with transposed weights.
     /// This implementation of classic backpropagation is optimized for training in batch-mode.
     /// </summary>
     public class GPUTransposeEpocheTrainer : IEpocheTrainer

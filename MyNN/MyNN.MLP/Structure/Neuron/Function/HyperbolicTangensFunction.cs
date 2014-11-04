@@ -146,16 +146,6 @@ inline floatv {METHOD_NAME}(floatv incoming)
 }
 ";
 
-
-//            var computed = this.GetOpenCLActivationFunction(varName);
-//            return
-//                string.Format(@"
-//{0} * {1} * (1 - ({2} / {0}) * ({2} / {0}))
-//",
-//                      _alpha.ToString(CultureInfo.InvariantCulture),
-//                      _beta.ToString(CultureInfo.InvariantCulture),
-//                      computed);
-
             var activationKernelName =
                 string.Format(
                     "ActivationKernel{0}",
