@@ -35,23 +35,6 @@ namespace MyNN.MLP.Structure.Neuron.Function
                 _alpha;
         }
 
-        public string GetOpenCLActivationFunction(string varName)
-        {
-            return
-                string.Format(
-                    "({0} * {1})",
-                    _alpha.ToString(CultureInfo.InvariantCulture),
-                    varName);
-        }
-
-        public string GetOpenCLFirstDerivative(string varName)
-        {
-            return
-                string.Format(
-                    "({0})",
-                    _alpha.ToString(CultureInfo.InvariantCulture));
-        }
-
         public string GetOpenCLActivationMethod(
             string methodName,
             VectorizationSizeEnum vse

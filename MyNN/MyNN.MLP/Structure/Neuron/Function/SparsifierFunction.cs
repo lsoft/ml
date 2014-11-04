@@ -48,26 +48,6 @@ namespace MyNN.MLP.Structure.Neuron.Function
             return fd;
         }
 
-        public string GetOpenCLFirstDerivative(string varName)
-        {
-            return
-                string.Format(
-                    "((exp({2} * ({1} - {0})) * ({0} * (exp({1} * {2}) + 1.0)  + {1} * (exp({0} * {2}) - 1.0)) ) / ((exp({1} * {2}) + 1.0)*(exp({1} * {2}) + 1.0)))",
-                    _lambda.ToString(CultureInfo.InvariantCulture),
-                    _mu.ToString(CultureInfo.InvariantCulture),
-                    varName);
-        }
-
-        public string GetOpenCLActivationFunction(string varName)
-        {
-            return
-                string.Format(
-                    "((1.0 - exp(-1.0 * {0} * {2})) / (1.0 + exp(-1.0 * {1} * {2})))",
-                    _lambda.ToString(CultureInfo.InvariantCulture),
-                    _mu.ToString(CultureInfo.InvariantCulture),
-                    varName);
-        }
-
         public string GetOpenCLActivationMethod(
             string methodName, 
             VectorizationSizeEnum vse

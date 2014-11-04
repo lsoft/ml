@@ -12,9 +12,6 @@ namespace MyNN.MLP.Structure.Neuron.Function
         float Compute(float x);
         float ComputeFirstDerivative(float x);
 
-        string GetOpenCLFirstDerivative(string varName);
-        string GetOpenCLActivationFunction(string varName);
-
         /// <summary>
         /// Получить функцию активации как метод
         /// </summary>

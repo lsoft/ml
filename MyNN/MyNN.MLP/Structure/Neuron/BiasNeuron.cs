@@ -31,17 +31,6 @@ namespace MyNN.MLP.Structure.Neuron
                 throw new NotSupportedException("Для этой функции этот метод не должен быть вызван");
             }
 
-            public string GetOpenCLFirstDerivative(string varName)
-            {
-                throw new NotSupportedException("Для этой функции этот метод не должен быть вызван");
-            }
-
-            public string GetOpenCLActivationFunction(string varName)
-            {
-                return
-                    "(1.0)";
-            }
-
             public string GetOpenCLActivationMethod(
                 string methodName,
                 VectorizationSizeEnum vse

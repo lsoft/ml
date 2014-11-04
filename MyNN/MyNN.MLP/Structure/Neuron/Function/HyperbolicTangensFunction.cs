@@ -46,29 +46,6 @@ namespace MyNN.MLP.Structure.Neuron.Function
                 _alpha * _beta * (1f - scaled * scaled);
         }
 
-        public string GetOpenCLActivationFunction(string varName)
-        {
-            return
-                string.Format("((float)({0}) * tanh((float)({1}) * {2}) )",
-                      _alpha.ToString(CultureInfo.InvariantCulture),
-                      _beta.ToString(CultureInfo.InvariantCulture),
-                      varName);
-        }
-
-        public string GetOpenCLFirstDerivative(string varName)
-        {
-            var computed = this.GetOpenCLActivationFunction(varName);
-
-            return
-                string.Format(@"
-({0} * {1} * (((float)1) - ({2} / {0}) * ({2} / {0})))
-",
-                      _alpha.ToString(CultureInfo.InvariantCulture),
-                      _beta.ToString(CultureInfo.InvariantCulture),
-                      computed);
-
-        }
-
         public string GetOpenCLActivationMethod(
             string methodName,
             VectorizationSizeEnum vse

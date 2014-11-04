@@ -30,20 +30,6 @@ namespace MyNN.MLP.Structure.Neuron.Function
             return 1f;
         }
 
-        public string GetOpenCLActivationFunction(string varName)
-        {
-            return
-                string.Format(
-                    "max((float)(0.0), {0})",
-                    varName);
-        }
-
-        public string GetOpenCLFirstDerivative(string varName)
-        {
-            return
-                "(1.0)";
-        }
-
         public string GetOpenCLActivationMethod(
             string methodName,
             VectorizationSizeEnum vse
