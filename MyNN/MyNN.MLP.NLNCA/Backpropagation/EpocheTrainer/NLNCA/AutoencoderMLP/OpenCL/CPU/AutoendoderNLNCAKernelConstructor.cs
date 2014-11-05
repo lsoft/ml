@@ -306,7 +306,7 @@ __kernel void OutputLayerTrain(
 
     float n =
         deri
-        * lambda * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);
+        * lambda * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]); //!!! HalfSquaredEuclidianDistance, refactor!
 
     currentLayerDeDz[neuronIndex] = n;
 

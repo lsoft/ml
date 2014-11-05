@@ -18,7 +18,7 @@ namespace MyNN.Common.Other
         }
 
         public static void AddElement(
-            Accumulator acc,
+            ref Accumulator acc,
             float dataItem
             )
         {
@@ -54,7 +54,8 @@ namespace MyNN.Common.Other
                 KahanAlgorithm.Sum(tempArray);
         }
 
-        public static float Sum(float[] data)
+        public static float Sum(
+            float[] data)
         {
             if (data == null)
             {

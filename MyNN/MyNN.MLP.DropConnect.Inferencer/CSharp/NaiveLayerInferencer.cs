@@ -140,8 +140,8 @@ namespace MyNN.MLP.DropConnect.Inferencer.CSharp
                 {
                     var wv = this._weightMem.Array[weightIndex++] * this._previousLayerStateMem.Array[plnIndex];
 
-                    KahanAlgorithm.AddElement(accMedian, wv);
-                    KahanAlgorithm.AddElement(accSigmaSq, wv * wv);
+                    KahanAlgorithm.AddElement(ref accMedian, wv);
+                    KahanAlgorithm.AddElement(ref accSigmaSq, wv * wv);
                 }
 
                 var wv_median = accMedian.Sum;

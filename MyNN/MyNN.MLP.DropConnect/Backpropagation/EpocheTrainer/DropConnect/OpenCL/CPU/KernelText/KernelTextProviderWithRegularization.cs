@@ -1,4 +1,5 @@
 using System;
+using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
