@@ -1,4 +1,5 @@
 using System;
+using MyNN.Common.OpenCLHelper;
 
 namespace MyNN.MLP.Backpropagation.Metrics
 {
@@ -25,6 +26,11 @@ namespace MyNN.MLP.Backpropagation.Metrics
         public float CalculatePartialDerivativeByV2Index(float[] v1, float[] v2, int v2Index)
         {
             return v2[v2Index] - v1[v2Index];
+        }
+
+        public string GetOpenCLPartialDerivative(string methodName, VectorizationSizeEnum vse, MemModifierEnum mme, int length)
+        {
+            throw new NotImplementedException();
         }
     }
 }

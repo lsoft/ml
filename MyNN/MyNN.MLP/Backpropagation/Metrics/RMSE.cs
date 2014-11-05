@@ -1,6 +1,7 @@
 using System;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP.Backpropagation.Metrics
 {
@@ -84,6 +85,7 @@ namespace MyNN.MLP.Backpropagation.Metrics
         public string GetOpenCLPartialDerivative(
             string methodName,
             VectorizationSizeEnum vse,
+            MemModifierEnum mme,
             int length
             )
         {
@@ -93,60 +95,47 @@ namespace MyNN.MLP.Backpropagation.Metrics
             }
 
             const string methodBody = @"
-inline floatv {METHOD_NAME}(floatv* v1, floatv* v2, int v2Index)
+inline float{v} {METHOD_NAME}({MODIFIER} float{v}* v1, {MODIFIER} float{v}* v2, int v2Index)
 {
-    KahanAccumulatorv acc = GetEmptyKahanAccv();
+    KahanAccumulator{v} acc = GetEmptyKahanAcc{v}();
 
     for (int cc = 0; cc < {LENGTH}; cc++)
     {
-        floatv diff = v1[cc] - v2[cc];
+        float{v} diff = v1[cc] - v2[cc];
 
-        floatv sqDiff = diff * diff;
+        float{v} sqDiff = diff * diff;
 
-        KahanAddElementv(
+        KahanAddElement{v}(
             &acc,
             sqDiff
             );
     }
 
-    floatv rSum = sqrt(acc.Sum);
-    floatv rN = sqrt({LENGTH});
-    floatv pDiff = v2[v2Index] - v1[v2Index];
+    float{v} rSum = sqrt(acc.Sum);
+    float{v} rN = sqrt((float){LENGTH});
+    float{v} pDiff = v2[v2Index] - v1[v2Index];
 
-    floatv result = pDiff / rN / rSum;
+    float{v} result = pDiff / rN / rSum;
 
     return result;
 }
 ";
 
             var vsize = VectorizationHelper.GetVectorizationSuffix(vse);
+            var mm = MemModifierHelper.GetModifierSuffix(mme);
 
             var result = methodBody;
 
-
             result = result.Replace(
-                "floatv",
+                "{v}",
                 string.Format(
-                    "float{0}",
+                    "{0}",
                     vsize));
 
             result = result.Replace(
-                "KahanAccumulatorv",
-                string.Format(
-                    "KahanAccumulator{0}",
-                    vsize));
-
-            result = result.Replace(
-                "GetEmptyKahanAccv",
-                string.Format(
-                    "GetEmptyKahanAcc{0}",
-                    vsize));
-
-            result = result.Replace(
-                "KahanAddElementv",
-                string.Format(
-                    "KahanAddElement{0}",
-                    vsize));
+                "{MODIFIER}",
+                mm
+                );
 
             result = result.Replace(
                 "{METHOD_NAME}",

@@ -1,4 +1,6 @@
 using System;
+using MyNN.Common.OpenCLHelper;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP.Backpropagation.Metrics
 {
@@ -58,6 +60,53 @@ namespace MyNN.MLP.Backpropagation.Metrics
 
             return 
                 -(v1[v2Index] / v2[v2Index] - (1 - v1[v2Index]) / (1 - v2[v2Index]));
+        }
+
+        public string GetOpenCLPartialDerivative(
+            string methodName,
+            VectorizationSizeEnum vse,
+            MemModifierEnum mme,
+            int length
+            )
+        {
+            if (methodName == null)
+            {
+                throw new ArgumentNullException("methodName");
+            }
+
+            //!!! нет нумерикал стабилити!
+
+            const string methodBody = @"
+inline float{v} {METHOD_NAME}({MODIFIER} float{v}* v1, {MODIFIER} float{v}* v2, int v2Index)
+{
+    float{v} result = -(v1[v2Index] / v2[v2Index] - (1 - v1[v2Index]) / (1 - v2[v2Index]));
+
+    return result;
+}
+";
+
+            var vsize = VectorizationHelper.GetVectorizationSuffix(vse);
+            var mm = MemModifierHelper.GetModifierSuffix(mme);
+
+            var result = methodBody;
+
+            result = result.Replace(
+                "{v}",
+                string.Format(
+                    "{0}",
+                    vsize));
+
+            result = result.Replace(
+                "{MODIFIER}",
+                mm
+                );
+
+            result = result.Replace(
+                "{METHOD_NAME}",
+                methodName
+                );
+
+            return result;
         }
     }
 }

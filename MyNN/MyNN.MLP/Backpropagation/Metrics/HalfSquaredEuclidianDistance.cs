@@ -1,5 +1,6 @@
 using System;
 using MyNN.Common.OpenCLHelper;
+using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP.Backpropagation.Metrics
 {
@@ -64,6 +65,7 @@ namespace MyNN.MLP.Backpropagation.Metrics
         public string GetOpenCLPartialDerivative(
             string methodName,
             VectorizationSizeEnum vse,
+            MemModifierEnum mme,
             int length
             )
         {
@@ -73,23 +75,29 @@ namespace MyNN.MLP.Backpropagation.Metrics
             }
 
             const string methodBody = @"
-inline floatv {METHOD_NAME}(floatv* v1, floatv* v2, int v2Index)
+inline float{v} {METHOD_NAME}({MODIFIER} float{v}* v1, {MODIFIER} float{v}* v2, int v2Index)
 {
-    floatv result = v2[v2Index] - v1[v2Index];
+    float{v} result = v2[v2Index] - v1[v2Index];
 
     return result;
 }
 ";
 
             var vsize = VectorizationHelper.GetVectorizationSuffix(vse);
+            var mm = MemModifierHelper.GetModifierSuffix(mme);
 
             var result = methodBody;
 
             result = result.Replace(
-                "floatv",
+                "{v}",
                 string.Format(
-                    "float{0}",
+                    "{0}",
                     vsize));
+
+            result = result.Replace(
+                "{MODIFIER}",
+                mm
+                );
 
             result = result.Replace(
                 "{METHOD_NAME}",

@@ -98,6 +98,8 @@
     <Compile Include="LearningRateController\ConstLearningRate.cs" />
     <Compile Include="LearningRateController\ILearningRate.cs" />
     <Compile Include="LearningRateController\LinearLearningRate.cs" />
+    <Compile Include="OpenCLHelper\MemModifierEnum.cs" />
+    <Compile Include="OpenCLHelper\MemModifierHelper.cs" />
     <Compile Include="OpenCLHelper\VectorizationHelper.cs" />
     <Compile Include="OpenCLHelper\VectorizationSizeEnum.cs" />
     <Compile Include="Other\ArrayOperations.cs" />
