@@ -1,9 +1,18 @@
 using MyNN.Common.LearningRateController;
+using MyNN.MLP.Backpropagation.Metrics;
 
 namespace MyNN.MLP.LearningConfig
 {
     public interface ILearningAlgorithmConfig
     {
+        /// <summary>
+        /// Метрика, на которую обучается MLP
+        /// </summary>
+        IMetrics TargetMetrics
+        {
+            get;
+        }
+
         /// <summary>
         /// Объект задающий динамику коэффициента скорости обучения от номера эпохи
         /// </summary>

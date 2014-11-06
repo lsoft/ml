@@ -107,6 +107,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                 mlp.OverwriteName(mlpName);
 
                 var config = new LearningAlgorithmConfig(
+                    new HalfSquaredEuclidianDistance(), 
                     new LinearLearningRate(0.006f, 0.99f),
                     1,
                     0f,
@@ -196,6 +197,7 @@ namespace MyNNConsoleApp.RefactoredForDI
             const int epocheCount = 50;
 
             var config = new LearningAlgorithmConfig(
+                new HalfSquaredEuclidianDistance(), 
                 new LinearLearningRate(0.0001f, 0.99f),
                 1,
                 0f,
@@ -341,6 +343,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     });
 
                 var config = new LearningAlgorithmConfig(
+                    new HalfSquaredEuclidianDistance(), 
                     new LinearLearningRate(0.006f, 0.99f),
                     1,
                     0f,

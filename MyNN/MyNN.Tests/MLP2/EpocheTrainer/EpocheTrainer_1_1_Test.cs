@@ -7,6 +7,7 @@ using MyNN.Common.LearningRateController;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.MLP.Backpropagation;
+using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
@@ -63,6 +64,7 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
             using (var clProvider = new CLProvider())
             {
                 var config = new LearningAlgorithmConfig(
+                    new HalfSquaredEuclidianDistance(), 
                     new ConstLearningRate(1f),
                     1,
                     0.0f,

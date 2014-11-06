@@ -231,6 +231,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     });
 
                 var config = new LearningAlgorithmConfig(
+                    new HalfSquaredEuclidianDistance(), 
                     new ConstLearningRate(1f / 65536),
                     batchSize,
                     regularizationFactor,

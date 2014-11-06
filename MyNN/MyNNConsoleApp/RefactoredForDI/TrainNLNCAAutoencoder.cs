@@ -132,6 +132,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                             : 0.001f;
 
                     var conf = new LearningAlgorithmConfig(
+                        new HalfSquaredEuclidianDistance(), 
                         new LinearLearningRate(lr, 0.99f),
                         250,
                         0.0f,

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.LearningConfig;
@@ -9,6 +10,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
     internal class KernelTextProviderWithoutRegularization : IKernelTextProvider
     {
         private const string DerivativeMethodName = "Derivative";
+        private const string MetricMethodName = "CalculateMetric";
 
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
@@ -39,7 +41,22 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
         public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
-            var result = _calculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+            var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+
+            result = result.Replace(
+                "<MetricMethodBody>",
+                _config.TargetMetrics.GetOpenCLPartialDerivative(
+                    MetricMethodName,
+                    VectorizationSizeEnum.NoVectorization,
+                    MemModifierEnum.Global,
+                    _mlp.Layers.Last().NonBiasNeuronCount
+                    )
+                );
+
+            result = result.Replace(
+                "<MetricMethodCall>",
+                MetricMethodName
+                );
 
             result = result.Replace("<DerivativeMethodCall>", DerivativeMethodName);
 
@@ -63,7 +80,22 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
         public string GetIncrementCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
-            var result = _calculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+            var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+
+            result = result.Replace(
+                "<MetricMethodBody>",
+                _config.TargetMetrics.GetOpenCLPartialDerivative(
+                    MetricMethodName,
+                    VectorizationSizeEnum.NoVectorization,
+                    MemModifierEnum.Global,
+                    _mlp.Layers.Last().NonBiasNeuronCount
+                    )
+                );
+
+            result = result.Replace(
+                "<MetricMethodCall>",
+                MetricMethodName
+                );
 
             result = result.Replace("<DerivativeMethodCall>", DerivativeMethodName);
 
@@ -93,8 +125,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
         }
 
 
-        private const string _calculationKernelsSource = @"
+        private const string CalculationKernelsSource = @"
 <DerivativeMethodBody>
+
+<MetricMethodBody>
 
 inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
@@ -216,9 +250,13 @@ __kernel void OutputLayerTrain(
     float nOut = currentLayerNET[neuronIndex];
     float deri = <DerivativeMethodCall>(nOut);
 
-    float n =
-        deri
-        * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]); //!!! HalfSquaredEuclidianDistance, refactor!
+    float metric = <MetricMethodCall>(
+        currentLayerLastState,
+        desiredOutput,
+        neuronIndex
+        );
+
+    float n = deri * metric;
 
     currentLayerDeDz[neuronIndex] = n;
 

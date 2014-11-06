@@ -110,6 +110,7 @@ namespace MyNNConsoleApp
                     });
 
                 var config = new LearningAlgorithmConfig(
+                    new HalfSquaredEuclidianDistance(), 
                     new ConstLearningRate(0.0001f), 
                     1,
                     0f,

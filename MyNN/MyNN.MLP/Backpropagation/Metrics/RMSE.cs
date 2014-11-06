@@ -74,10 +74,9 @@ namespace MyNN.MLP.Backpropagation.Metrics
             }
 
             var rSum = Math.Sqrt(acc.Sum);
-            var rN = Math.Sqrt(v1.Length);
             var pDiff = v2[v2Index] - v1[v2Index];
 
-            var result = pDiff/rN/rSum;
+            var result = pDiff / rSum;
 
             return (float)result;
         }
@@ -112,10 +111,9 @@ inline float{v} {METHOD_NAME}({MODIFIER} float{v}* v1, {MODIFIER} float{v}* v2, 
     }
 
     float{v} rSum = sqrt(acc.Sum);
-    float{v} rN = sqrt((float){LENGTH});
     float{v} pDiff = v2[v2Index] - v1[v2Index];
 
-    float{v} result = pDiff / rN / rSum;
+    float{v} result = pDiff / rSum;
 
     return result;
 }

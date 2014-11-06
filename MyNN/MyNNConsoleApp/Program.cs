@@ -73,7 +73,8 @@ namespace MyNNConsoleApp
 
                 var rootContainer = new SavelessArtifactContainer(
                     ".",
-                    serialization);
+                    serialization
+                    );
 
                 var validation = new Validation(
                     new ClassificationAccuracyCalculator(
@@ -102,6 +103,7 @@ namespace MyNNConsoleApp
                         });
 
                     var config = new LearningAlgorithmConfig(
+                        new HalfSquaredEuclidianDistance(), 
                         new LinearLearningRate(0.001f, 0.99f),
                         1,
                         0.00f,

@@ -16,6 +16,7 @@ using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
 using MyNN.KNN.OpenCL.CPU.Factory;
 using MyNN.MLP.Backpropagation;
+using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
@@ -109,6 +110,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     });
 
                 var config = new LearningAlgorithmConfig(
+                    new HalfSquaredEuclidianDistance(), 
                     new LinearLearningRate(0.5f, 0.98f),
                     400,
                     0f,

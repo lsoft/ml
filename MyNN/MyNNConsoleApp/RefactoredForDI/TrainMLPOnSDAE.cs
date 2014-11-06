@@ -85,6 +85,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     DateTime.Now.ToString("yyyyMMddHHmmss"));
 
                 var config = new LearningAlgorithmConfig(
+                    new HalfSquaredEuclidianDistance(), 
                     new LinearLearningRate(0.02f, 0.99f),
                     1,
                     0f,
