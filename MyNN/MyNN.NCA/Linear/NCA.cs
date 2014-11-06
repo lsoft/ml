@@ -11,10 +11,6 @@ using MyNN.Common.Data.Set.Item;
 
 namespace MyNN.NCA.Linear
 {
-    #region support classes
-
-    #endregion
-
     public class NCA
     {
         private int _itemSize;
@@ -31,11 +27,9 @@ namespace MyNN.NCA.Linear
 
         public NCA()
         {
-            //MathNet.Numerics.Control.LinearAlgebraProvider = new AtlasLinearAlgebraProvider();
-
             _trainList = new List<DataVector>();
 
-            _rnd = new Random(1); //!!!
+            _rnd = new Random(DateTime.Now.Millisecond);
         }
 
         public void Train(

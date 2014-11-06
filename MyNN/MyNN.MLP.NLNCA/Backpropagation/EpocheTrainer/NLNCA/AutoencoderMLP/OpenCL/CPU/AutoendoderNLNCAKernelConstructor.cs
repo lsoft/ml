@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
@@ -11,6 +12,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
     public class AutoendoderNLNCAKernelConstructor
     {
         private const string DerivativeMethodName = "Derivative";
+        private const string MetricMethodName = "CalculateMetric";
 
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
@@ -38,6 +40,21 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
             var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+
+            result = result.Replace(
+                "<MetricMethodBody>",
+                _config.TargetMetrics.GetOpenCLPartialDerivative(
+                    MetricMethodName,
+                    VectorizationSizeEnum.NoVectorization,
+                    MemModifierEnum.Global,
+                    _mlp.Layers.Last().NonBiasNeuronCount
+                    )
+                );
+
+            result = result.Replace(
+                "<MetricMethodCall>",
+                MetricMethodName
+                );
 
             result = result.Replace("<DerivativeMethodCall>", DerivativeMethodName);
 
@@ -101,6 +118,21 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
             var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+
+            result = result.Replace(
+                "<MetricMethodBody>",
+                _config.TargetMetrics.GetOpenCLPartialDerivative(
+                    MetricMethodName,
+                    VectorizationSizeEnum.NoVectorization,
+                    MemModifierEnum.Global,
+                    _mlp.Layers.Last().NonBiasNeuronCount
+                    )
+                );
+
+            result = result.Replace(
+                "<MetricMethodCall>",
+                MetricMethodName
+                );
 
             result = result.Replace("<DerivativeMethodCall>", DerivativeMethodName);
 
@@ -169,6 +201,8 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
 
         private const string CalculationKernelsSource = @"
 <DerivativeMethodBody>
+
+<MetricMethodBody>
 
 inline int ComputeWeightIndex(
     int previousLayerNeuronCount,
@@ -304,9 +338,13 @@ __kernel void OutputLayerTrain(
     float nOut = currentLayerNET[neuronIndex];
     float deri = <DerivativeMethodCall>(nOut);
 
-    float n =
-        deri
-        * lambda * (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]); //!!! HalfSquaredEuclidianDistance, refactor!
+    float metric = <MetricMethodCall>(
+        currentLayerLastState,
+        desiredOutput,
+        neuronIndex
+        );
+
+    float n = deri * lambda * metric;
 
     currentLayerDeDz[neuronIndex] = n;
 

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
