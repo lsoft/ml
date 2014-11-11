@@ -92,7 +92,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new GPUPropagatorComponentConstructor(
                             clProvider
                             );
 
@@ -138,7 +138,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                     () => new SigmoidFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new GPUPropagatorComponentConstructor(
                             clProvider
                             );
 
@@ -182,7 +182,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new GPUPropagatorComponentConstructor(
                             clProvider
                             );
 
@@ -234,7 +234,7 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {
-                        var pcc = new PropagatorComponentConstructor(
+                        var pcc = new GPUPropagatorComponentConstructor(
                             clProvider
                             );
 

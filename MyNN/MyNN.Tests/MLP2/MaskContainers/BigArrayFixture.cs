@@ -29,11 +29,15 @@ namespace MyNN.Tests.MLP2.MaskContainers
             Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
                 (clProvider) =>
                 {
+                    var previousLayerConfiguration = mlpConfiguration.Layers[1];
+                    var currentLayerConfiguration = mlpConfiguration.Layers[2];
+
+                    var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
+
                     return
                         new BigArrayWeightMaskContainer(
                             clProvider,
-                            mlpConfiguration.Layers[1],
-                            mlpConfiguration.Layers[2],
+                            arraySize,
                             randomizer,
                             p);
                 };
@@ -81,11 +85,15 @@ namespace MyNN.Tests.MLP2.MaskContainers
             Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
                 (clProvider) =>
                 {
+                    var previousLayerConfiguration = mlpConfiguration.Layers[1];
+                    var currentLayerConfiguration = mlpConfiguration.Layers[2];
+
+                    var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
+
                     return
                         new BigArrayWeightMaskContainer(
                             clProvider,
-                            mlpConfiguration.Layers[1],
-                            mlpConfiguration.Layers[2],
+                            arraySize,
                             randomizer,
                             p);
                 };
@@ -122,11 +130,15 @@ namespace MyNN.Tests.MLP2.MaskContainers
             Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
                 (clProvider) =>
                 {
+                    var previousLayerConfiguration = mlpConfiguration.Layers[1];
+                    var currentLayerConfiguration = mlpConfiguration.Layers[2];
+
+                    var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
+
                     return
                         new BigArrayWeightMaskContainer(
                             clProvider,
-                            mlpConfiguration.Layers[1],
-                            mlpConfiguration.Layers[2],
+                            arraySize,
                             randomizer,
                             p);
                 };
@@ -163,11 +175,15 @@ namespace MyNN.Tests.MLP2.MaskContainers
             Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
                 (clProvider) =>
                 {
+                    var previousLayerConfiguration = mlpConfiguration.Layers[1];
+                    var currentLayerConfiguration = mlpConfiguration.Layers[2];
+
+                    var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
+
                     return
                         new BigArrayWeightMaskContainer(
                             clProvider,
-                            mlpConfiguration.Layers[1],
-                            mlpConfiguration.Layers[2],
+                            arraySize,
                             randomizer,
                             p);
                 };

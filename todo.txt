@@ -1,5 +1,4 @@
-в бекпропе на opencl (во всех EpocheTrainer) используетс€ HalfSquaredEuclidianDistance, вот в этой строке: (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);  «јћ≈Ќ»“№ Ќј  ј—“ќћ»«»–”≈ћ”ё ‘”Ќ ÷»ё.  http://habrahabr.ru/post/154369/
-в бекпропе на opencl (во всех EpocheTrainer)  исползовать Kahan в агрегации float currentDeDz = 0;
+в бекпропе на opencl (во всех NLNCA EpocheTrainer)  исползовать Kahan в агрегации float currentDeDz = 0;
 тест на ComputeState с несколькими скрытыми сло€ми
 
 бекпроп тесты
@@ -16,3 +15,4 @@
 
 [done] тесты с более 16 нейронами и 16й векторизацией
 [done] weightmask тесты
+[done] в бекпропе на opencl (во всех EpocheTrainer) используетс€ HalfSquaredEuclidianDistance, вот в этой строке: (desiredOutput[neuronIndex] - currentLayerLastState[neuronIndex]);  «јћ≈Ќ»“№ Ќј  ј—“ќћ»«»–”≈ћ”ё ‘”Ќ ÷»ё.  http://habrahabr.ru/post/154369/

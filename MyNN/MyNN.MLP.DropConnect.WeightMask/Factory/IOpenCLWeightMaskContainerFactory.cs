@@ -6,8 +6,7 @@ namespace MyNN.MLP.DropConnect.WeightMask.Factory
     public interface IOpenCLWeightMaskContainerFactory
     {
         IOpenCLWeightMaskContainer CreateContainer(
-            ILayerConfiguration previousLayerConfiguration,
-            ILayerConfiguration currentLayerConfiguration
+            long arraySize
             );
     }
 }

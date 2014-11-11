@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AB04B9C9-BAAB-4394-A14D-0662526C8725}</ProjectGuid>
+    <ProjectGuid>{1BF034A8-F0EB-4C94-B671-AB46FBB93E97}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyNN.MLP.Classic.ForwardPropagation</RootNamespace>
-    <AssemblyName>MyNN.MLP.Classic.ForwardPropagation</AssemblyName>
+    <RootNamespace>MyNN.MLP.Dropout.ForwardPropagation</RootNamespace>
+    <AssemblyName>MyNN.MLP.Dropout.ForwardPropagation</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,32 +32,30 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CSharp\CSharpLayerPropagator.cs" />
-    <Compile Include="CSharp\CSharpPropagatorComponentConstructor.cs" />
-    <Compile Include="OpenCL\Img\GPU\KernelSource.cs" />
-    <Compile Include="OpenCL\Img\GPU\LayerPropagator.cs" />
-    <Compile Include="OpenCL\Img\GPU\PropagatorComponentConstructor.cs" />
-    <Compile Include="OpenCL\Mem\CPU\CPUKernelSource.cs" />
-    <Compile Include="OpenCL\Mem\CPU\CPULayerPropagator.cs" />
-    <Compile Include="OpenCL\Mem\CPU\CPUPropagatorComponentConstructor.cs" />
-    <Compile Include="OpenCL\Mem\GPU\KernelSource.cs" />
-    <Compile Include="OpenCL\Mem\GPU\LayerPropagator.cs" />
-    <Compile Include="OpenCL\Mem\GPU\GPUPropagatorComponentConstructor.cs" />
+    <Compile Include="OpenCL\CPU\CPUKernelSource.cs" />
+    <Compile Include="OpenCL\CPU\CPULayerPropagator.cs" />
+    <Compile Include="OpenCL\CPU\CPUPropagatorComponentConstructor.cs" />
+    <Compile Include="OpenCL\CPU\IDropoutLayerPropagator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyNN.Common\MyNN.Common.csproj">
-      <Project>{2e34b41a-e15f-434c-9554-9bdf5f4eccc9}</Project>
+      <Project>{2E34B41A-E15F-434C-9554-9BDF5F4ECCC9}</Project>
       <Name>MyNN.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MyNN.MLP.DropConnect.ForwardPropagation\MyNN.MLP.DropConnect.ForwardPropagation.csproj">
-      <Project>{03082D83-3645-4CF8-A1C7-BD4B5CFC7FE0}</Project>
-      <Name>MyNN.MLP.DropConnect.ForwardPropagation</Name>
+    <ProjectReference Include="..\MyNN.MLP.DropConnect.WeightMask\MyNN.MLP.DropConnect.WeightMask.csproj">
+      <Project>{EBEFFE64-2B8B-4184-BF79-CB247064E1D4}</Project>
+      <Name>MyNN.MLP.DropConnect.WeightMask</Name>
     </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP\MyNN.MLP.csproj">
-      <Project>{3fff29db-d717-48cb-a221-37f3e397a80e}</Project>
+      <Project>{3FFF29DB-D717-48CB-A221-37F3E397A80E}</Project>
       <Name>MyNN.MLP</Name>
     </ProjectReference>
     <ProjectReference Include="..\OpenCL.Net.Wrapper\OpenCL.Net.Wrapper.csproj">

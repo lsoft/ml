@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MyNN;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.DataSetConverter;
+using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
 using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
+using MyNN.Common.Data.TrainDataProvider.Noiser;
+using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
 using MyNN.Common.Data.TypicalDataProvider;
 using MyNN.Common.LearningRateController;
 using MyNN.Common.OpenCLHelper;
@@ -19,11 +24,19 @@ using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Factory;
+using MyNN.MLP.Structure.Layer;
+using MyNN.MLP.Structure.Layer.Factory;
+using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
+using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.RefactoredForDI
 {
@@ -36,7 +49,7 @@ namespace MyNNConsoleApp.RefactoredForDI
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
                 int.MaxValue,
-                true,
+                false,
                 dataItemFactory
                 );
             trainData.Normalize();
@@ -44,7 +57,7 @@ namespace MyNNConsoleApp.RefactoredForDI
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
                 int.MaxValue,
-                true,
+                false,
                 dataItemFactory
                 );
             validationData.Normalize();
@@ -54,7 +67,7 @@ namespace MyNNConsoleApp.RefactoredForDI
             var serialization = new SerializationHelper();
 
             var mlp = serialization.LoadFromFile<MLP>(
-                "ae20140821114722.ae/epoche 18/sdae2d20140820001058.sdae");
+                "sdae20141108113834.tuned.sdae/epoche 248/sdae20141108094943.sdae");
 
             mlp.AutoencoderCutTail();
 
@@ -78,26 +91,67 @@ namespace MyNNConsoleApp.RefactoredForDI
                     100)
                 );
 
-            using (var clProvider = new CLProvider())
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var mlpName = string.Format(
-                    "justmlp{0}.mlp",
+                    "mlp{0}.basedonsdae.mlp",
                     DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+                const int epocheCount = 30;
 
                 var config = new LearningAlgorithmConfig(
                     new HalfSquaredEuclidianDistance(), 
                     new LinearLearningRate(0.02f, 0.99f),
                     1,
-                    0f,
-                    25,
+                    0.001f,
+                    epocheCount,
                     -1f,
                     -1f
                     );
 
+
+                Func<int, INoiser> noiserProvider =
+                    (int epocheNumber) =>
+                    {
+                        if (epocheCount == epocheNumber)
+                        {
+                            return
+                                new NoNoiser();
+                        }
+
+                        var coef = (epocheCount - epocheNumber) / (float)epocheCount;
+                        //const float coef = 0.3f;
+
+                        var noiser = new ZeroMaskingNoiser(randomizer, coef * 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength));
+
+                        //var noiser = new SequenceNoiser(
+                        //    randomizer,
+                        //    true,
+                        //    new GaussNoiser(coef * 0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                        //    new MultiplierNoiser(randomizer, coef * 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                        //    new DistanceChangeNoiser(randomizer, coef * 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                        //    new SaltAndPepperNoiser(randomizer, coef * 0.1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
+                        //    new ZeroMaskingNoiser(randomizer, coef * 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
+                        //    );
+
+                        return noiser;
+                    };
+
+                var noiserDataProvider = new NoiseDataProvider(
+                    trainData,
+                    noiserProvider,
+                    dataItemFactory
+                    );
+
+                //var noDeformationDataProvider = new NoDeformationTrainDataProvider(
+                //    trainData
+                //    );
+
                 var trainDataProvider =
                     new ConverterTrainDataProvider(
                         new ShuffleDataSetConverter(randomizer),
-                        new NoDeformationTrainDataProvider(trainData)
+                        noiserDataProvider
+                        //noDeformationDataProvider
                         );
 
                 var mlpContainer = rootContainer.GetChildContainer(mlpName);
@@ -105,8 +159,9 @@ namespace MyNNConsoleApp.RefactoredForDI
                 var mlpContainerHelper = new MLPContainerHelper();
 
                 var algo = new Backpropagation(
-                    new CPUEpocheTrainer(
-                        VectorizationSizeEnum.VectorizationMode16, 
+                    //new GPUTransposeEpocheTrainer(
+                    new GPUEpocheTrainer(
+                        //VectorizationSizeEnum.VectorizationMode16, 
                         mlp,
                         config,
                         clProvider),

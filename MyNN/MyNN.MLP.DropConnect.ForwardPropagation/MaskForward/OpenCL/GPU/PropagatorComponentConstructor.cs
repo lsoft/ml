@@ -68,9 +68,13 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
+                var previousLayerConfiguration = mlp.Layers[layerIndex - 1].GetConfiguration();
+                var currentLayerConfiguration = mlp.Layers[layerIndex].GetConfiguration();
+
+                var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
+
                 var maskContainer = _maskContainerFactory.CreateContainer(
-                    mlp.Layers[layerIndex - 1].GetConfiguration(),
-                    mlp.Layers[layerIndex].GetConfiguration()
+                    arraySize
                     );
 
                 result[layerIndex] = maskContainer;

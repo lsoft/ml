@@ -2,7 +2,7 @@
 using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Structure.Neuron.Function;
 
-namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
+namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU
 {
     public class CPUKernelSource
     {
@@ -75,7 +75,11 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCountTotal)
+            const __global uint * mask,
+            int maskShift,
+            uint bitmask,
+            int previousLayerNeuronCountTotal
+            )
 {
     int neuronIndex = get_global_id(0);
 
@@ -86,14 +90,19 @@ __kernel void
 
     KahanAccumulator acc = GetEmptyKahanAcc();
 
-    for (int plnIndex =0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
+    for (int plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
     {
         float lastNETIncrement = weights[weightIndex++] * previousLayerLastState[plnIndex];
 
         KahanAddElement(&acc, lastNETIncrement);
     }
 
-    float lastNET = acc.Sum;
+    //вычисляем маску
+    uint maski = mask[neuronIndex + maskShift];
+    float mask = ((maski & bitmask) > 0) ? (float)1 : (float)0;
+
+    //применяем маску
+    float lastNET = acc.Sum * mask;
 
 
 
@@ -102,7 +111,9 @@ __kernel void
     //compute last state
 
     float lastState = <ActivationMethodCall>(lastNET);
-    currentLayerLastState[neuronIndex] = lastState;
+
+    //применяем маску и сохраняем
+    currentLayerLastState[neuronIndex] = lastState  * mask;
 }
 ";
 
@@ -115,7 +126,11 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCountTotal)
+            const __global uint * mask,
+            int maskShift,
+            uint bitmask,
+            int previousLayerNeuronCountTotal
+            )
 {
     int previousLayerNeuronCount4 = previousLayerNeuronCountTotal / 4;
     int previousLayerNeuronCount4M4 = previousLayerNeuronCountTotal - previousLayerNeuronCountTotal % 4;
@@ -164,7 +179,12 @@ __kernel void
         KahanAddElement(&acc, lastNETIncrement);
     }
 
-    float lastNET = acc.Sum;
+    //вычисляем маску
+    uint maski = mask[neuronIndex + maskShift];
+    float mask = ((maski & bitmask) > 0) ? (float)1 : (float)0;
+
+    //применяем маску
+    float lastNET = acc.Sum * mask;
 
 
 
@@ -173,7 +193,7 @@ __kernel void
     //compute last state
 
     float lastState = <ActivationMethodCall>(lastNET);
-    currentLayerLastState[neuronIndex] = lastState;
+    currentLayerLastState[neuronIndex] = lastState * mask;
 }
 ";
 
@@ -186,7 +206,11 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCountTotal)
+            const __global uint * mask,
+            int maskShift,
+            uint bitmask,
+            int previousLayerNeuronCountTotal
+            )
 {
     int previousLayerNeuronCount16 = previousLayerNeuronCountTotal / 16;
     int previousLayerNeuronCount16M16 = previousLayerNeuronCountTotal - previousLayerNeuronCountTotal % 16;
@@ -234,7 +258,12 @@ __kernel void
         KahanAddElement(&acc, lastNETIncrement);
     }
 
-    float lastNET = acc.Sum;
+    //вычисляем маску
+    uint maski = mask[neuronIndex + maskShift];
+    float mask = ((maski & bitmask) > 0) ? (float)1 : (float)0;
+
+    //применяем маску
+    float lastNET = acc.Sum * mask;
 
 
 
@@ -243,7 +272,7 @@ __kernel void
     //compute last state
 
     float lastState = <ActivationMethodCall>(lastNET);
-    currentLayerLastState[neuronIndex] = lastState;
+    currentLayerLastState[neuronIndex] = lastState * mask;
 }
 ";
     }

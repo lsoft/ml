@@ -92,7 +92,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenC
             _config = config;
             _clProvider = clProvider;
 
-            var cc = new PropagatorComponentConstructor(
+            var cc = new GPUPropagatorComponentConstructor(
                 _clProvider
                 );
 

@@ -7,11 +7,11 @@ using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
 {
-    public class PropagatorComponentConstructor : IPropagatorComponentConstructor
+    public class GPUPropagatorComponentConstructor : IPropagatorComponentConstructor
     {
         private readonly CLProvider _clProvider;
 
-        public PropagatorComponentConstructor(
+        public GPUPropagatorComponentConstructor(
             CLProvider clProvider
             )
         {

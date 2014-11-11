@@ -1,27 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU.LayerPropagator;
+using MyNN.Common.OpenCLHelper;
+using MyNN.Common.Randomizer;
 using MyNN.MLP.DropConnect.WeightMask;
 using MyNN.MLP.DropConnect.WeightMask.Factory;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure;
 using OpenCL.Net.Wrapper;
-using OpenCL.Net.Wrapper.Mem;
 
-namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
+namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU
 {
-    public class PropagatorComponentConstructor : IPropagatorComponentConstructor
+    public class CPUPropagatorComponentConstructor : IPropagatorComponentConstructor
     {
+        private readonly IRandomizer _randomizer;
         private readonly CLProvider _clProvider;
+        private readonly VectorizationSizeEnum _vse;
         private readonly IOpenCLWeightMaskContainerFactory _maskContainerFactory;
 
-        public PropagatorComponentConstructor(
+        public CPUPropagatorComponentConstructor(
+            IRandomizer randomizer,
             CLProvider clProvider,
+            VectorizationSizeEnum vse,
             IOpenCLWeightMaskContainerFactory maskContainerFactory
             )
         {
+            if (randomizer == null)
+            {
+                throw new ArgumentNullException("randomizer");
+            }
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
@@ -31,7 +38,9 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
                 throw new ArgumentNullException("maskContainerFactory");
             }
 
+            _randomizer = randomizer;
             _clProvider = clProvider;
+            _vse = vse;
             _maskContainerFactory = maskContainerFactory;
         }
 
@@ -48,7 +57,11 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
 
             var mc = this.CreateMaskContainersByMLP(mlp);
             var c = this.CreateMemsByMLP(mlp);
-            var p = this.CreatePropagatorsByMLP(mlp, c, mc);
+            var p = this.CreatePropagatorsByMLP(
+                mlp,
+                c,
+                mc
+                );
 
             containers = c;
             propagators = p;
@@ -69,10 +82,9 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
-                var previousLayerConfiguration = mlp.Layers[layerIndex - 1].GetConfiguration();
                 var currentLayerConfiguration = mlp.Layers[layerIndex].GetConfiguration();
 
-                var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
+                var arraySize = (long) currentLayerConfiguration.NonBiasNeuronCount;
 
                 var maskContainer = _maskContainerFactory.CreateContainer(
                     arraySize
@@ -86,8 +98,8 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
         }
 
         private ILayerPropagator[] CreatePropagatorsByMLP(
-            IMLP mlp, 
-            IMemLayerContainer[] containers, 
+            IMLP mlp,
+            IMemLayerContainer[] containers,
             IOpenCLWeightMaskContainer[] maskContainers
             )
         {
@@ -107,19 +119,21 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
             var result = new List<ILayerPropagator>();
             result.Add(null); //для первого слоя нет пропагатора
 
-            var ks = new KernelSource();
+            var ks = new CPUKernelSource();
 
             var layerCount = mlp.Layers.Length;
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
-                var p = new DropConnectLayerPropagator(
+                var p = new CPULayerPropagator(
+                    _randomizer,
                     _clProvider,
                     ks,
                     maskContainers[layerIndex],
                     containers[layerIndex - 1],
                     containers[layerIndex],
                     mlp.Layers[layerIndex].LayerActivationFunction,
+                    _vse,
                     mlp.Layers[layerIndex - 1].Neurons.Length,
                     mlp.Layers[layerIndex].NonBiasNeuronCount
                     );

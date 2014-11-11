@@ -28,23 +28,18 @@ namespace MyNN.MLP.DropConnect.WeightMask.Factory
         }
 
         public IOpenCLWeightMaskContainer CreateContainer(
-            ILayerConfiguration previousLayerConfiguration, 
-            ILayerConfiguration currentLayerConfiguration)
+            long arraySize
+            )
         {
-            if (previousLayerConfiguration == null)
+            if (arraySize <= 0)
             {
-                throw new ArgumentNullException("previousLayerConfiguration");
-            }
-            if (currentLayerConfiguration == null)
-            {
-                throw new ArgumentNullException("currentLayerConfiguration");
+                throw new ArgumentOutOfRangeException("arraySize");
             }
 
             return 
                 new BigArrayWeightMaskContainer(
                     _clProvider,
-                    previousLayerConfiguration,
-                    currentLayerConfiguration,
+                    arraySize,
                     _randomizer
                     );
         }

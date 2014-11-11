@@ -31,7 +31,6 @@ namespace MyNN.MLP.DropConnect.WeightMask
         private readonly IRandomizer _randomizer;
         private readonly float _p;
 
-        private readonly int _arraySize;
         private readonly uint[] _array;
 
         private readonly uint[] _bitmask;
@@ -62,24 +61,18 @@ namespace MyNN.MLP.DropConnect.WeightMask
         /// Constructor
         /// </summary>
         /// <param name="clProvider">OpenCL provider</param>
-        /// <param name="previousLayerConfiguration">Previous layer configuration</param>
-        /// <param name="currentLayerConfiguration">Current layer configuration</param>
+        /// <param name="arraySize">Size of allocation buffer</param>
         /// <param name="randomizer">Random number provider</param>
         /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
         public BigArrayWeightMaskContainer(
             CLProvider clProvider,
-            ILayerConfiguration previousLayerConfiguration,
-            ILayerConfiguration currentLayerConfiguration,
+            long arraySize,
             IRandomizer randomizer,
             float p = 0.5f)
         {
-            if (previousLayerConfiguration == null)
+            if (arraySize <= 0)
             {
-                throw new ArgumentNullException("previousLayerConfiguration");
-            }
-            if (currentLayerConfiguration == null)
-            {
-                throw new ArgumentNullException("currentLayerConfiguration");
+                throw new ArgumentOutOfRangeException("arraySize");
             }
             if (randomizer == null)
             {
@@ -95,10 +88,7 @@ namespace MyNN.MLP.DropConnect.WeightMask
 
             this._bitIndex = 31;
 
-            this._arraySize = previousLayerConfiguration.Neurons.Length * currentLayerConfiguration.Neurons.Length;
-            this._arraySize += AdditionalPartSize;
-
-            this._array = new uint[_arraySize];
+            this._array = new uint[arraySize + AdditionalPartSize];
             this._currentIterationNumber = 0;
 
             this._bitmask = new uint[32];
@@ -108,7 +98,7 @@ namespace MyNN.MLP.DropConnect.WeightMask
             }
 
             MaskMem = clProvider.CreateUintMem(
-                currentLayerConfiguration.NonBiasNeuronCount * previousLayerConfiguration.Neurons.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                arraySize, //currentLayerConfiguration.NonBiasNeuronCount * previousLayerConfiguration.Neurons.Length, //without bias neuron at current layer, but include bias neuron at previous layer
                 MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
             InternalRegenerateArray();
@@ -190,7 +180,7 @@ namespace MyNN.MLP.DropConnect.WeightMask
         /// </summary>
         private void InternalRegenerateArray()
         {
-            Parallel.For(0, _arraySize, () => GetBernoulliRandom(), (i, loop, brnd) =>
+            Parallel.For(0, _array.Length, () => GetBernoulliRandom(), (i, loop, brnd) =>
             //for (var i = 0; i < _arraySize; i++)
             {
                 uint ci = 0;

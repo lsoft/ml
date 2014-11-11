@@ -24,7 +24,9 @@ using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
 using MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU;
+using MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
 using MyNN.MLP.ForwardPropagationFactory;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
@@ -47,7 +49,7 @@ namespace MyNNConsoleApp.RefactoredForDI
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
                 int.MaxValue,
-                true,
+                false,
                 dataItemFactory
                 );
             trainData.Normalize();
@@ -55,7 +57,7 @@ namespace MyNNConsoleApp.RefactoredForDI
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
                 int.MaxValue,
-                true,
+                false,
                 dataItemFactory
                 );
             validationData.Normalize();
@@ -77,26 +79,26 @@ namespace MyNNConsoleApp.RefactoredForDI
                 ".",
                 serialization);
 
-            var noiser = new SequenceNoiser(
-                randomizer,
-                true,
-                new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
-                );
-
             var mlpContainerHelper = new MLPContainerHelper();
             
             var sdae = new StackedAutoencoder(
-                new IntelCPUDeviceChooser(),
+                new NvidiaOrAmdGPUDeviceChooser(true), 
                 mlpContainerHelper,
                 randomizer,
                 dataItemFactory,
                 mlpfactory,
                 (int depthIndex, IDataSet td) =>
                 {
+                    var noiser = new SequenceNoiser(
+                        randomizer,
+                        true,
+                        new GaussNoiser(0.20f, false, new RandomSeriesRange(randomizer, td[0].InputLength)),
+                        new MultiplierNoiser(randomizer, 1f, new RandomSeriesRange(randomizer, td[0].InputLength)),
+                        new DistanceChangeNoiser(randomizer, 1f, 3, new RandomSeriesRange(randomizer, td[0].InputLength)),
+                        new SaltAndPepperNoiser(randomizer, 0.1f, new RandomSeriesRange(randomizer, td[0].InputLength)),
+                        new ZeroMaskingNoiser(randomizer, 0.25f, new RandomSeriesRange(randomizer, td[0].InputLength))
+                        );
+
                     var tda = toa.Convert(td);
 
                     var result =
@@ -134,23 +136,24 @@ namespace MyNNConsoleApp.RefactoredForDI
                         new HalfSquaredEuclidianDistance(), 
                         new LinearLearningRate(lr, 0.99f),
                         1,
-                        0.0f,
-                        50,
+                        0.001f,
+                        100,
                         0f,
                         -0.0025f);
 
                     return conf;
                 },
-                new CPUBackpropagationFactory(
+                new GPUBackpropagationFactory(
                     mlpContainerHelper),
                 (clProvider) => new ForwardPropagationFactory(
-                    new CPUPropagatorComponentConstructor(
-                        clProvider,
-                        VectorizationSizeEnum.VectorizationMode16)),
+                    new GPUPropagatorComponentConstructor(
+                        clProvider
+                        //,VectorizationSizeEnum.VectorizationMode16
+                        )),
                 new LayerInfo(784, new RLUFunction()),
-                new LayerInfo(1000, new RLUFunction()),
-                new LayerInfo(1000, new RLUFunction()),
-                new LayerInfo(2200, new RLUFunction())
+                new LayerInfo(1500, new RLUFunction()),
+                new LayerInfo(1500, new RLUFunction()),
+                new LayerInfo(3000, new RLUFunction())
                 );
 
             var sdaeName = string.Format(

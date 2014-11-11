@@ -19,8 +19,6 @@ using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.CPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.CPU;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic2.OpenCL.GPU;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
@@ -82,40 +80,19 @@ namespace MyNNConsoleApp.RefactoredForDI
                         );
             };
 
-            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IEpocheTrainer> cpuTranspose2Trainer = (clProvider, mlp, config) =>
-            {
-                return
-                    new CPUTranspose2EpocheTrainer(
-                        VectorizationSizeEnum.NoVectorization, 
-                        mlp,
-                        config,
-                        clProvider
-                        );
-            };
-
-            Func<CLProvider, IMLP, ILearningAlgorithmConfig, IEpocheTrainer> gpuTranspose2Trainer = (clProvider, mlp, config) =>
-            {
-                return
-                    new GPUTranspose2EpocheTrainer(
-                        mlp,
-                        config,
-                        clProvider
-                        );
-            };
-
             const int batchSize = 5;
             const float regularizationFactor = 0f;//1e-2f;
 
             var g0 = DoTestPrivate(
                 gpuChooser,
-                gpuTranspose2Trainer,
+                gpuTransposeTrainer,
                 1,
                 regularizationFactor
                 );
 
             var g1 = DoTestPrivate(
                 gpuChooser,
-                gpuTranspose2Trainer,
+                gpuTransposeTrainer,
                 batchSize,
                 regularizationFactor
                 );

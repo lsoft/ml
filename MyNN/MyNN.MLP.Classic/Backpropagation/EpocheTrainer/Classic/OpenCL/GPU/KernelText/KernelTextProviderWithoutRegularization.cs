@@ -41,7 +41,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Kern
         public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
-            var result = _calculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+            var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
 
             result = result.Replace(
                 "<MetricMethodBody>",
@@ -76,7 +76,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Kern
         public string GetIncrementCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
-            var result = _calculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+            var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
 
             result = result.Replace(
                 "<MetricMethodBody>",
@@ -109,7 +109,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Kern
         }
 
 
-        private const string _calculationKernelsSource = @"
+        private const string CalculationKernelsSource = @"
 <DerivativeMethodBody>
 
 <MetricMethodBody>
@@ -149,7 +149,7 @@ __kernel void HiddenLayerTrain(
 {
     int neuronIndex = get_group_id(0);
 
-    if(neuronIndex < currentLayerNeuronCount)
+    if(neuronIndex < currentLayerNeuronCount) //проверка лишн€€, см. как осуществл€етс€ вызов. в случае, если изменилс€ вызов, то эта проверка будет ошибочна, так как внутри нее есть синхронизаци€ внутри воркгруп!!! ќЎ»Ѕ ј!!!
     {
         int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 

@@ -77,7 +77,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             _config = config;
             _clProvider = clProvider;
 
-            var cc = new PropagatorComponentConstructor(
+            var cc = new GPUPropagatorComponentConstructor(
                 _clProvider
                 );
 
@@ -309,7 +309,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                         var currentLayer = _mlp.Layers[hiddenLayerIndex];
                         var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
 
-                        const uint HiddenLocalGroupSize = 32;
+                        const uint HiddenLocalGroupSize = 64;
                         uint HiddenGlobalGroupSize =
                             (uint)currentLayer.NonBiasNeuronCount * HiddenLocalGroupSize
                             ;
