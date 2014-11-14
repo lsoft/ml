@@ -1,11 +1,17 @@
-﻿using MyNN.MLP.DropConnect.WeightMask;
+﻿using System.Security.Cryptography.X509Certificates;
+using MyNN.Mask;
 using MyNN.MLP.ForwardPropagation;
 
 namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU
 {
     public interface IDropoutLayerPropagator : ILayerPropagator
     {
-        IOpenCLWeightMaskContainer MaskContainer
+        IOpenCLMaskContainer MaskContainer
+        {
+            get;
+        }
+
+        int MaskShift
         {
             get;
         }

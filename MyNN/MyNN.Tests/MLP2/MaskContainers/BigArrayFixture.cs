@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
-using MyNN.MLP.DropConnect.WeightMask;
+using MyNN.Mask;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.MaskContainers
@@ -26,7 +26,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
             var correctResult = new diapfloat(p, p/100f);
 
             var randomizer = new DefaultRandomizer(123);
-            Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
+            Func<CLProvider, IOpenCLMaskContainer> containerProvider =
                 (clProvider) =>
                 {
                     var previousLayerConfiguration = mlpConfiguration.Layers[1];
@@ -35,7 +35,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
                     var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
 
                     return
-                        new BigArrayWeightMaskContainer(
+                        new BigArrayMaskContainer(
                             clProvider,
                             arraySize,
                             randomizer,
@@ -82,7 +82,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
             var correctResult = new diapfloat(p, p, false);
 
             var randomizer = new DefaultRandomizer(123);
-            Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
+            Func<CLProvider, IOpenCLMaskContainer> containerProvider =
                 (clProvider) =>
                 {
                     var previousLayerConfiguration = mlpConfiguration.Layers[1];
@@ -91,7 +91,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
                     var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
 
                     return
-                        new BigArrayWeightMaskContainer(
+                        new BigArrayMaskContainer(
                             clProvider,
                             arraySize,
                             randomizer,
@@ -127,7 +127,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
             var correctResult = new diapfloat(p, p / 100f);
 
             var randomizer = new DefaultRandomizer(123);
-            Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
+            Func<CLProvider, IOpenCLMaskContainer> containerProvider =
                 (clProvider) =>
                 {
                     var previousLayerConfiguration = mlpConfiguration.Layers[1];
@@ -136,7 +136,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
                     var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
 
                     return
-                        new BigArrayWeightMaskContainer(
+                        new BigArrayMaskContainer(
                             clProvider,
                             arraySize,
                             randomizer,
@@ -172,7 +172,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
             var correctResult = new diapfloat(p, p / 100f);
 
             var randomizer = new DefaultRandomizer(123);
-            Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider =
+            Func<CLProvider, IOpenCLMaskContainer> containerProvider =
                 (clProvider) =>
                 {
                     var previousLayerConfiguration = mlpConfiguration.Layers[1];
@@ -181,7 +181,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
                     var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
 
                     return
-                        new BigArrayWeightMaskContainer(
+                        new BigArrayMaskContainer(
                             clProvider,
                             arraySize,
                             randomizer,

@@ -1,10 +1,10 @@
-﻿namespace MyNN.MLP.DropConnect.WeightMask
+﻿namespace MyNN.Mask
 {
     /// <summary>
     /// Weight mask container with Bernoulli mask.
     /// For details refer http://cs.nyu.edu/~wanli/dropc/
     /// </summary>
-    public interface IWeightMaskContainer
+    public interface IMaskContainer
     {
         void RegenerateMask();
     }

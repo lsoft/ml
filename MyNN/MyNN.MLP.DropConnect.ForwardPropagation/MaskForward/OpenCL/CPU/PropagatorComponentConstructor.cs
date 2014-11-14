@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MyNN.Mask;
+using MyNN.Mask.Factory;
 using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU.LayerPropagator;
-using MyNN.MLP.DropConnect.WeightMask;
-using MyNN.MLP.DropConnect.WeightMask.Factory;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure;
@@ -15,11 +15,13 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
     public class PropagatorComponentConstructor : IPropagatorComponentConstructor
     {
         private readonly CLProvider _clProvider;
-        private readonly IOpenCLWeightMaskContainerFactory _maskContainerFactory;
+        private readonly IOpenCLMaskContainerFactory _maskContainerFactory;
+        private readonly float _p;
 
         public PropagatorComponentConstructor(
             CLProvider clProvider,
-            IOpenCLWeightMaskContainerFactory maskContainerFactory
+            IOpenCLMaskContainerFactory maskContainerFactory,
+            float p
             )
         {
             if (clProvider == null)
@@ -30,9 +32,14 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
             {
                 throw new ArgumentNullException("maskContainerFactory");
             }
+            if (p <= 0 || p > 1)
+            {
+                throw new ArgumentOutOfRangeException("p");
+            }
 
             _clProvider = clProvider;
             _maskContainerFactory = maskContainerFactory;
+            _p = p;
         }
 
         public void CreateComponents(
@@ -54,7 +61,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
             propagators = p;
         }
 
-        private IOpenCLWeightMaskContainer[] CreateMaskContainersByMLP(
+        private IOpenCLMaskContainer[] CreateMaskContainersByMLP(
             IMLP mlp
             )
         {
@@ -65,7 +72,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
 
             var layerCount = mlp.Layers.Length;
 
-            var result = new IOpenCLWeightMaskContainer[layerCount];
+            var result = new IOpenCLMaskContainer[layerCount];
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
@@ -75,7 +82,8 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
                 var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * (long)previousLayerConfiguration.Neurons.Length; //without bias neuron at current layer, but include bias neuron at previous layer
 
                 var maskContainer = _maskContainerFactory.CreateContainer(
-                    arraySize
+                    arraySize,
+                    _p
                     );
 
                 result[layerIndex] = maskContainer;
@@ -88,7 +96,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
         private ILayerPropagator[] CreatePropagatorsByMLP(
             IMLP mlp, 
             IMemLayerContainer[] containers, 
-            IOpenCLWeightMaskContainer[] maskContainers
+            IOpenCLMaskContainer[] maskContainers
             )
         {
             if (mlp == null)

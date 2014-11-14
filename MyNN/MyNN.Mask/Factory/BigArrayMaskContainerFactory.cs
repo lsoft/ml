@@ -1,16 +1,15 @@
 using System;
 using MyNN.Common.Randomizer;
-using MyNN.MLP.Structure.Layer;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP.DropConnect.WeightMask.Factory
+namespace MyNN.Mask.Factory
 {
-    public class BigArrayWeightMaskContainerFactory : IOpenCLWeightMaskContainerFactory
+    public class BigArrayMaskContainerFactory : IOpenCLMaskContainerFactory
     {
         private readonly IRandomizer _randomizer;
         private readonly CLProvider _clProvider;
 
-        public BigArrayWeightMaskContainerFactory(
+        public BigArrayMaskContainerFactory(
             IRandomizer randomizer,
             CLProvider clProvider
             )
@@ -27,20 +26,26 @@ namespace MyNN.MLP.DropConnect.WeightMask.Factory
             _clProvider = clProvider;
         }
 
-        public IOpenCLWeightMaskContainer CreateContainer(
-            long arraySize
+        public IOpenCLMaskContainer CreateContainer(
+            long arraySize,
+            float p
             )
         {
             if (arraySize <= 0)
             {
                 throw new ArgumentOutOfRangeException("arraySize");
             }
+            if (p <= 0 || p > 1)
+            {
+                throw new ArgumentOutOfRangeException("p");
+            }
 
             return 
-                new BigArrayWeightMaskContainer(
+                new BigArrayMaskContainer(
                     _clProvider,
                     arraySize,
-                    _randomizer
+                    _randomizer,
+                    p
                     );
         }
     }

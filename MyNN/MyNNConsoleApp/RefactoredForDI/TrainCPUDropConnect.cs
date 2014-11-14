@@ -12,6 +12,7 @@ using MyNN.Common.LearningRateController;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
+using MyNN.Mask.Factory;
 using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
@@ -21,7 +22,6 @@ using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.CPU;
 using MyNN.MLP.DropConnect.Inferencer;
 using MyNN.MLP.DropConnect.Inferencer.Factory;
-using MyNN.MLP.DropConnect.WeightMask.Factory;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure.Factory;
@@ -126,7 +126,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                 const int sampleCount = 10000;
                 const float p = 0.5f;
 
-                var maskContainerFactory = new BigArrayWeightMaskContainerFactory(
+                var maskContainerFactory = new BigArrayMaskContainerFactory(
                     randomizer,
                     clProvider);
 
@@ -143,7 +143,6 @@ namespace MyNNConsoleApp.RefactoredForDI
                         maskContainerFactory,
                         inferencerFactory,
                         clProvider,
-                        sampleCount,
                         p),
                     mlpContainerHelper,
                     mlpContainer,

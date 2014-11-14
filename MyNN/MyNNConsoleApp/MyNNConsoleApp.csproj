@@ -136,6 +136,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -145,6 +146,7 @@
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
     <Compile Include="FeatureAndMetricsAccuracyCalculator.cs" />
+    <Compile Include="RefactoredForDI\TrainMLPOnSDAE_Dropout.cs" />
     <Compile Include="RefactoredForDI\TuneSDAE.cs" />
     <Compile Include="RefactoredForDI\TrainCPUDropConnect.cs" />
     <Compile Include="RefactoredForDI\TestBackProp.cs" />
@@ -181,6 +183,10 @@
       <Project>{4571e6e7-2081-4b82-bbca-4b0110ad7fe4}</Project>
       <Name>MyNN.KNN</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MyNN.Mask\MyNN.Mask.csproj">
+      <Project>{07adbce4-b675-450a-a38d-a83b475b62f1}</Project>
+      <Name>MyNN.Mask</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.Classic.ForwardPropagation\MyNN.MLP.Classic.ForwardPropagation.csproj">
       <Project>{AB04B9C9-BAAB-4394-A14D-0662526C8725}</Project>
       <Name>MyNN.MLP.Classic.ForwardPropagation</Name>
@@ -197,13 +203,13 @@
       <Project>{A8501494-9230-4FB0-B2F7-E84B31E9E63A}</Project>
       <Name>MyNN.MLP.DropConnect.Inferencer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MyNN.MLP.DropConnect.WeightMask\MyNN.MLP.DropConnect.WeightMask.csproj">
-      <Project>{EBEFFE64-2B8B-4184-BF79-CB247064E1D4}</Project>
-      <Name>MyNN.MLP.DropConnect.WeightMask</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.DropConnect\MyNN.MLP.DropConnect.csproj">
       <Project>{6B97FBA5-C72D-4BEA-88FB-D2C2C115E470}</Project>
       <Name>MyNN.MLP.DropConnect</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.Dropout\MyNN.MLP.Dropout.csproj">
+      <Project>{1C8AF3A1-E95B-43A2-AF1E-6238A89AB53C}</Project>
+      <Name>MyNN.MLP.Dropout</Name>
     </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.NLNCA\MyNN.MLP.NLNCA.csproj">
       <Project>{5A82E05A-C2DA-42F4-A5F7-C79355E48E5F}</Project>

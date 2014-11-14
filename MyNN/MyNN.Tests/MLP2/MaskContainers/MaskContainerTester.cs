@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Other;
-using MyNN.MLP.DropConnect.WeightMask;
+using MyNN.Mask;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
@@ -11,7 +11,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
     internal class MaskContainerTester
     {
         public static float TestContainer(
-            Func<CLProvider, IOpenCLWeightMaskContainer> containerProvider
+            Func<CLProvider, IOpenCLMaskContainer> containerProvider
             )
         {
             if (containerProvider == null)

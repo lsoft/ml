@@ -63,13 +63,13 @@
       <Project>{2E34B41A-E15F-434C-9554-9BDF5F4ECCC9}</Project>
       <Name>MyNN.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MyNN.Mask\MyNN.Mask.csproj">
+      <Project>{07adbce4-b675-450a-a38d-a83b475b62f1}</Project>
+      <Name>MyNN.Mask</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.DropConnect.Inferencer\MyNN.MLP.DropConnect.Inferencer.csproj">
       <Project>{a8501494-9230-4fb0-b2f7-e84b31e9e63a}</Project>
       <Name>MyNN.MLP.DropConnect.Inferencer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyNN.MLP.DropConnect.WeightMask\MyNN.MLP.DropConnect.WeightMask.csproj">
-      <Project>{EBEFFE64-2B8B-4184-BF79-CB247064E1D4}</Project>
-      <Name>MyNN.MLP.DropConnect.WeightMask</Name>
     </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP\MyNN.MLP.csproj">
       <Project>{3FFF29DB-D717-48CB-A221-37F3E397A80E}</Project>

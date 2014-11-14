@@ -395,7 +395,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.OpenCL.GPU2
 
             var ks = new KernelSource();
 
-            var mc = new TestPurposeWeightMaskContainer(
+            var mc = new TestPurposeMaskContainer(
                 clProvider,
                 bitMask,
                 previousLayer.GetConfiguration(), 

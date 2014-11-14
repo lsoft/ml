@@ -38,6 +38,7 @@ namespace MyNNConsoleApp
 {
     class Program
     {
+        [STAThread]
         private static void Main(string[] args)
         {
             using (new CombinedConsole("console.log"))
@@ -176,9 +177,11 @@ namespace MyNNConsoleApp
                 //TrainDBN.DoTrainAutoencoder();
                 //TrainDBN.DoTrainMLPOnAE();
 
-                TrainSDAE.DoTrain();
+                //TrainSDAE.DoTrain();
                 //TuneSDAE.Tune();
                 //TrainMLPOnSDAE.DoTrain();
+
+                TrainMLPOnSDAE_Dropout.DoTrain();
 
                 //TrainMLPWithNoNoise.DoTrain();
 

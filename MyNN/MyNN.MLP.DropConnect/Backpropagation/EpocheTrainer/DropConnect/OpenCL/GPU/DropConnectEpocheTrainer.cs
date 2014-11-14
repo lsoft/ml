@@ -6,6 +6,7 @@ using MyNN.Common.Data.Set;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
+using MyNN.Mask.Factory;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU.KernelText;
 using MyNN.MLP.DropConnect.ForwardPropagation.Inference;
@@ -13,8 +14,6 @@ using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU;
 using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPropagator;
 using MyNN.MLP.DropConnect.Inferencer;
 using MyNN.MLP.DropConnect.Inferencer.Factory;
-using MyNN.MLP.DropConnect.WeightMask;
-using MyNN.MLP.DropConnect.WeightMask.Factory;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
@@ -37,8 +36,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly ILearningAlgorithmConfig _config;
 
         private readonly CLProvider _clProvider;
-        private readonly int _sampleCount;
-        private readonly float _p;
 
         private MemFloat[] _deDz;
         private MemFloat[] _nablaWeights;
@@ -74,15 +71,13 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         /// <param name="maskContainerFactory">Фабрика битовых масок</param>
         /// <param name="inferencerFactory">Фабрика стохастического выводителя для слоя</param>
         /// <param name="clProvider">OpenCL provider</param>
-        /// <param name="sampleCount">Sample count per neuron per inference iteration (typically 1000 - 10000)</param>
-        /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
+        /// <param name="p">Probability for each bit to be ONE (TRUE) (with p = 1 it completely disables mask and convert the model to classic backprop)</param>
         public DropConnectEpocheTrainer(
             IMLP mlp,
             ILearningAlgorithmConfig config,
-            IOpenCLWeightMaskContainerFactory maskContainerFactory,
+            IOpenCLMaskContainerFactory maskContainerFactory,
             ILayerInferencerFactory inferencerFactory,
             CLProvider clProvider,
-            int sampleCount = 5000,
             float p = 0.5f
             )
         {
@@ -106,28 +101,14 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             {
                 throw new ArgumentNullException("clProvider");
             }
-
-            if (sampleCount <= 0)
-            {
-                throw new ArgumentOutOfRangeException("sampleCount");
-            }
             if (p <= 0 || p > 1)
             {
                 throw new ArgumentOutOfRangeException("p");
             }
 
-            if (sampleCount < 1000 || sampleCount > 10000)
-            {
-                ConsoleAmbientContext.Console.WriteWarning(
-                    "Sample count = {0}. Sample count typically lay in [1000; 10000].",
-                    sampleCount);
-            }
-
             _mlp = mlp;
             _config = config;
             _clProvider = clProvider;
-            _sampleCount = sampleCount;
-            _p = p;
 
             this.PrepareInfrastructure();
 
@@ -136,7 +117,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             {
                 var cc = new PropagatorComponentConstructor(
                     _clProvider,
-                    maskContainerFactory
+                    maskContainerFactory,
+                    p
                     );
 
                 ILayerContainer[] containers;
@@ -180,15 +162,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                     propagators,
                     _mlp
                     );
-
-
-                //_inferenceForwardPropagation = new InferenceOpenCLForwardPropagation<T>(
-                //    vse,
-                //    _mlp,
-                //    _clProvider,
-                //    _randomizer,
-                //    _sampleCount,
-                //    _p);
             }
 
             #endregion

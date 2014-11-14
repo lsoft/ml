@@ -43,7 +43,7 @@ namespace MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Default
         /// <param name="weightMem">Weights of current MLP layer</param>
         /// <param name="previousLayerStateMem">State of previous layer neurons</param>
         /// <param name="currentLayerStateMem">State of current layer neurons</param>
-        /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
+        /// <param name="p">Probability for each bit to be ONE (TRUE) (with p = 1 it completely disables mask and convert the model to classic backprop)</param>
         public DefaultLayerInferencer(
             IRandomizer randomizer,
             CLProvider clProvider,

@@ -1,6 +1,6 @@
 ﻿using System;
 using MyNN.Common.Other;
-using MyNN.MLP.DropConnect.WeightMask;
+using MyNN.Mask;
 using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
@@ -9,9 +9,9 @@ using OpenCL.Net.Wrapper.Mem.Data;
 
 namespace MyNN.Tests.MLP2.Forward.DropConnect.OpenCL.CPU.MaskContainer
 {
-    internal class MockWeightMaskContainer : IOpenCLWeightMaskContainer
+    internal class MockMaskContainer : IOpenCLMaskContainer
     {
-        public MockWeightMaskContainer(
+        public MockMaskContainer(
             CLProvider clProvider,
             ILayerConfiguration previousLayerConfiguration,
             ILayerConfiguration currentLayerConfiguration,
@@ -47,7 +47,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.OpenCL.CPU.MaskContainer
             this.MaskMem.Write(BlockModeEnum.Blocking);
         }
 
-        public MockWeightMaskContainer(
+        public MockMaskContainer(
             CLProvider clProvider,
             ILayerConfiguration previousLayerConfiguration,
             ILayerConfiguration currentLayerConfiguration,

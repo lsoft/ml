@@ -75,7 +75,7 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            const __global uint * mask,
+            const __global uint * masks,
             int maskShift,
             uint bitmask,
             int previousLayerNeuronCountTotal
@@ -98,7 +98,7 @@ __kernel void
     }
 
     //вычисляем маску
-    uint maski = mask[neuronIndex + maskShift];
+    uint maski = masks[neuronIndex + maskShift];
     float mask = ((maski & bitmask) > 0) ? (float)1 : (float)0;
 
     //применяем маску
@@ -126,7 +126,7 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            const __global uint * mask,
+            const __global uint * masks,
             int maskShift,
             uint bitmask,
             int previousLayerNeuronCountTotal
@@ -180,7 +180,7 @@ __kernel void
     }
 
     //вычисляем маску
-    uint maski = mask[neuronIndex + maskShift];
+    uint maski = masks[neuronIndex + maskShift];
     float mask = ((maski & bitmask) > 0) ? (float)1 : (float)0;
 
     //применяем маску
@@ -206,7 +206,7 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            const __global uint * mask,
+            const __global uint * masks,
             int maskShift,
             uint bitmask,
             int previousLayerNeuronCountTotal
@@ -259,7 +259,7 @@ __kernel void
     }
 
     //вычисляем маску
-    uint maski = mask[neuronIndex + maskShift];
+    uint maski = masks[neuronIndex + maskShift];
     float mask = ((maski & bitmask) > 0) ? (float)1 : (float)0;
 
     //применяем маску

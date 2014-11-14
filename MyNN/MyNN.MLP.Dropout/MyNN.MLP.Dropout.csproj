@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EBEFFE64-2B8B-4184-BF79-CB247064E1D4}</ProjectGuid>
+    <ProjectGuid>{1C8AF3A1-E95B-43A2-AF1E-6238A89AB53C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyNN.MLP.DropConnect.WeightMask</RootNamespace>
-    <AssemblyName>MyNN.MLP.DropConnect.WeightMask</AssemblyName>
+    <RootNamespace>MyNN.MLP.Dropout</RootNamespace>
+    <AssemblyName>MyNN.MLP.Dropout</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -32,27 +32,36 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MathNet.Numerics">
-      <HintPath>..\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.dll</HintPath>
-    </Reference>
     <Reference Include="OpenCL.Net">
       <HintPath>..\packages\OpenCL.Net.2.2.9.0\lib\net40\OpenCL.Net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Factory\BigArrayWeightMaskContainerFactory.cs" />
-    <Compile Include="IWeightMaskContainer.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\CPUDropoutEpocheTrainer.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProvider.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProviderWithRegularization.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BigArrayWeightMaskContainer.cs" />
-    <Compile Include="Factory\IOpenCLWeightMaskContainerFactory.cs" />
-    <Compile Include="IOpenCLWeightMaskContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyNN.Common\MyNN.Common.csproj">
       <Project>{2E34B41A-E15F-434C-9554-9BDF5F4ECCC9}</Project>
       <Name>MyNN.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.Mask\MyNN.Mask.csproj">
+      <Project>{07ADBCE4-B675-450A-A38D-A83B475B62F1}</Project>
+      <Name>MyNN.Mask</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.Dropout.ForwardPropagation\MyNN.MLP.Dropout.ForwardPropagation.csproj">
+      <Project>{1BF034A8-F0EB-4C94-B671-AB46FBB93E97}</Project>
+      <Name>MyNN.MLP.Dropout.ForwardPropagation</Name>
     </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP\MyNN.MLP.csproj">
       <Project>{3FFF29DB-D717-48CB-A221-37F3E397A80E}</Project>
@@ -66,6 +75,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -20,6 +21,7 @@ using MyNN.Common.LearningRateController;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
+using MyNN.Mask.Factory;
 using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
@@ -29,6 +31,7 @@ using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
+using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
@@ -42,7 +45,7 @@ using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.RefactoredForDI
 {
-    public class TrainMLPOnSDAE
+    public class TrainMLPOnSDAE_Dropout
     {
         public static void DoTrain()
         {
@@ -50,7 +53,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                int.MaxValue,
+                100,//int.MaxValue,
                 false,
                 dataItemFactory
                 );
@@ -58,7 +61,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                int.MaxValue,
+                100,//int.MaxValue,
                 false,
                 dataItemFactory
                 );
@@ -68,20 +71,22 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var serialization = new SerializationHelper();
 
-            string filepath = null;
-            using (var ofd = new OpenFileDialog())
-            {
-                ofd.InitialDirectory = Directory.GetCurrentDirectory();
+            //string filepath = null;
+            //using (var ofd = new OpenFileDialog())
+            //{
+            //    ofd.InitialDirectory = Directory.GetCurrentDirectory();
 
-                ofd.Multiselect = false;
+            //    ofd.Multiselect = false;
 
-                if (ofd.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
+            //    if (ofd.ShowDialog() != DialogResult.OK)
+            //    {
+            //        return;
+            //    }
 
-                filepath = ofd.FileNames[0];
-            }
+            //    filepath = ofd.FileNames[0];
+            //}
+
+            var filepath = "sdae20141108113834.tuned.sdae/epoche 248/sdae20141108094943.sdae";
 
             var mlp = serialization.LoadFromFile<MLP>(
                 filepath
@@ -109,7 +114,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     100)
                 );
 
-            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
+            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(true), false))
             {
                 var mlpName = string.Format(
                     "mlp{0}.basedonsdae.mlp",
@@ -176,13 +181,23 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 var mlpContainerHelper = new MLPContainerHelper();
 
+                var maskContainerFactory = new BigArrayMaskContainerFactory(
+                    randomizer,
+                    clProvider
+                    );
+
+                const float p = 0.5f;
+
                 var algo = new Backpropagation(
-                    //new GPUTransposeEpocheTrainer(
-                    new GPUEpocheTrainer(
-                        //VectorizationSizeEnum.VectorizationMode16, 
+                    new CPUDropoutEpocheTrainer(
+                        randomizer,
+                        VectorizationSizeEnum.VectorizationMode16, 
+                        maskContainerFactory,
                         mlp,
                         config,
-                        clProvider),
+                        clProvider,
+                        p
+                    ),
                     mlpContainerHelper,
                     mlpContainer,
                     mlp,

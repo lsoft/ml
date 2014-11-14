@@ -1,5 +1,5 @@
 ﻿using System;
-using MyNN.MLP.DropConnect.WeightMask;
+using MyNN.Mask;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
@@ -9,7 +9,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPr
     public class DropConnectLayerPropagator : IDropConnectLayerPropagator
     {
         private readonly CLProvider _clProvider;
-        private readonly IOpenCLWeightMaskContainer _maskContainer;
+        private readonly IOpenCLMaskContainer _maskContainer;
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
         private readonly int _prevLayerNeuronTotalCount;
@@ -17,7 +17,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPr
 
         private readonly Kernel _kernel;
 
-        public IOpenCLWeightMaskContainer MaskContainer
+        public IOpenCLMaskContainer MaskContainer
         {
             get
             {
@@ -29,7 +29,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPr
         public DropConnectLayerPropagator(
             CLProvider clProvider,
             KernelSource ks,
-            IOpenCLWeightMaskContainer maskContainer,
+            IOpenCLMaskContainer maskContainer,
             IMemLayerContainer previousMemLayerContainer,
             IMemLayerContainer currentMemLayerContainer,
             IFunction activationFunction,

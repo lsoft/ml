@@ -74,7 +74,7 @@
     //                () => new LinearFunction(1f),
     //                (mlp) =>
     //                {
-    //                    var maskContainer = new MockWeightMaskContainer(
+    //                    var maskContainer = new MockMaskContainer(
     //                        clProvider,
     //                        mlp,
     //                        1,
@@ -151,7 +151,7 @@
     //                () => new LinearFunction(1f),
     //                (mlp) =>
     //                {
-    //                    var maskContainer = new MockWeightMaskContainer(
+    //                    var maskContainer = new MockMaskContainer(
     //                        clProvider,
     //                        mlp,
     //                        1,
@@ -228,7 +228,7 @@
     //                () => new LinearFunction(1f),
     //                (mlp) =>
     //                {
-    //                    var maskContainer = new MockWeightMaskContainer(
+    //                    var maskContainer = new MockMaskContainer(
     //                        clProvider,
     //                        mlp,
     //                        1,

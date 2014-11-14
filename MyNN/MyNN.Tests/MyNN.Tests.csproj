@@ -111,7 +111,7 @@
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardStateDisableOutputLayerFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardStateDisableWeight10Fixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardStateDisableWeight22Fixture.cs" />
-    <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\MaskContainer\MockWeightMaskContainer.cs" />
+    <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\MaskContainer\MockMaskContainer.cs" />
     <Compile Include="MLP2\Forward\ForwardOutputTester.cs" />
     <Compile Include="MLP2\Forward\ForwardStateTester.cs" />
     <Compile Include="MLP2\LayerPropagator\Classic\CSharp\ComputeLayerFixture.cs" />
@@ -120,7 +120,7 @@
     <Compile Include="MLP2\LayerPropagator\Classic\OpenCL\GPU\IntelGPUComputeLayerFixture.cs" />
     <Compile Include="MLP2\LayerPropagator\Classic\OpenCL\GPU\IntelCPUComputeLayerFixture.cs" />
     <Compile Include="MLP2\LayerPropagator\DropConnect\OpenCL\GPU2\IntelCPUComputeLayerFixture.cs" />
-    <Compile Include="MLP2\LayerPropagator\DropConnect\OpenCL\GPU2\TestPurposeWeightMaskContainer.cs" />
+    <Compile Include="MLP2\LayerPropagator\DropConnect\OpenCL\GPU2\TestPurposeMaskContainer.cs" />
     <Compile Include="MLP2\MaskContainers\BigArrayFixture.cs" />
     <Compile Include="MLP2\MaskContainers\MaskContainerTester.cs" />
     <Compile Include="MLP2\Metrics\HalfSquaredEuclidianDistanceFixture.cs" />
@@ -141,6 +141,10 @@
       <Project>{2e34b41a-e15f-434c-9554-9bdf5f4eccc9}</Project>
       <Name>MyNN.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MyNN.Mask\MyNN.Mask.csproj">
+      <Project>{07adbce4-b675-450a-a38d-a83b475b62f1}</Project>
+      <Name>MyNN.Mask</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.Classic.ForwardPropagation\MyNN.MLP.Classic.ForwardPropagation.csproj">
       <Project>{AB04B9C9-BAAB-4394-A14D-0662526C8725}</Project>
       <Name>MyNN.MLP.Classic.ForwardPropagation</Name>
@@ -156,10 +160,6 @@
     <ProjectReference Include="..\MyNN.MLP.DropConnect.Inferencer\MyNN.MLP.DropConnect.Inferencer.csproj">
       <Project>{a8501494-9230-4fb0-b2f7-e84b31e9e63a}</Project>
       <Name>MyNN.MLP.DropConnect.Inferencer</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyNN.MLP.DropConnect.WeightMask\MyNN.MLP.DropConnect.WeightMask.csproj">
-      <Project>{EBEFFE64-2B8B-4184-BF79-CB247064E1D4}</Project>
-      <Name>MyNN.MLP.DropConnect.WeightMask</Name>
     </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.NLNCA\MyNN.MLP.NLNCA.csproj">
       <Project>{5A82E05A-C2DA-42F4-A5F7-C79355E48E5F}</Project>

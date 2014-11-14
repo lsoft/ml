@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MyNN.MLP.DropConnect.WeightMask")]
+[assembly: AssemblyTitle("MyNN.Mask")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("MyNN.MLP.DropConnect.WeightMask")]
+[assembly: AssemblyProduct("MyNN.Mask")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("ed4788fc-b2cd-44f4-a96c-5e649034b9af")]
+[assembly: Guid("29112a26-792b-457b-9c15-df7d7ae7c3fc")]
 
 // Version information for an assembly consists of the following four values:
 //

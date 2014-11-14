@@ -2,21 +2,19 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MathNet.Numerics.Distributions;
-using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
-using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using OpenCL.Net.Wrapper.Mem.Data;
 
-namespace MyNN.MLP.DropConnect.WeightMask
+namespace MyNN.Mask
 {
     /// <summary>
     /// Implementation of weight bit mask container for dropconnect backpropagation algorithm.
     /// This container uses mask array with size that greather than weights count.
     /// </summary>
-    public class BigArrayWeightMaskContainer : IOpenCLWeightMaskContainer
+    public class BigArrayMaskContainer : IOpenCLMaskContainer
     {
         /// <summary>
         /// Iteration count between random array recalculcation
@@ -63,12 +61,13 @@ namespace MyNN.MLP.DropConnect.WeightMask
         /// <param name="clProvider">OpenCL provider</param>
         /// <param name="arraySize">Size of allocation buffer</param>
         /// <param name="randomizer">Random number provider</param>
-        /// <param name="p">Probability for each weight to be ONLINE (with p = 1 it disables dropconnect and convert the model to classic backprop)</param>
-        public BigArrayWeightMaskContainer(
+        /// <param name="p">Probability for each bit to be ONE (TRUE) (with p = 1 it completely disables mask and convert the model to classic backprop)</param>
+        public BigArrayMaskContainer(
             CLProvider clProvider,
             long arraySize,
             IRandomizer randomizer,
-            float p = 0.5f)
+            float p
+            )
         {
             if (arraySize <= 0)
             {
@@ -154,7 +153,7 @@ namespace MyNN.MLP.DropConnect.WeightMask
         private void FillMem()
         {
             var arrayIndex = _randomizer.Next(_array.Length - MaskMem.Array.Length);
-            Array.Copy(_array, arrayIndex, MaskMem.Array, 0, MaskMem.Array.Length);
+            Array.Copy((Array) _array, arrayIndex, (Array) MaskMem.Array, (int) 0, (int) MaskMem.Array.Length);
 
             //обновляем рабочие индексы
             _currentIterationNumber++;

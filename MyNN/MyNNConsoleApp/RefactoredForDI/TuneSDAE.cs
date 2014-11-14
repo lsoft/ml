@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Security.Permissions;
+using System.Windows.Forms;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.DataSetConverter;
 using MyNN.Common.Data.Set.Item.Dense;
@@ -28,7 +31,7 @@ namespace MyNNConsoleApp.RefactoredForDI
     {
         public static void Tune()
         {
-            var rndSeed = 81261;
+            var rndSeed = 81262;
             var randomizer = new DefaultRandomizer(++rndSeed);
 
             var dataItemFactory = new DenseDataItemFactory();
@@ -57,8 +60,24 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var serialization = new SerializationHelper();
 
+            string filepath = null;
+            using (var ofd = new OpenFileDialog())
+            {
+                ofd.InitialDirectory = Directory.GetCurrentDirectory();
+
+                ofd.Multiselect = false;
+
+                if (ofd.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+
+                filepath = ofd.FileNames[0];
+            }
+
             var mlp = new SerializationHelper().LoadFromFile<MLP>(
-                "sdae20141108094943.sdae/sdae20141108094943.sdae");
+                filepath
+                );
 
             Console.WriteLine("Network configuration: " + mlp.GetLayerInformation());
 
