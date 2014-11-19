@@ -1,8 +1,7 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using MyNN.Mask;
+﻿using MyNN.Mask;
 using MyNN.MLP.ForwardPropagation;
 
-namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU
+namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL
 {
     public interface IDropoutLayerPropagator : ILayerPropagator
     {

@@ -3,7 +3,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU;
-using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPropagator;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Neuron.Factory;

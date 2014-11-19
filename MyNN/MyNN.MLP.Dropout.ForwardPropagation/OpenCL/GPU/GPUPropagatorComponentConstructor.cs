@@ -9,22 +9,20 @@ using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU
+namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
 {
-    public abstract class CPUPropagatorComponentConstructor : IPropagatorComponentConstructor
+    public abstract class GPUPropagatorComponentConstructor : IPropagatorComponentConstructor
     {
         private const long Coef = 10L;
 
         private readonly IRandomizer _randomizer;
         private readonly CLProvider _clProvider;
-        private readonly VectorizationSizeEnum _vse;
         private readonly IOpenCLMaskContainerFactory _maskContainerFactory;
         private readonly float _p;
 
-        protected CPUPropagatorComponentConstructor(
+        protected GPUPropagatorComponentConstructor(
             IRandomizer randomizer,
             CLProvider clProvider,
-            VectorizationSizeEnum vse,
             IOpenCLMaskContainerFactory maskContainerFactory,
             float p
             )
@@ -48,7 +46,6 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU
 
             _randomizer = randomizer;
             _clProvider = clProvider;
-            _vse = vse;
             _maskContainerFactory = maskContainerFactory;
             _p = p;
         }
@@ -132,7 +129,7 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU
             var result = new List<ILayerPropagator>();
             result.Add(null); //для первого слоя нет пропагатора
 
-            var ks = new CPUKernelSource();
+            var ks = new GPUKernelSource();
 
             var layerCount = mlp.Layers.Length;
 
@@ -151,7 +148,7 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU
                     out oneValue1
                     );
 
-                var p = new CPULayerPropagator(
+                var p = new GPULayerPropagator(
                     _randomizer,
                     _clProvider,
                     ks,
@@ -159,7 +156,6 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU
                     containers[layerIndex - 1],
                     containers[layerIndex],
                     mlp.Layers[layerIndex].LayerActivationFunction,
-                    _vse,
                     mlp.Layers[layerIndex - 1].Neurons.Length,
                     mlp.Layers[layerIndex].NonBiasNeuronCount,
                     zeroValue0,

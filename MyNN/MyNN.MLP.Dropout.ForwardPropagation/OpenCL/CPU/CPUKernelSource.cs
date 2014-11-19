@@ -78,7 +78,11 @@ __kernel void
             const __global uint * masks,
             int maskShift,
             uint bitmask,
-            int previousLayerNeuronCountTotal
+            const int previousLayerNeuronCountTotal,
+            const float zeroValue0,
+            const float oneValue0,
+            const float zeroValue1,
+            const float oneValue1
             )
 {
     int neuronIndex = get_global_id(0);
@@ -99,10 +103,11 @@ __kernel void
 
     //вычисляем маску
     uint maski = masks[neuronIndex + maskShift];
-    float mask = ((maski & bitmask) > 0) ? (float)1 : (float)0;
+    float mask0 = ((maski & bitmask) > 0) ? oneValue0 : zeroValue0;
+    float mask1 = ((maski & bitmask) > 0) ? oneValue1 : zeroValue1;
 
     //применяем маску
-    float lastNET = acc.Sum * mask;
+    float lastNET = acc.Sum * mask0;
 
 
 
@@ -113,7 +118,7 @@ __kernel void
     float lastState = <ActivationMethodCall>(lastNET);
 
     //применяем маску и сохраняем
-    currentLayerLastState[neuronIndex] = lastState  * mask;
+    currentLayerLastState[neuronIndex] = lastState  * mask1;
 }
 ";
 
@@ -129,7 +134,11 @@ __kernel void
             const __global uint * masks,
             int maskShift,
             uint bitmask,
-            int previousLayerNeuronCountTotal
+            const int previousLayerNeuronCountTotal,
+            const float zeroValue0,
+            const float oneValue0,
+            const float zeroValue1,
+            const float oneValue1
             )
 {
     int previousLayerNeuronCount4 = previousLayerNeuronCountTotal / 4;
@@ -181,10 +190,11 @@ __kernel void
 
     //вычисляем маску
     uint maski = masks[neuronIndex + maskShift];
-    float mask = ((maski & bitmask) > 0) ? (float)1 : (float)0;
+    float mask0 = ((maski & bitmask) > 0) ? oneValue0 : zeroValue0;
+    float mask1 = ((maski & bitmask) > 0) ? oneValue1 : zeroValue1;
 
     //применяем маску
-    float lastNET = acc.Sum * mask;
+    float lastNET = acc.Sum * mask0;
 
 
 
@@ -193,7 +203,7 @@ __kernel void
     //compute last state
 
     float lastState = <ActivationMethodCall>(lastNET);
-    currentLayerLastState[neuronIndex] = lastState * mask;
+    currentLayerLastState[neuronIndex] = lastState * mask1;
 }
 ";
 
@@ -209,7 +219,11 @@ __kernel void
             const __global uint * masks,
             int maskShift,
             uint bitmask,
-            int previousLayerNeuronCountTotal
+            const int previousLayerNeuronCountTotal,
+            const float zeroValue0,
+            const float oneValue0,
+            const float zeroValue1,
+            const float oneValue1
             )
 {
     int previousLayerNeuronCount16 = previousLayerNeuronCountTotal / 16;
@@ -260,10 +274,11 @@ __kernel void
 
     //вычисляем маску
     uint maski = masks[neuronIndex + maskShift];
-    float mask = ((maski & bitmask) > 0) ? (float)1 : (float)0;
+    float mask0 = ((maski & bitmask) > 0) ? oneValue0 : zeroValue0;
+    float mask1 = ((maski & bitmask) > 0) ? oneValue1 : zeroValue1;
 
     //применяем маску
-    float lastNET = acc.Sum * mask;
+    float lastNET = acc.Sum * mask0;
 
 
 
@@ -272,7 +287,7 @@ __kernel void
     //compute last state
 
     float lastState = <ActivationMethodCall>(lastNET);
-    currentLayerLastState[neuronIndex] = lastState * mask;
+    currentLayerLastState[neuronIndex] = lastState * mask1;
 }
 ";
     }

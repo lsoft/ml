@@ -4,7 +4,7 @@ using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPropagator
+namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU
 {
     public class DropConnectLayerPropagator : IDropConnectLayerPropagator
     {
@@ -87,9 +87,6 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPr
         {
             _maskContainer.RegenerateMask();
 
-            const uint szLocalWorkSize = 256;
-            uint szGlobalWorkSize = 64 * _clProvider.Parameters.NumComputeUnits * szLocalWorkSize;
-
             _kernel
                 .SetKernelArgMem(0, _previousMemLayerContainer.StateMem)
                 .SetKernelArgMem(1, _currentMemLayerContainer.NetMem)
@@ -97,17 +94,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPr
                 .SetKernelArgMem(3, _currentMemLayerContainer.WeightMem)
                 .SetKernelArgMem(4, _maskContainer.MaskMem)
                 .SetKernelArg(5, 4, _maskContainer.BitMask)
-                .SetKernelArgLocalMem(6, 4 * szLocalWorkSize)
-                .EnqueueNDRangeKernel(
-                    new[]
-                        {
-                            szGlobalWorkSize
-                        }
-                    , new[]
-                        {
-                            szLocalWorkSize
-                        }
-                    );
+                .EnqueueNDRangeKernel(_currentLayerNonBiasNeuronCount);
         }
 
         public void WaitForCalculationFinished()

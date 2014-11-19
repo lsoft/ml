@@ -8,6 +8,7 @@ using MyNN.Common.Randomizer;
 using MyNN.Mask.Factory;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU.KernelText;
+using MyNN.MLP.Dropout.ForwardPropagation.OpenCL;
 using MyNN.MLP.Dropout.ForwardPropagation.OpenCL.CPU;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
@@ -26,9 +27,6 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
     /// </summary>
     public class CPUDropoutEpocheTrainer : IEpocheTrainer
     {
-        private readonly IMemLayerContainer[] _containers;
-        private readonly IDropoutLayerPropagator[] _propagators;
-
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
@@ -42,13 +40,20 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
         private Kernel _updateWeightKernel;
 
-        private readonly MLP.ForwardPropagation.ForwardPropagation _forwardPropagation;
+        private readonly MLP.ForwardPropagation.ForwardPropagation _dropoutForwardPropagation;
+        private readonly IMemLayerContainer[] _dropoutContainers;
+        private readonly IDropoutLayerPropagator[] _dropoutPropagators;
+
+        private readonly MLP.ForwardPropagation.ForwardPropagation _inferenceForwardPropagation;
+        private readonly IMemLayerContainer[] _inferenceContainers;
+        private readonly IDropoutLayerPropagator[] _inferencePropagators;
+
         public IForwardPropagation ForwardPropagation
         {
             get
             {
                 return
-                    _forwardPropagation;
+                    _inferenceForwardPropagation;
             }
         }
 
@@ -101,29 +106,65 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
             _config = config;
             _clProvider = clProvider;
 
-            var cc = new CPUPropagatorComponentConstructor(
-                randomizer,
-                _clProvider,
-                vse,
-                maskContainerFactory,
-                p
-                );
+            #region создаем компоненты обучения
 
-            ILayerContainer[] containers;
-            ILayerPropagator[] propagators;
-            cc.CreateComponents(
-                mlp,
-                out containers,
-                out propagators);
+            {
+                var cc = new CPUMaskForwardPropagatorComponentConstructor(
+                    randomizer,
+                    _clProvider,
+                    vse,
+                    maskContainerFactory,
+                    p
+                    );
 
-            _containers = containers.ToList().ConvertAll(j => j as IMemLayerContainer).ToArray();
-            _propagators = propagators.ToList().ConvertAll(j => j as IDropoutLayerPropagator).ToArray();
+                ILayerContainer[] containers;
+                ILayerPropagator[] propagators;
+                cc.CreateComponents(
+                    mlp,
+                    out containers,
+                    out propagators);
 
-            _forwardPropagation = new MLP.ForwardPropagation.ForwardPropagation(
-                containers,
-                propagators,
-                _mlp
-                );
+                _dropoutContainers = containers.ToList().ConvertAll(j => j as IMemLayerContainer).ToArray();
+                _dropoutPropagators = propagators.ToList().ConvertAll(j => j as IDropoutLayerPropagator).ToArray();
+
+                _dropoutForwardPropagation = new MLP.ForwardPropagation.ForwardPropagation(
+                    containers,
+                    propagators,
+                    _mlp
+                    );
+            }
+
+            #endregion
+
+            #region создаем компоненты выведения
+
+            {
+                var cc = new CPUInferencePropagatorComponentConstructor(
+                    randomizer,
+                    _clProvider,
+                    vse,
+                    maskContainerFactory,
+                    p
+                    );
+
+                ILayerContainer[] containers;
+                ILayerPropagator[] propagators;
+                cc.CreateComponents(
+                    mlp,
+                    out containers,
+                    out propagators);
+
+                _inferenceContainers = containers.ToList().ConvertAll(j => j as IMemLayerContainer).ToArray();
+                _inferencePropagators = propagators.ToList().ConvertAll(j => j as IDropoutLayerPropagator).ToArray();
+
+                _inferenceForwardPropagation = new MLP.ForwardPropagation.ForwardPropagation(
+                    containers,
+                    propagators,
+                    _mlp
+                    );
+            }
+
+            #endregion
 
             this.PrepareInfrastructure();
         }
@@ -225,7 +266,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
             #region one epoche
 
             //переносим веса сети в объекты OpenCL
-            _forwardPropagation.PushWeights();
+            _dropoutForwardPropagation.PushWeights();
 
             //гоним на устройство
             foreach (var nw in _nablaWeights)
@@ -236,7 +277,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
                 }
             }
 
-            _forwardPropagation.ClearAndPushHiddenLayers();
+            _dropoutForwardPropagation.ClearAndPushHiddenLayers();
 
             // Make sure we're done with everything that's been requested before
             _clProvider.QueueFinish();
@@ -254,7 +295,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
 
                     //---------------------------- forward pass ----------------------------
 
-                    _forwardPropagation.Propagate(trainDataItem);
+                    _dropoutForwardPropagation.Propagate(trainDataItem);
 
                     //---------------------------- backward pass, error propagation ----------------------------
 
@@ -276,12 +317,12 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
                         //_clProvider.QueueFinish();
 
                         _outputKernelOverwrite.Last()
-                            .SetKernelArgMem(0, _containers[outputLayerIndex].NetMem)
-                            .SetKernelArgMem(1, _containers[outputLayerIndex - 1].StateMem)
-                            .SetKernelArgMem(2, _containers[outputLayerIndex].StateMem)
+                            .SetKernelArgMem(0, _dropoutContainers[outputLayerIndex].NetMem)
+                            .SetKernelArgMem(1, _dropoutContainers[outputLayerIndex - 1].StateMem)
+                            .SetKernelArgMem(2, _dropoutContainers[outputLayerIndex].StateMem)
                             .SetKernelArgMem(3, this._deDz[outputLayerIndex])
                             .SetKernelArgMem(4, _desiredOutput)
-                            .SetKernelArgMem(5, _containers[outputLayerIndex].WeightMem)
+                            .SetKernelArgMem(5, _dropoutContainers[outputLayerIndex].WeightMem)
                             .SetKernelArgMem(6, outputNablaLayer)
                             .SetKernelArg(7, 4, preOutputLayer.Neurons.Length / 4)
                             .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
@@ -295,12 +336,12 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
                     else
                     {
                         _outputKernelIncrement.Last()
-                            .SetKernelArgMem(0, _containers[outputLayerIndex].NetMem)
-                            .SetKernelArgMem(1, _containers[outputLayerIndex - 1].StateMem)
-                            .SetKernelArgMem(2, _containers[outputLayerIndex].StateMem)
+                            .SetKernelArgMem(0, _dropoutContainers[outputLayerIndex].NetMem)
+                            .SetKernelArgMem(1, _dropoutContainers[outputLayerIndex - 1].StateMem)
+                            .SetKernelArgMem(2, _dropoutContainers[outputLayerIndex].StateMem)
                             .SetKernelArgMem(3, this._deDz[outputLayerIndex])
                             .SetKernelArgMem(4, _desiredOutput)
-                            .SetKernelArgMem(5, _containers[outputLayerIndex].WeightMem)
+                            .SetKernelArgMem(5, _dropoutContainers[outputLayerIndex].WeightMem)
                             .SetKernelArgMem(6, outputNablaLayer)
                             .SetKernelArg(7, 4, preOutputLayer.Neurons.Length / 4)
                             .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
@@ -326,18 +367,18 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
                         if (inBatchIndex == 0)
                         {
                             _hiddenKernelOverwrite[hiddenLayerIndex]
-                                .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
-                                .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
-                                .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
+                                .SetKernelArgMem(0, _dropoutContainers[hiddenLayerIndex].NetMem)
+                                .SetKernelArgMem(1, _dropoutContainers[hiddenLayerIndex - 1].StateMem)
+                                .SetKernelArgMem(2, _dropoutContainers[hiddenLayerIndex].StateMem)
                                 .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
                                 .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
-                                .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
+                                .SetKernelArgMem(5, _dropoutContainers[hiddenLayerIndex].WeightMem)
+                                .SetKernelArgMem(6, _dropoutContainers[hiddenLayerIndex + 1].WeightMem)
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
 
-                                .SetKernelArgMem(8, _propagators[outputLayerIndex].MaskContainer.MaskMem)
-                                .SetKernelArg(9, 4, _propagators[outputLayerIndex].MaskShift)
-                                .SetKernelArg(10, 4, _propagators[outputLayerIndex].MaskContainer.BitMask)
+                                .SetKernelArgMem(8, _dropoutPropagators[outputLayerIndex].MaskContainer.MaskMem)
+                                .SetKernelArg(9, 4, _dropoutPropagators[outputLayerIndex].MaskShift)
+                                .SetKernelArg(10, 4, _dropoutPropagators[outputLayerIndex].MaskContainer.BitMask)
 
                                 .SetKernelArg(11, 4, prevLayer.Neurons.Length / 4)
                                 .SetKernelArg(12, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
@@ -352,18 +393,18 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
                         else
                         {
                             _hiddenKernelIncrement[hiddenLayerIndex]
-                                .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
-                                .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
-                                .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
+                                .SetKernelArgMem(0, _dropoutContainers[hiddenLayerIndex].NetMem)
+                                .SetKernelArgMem(1, _dropoutContainers[hiddenLayerIndex - 1].StateMem)
+                                .SetKernelArgMem(2, _dropoutContainers[hiddenLayerIndex].StateMem)
                                 .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
                                 .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
-                                .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
+                                .SetKernelArgMem(5, _dropoutContainers[hiddenLayerIndex].WeightMem)
+                                .SetKernelArgMem(6, _dropoutContainers[hiddenLayerIndex + 1].WeightMem)
                                 .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
 
-                                .SetKernelArgMem(8, _propagators[outputLayerIndex].MaskContainer.MaskMem)
-                                .SetKernelArg(9, 4, _propagators[outputLayerIndex].MaskShift)
-                                .SetKernelArg(10, 4, _propagators[outputLayerIndex].MaskContainer.BitMask)
+                                .SetKernelArgMem(8, _dropoutPropagators[outputLayerIndex].MaskContainer.MaskMem)
+                                .SetKernelArg(9, 4, _dropoutPropagators[outputLayerIndex].MaskShift)
+                                .SetKernelArg(10, 4, _dropoutPropagators[outputLayerIndex].MaskContainer.BitMask)
 
                                 .SetKernelArg(11, 4, prevLayer.Neurons.Length / 4)
                                 .SetKernelArg(12, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
@@ -394,7 +435,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
 
                 for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
                 {
-                    var weightMem = _containers[layerIndex].WeightMem;
+                    var weightMem = _dropoutContainers[layerIndex].WeightMem;
                     var nablaMem = _nablaWeights[layerIndex];
 
                     const int perKernelFloats = 1500; //по 1500 флоатов на кернел (должно быть кратно 4м!!!)
@@ -428,7 +469,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
             //конец эпохи обучения
 
             //считываем веса с устройства
-            foreach (var container in _containers)
+            foreach (var container in _dropoutContainers)
             {
                 if (container.WeightMem != null)
                 {
@@ -442,7 +483,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU
             for (int layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
             {
                 var layer = _mlp.Layers[layerIndex];
-                var weightLayer = _containers[layerIndex].WeightMem;
+                var weightLayer = _dropoutContainers[layerIndex].WeightMem;
 
                 var weightShiftIndex = 0;
                 for (int neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; ++neuronIndex)

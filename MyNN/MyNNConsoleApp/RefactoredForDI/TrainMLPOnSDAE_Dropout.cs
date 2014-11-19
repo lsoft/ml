@@ -53,7 +53,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var trainData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/trainingset/",
-                100,//int.MaxValue,
+                int.MaxValue,
                 false,
                 dataItemFactory
                 );
@@ -61,7 +61,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var validationData = MNISTDataProvider.GetDataSet(
                 "_MNIST_DATABASE/mnist/testset/",
-                100,//int.MaxValue,
+                int.MaxValue,
                 false,
                 dataItemFactory
                 );
@@ -71,22 +71,22 @@ namespace MyNNConsoleApp.RefactoredForDI
 
             var serialization = new SerializationHelper();
 
-            //string filepath = null;
-            //using (var ofd = new OpenFileDialog())
-            //{
-            //    ofd.InitialDirectory = Directory.GetCurrentDirectory();
+            string filepath = null;
+            using (var ofd = new OpenFileDialog())
+            {
+                ofd.InitialDirectory = Directory.GetCurrentDirectory();
 
-            //    ofd.Multiselect = false;
+                ofd.Multiselect = false;
 
-            //    if (ofd.ShowDialog() != DialogResult.OK)
-            //    {
-            //        return;
-            //    }
+                if (ofd.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
 
-            //    filepath = ofd.FileNames[0];
-            //}
+                filepath = ofd.FileNames[0];
+            }
 
-            var filepath = "sdae20141108113834.tuned.sdae/epoche 248/sdae20141108094943.sdae";
+            //var filepath = "sdae20141108113834.tuned.sdae/epoche 248/sdae20141108094943.sdae";
 
             var mlp = serialization.LoadFromFile<MLP>(
                 filepath
@@ -120,7 +120,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                     "mlp{0}.basedonsdae.mlp",
                     DateTime.Now.ToString("yyyyMMddHHmmss"));
 
-                const int epocheCount = 30;
+                const int epocheCount = 300;
 
                 var config = new LearningAlgorithmConfig(
                     new HalfSquaredEuclidianDistance(), 

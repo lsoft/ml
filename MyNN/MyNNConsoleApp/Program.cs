@@ -181,7 +181,8 @@ namespace MyNNConsoleApp
                 //TuneSDAE.Tune();
                 //TrainMLPOnSDAE.DoTrain();
 
-                TrainMLPOnSDAE_Dropout.DoTrain();
+                //TrainMLPOnSDAE_Dropout.DoTrain();
+                TestGPUDropout.DoTrain();
 
                 //TrainMLPWithNoNoise.DoTrain();
 

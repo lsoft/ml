@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using MyNN.Mask;
 using MyNN.Mask.Factory;
-using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.LayerPropagator;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure;

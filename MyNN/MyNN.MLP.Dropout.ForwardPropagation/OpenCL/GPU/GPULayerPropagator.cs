@@ -1,21 +1,30 @@
 ﻿using System;
+using MyNN.Common.OpenCLHelper;
+using MyNN.Common.Randomizer;
 using MyNN.Mask;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU.LayerPropagator
+namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
 {
-    public class DropConnectLayerPropagator : IDropConnectLayerPropagator
+    public class GPULayerPropagator : IDropoutLayerPropagator
     {
+        private readonly IRandomizer _randomizer;
         private readonly CLProvider _clProvider;
         private readonly IOpenCLMaskContainer _maskContainer;
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
         private readonly int _prevLayerNeuronTotalCount;
         private readonly int _currentLayerNonBiasNeuronCount;
+        private readonly float _zeroValue0;
+        private readonly float _oneValue0;
+        private readonly float _zeroValue1;
+        private readonly float _oneValue1;
 
         private readonly Kernel _kernel;
+
+        private int _maskChanged = 0;
 
         public IOpenCLMaskContainer MaskContainer
         {
@@ -26,17 +35,32 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU.LayerPr
             }
         }
 
-        public DropConnectLayerPropagator(
+        public int MaskShift
+        {
+            get;
+            private set;
+        }
+
+        public GPULayerPropagator(
+            IRandomizer randomizer,
             CLProvider clProvider,
-            KernelSource ks,
+            GPUKernelSource ks,
             IOpenCLMaskContainer maskContainer,
             IMemLayerContainer previousMemLayerContainer,
             IMemLayerContainer currentMemLayerContainer,
             IFunction activationFunction,
             int prevLayerNeuronTotalCount,
-            int currentLayerNonBiasNeuronCount
+            int currentLayerNonBiasNeuronCount,
+            float zeroValue0,
+            float oneValue0,
+            float zeroValue1,
+            float oneValue1
             )
         {
+            if (randomizer == null)
+            {
+                throw new ArgumentNullException("randomizer");
+            }
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
@@ -62,12 +86,17 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU.LayerPr
                 throw new ArgumentNullException("activationFunction");
             }
 
+            _randomizer = randomizer;
             _clProvider = clProvider;
             _maskContainer = maskContainer;
             _previousMemLayerContainer = previousMemLayerContainer;
             _currentMemLayerContainer = currentMemLayerContainer;
             _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
             _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
+            _zeroValue0 = zeroValue0;
+            _oneValue0 = oneValue0;
+            _zeroValue1 = zeroValue1;
+            _oneValue1 = oneValue1;
 
             string kernelName;
             var kernelSource = ks.GetKernelSource(
@@ -85,16 +114,42 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU.LayerPr
         public void ComputeLayer(
             )
         {
-            _maskContainer.RegenerateMask();
+            var maxRandomShift = this._maskContainer.MaskMem.Array.Length - _currentLayerNonBiasNeuronCount;
+            this.MaskShift = _randomizer.Next(maxRandomShift);
+
+            if (++_maskChanged > 100)
+            {
+                _maskContainer.RegenerateMask();
+
+                _maskChanged = 0;
+            }
+
+            const uint szLocalWorkSize = 256;
+            uint szGlobalWorkSize = 64 * _clProvider.Parameters.NumComputeUnits * szLocalWorkSize;
 
             _kernel
                 .SetKernelArgMem(0, _previousMemLayerContainer.StateMem)
                 .SetKernelArgMem(1, _currentMemLayerContainer.NetMem)
                 .SetKernelArgMem(2, _currentMemLayerContainer.StateMem)
                 .SetKernelArgMem(3, _currentMemLayerContainer.WeightMem)
-                .SetKernelArgMem(4, _maskContainer.MaskMem)
-                .SetKernelArg(5, 4, _maskContainer.BitMask)
-                .EnqueueNDRangeKernel(_currentLayerNonBiasNeuronCount);
+                .SetKernelArgMem(4, this._maskContainer.MaskMem)
+                .SetKernelArg(5, 4, this.MaskShift)
+                .SetKernelArg(6, 4, this._maskContainer.BitMask)
+                .SetKernelArg(7, 4, _zeroValue0)
+                .SetKernelArg(8, 4, _oneValue0)
+                .SetKernelArg(9, 4, _zeroValue1)
+                .SetKernelArg(10, 4, _oneValue1)
+                .SetKernelArgLocalMem(11, 4 * szLocalWorkSize)
+                .EnqueueNDRangeKernel(
+                    new[]
+                        {
+                            szGlobalWorkSize
+                        }
+                    , new[]
+                        {
+                            szLocalWorkSize
+                        }
+                    );
         }
 
         public void WaitForCalculationFinished()
@@ -102,6 +157,5 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.CPU.LayerPr
             // Make sure we're done with everything that's been requested before
             _clProvider.QueueFinish();
         }
-
     }
 }

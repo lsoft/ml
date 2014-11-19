@@ -48,14 +48,13 @@
     <Compile Include="Inference\OpenCL\GPU\KernelSource.cs" />
     <Compile Include="Inference\OpenCL\GPU\LayerPropagator.cs" />
     <Compile Include="Inference\OpenCL\GPU\PropagatorComponentConstructor.cs" />
+    <Compile Include="MaskForward\OpenCL\CPU\DropConnectLayerPropagator.cs" />
     <Compile Include="MaskForward\OpenCL\CPU\KernelSource.cs" />
-    <Compile Include="MaskForward\OpenCL\CPU\LayerPropagator\DropConnectLayerPropagator.cs" />
-    <Compile Include="MaskForward\OpenCL\CPU\LayerPropagator\IDropConnectLayerPropagator.cs" />
     <Compile Include="MaskForward\OpenCL\CPU\PropagatorComponentConstructor.cs" />
-    <Compile Include="MaskForward\OpenCL\GPU\LayerPropagator\IDropConnectLayerPropagator.cs" />
+    <Compile Include="MaskForward\OpenCL\GPU\DropConnectLayerPropagator.cs" />
+    <Compile Include="MaskForward\OpenCL\IDropConnectLayerPropagator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MaskForward\OpenCL\GPU\KernelSource.cs" />
-    <Compile Include="MaskForward\OpenCL\GPU\LayerPropagator\DropConnectLayerPropagator.cs" />
     <Compile Include="MaskForward\OpenCL\GPU\PropagatorComponentConstructor.cs" />
   </ItemGroup>
   <ItemGroup>
