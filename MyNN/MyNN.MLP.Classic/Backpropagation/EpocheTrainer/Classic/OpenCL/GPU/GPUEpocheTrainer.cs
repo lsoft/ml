@@ -20,7 +20,7 @@ using Kernel = OpenCL.Net.Wrapper.Kernel;
 namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
 {
     /// <summary>
-    /// Classic backpropagation epoche trainer that enables CPU-OpenCL
+    /// Classic backpropagation epoche trainer that enables GPU-OpenCL
     /// </summary>
     public class GPUEpocheTrainer : IEpocheTrainer
     {

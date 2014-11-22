@@ -48,6 +48,10 @@
     <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProvider.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProviderWithRegularization.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\GPUDropoutEpocheTrainer.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\KernelText\KernelTextProvider.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\KernelText\KernelTextProviderWithRegularization.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

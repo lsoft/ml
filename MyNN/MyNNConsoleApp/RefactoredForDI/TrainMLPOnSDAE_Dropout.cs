@@ -32,6 +32,7 @@ using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
 using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU;
+using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
@@ -114,18 +115,18 @@ namespace MyNNConsoleApp.RefactoredForDI
                     100)
                 );
 
-            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(true), false))
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
             {
                 var mlpName = string.Format(
                     "mlp{0}.basedonsdae.mlp",
                     DateTime.Now.ToString("yyyyMMddHHmmss"));
 
-                const int epocheCount = 300;
+                const int epocheCount = 500;
 
                 var config = new LearningAlgorithmConfig(
                     new HalfSquaredEuclidianDistance(), 
                     new LinearLearningRate(0.02f, 0.99f),
-                    1,
+                    100,
                     0.001f,
                     epocheCount,
                     -1f,
@@ -189,9 +190,9 @@ namespace MyNNConsoleApp.RefactoredForDI
                 const float p = 0.5f;
 
                 var algo = new Backpropagation(
-                    new CPUDropoutEpocheTrainer(
+                    new GPUDropoutEpocheTrainer(
                         randomizer,
-                        VectorizationSizeEnum.VectorizationMode16, 
+                        //VectorizationSizeEnum.VectorizationMode16, 
                         maskContainerFactory,
                         mlp,
                         config,

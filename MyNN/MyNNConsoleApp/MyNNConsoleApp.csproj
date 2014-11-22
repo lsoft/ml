@@ -146,7 +146,7 @@
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
     <Compile Include="FeatureAndMetricsAccuracyCalculator.cs" />
-    <Compile Include="RefactoredForDI\TestGPUDropout.cs" />
+    <Compile Include="RefactoredForDI\TestGPUDropoutForward.cs" />
     <Compile Include="RefactoredForDI\TrainMLPOnSDAE_Dropout.cs" />
     <Compile Include="RefactoredForDI\TuneSDAE.cs" />
     <Compile Include="RefactoredForDI\TrainCPUDropConnect.cs" />

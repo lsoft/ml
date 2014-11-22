@@ -25,7 +25,7 @@ using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNNConsoleApp.RefactoredForDI
 {
-    public class TestGPUDropout
+    public class TestGPUDropoutForward
     {
         public static void DoTrain()
         {
