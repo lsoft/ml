@@ -94,6 +94,21 @@ namespace MyNNConsoleApp.RefactoredForDI
                 10,
                 false);
 
+            //for (var layerIndex = 2; layerIndex < mlp.Layers.Length; layerIndex++)
+            //{
+            //    var l = mlp.Layers[layerIndex];
+
+            //    for (var neuronIndex = 0; neuronIndex < l.NonBiasNeuronCount; neuronIndex++)
+            //    {
+            //        var n = l.Neurons[neuronIndex];
+
+            //        for (var weightIndex = 0; weightIndex < n.Weights.Length; weightIndex++)
+            //        {
+            //            n.Weights[weightIndex] *= 0.5f;
+            //        }
+            //    }
+            //}
+
             var rootContainer = new FileSystemArtifactContainer(
                 ".",
                 serialization);
@@ -177,9 +192,7 @@ namespace MyNNConsoleApp.RefactoredForDI
                 var mlpContainerHelper = new MLPContainerHelper();
 
                 var algo = new Backpropagation(
-                    //new GPUTransposeEpocheTrainer(
                     new GPUEpocheTrainer(
-                        //VectorizationSizeEnum.VectorizationMode16, 
                         mlp,
                         config,
                         clProvider),

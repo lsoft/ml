@@ -182,7 +182,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                     return conf;
                 },
-                new CPUBackpropagationFactory(
+                (clProvider) => new CPUBackpropagationFactory(
                     mlpContainerHelper),
                 (clProvider) => new ForwardPropagationFactory(
                     new CPUPropagatorComponentConstructor(

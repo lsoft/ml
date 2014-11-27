@@ -148,6 +148,8 @@
     <Compile Include="FeatureAndMetricsAccuracyCalculator.cs" />
     <Compile Include="RefactoredForDI\TestGPUDropoutForward.cs" />
     <Compile Include="RefactoredForDI\TrainMLPOnSDAE_Dropout.cs" />
+    <Compile Include="RefactoredForDI\TrainSDAE_Dropout.cs" />
+    <Compile Include="RefactoredForDI\TuneSDAE_Dropout.cs" />
     <Compile Include="RefactoredForDI\TuneSDAE.cs" />
     <Compile Include="RefactoredForDI\TrainCPUDropConnect.cs" />
     <Compile Include="RefactoredForDI\TestBackProp.cs" />

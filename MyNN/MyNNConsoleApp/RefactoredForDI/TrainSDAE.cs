@@ -143,7 +143,7 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                     return conf;
                 },
-                new GPUBackpropagationFactory(
+                (clProvider) => new GPUBackpropagationFactory(
                     mlpContainerHelper),
                 (clProvider) => new ForwardPropagationFactory(
                     new GPUPropagatorComponentConstructor(

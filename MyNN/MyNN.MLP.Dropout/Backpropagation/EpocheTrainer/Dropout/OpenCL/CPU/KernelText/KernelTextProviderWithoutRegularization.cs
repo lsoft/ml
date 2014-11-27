@@ -212,6 +212,8 @@ __kernel void HiddenLayerTrain(
 
         <vectorized_nabla_update>
 
+        n *= mask; //регуляризация может изменить нуль, который был в n благодаря умножению на currentDeDz
+
         vstore4(
             n,
             currentNablaIndex4 + currentWeightIndex4,
@@ -227,6 +229,8 @@ __kernel void HiddenLayerTrain(
         float prevOut = previousLayerLastState[currentWeightIndex];
 
         float n = learningRate * currentDeDz * prevOut;
+
+        n *= mask; //регуляризация может изменить нуль, который был в n благодаря умножению на currentDeDz
 
         <nabla_update>
     }

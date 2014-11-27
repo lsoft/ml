@@ -27,19 +27,10 @@ using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
-using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
-using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.CPU;
 using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
-using MyNN.MLP.Structure.Factory;
-using MyNN.MLP.Structure.Layer;
-using MyNN.MLP.Structure.Layer.Factory;
-using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
@@ -192,7 +183,6 @@ namespace MyNNConsoleApp.RefactoredForDI
                 var algo = new Backpropagation(
                     new GPUDropoutEpocheTrainer(
                         randomizer,
-                        //VectorizationSizeEnum.VectorizationMode16, 
                         maskContainerFactory,
                         mlp,
                         config,

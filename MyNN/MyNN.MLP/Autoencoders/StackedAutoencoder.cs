@@ -32,7 +32,7 @@ namespace MyNN.MLP.Autoencoders
         private readonly Func<int, IDataSet, ITrainDataProvider> _dataProviderFactory;
         private readonly Func<int, IDataSet, IArtifactContainer, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
-        private readonly IBackpropagationFactory _backpropagationFactory;
+        private readonly Func<CLProvider, IBackpropagationFactory> _backpropagationFactoryFunc;
         private readonly Func<CLProvider, IForwardPropagationFactory> _forwardPropagationFactoryFunc;
         private readonly LayerInfo[] _layerInfos;
 
@@ -45,7 +45,7 @@ namespace MyNN.MLP.Autoencoders
             Func<int, IDataSet, ITrainDataProvider> dataProviderFactory,
             Func<int, IDataSet, IArtifactContainer, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
-            IBackpropagationFactory backpropagationFactory,
+            Func<CLProvider, IBackpropagationFactory> backpropagationFactoryFunc,
             Func<CLProvider, IForwardPropagationFactory> forwardPropagationFactoryFunc,
             params LayerInfo[] layerInfos)
         {
@@ -106,7 +106,7 @@ namespace MyNN.MLP.Autoencoders
             _dataProviderFactory = dataProviderFactory;
             _validationFactory = validationFactory;
             _configFactory = configFactory;
-            _backpropagationFactory = backpropagationFactory;
+            _backpropagationFactoryFunc = backpropagationFactoryFunc;
             _forwardPropagationFactoryFunc = forwardPropagationFactoryFunc;
             _layerInfos = layerInfos;
         }
@@ -190,7 +190,11 @@ namespace MyNN.MLP.Autoencoders
                 //обучаем автоенкодер
                 using (var clProvider = new CLProvider(_deviceChooser, true))
                 {
-                    var algo = _backpropagationFactory.CreateBackpropagation(
+                    var backpropagationFactory = _backpropagationFactoryFunc(
+                        clProvider
+                        );
+
+                    var algo = backpropagationFactory.CreateBackpropagation(
                         _randomizer,
                         clProvider,
                         mlpContainer,

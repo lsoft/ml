@@ -209,6 +209,8 @@ __kernel void HiddenLayerTrain(
 
             float n = learningRate * currentDeDz * prevOut;
 
+            n *= mask; //регуляризация может изменить нуль, который был в n благодаря умножению на currentDeDz
+
             <nabla_update>
         }
 

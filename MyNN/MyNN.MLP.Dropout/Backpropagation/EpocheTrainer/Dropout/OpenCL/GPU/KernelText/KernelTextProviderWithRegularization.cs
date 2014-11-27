@@ -44,7 +44,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Kern
         public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
-            var result = _calculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+            var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
 
             result = result.Replace(
                 "<MetricMethodBody>",
@@ -79,7 +79,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Kern
         public string GetIncrementCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
-            var result = _calculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
+            var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
 
             result = result.Replace(
                 "<MetricMethodBody>",
@@ -112,7 +112,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Kern
         }
 
 
-        private const string _calculationKernelsSource = @"
+        private const string CalculationKernelsSource = @"
 <DerivativeMethodBody>
 
 <MetricMethodBody>
@@ -212,6 +212,8 @@ __kernel void HiddenLayerTrain(
             float regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount;
             float coef = prevOut + regularizationCoef;
             float n = learningRate * currentDeDz * coef;
+
+            n *= mask; //регуляризация может изменить нуль, который был в n благодаря умножению на currentDeDz
 
             <nabla_update>
         }

@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackpropagationFactory\Dropout\OpenCL\GPU\GPUDropoutBackpropagationFactory.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\CPUDropoutEpocheTrainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProvider.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
