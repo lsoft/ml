@@ -8,17 +8,22 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using MyNN;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data.DataSetConverter;
-using MyNN.Common.Data.Set;
+using MyNN.Common.Data.DataLoader;
+
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Data.TrainDataProvider.Noiser.Range;
-using MyNN.Common.Data.TypicalDataProvider;
 using MyNN.Common.LearningRateController;
+using MyNN.Common.NewData.DataSet.ItemLoader;
+using MyNN.Common.NewData.DataSet.ItemTransformation;
+using MyNN.Common.NewData.DataSet.Iterator;
+using MyNN.Common.NewData.DataSetProvider;
+using MyNN.Common.NewData.Normalizer;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
+using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Metrics;
@@ -46,25 +51,20 @@ namespace MyNNConsoleApp.RefactoredForDI
     {
         public static void DoTrain()
         {
-            var dataItemFactory = new DenseDataItemFactory();
+            const int trainMaxCountFilesInCategory = 1000;
+            const int validationMaxCountFilesInCategory = 300;
 
-            var trainData = MNISTDataProvider.GetDataSet(
-                "_MNIST_DATABASE/mnist/trainingset/",
-                int.MaxValue,
+            var trainDataSetProvider = GetTrainProvider(
+                trainMaxCountFilesInCategory,
                 false,
-                dataItemFactory
+                true
                 );
-            trainData.Normalize();
-
-            var validationData = MNISTDataProvider.GetDataSet(
-                "_MNIST_DATABASE/mnist/testset/",
-                int.MaxValue,
+            
+            var validationData = GetValidation(
+                validationMaxCountFilesInCategory,
                 false,
-                dataItemFactory
+                true
                 );
-            validationData.Normalize();
-
-            var randomizer = new DefaultRandomizer(123);
 
             var serialization = new SerializationHelper();
 
@@ -86,6 +86,8 @@ namespace MyNNConsoleApp.RefactoredForDI
             var mlp = serialization.LoadFromFile<MLP>(
                 filepath
                 );
+
+            ConsoleAmbientContext.Console.WriteLine("Loaded " + mlp.GetLayerInformation());
 
             mlp.AutoencoderCutTail();
 
@@ -142,51 +144,6 @@ namespace MyNNConsoleApp.RefactoredForDI
                     -1f
                     );
 
-
-                //Func<int, INoiser> noiserProvider =
-                //    (int epocheNumber) =>
-                //    {
-                //        if (epocheCount == epocheNumber)
-                //        {
-                //            return
-                //                new NoNoiser();
-                //        }
-
-                //        var coef = (epocheCount - epocheNumber) / (float)epocheCount;
-                //        //const float coef = 0.3f;
-
-                //        var noiser = new ZeroMaskingNoiser(randomizer, coef * 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength));
-
-                //        //var noiser = new SequenceNoiser(
-                //        //    randomizer,
-                //        //    true,
-                //        //    new GaussNoiser(coef * 0.20f, false, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                //        //    new MultiplierNoiser(randomizer, coef * 1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                //        //    new DistanceChangeNoiser(randomizer, coef * 1f, 3, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                //        //    new SaltAndPepperNoiser(randomizer, coef * 0.1f, new RandomSeriesRange(randomizer, trainData[0].InputLength)),
-                //        //    new ZeroMaskingNoiser(randomizer, coef * 0.25f, new RandomSeriesRange(randomizer, trainData[0].InputLength))
-                //        //    );
-
-                //        return noiser;
-                //    };
-
-                //var noiserDataProvider = new NoiseDataProvider(
-                //    trainData,
-                //    noiserProvider,
-                //    dataItemFactory
-                //    );
-
-                var noDeformationDataProvider = new NoDeformationTrainDataProvider(
-                    trainData
-                    );
-
-                var trainDataProvider =
-                    new ConverterTrainDataProvider(
-                        new ShuffleDataSetConverter(randomizer),
-                        //noiserDataProvider
-                        noDeformationDataProvider
-                        );
-
                 var mlpContainer = rootContainer.GetChildContainer(mlpName);
 
                 var mlpContainerHelper = new MLPContainerHelper();
@@ -204,9 +161,107 @@ namespace MyNNConsoleApp.RefactoredForDI
                     );
 
                 algo.Train(
-                    trainDataProvider
+                    trainDataSetProvider
                     );
             }
         }
+
+        private static IDataSetProvider GetTrainProvider(
+            int maxCountFilesInCategory,
+            bool isNeedToGNormalize,
+            bool isNeedToNormalize
+            )
+        {
+            var dataItemFactory = new DataItemFactory();
+
+            var dataItemLoader = new MNISTDataItemLoader(
+                "_MNIST_DATABASE/mnist/trainingset/",
+                maxCountFilesInCategory,
+                false,
+                dataItemFactory,
+                new DefaultNormalizer()
+                );
+
+            if (isNeedToGNormalize)
+            {
+                dataItemLoader.GNormalize();
+            }
+
+            if (isNeedToNormalize)
+            {
+                dataItemLoader.Normalize();
+            }
+
+            var iteratorFactory = new DataIteratorFactory(
+                );
+
+            var itemTransformationFactory = new DataItemTransformationFactory(
+                (epochNumber) =>
+                {
+                    return
+                        new NoConvertDataItemTransformation();
+                });
+
+            var dataSetFactory = new DataSetFactory(
+                iteratorFactory,
+                itemTransformationFactory
+                );
+
+            var dataSetProvider = new DataSetProvider(
+                dataSetFactory,
+                dataItemLoader
+                );
+
+            return
+                dataSetProvider;
+        }
+
+        private static IDataSet GetValidation(
+            int maxCountFilesInCategory,
+            bool isNeedToGNormalize,
+            bool isNeedToNormalize
+            )
+        {
+            var dataItemFactory = new DataItemFactory();
+
+            var dataItemLoader = new MNISTDataItemLoader(
+                "_MNIST_DATABASE/mnist/testset/",
+                maxCountFilesInCategory,
+                false,
+                dataItemFactory,
+                new DefaultNormalizer()
+                );
+
+            if (isNeedToGNormalize)
+            {
+                dataItemLoader.GNormalize();
+            }
+
+            if (isNeedToNormalize)
+            {
+                dataItemLoader.Normalize();
+            }
+
+            var iterationFactory = new DataIteratorFactory(
+                );
+
+            var itemTransformationFactory = new DataItemTransformationFactory(
+                (epochNumber) =>
+                {
+                    return
+                        new NoConvertDataItemTransformation();
+                });
+
+            var validationDataSet = new DataSet(
+                iterationFactory,
+                itemTransformationFactory,
+                dataItemLoader,
+                0
+                );
+
+            return
+                validationDataSet;
+        }
+
     }
 }

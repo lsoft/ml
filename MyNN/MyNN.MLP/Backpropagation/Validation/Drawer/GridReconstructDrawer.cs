@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Visualizer;
 using MyNN.Common.Other;
 using MyNN.MLP.Structure.Layer;
@@ -53,7 +54,7 @@ namespace MyNN.MLP.Backpropagation.Validation.Drawer
                 throw new ArgumentNullException("netResults");
             }
 
-            if (_validationData.IsAuencoderDataSet)
+            if (_validationData.IsAutoencoderDataSet)
             {
                 using (var s = containerForSave.GetWriteStreamForResource("grid.bmp"))
                 {
@@ -68,12 +69,22 @@ namespace MyNN.MLP.Backpropagation.Validation.Drawer
                 var startIndex = (int) ((DateTime.Now.Millisecond/1000f)*(Math.Min(_validationData.Count, netResults.Count) - _visualizeAsPairCount));
 
                 var pairList = new List<Pair<float[], float[]>>();
-                for (var cc = startIndex; cc < startIndex + _visualizeAsPairCount; cc++)
+                //for (var cc = startIndex; cc < startIndex + _visualizeAsPairCount; cc++)
+                //{
+                //    var i = new Pair<float[], float[]>(
+                //        _validationData.Data[cc].Input,
+                //        netResults[cc].NState);
+                //    pairList.Add(i);
+                //}
+                foreach (var pair in netResults.ZipEqualLength(_validationData).Skip(startIndex).Take(_visualizeAsPairCount))
                 {
-                    var i = new Pair<float[], float[]>(
-                        _validationData[cc].Input,
-                        netResults[cc].NState);
-                    pairList.Add(i);
+                    var netResult = pair.Value1;
+                    var testItem = pair.Value2;
+
+                    pairList.Add(
+                        new Pair<float[], float[]>(
+                            testItem.Output,
+                            netResult.NState));
                 }
 
                 using (var s = containerForSave.GetWriteStreamForResource("reconstruct.bmp"))

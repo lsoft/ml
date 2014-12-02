@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.MLP.AccuracyRecord;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
@@ -16,6 +16,7 @@ namespace MyNN.Tests
     public class TestPurposeValidation : IValidation
     {
         private readonly IDataSet _validationData;
+        private readonly DataItemFactory _dataItemFactory;
 
         public float TotalError
         {
@@ -38,6 +39,7 @@ namespace MyNN.Tests
             }
 
             _validationData = validationData;
+            _dataItemFactory = new DataItemFactory();
         }
 
         public IAccuracyRecord Validate(
@@ -53,16 +55,22 @@ namespace MyNN.Tests
 
             var netResults = forwardPropagation.ComputeOutput(_validationData);
 
-            //преобразуем в вид, когда в DenseDataItem.Input - правильный ВЫХОД (обучаемый выход),
-            //а в DenseDataItem.Output - РЕАЛЬНЫЙ выход, а их разница - ошибка обучения
+
+            //преобразуем в вид, когда в DataItem.Input - правильный ВЫХОД (обучаемый выход),
+            //а в DataItem.Output - РЕАЛЬНЫЙ выход, а их разница - ошибка обучения
             var d = new List<IDataItem>(_validationData.Count + 1);
-            for (int i = 0; i < _validationData.Count; i++)
+            foreach (var pair in netResults.ZipEqualLength(_validationData))
             {
+                var netResult = pair.Value1;
+                var testItem = pair.Value2;
+
                 d.Add(
-                    new DenseDataItem(
-                        _validationData[i].Output,
-                        netResults[i].NState));
+                    _dataItemFactory.CreateDataItem(
+                        testItem.Output,
+                        netResult.NState
+                        ));
             }
+
 
             var metrics = new TestPurposeMetric();
 

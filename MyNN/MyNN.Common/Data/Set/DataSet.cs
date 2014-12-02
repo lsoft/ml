@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 
 namespace MyNN.Common.Data.Set
 {
@@ -17,12 +16,6 @@ namespace MyNN.Common.Data.Set
         }
 
         public bool IsAutoencoderDataSet
-        {
-            get;
-            set;
-        }
-
-        public bool IsAuencoderDataSet
         {
             get
             {
@@ -125,24 +118,9 @@ namespace MyNN.Common.Data.Set
 
             for (var i = 0; i < dataSet.Count; i++)
             {
-                var di = dataItemFactory.CreateDataItem(inputPart[i], dataSet[i].Output);
+                var di = dataItemFactory.CreateDataItem(inputPart[i], dataSet.Data[i].Output);
                 this.Data.Add(di);
             }
-        }
-
-        public IDataItem this[int i]
-        {
-            get
-            {
-                return
-                    this.Data[i];
-            }
-        }
-
-        public List<float[]> GetInputPart()
-        {
-            return
-                this.Data.ConvertAll(j => j.Input);
         }
 
         /// <summary>
@@ -233,23 +211,5 @@ namespace MyNN.Common.Data.Set
                 }
             }
         }
-
-
-        #region get enumerator interface implementation
-
-        public IEnumerator<IDataItem> GetEnumerator()
-        {
-            return
-                this.Data.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return
-                GetEnumerator();
-        }
-
-        #endregion
-
     }
 }

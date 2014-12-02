@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
 using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Layer;
@@ -85,18 +85,33 @@ namespace MyNN.MLP.ForwardPropagation
             _mlp = mlp;
         }
 
-        public List<ILayerState> ComputeOutput(IDataSet dataSet)
+        public List<ILayerState> ComputeOutput(
+            IEnumerable<IDataItem> dataItemList
+            )
         {
+            if (dataItemList == null)
+            {
+                throw new ArgumentNullException("dataItemList");
+            }
+
             TimeSpan propagationTime;
             var result = ComputeOutput(
-                dataSet,
+                dataItemList,
                 out propagationTime);
 
             return result;
         }
 
-        public List<ILayerState> ComputeOutput(IDataSet dataSet, out TimeSpan propagationTime)
+        public List<ILayerState> ComputeOutput(
+            IEnumerable<IDataItem> dataItemList,
+            out TimeSpan propagationTime
+            )
         {
+            if (dataItemList == null)
+            {
+                throw new ArgumentNullException("dataItemList");
+            }
+
             var result = new List<ILayerState>();
 
             this.PushWeights();
@@ -105,7 +120,7 @@ namespace MyNN.MLP.ForwardPropagation
 
             var before = DateTime.Now;
 
-            foreach (var d in dataSet)
+            foreach (var d in dataItemList)
             {
                 this.Propagate(d);
                 
@@ -122,15 +137,22 @@ namespace MyNN.MLP.ForwardPropagation
             return result;
         }
 
-        public List<IMLPState> ComputeState(IDataSet dataSet)
+        public List<IMLPState> ComputeState(
+            IEnumerable<IDataItem> dataItemList
+            )
         {
+            if (dataItemList == null)
+            {
+                throw new ArgumentNullException("dataItemList");
+            }
+
             var result = new List<IMLPState>();
 
             this.PushWeights();
 
             this.ClearAndPushHiddenLayers();
 
-            foreach (var d in dataSet)
+            foreach (var d in dataItemList)
             {
                 this.Propagate(d);
 

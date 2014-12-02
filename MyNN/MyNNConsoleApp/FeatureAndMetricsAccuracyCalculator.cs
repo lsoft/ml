@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.Data.DataLoader;
+using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
-using MyNN.Common.Data.TypicalDataProvider;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
@@ -98,15 +98,18 @@ namespace MyNNConsoleApp
 
             netResults = forwardPropagation.ComputeOutput(_validationData);
 
-            //преобразуем в вид, когда в DenseDataItem.Input - правильный ¬џ’ќƒ (обучаемый выход),
-            //а в DenseDataItem.Output - –≈јЋ№Ќџ… выход, а их разница - ошибка обучени€
+            //преобразуем в вид, когда в DataItem.Input - правильный ¬џ’ќƒ (обучаемый выход),
+            //а в DataItem.Output - –≈јЋ№Ќџ… выход, а их разница - ошибка обучени€
             var d = new List<IDataItem>(_validationData.Count + 1);
-            for (var i = 0; i < _validationData.Count; i++)
+            foreach (var pair in netResults.ZipEqualLength(_validationData))
             {
+                var netResult = pair.Value1;
+                var testItem = pair.Value2;
+
                 d.Add(
                     _dataItemFactory.CreateDataItem(
-                        _validationData[i].Output,
-                        netResults[i].NState));
+                        testItem.Output,
+                        netResult.NState));
             }
 
             var totalError = d.AsParallel().Sum(

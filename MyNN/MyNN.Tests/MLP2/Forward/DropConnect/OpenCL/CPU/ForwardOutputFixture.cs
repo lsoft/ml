@@ -11,10 +11,10 @@
     //    {
     //        var test = new ForwardOutputTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {0.75f},
     //                    new[] {1f})
     //            });
@@ -62,10 +62,10 @@
     //    {
     //        var test = new ForwardOutputTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {0.75f},
     //                    new[] {1f})
     //            });
@@ -113,10 +113,10 @@
     //    {
     //        var test = new ForwardOutputTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {0.75f},
     //                    new[] {1f})
     //            });
@@ -164,10 +164,10 @@
     //    {
     //        var test = new ForwardOutputTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
     //                    new[] {1f})
     //            });
@@ -214,10 +214,10 @@
     //    {
     //        var test = new ForwardOutputTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
     //                    new[] {1f})
     //            });
@@ -264,10 +264,10 @@
     //    {
     //        var test = new ForwardOutputTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
     //                    new[] {1f})
     //            });
@@ -314,10 +314,10 @@
     //    {
     //        var test = new ForwardOutputTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
     //                    new[] {1f})
     //            });
@@ -364,10 +364,10 @@
     //    {
     //        var test = new ForwardOutputTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
     //                    new[] {1f})
     //            });
@@ -414,10 +414,10 @@
     //    {
     //        var test = new ForwardOutputTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
     //                    new[] {1f})
     //            });

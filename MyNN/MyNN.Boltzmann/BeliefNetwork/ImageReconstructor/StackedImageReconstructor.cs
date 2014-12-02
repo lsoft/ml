@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using MyNN.Boltzmann.BeliefNetwork.ImageReconstructor.Converter;
 using MyNN.Boltzmann.BoltzmannMachines;
 
 namespace MyNN.Boltzmann.BeliefNetwork.ImageReconstructor
@@ -23,7 +24,9 @@ namespace MyNN.Boltzmann.BeliefNetwork.ImageReconstructor
             _converterList = new List<IDataArrayConverter>();
         }
 
-        public void AddConverter(IDataArrayConverter converter)
+        public void AddConverter(
+            IDataArrayConverter converter
+            )
         {
             if (converter == null)
             {
@@ -33,35 +36,37 @@ namespace MyNN.Boltzmann.BeliefNetwork.ImageReconstructor
             _converterList.Add(converter);
         }
 
-
-        public void AddPair(
-            int dataItemIndexIntoDataSet, 
-            float[] reconstructedData)
+        public Bitmap GetReconstructedBitmap(
+            int startDataItemIndexIntoDataSet,
+            List<float[]> reconstructedDataList
+            )
         {
-            if (reconstructedData == null)
+            if (reconstructedDataList == null)
             {
-                throw new ArgumentNullException("reconstructedData");
+                throw new ArgumentNullException("reconstructedDataList");
             }
 
-            var d = reconstructedData;
+            var processed = reconstructedDataList;
             for (var ci = _converterList.Count - 1; ci >= 0; ci--)
             {
-                var c = _converterList[ci];
+                var converter = _converterList[ci];
 
-                var cded = c.Convert(d);
+                var forOneIteration = new List<float[]>();
+                foreach (var di in processed)
+                {
+                    var dip = converter.Convert(di);
+                    forOneIteration.Add(dip);
+                }
 
-                d = cded;
+                processed = forOneIteration;
             }
 
-            _isolatedImageReconstructor.AddPair(
-                dataItemIndexIntoDataSet,
-                d);
-        }
 
-        public Bitmap GetReconstructedBitmap()
-        {
             return
-                _isolatedImageReconstructor.GetReconstructedBitmap();
+                _isolatedImageReconstructor.GetReconstructedBitmap(
+                    startDataItemIndexIntoDataSet,
+                    processed
+                    );
         }
 
         public int GetReconstructedImageCount()

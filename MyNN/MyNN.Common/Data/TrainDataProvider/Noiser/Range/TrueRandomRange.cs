@@ -8,18 +8,15 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
     public class TrueRandomRange : IRange
     {
         private readonly IRandomizer _randomizer;
-        private readonly int _dataLength;
         private readonly float _threshold;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="randomizer"></param>
-        /// <param name="dataLength"></param>
+        /// <param name="randomizer">Поставщик случайных чисел</param>
         /// <param name="threshold">Значение [0;1]. Чем выше значение - тем меньше шума применяется. 1 - не применять шум вообще, 0 - применять во всех ячеях (аналог FullRange)</param>
         public TrueRandomRange(
             IRandomizer randomizer,
-            int dataLength,
             float threshold
             )
         {
@@ -33,13 +30,12 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
             }
 
             _randomizer = randomizer;
-            _dataLength = dataLength;
             _threshold = threshold;
         }
 
-        public bool[] GetIndexMask()
+        public bool[] GetIndexMask(int dataLength)
         {
-            var result = new bool[_dataLength];
+            var result = new bool[dataLength];
             result.Fill(_randomizer.Next() > _threshold);
 
             return result;

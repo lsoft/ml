@@ -1,6 +1,7 @@
 ﻿using System;
-using MyNN.Common.Data.DataSetConverter;
-using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.DataSet;
+using MyNN.Common.NewData.DataSet.ItemLoader;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
 using OpenCvSharp;
@@ -37,10 +38,8 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
             int scaleFactor
             )
         {
-            var shuffler = new ShuffleDataSetConverter(_randomizer);
-            var shuffled = shuffler.Convert(data);
-
-            foreach (var di in shuffled)
+            var shuffler = new ArrayShuffler<IDataItem>(_randomizer, data);
+            foreach (var di in shuffler)
             {
                 var origBytes = di.Input.ConvertAll<float, byte>((a) => (byte)(a * 255));
 

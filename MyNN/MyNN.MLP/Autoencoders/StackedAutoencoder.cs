@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
 using MyNN.Common.Data.TrainDataProvider;
+using MyNN.Common.NewData.DataSet.ItemLoader;
+using MyNN.Common.NewData.DataSetProvider;
+using MyNN.Common.NewData.Normalizer;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
@@ -27,9 +32,10 @@ namespace MyNN.MLP.Autoencoders
         private readonly IDeviceChooser _deviceChooser;
         private readonly IMLPContainerHelper _mlpContainerHelper;
         private readonly IRandomizer _randomizer;
+        private readonly IDataSetFactory _dataSetFactory;
         private readonly IDataItemFactory _dataItemFactory;
         private readonly IMLPFactory _mlpFactory;
-        private readonly Func<int, IDataSet, ITrainDataProvider> _dataProviderFactory;
+        private readonly Func<int, IDataSet, IDataSetProvider> _dataProviderFactory;
         private readonly Func<int, IDataSet, IArtifactContainer, IValidation> _validationFactory;
         private readonly Func<int, ILearningAlgorithmConfig> _configFactory;
         private readonly Func<CLProvider, IBackpropagationFactory> _backpropagationFactoryFunc;
@@ -40,9 +46,10 @@ namespace MyNN.MLP.Autoencoders
             IDeviceChooser deviceChooser,
             IMLPContainerHelper mlpContainerHelper,
             IRandomizer randomizer,
+            IDataSetFactory dataSetFactory,
             IDataItemFactory dataItemFactory,
             IMLPFactory mlpFactory,
-            Func<int, IDataSet, ITrainDataProvider> dataProviderFactory,
+            Func<int, IDataSet, IDataSetProvider> dataProviderFactory,
             Func<int, IDataSet, IArtifactContainer, IValidation> validationFactory,
             Func<int, ILearningAlgorithmConfig> configFactory,
             Func<CLProvider, IBackpropagationFactory> backpropagationFactoryFunc,
@@ -60,6 +67,10 @@ namespace MyNN.MLP.Autoencoders
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
+            }
+            if (dataSetFactory == null)
+            {
+                throw new ArgumentNullException("dataSetFactory");
             }
             if (dataItemFactory == null)
             {
@@ -101,6 +112,7 @@ namespace MyNN.MLP.Autoencoders
             _deviceChooser = deviceChooser;
             _mlpContainerHelper = mlpContainerHelper;
             _randomizer = randomizer;
+            _dataSetFactory = dataSetFactory;
             _dataItemFactory = dataItemFactory;
             _mlpFactory = mlpFactory;
             _dataProviderFactory = dataProviderFactory;
@@ -133,13 +145,13 @@ namespace MyNN.MLP.Autoencoders
             {
                 throw new ArgumentNullException("trainData");
             }
-            if (trainData.IsAuencoderDataSet)
+            if (!trainData.IsAutoencoderDataSet)
             {
-                throw new InvalidOperationException("trainData.IsAutoencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
+                throw new InvalidOperationException("trainData.IsAutoencoderDataSet: Надо автоенкодер-датасеты.");
             }
-            if (validationData.IsAuencoderDataSet)
+            if (!validationData.IsAutoencoderDataSet)
             {
-                throw new InvalidOperationException("validationData.IsAutoencoderDataSet: Не надо автоенкодер-датасеты, сами сделаем");
+                throw new InvalidOperationException("validationData.IsAutoencoderDataSet: Надо автоенкодер-датасеты.");
             }
 
             var sdaeContainer = rootContainer.GetChildContainer(sdaeName);
@@ -233,19 +245,44 @@ namespace MyNN.MLP.Autoencoders
                             mlp);
 
                         var nextTrain = forward.ComputeOutput(processingTrainData);
-                        var newTrainData = new DataSet(
-                            trainData,
-                            nextTrain.ConvertAll(j => j.NState),
-                            _dataItemFactory);
-                        processingTrainData = newTrainData;
+
+                        var tdiList = new List<IDataItem>();
+                        foreach (var nt in nextTrain)
+                        {
+                            var di = _dataItemFactory.CreateDataItem(
+                                nt.NState,
+                                nt.NState
+                                );
+
+                            tdiList.Add(di);
+                        }
+
+                        processingTrainData = _dataSetFactory.CreateDataSet(
+                            new FromArrayDataItemLoader(
+                                tdiList,
+                                new DefaultNormalizer()),
+                            0
+                            );
 
                         //обновляем валидационные данные (от исходного множества, чтобы без применения возможных деформаций)
                         var nextValidation = forward.ComputeOutput(processingValidationData);
-                        var newValidationData = new DataSet(
-                            validationData,
-                            nextValidation.ConvertAll(j => j.NState),
-                            _dataItemFactory);
-                        processingValidationData = newValidationData;
+
+                        var vdiList = new List<IDataItem>();
+                        foreach (var nv in nextValidation)
+                        {
+                            var di = _dataItemFactory.CreateDataItem(
+                                nv.NState,
+                                nv.NState
+                                );
+
+                            vdiList.Add(di);
+                        }
+                        processingValidationData = _dataSetFactory.CreateDataSet(
+                            new FromArrayDataItemLoader(
+                                vdiList,
+                                new DefaultNormalizer()),
+                            0
+                            );
                     }
                 }
             }

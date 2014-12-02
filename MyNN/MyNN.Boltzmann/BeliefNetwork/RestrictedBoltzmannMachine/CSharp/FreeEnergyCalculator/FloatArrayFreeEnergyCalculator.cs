@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MyNN.Boltzmann.BeliefNetwork.FreeEnergyCalculator;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
 
 namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator
@@ -45,15 +45,25 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
 
             var freeEnergyArray = new double[data.Count];
 
-            Parallel.For(0, data.Count, vii =>
-            //for(var vii = 0; vii < data.Count; vii++)
+            var parallelOptions = new ParallelOptions
             {
-                var vd = data[vii];
+                MaxDegreeOfParallelism = Environment.ProcessorCount
+            };
+
+            Parallel.ForEach(data, parallelOptions, (vd, pls, vii) =>
+            {
                 var freeEnergy = CalculateForDataItem(weights, vd);
 
                 freeEnergyArray[vii] = freeEnergy;
-            }
-            ); //Parallel.For
+            });
+            //Parallel.For(0, data.Count, vii =>
+            //{
+            //    var vd = data.Data[vii];
+            //    var freeEnergy = CalculateForDataItem(weights, vd);
+
+            //    freeEnergyArray[vii] = freeEnergy;
+            //}
+            //); //Parallel.For
 
             var sumFreeEnergy = freeEnergyArray.Sum();
 

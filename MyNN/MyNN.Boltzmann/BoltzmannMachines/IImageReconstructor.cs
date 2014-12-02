@@ -1,14 +1,14 @@
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace MyNN.Boltzmann.BoltzmannMachines
 {
     public interface IImageReconstructor
     {
-        void AddPair(
-            int dataItemIndexIntoDataSet,
-            float[] reconstructedData);
-        
-        Bitmap GetReconstructedBitmap();
+        Bitmap GetReconstructedBitmap(
+            int startDataItemIndexIntoDataSet,
+            List<float[]> reconstructedData
+            );
         
         int GetReconstructedImageCount();
     }

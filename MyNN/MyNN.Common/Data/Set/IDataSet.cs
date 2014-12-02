@@ -3,14 +3,14 @@ using MyNN.Common.Data.Set.Item;
 
 namespace MyNN.Common.Data.Set
 {
-    public interface IDataSet : IEnumerable<IDataItem>
+    public interface IDataSet
     {
         List<IDataItem> Data
         {
             get;
         }
 
-        bool IsAuencoderDataSet
+        bool IsAutoencoderDataSet
         {
             get;
         }
@@ -24,13 +24,6 @@ namespace MyNN.Common.Data.Set
         {
             get;
         }
-
-        IDataItem this[int i]
-        {
-            get;
-        }
-
-        List<float[]> GetInputPart();
 
         /// <summary>
         /// Линейная нормализация [0;1]

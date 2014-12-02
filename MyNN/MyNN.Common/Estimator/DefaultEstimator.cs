@@ -11,7 +11,6 @@ namespace MyNN.Common.Estimator
     {
         private readonly int _total;
         
-        private int _value;
         private DateTime _startTime;
         private DateTime _time;
 
@@ -27,7 +26,6 @@ namespace MyNN.Common.Estimator
 
             _startTime = now;
 
-            _value = 0;
             _time = now;
         }
 
@@ -40,7 +38,6 @@ namespace MyNN.Common.Estimator
 
             var now = DateTime.Now;
 
-            _value = currentValue;
             _time = now;
 
             var taken = _time - _startTime;

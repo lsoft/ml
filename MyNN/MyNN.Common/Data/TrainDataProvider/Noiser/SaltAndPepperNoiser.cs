@@ -62,9 +62,9 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
 
             var r = new float[data.Length];
 
-            var range = _range ?? new FullRange(data.Length);
+            var range = _range ?? new FullRange();
 
-            var mask = range.GetIndexMask();
+            var mask = range.GetIndexMask(data.Length);
 
             for (var cc = 0; cc < data.Length; cc++)
             {

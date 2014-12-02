@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.AccuracyRecord;
@@ -38,7 +40,7 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
             _validationData = validationData;
             _domainCountThreshold = domainCountThreshold;
 
-            _outputLength = validationData.Data[0].OutputLength;
+            _outputLength = validationData.OutputLength;
         }
 
         public void CalculateAccuracy(
@@ -63,10 +65,10 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
 
             var totalError = 0f;
 
-            var iterationIndex = 0;
-            foreach (var netResult in netResults)
+            foreach (var pair in netResults.ZipEqualLength(_validationData))
             {
-                var testItem = _validationData[iterationIndex++];
+                var netResult = pair.Value1;
+                var testItem = pair.Value2;
 
                 #region суммируем ошибку
 

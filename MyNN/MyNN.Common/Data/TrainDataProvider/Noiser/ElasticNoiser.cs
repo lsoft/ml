@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
 using OpenCvSharp;
@@ -464,11 +464,11 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
         public class ElasticNoiserMNISTViewer
         {
             public void DoView(
-                IDataSet data)
+                IDataSet dataset)
             {
-                if (data == null)
+                if (dataset == null)
                 {
-                    throw new ArgumentNullException("data");
+                    throw new ArgumentNullException("dataset");
                 }
 
                 var noiser = new ElasticNoiser(
@@ -479,9 +479,9 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser
                     true
                     );
 
-                while (true)
+                foreach (var d in dataset)
                 {
-                    var origFloat = noiser.ApplyNoise(data[0].Input);
+                    var origFloat = noiser.ApplyNoise(d.Input);
                     var origByte = origFloat.ConvertAll<float, byte>((a) => (byte)(a * 255));
 
                     unsafe

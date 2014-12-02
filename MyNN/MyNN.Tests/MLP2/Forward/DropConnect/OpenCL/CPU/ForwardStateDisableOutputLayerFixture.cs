@@ -58,10 +58,10 @@
     //    {
     //        var test = new ForwardStateTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {0.75f},
     //                    new[] {1f})
     //            });
@@ -130,10 +130,10 @@
     //    {
     //        var test = new ForwardStateTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {0.75f},
     //                    new[] {1f})
     //            });
@@ -202,10 +202,10 @@
     //    {
     //        var test = new ForwardStateTester();
 
-    //        var dataset = new DataSet(
+    //        var dataset = new TestDataSet(
     //            new List<IDataItem>
     //            {
-    //                new DenseDataItem(
+    //                new DataItem(
     //                    new[] {0.75f},
     //                    new[] {1f})
     //            });

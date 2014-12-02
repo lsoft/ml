@@ -207,7 +207,7 @@ namespace MyNN.MLP.Structure.Factory
 
             #region создаем слои
 
-            ConsoleAmbientContext.Console.WriteLine("Load weights from DBN...");
+            ConsoleAmbientContext.Console.WriteLine("LoadNext weights from DBN...");
 
             var layerList = new ILayer[activationFunction.Length];
 
@@ -237,7 +237,7 @@ namespace MyNN.MLP.Structure.Factory
                 layerList[layerIndex] = layer;
             }
 
-            ConsoleAmbientContext.Console.WriteLine("Load weights done");
+            ConsoleAmbientContext.Console.WriteLine("LoadNext weights done");
 
             #endregion
 
@@ -285,7 +285,7 @@ namespace MyNN.MLP.Structure.Factory
 
             #region создаем слои
 
-            ConsoleAmbientContext.Console.WriteLine("Load weights from DBN...");
+            ConsoleAmbientContext.Console.WriteLine("LoadNext weights from DBN...");
 
             var layerList = new ILayer[activationFunction.Length];
 
@@ -336,7 +336,7 @@ namespace MyNN.MLP.Structure.Factory
                 }
             }
 
-            ConsoleAmbientContext.Console.WriteLine("Load weights done");
+            ConsoleAmbientContext.Console.WriteLine("LoadNext weights done");
 
             #endregion
 

@@ -6,7 +6,38 @@ namespace MyNN.Common.Other
 {
     public static class SplitHelper
     {
-        public static List<List<T>> Split<T>(this IEnumerable<T> list, int splitCount)
+        public static IEnumerable<List<T>> LazySplit<T>(
+            this IEnumerable<T> list,
+            int splitCount
+            )
+        {
+            if (splitCount <= 0)
+            {
+                throw new ArgumentException("splitCount <= 0");
+            }
+
+            var result = new List<T>();
+
+            var currentIndex = 0;
+            foreach (var i in list)
+            {
+                result.Add(i);
+
+                if (++currentIndex >= splitCount)
+                {
+                    yield return
+                        result;
+
+                    result = new List<T>();
+                    currentIndex = 0;
+                }
+            }
+        }
+
+        public static List<List<T>> CompleteSplit<T>(
+            this IEnumerable<T> list,
+            int splitCount
+            )
         {
             if (splitCount <= 0)
             {

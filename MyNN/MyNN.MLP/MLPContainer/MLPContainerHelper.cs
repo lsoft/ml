@@ -23,8 +23,6 @@ namespace MyNN.MLP.MLPContainer
 
             var result = artifactContainer.LoadSerialized<Structure.MLP>(mlpName);
 
-            //var result = _serializationHelper.LoadFromFile<MyNN.MLP2.Structure.MLP>(path);
-
             return result;
         }
 
@@ -51,15 +49,10 @@ namespace MyNN.MLP.MLPContainer
             artifactContainer.SaveSerialized(mlp, mlp.Name);
             
             //сохраняем файл с результатами
-            artifactContainer.SaveSerialized(accuracyRecord.GetTextResults(), "_result.txt");
-
-            ////сохраняем сеть
-            //var mlpFilePath = Path.Combine(_rootFolder, mlp.Name);
-            //_serializationHelper.SaveToFile(mlp, mlpFilePath);
-
-            ////сохраняем файл с результатами
-            //var txtFilePath = Path.Combine(_rootFolder, "_result.txt");
-            //File.WriteAllText(txtFilePath, accuracyRecord.GetTextResults());
+            artifactContainer.SaveString(
+                accuracyRecord.GetTextResults(),
+                "_result.txt"
+                );
         }
 
     }

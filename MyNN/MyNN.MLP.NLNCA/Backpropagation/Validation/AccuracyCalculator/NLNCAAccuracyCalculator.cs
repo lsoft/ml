@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.MLP.AccuracyRecord;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.ForwardPropagation;

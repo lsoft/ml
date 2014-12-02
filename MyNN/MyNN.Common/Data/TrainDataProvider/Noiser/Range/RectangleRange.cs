@@ -16,7 +16,6 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
         private readonly rint _rectWidth;
         private readonly rint _rectHeight;
         private readonly bool _needInvert;
-        private readonly int _dataLength;
 
         /// <summary>
         /// Конструктор
@@ -71,13 +70,16 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
             _rectWidth = rectWidth;
             _rectHeight = rectHeight;
             _needInvert = needInvert;
-
-            _dataLength = imageWidth * imageHeight;
         }
 
-        public bool[] GetIndexMask()
+        public bool[] GetIndexMask(int dataLength)
         {
-            var result = new bool[_dataLength];
+            if (dataLength != _imageWidth*_imageHeight)
+            {
+                throw new ArgumentException("dataLength != _imageWidth*_imageHeight");
+            }
+
+            var result = new bool[dataLength];
 
             var rectWidth = _rectWidth.Sample();
             var rectHeight = _rectHeight.Sample();

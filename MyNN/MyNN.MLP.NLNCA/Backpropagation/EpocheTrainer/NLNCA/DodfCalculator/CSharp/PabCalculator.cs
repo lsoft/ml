@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
 
 namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSharp

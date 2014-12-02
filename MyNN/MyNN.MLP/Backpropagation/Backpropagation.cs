@@ -2,6 +2,7 @@
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data.TrainDataProvider;
+using MyNN.Common.NewData.DataSetProvider;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.AccuracyRecord;
@@ -10,6 +11,7 @@ using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
+using OpenCL.Net;
 
 namespace MyNN.MLP.Backpropagation
 {
@@ -57,11 +59,11 @@ namespace MyNN.MLP.Backpropagation
             _config = config;
         }
 
-        public IAccuracyRecord Train(ITrainDataProvider trainDataProvider)
+        public IAccuracyRecord Train(IDataSetProvider dataSetProvider)
         {
-            if (trainDataProvider == null)
+            if (dataSetProvider == null)
             {
-                throw new ArgumentNullException("trainDataProvider");
+                throw new ArgumentNullException("dataSetProvider");
             }
 
             ConsoleAmbientContext.Console.WriteLine(
@@ -104,7 +106,17 @@ namespace MyNN.MLP.Backpropagation
             ConsoleAmbientContext.Console.WriteLine("Predeformation...");
 
             //запрашиваем данные (уже перемешанные)
-            var trainData = trainDataProvider.GetDataSet(epochNumber);
+            var trainData = dataSetProvider.GetDataSet(epochNumber);
+
+            if (trainData.OutputLength != _mlp.Layers.Last().NonBiasNeuronCount)
+            {
+                throw new Exception(
+                    string.Format(
+                        "На последнем слое сети {1} нейронов, а у датасета OutputLength = {0}",
+                        trainData.OutputLength,
+                        _mlp.Layers.Last().NonBiasNeuronCount));
+            }
+
 
             ConsoleAmbientContext.Console.WriteLine("Start training...");
 
@@ -186,7 +198,7 @@ namespace MyNN.MLP.Backpropagation
                 var deformStart = DateTime.Now;
 
                 //получаем данные для следующей эпохи (уже перемешанные)
-                trainData = trainDataProvider.GetDataSet(epochNumber);
+                trainData = dataSetProvider.GetDataSet(epochNumber);
 
                 //сколько времени заняло искажение данных
                 var dtFinish = DateTime.Now;

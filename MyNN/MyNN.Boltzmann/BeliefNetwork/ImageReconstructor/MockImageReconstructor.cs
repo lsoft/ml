@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using MyNN.Boltzmann.BoltzmannMachines;
 
@@ -6,15 +8,17 @@ namespace MyNN.Boltzmann.BeliefNetwork.ImageReconstructor
 {
     public class MockImageReconstructor : IImageReconstructor
     {
-        public void AddPair(
-            int dataItemIndexIntoDataSet, 
-            float[] reconstructedData)
-        {
-            //nothing to do
-        }
 
-        public Bitmap GetReconstructedBitmap()
+        public Bitmap GetReconstructedBitmap(
+            int startDataItemIndexIntoDataSet,
+            List<float[]> reconstructedDataList
+            )
         {
+            if (reconstructedDataList == null)
+            {
+                throw new ArgumentNullException("reconstructedDataList");
+            }
+
             var result = new Bitmap(300, 100);
 
             using (var g = Graphics.FromImage(result))

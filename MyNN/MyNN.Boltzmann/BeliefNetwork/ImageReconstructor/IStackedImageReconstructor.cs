@@ -1,4 +1,5 @@
-﻿using MyNN.Boltzmann.BoltzmannMachines;
+﻿using MyNN.Boltzmann.BeliefNetwork.ImageReconstructor.Converter;
+using MyNN.Boltzmann.BoltzmannMachines;
 
 namespace MyNN.Boltzmann.BeliefNetwork.ImageReconstructor
 {

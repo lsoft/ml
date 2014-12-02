@@ -42,16 +42,16 @@
   <ItemGroup>
     <Compile Include="BeliefNetwork\Accuracy\AccuracyController.cs" />
     <Compile Include="BeliefNetwork\Accuracy\IAccuracyController.cs" />
-    <Compile Include="BeliefNetwork\DBN.cs" />
+    <Compile Include="BeliefNetwork\DeepBeliefNetwork\DBN.cs" />
     <Compile Include="BeliefNetwork\FeatureExtractor\MockFeatureExtractor.cs" />
     <Compile Include="BeliefNetwork\FreeEnergyCalculator\IFreeEnergyCalculator.cs" />
     <Compile Include="BeliefNetwork\FreeEnergyCalculator\MockFreeEnergyCalculator.cs" />
-    <Compile Include="BeliefNetwork\IFeatureExtractorFactory.cs" />
-    <Compile Include="BeliefNetwork\ImageReconstructor\IDataArrayConverter.cs" />
+    <Compile Include="BeliefNetwork\DeepBeliefNetwork\FeatureFactory\IFeatureExtractorFactory.cs" />
+    <Compile Include="BeliefNetwork\ImageReconstructor\Converter\IDataArrayConverter.cs" />
     <Compile Include="BeliefNetwork\ImageReconstructor\IStackedImageReconstructor.cs" />
     <Compile Include="BeliefNetwork\ImageReconstructor\MockImageReconstructor.cs" />
     <Compile Include="BeliefNetwork\ImageReconstructor\StackedImageReconstructor.cs" />
-    <Compile Include="BeliefNetwork\IRBMFactory.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Factory\IRBMFactory.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Algorithm\IAlgorithm.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Algorithm\IAlgorithmFactory.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Container\IContainer.cs" />
@@ -68,7 +68,13 @@
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IsolatedFeatureExtractor.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Reconstructor\IsolatedImageReconstructor.cs" />
     <Compile Include="BoltzmannMachines\IImageReconstructor.cs" />
+    <Compile Include="BeliefNetwork\DeepBeliefNetwork\Converter\DBNDataSetConverter.cs" />
+    <Compile Include="BeliefNetwork\DeepBeliefNetwork\Converter\IDataSetConverter.cs" />
+    <Compile Include="BeliefNetwork\ImageReconstructor\Converter\ImageReconstructorDataConverter.cs" />
+    <Compile Include="BeliefNetwork\DeepBeliefNetwork\FeatureFactory\IsolatedFeatureExtractorFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Factory\RBMBBCDFactory.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\Factory\RBMLNRELUCDFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyNN.Common\MyNN.Common.csproj">

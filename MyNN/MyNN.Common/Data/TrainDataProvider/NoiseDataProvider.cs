@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using MyNN.Common.Data.Set;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Data.TrainDataProvider.Noiser;
 using MyNN.Common.Other;
 
@@ -69,7 +68,7 @@ namespace MyNN.Common.Data.TrainDataProvider
         {
             var result = new List<IDataItem>();
 
-            foreach (var d in this._trainData)
+            foreach (var d in this._trainData.Data)
             {
                 var noiser = _noiser ?? _noiserProvider(epocheNumber);
 

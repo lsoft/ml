@@ -4,7 +4,7 @@ using MyNN.Boltzmann.BeliefNetwork.FreeEnergyCalculator;
 using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.Container;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
 

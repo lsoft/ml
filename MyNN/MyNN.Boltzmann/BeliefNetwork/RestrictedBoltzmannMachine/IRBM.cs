@@ -1,15 +1,16 @@
 using MyNN.Boltzmann.BeliefNetwork.Accuracy;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.LearningRateController;
+using MyNN.Common.NewData.DataSetProvider;
 
 namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine
 {
     public interface IRBM
     {
         void Train(
-            ITrainDataProvider trainDataProvider,
+            IDataSetProvider trainDataProvider,
             IDataSet validationData,
             ILearningRate learningRateController,
             IAccuracyController accuracyController,

@@ -3,6 +3,7 @@
     public interface IRange
     {
         bool[] GetIndexMask(
+            int dataLength
             );
 
     }

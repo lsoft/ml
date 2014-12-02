@@ -45,6 +45,11 @@ namespace MyNN.Common.ArtifactContainer
                 _serializationHelper.LoadFromFile<T>(resourceFilePath);
         }
 
+        public void SaveString(string message, string resourceName)
+        {
+            //nothing to do
+        }
+
         public void SaveSerialized<T>(T obj, string resourceName)
         {
             //nothing to do

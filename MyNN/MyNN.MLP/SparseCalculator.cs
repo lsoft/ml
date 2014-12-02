@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure;

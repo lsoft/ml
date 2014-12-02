@@ -8,27 +8,27 @@ namespace MyNN.MLP.Backpropagation.Metrics
     public class HalfSquaredEuclidianDistance : IMetrics
     {
         public float Calculate(
-            float[] v1,
-            float[] v2
+            float[] desiredValues,
+            float[] predictedValues
             )
         {
-            if (v1 == null)
+            if (desiredValues == null)
             {
-                throw new ArgumentNullException("v1");
+                throw new ArgumentNullException("desiredValues");
             }
-            if (v2 == null)
+            if (predictedValues == null)
             {
-                throw new ArgumentNullException("v2");
+                throw new ArgumentNullException("predictedValues");
             }
-            if (v1.Length != v2.Length)
+            if (desiredValues.Length != predictedValues.Length)
             {
                 throw new InvalidOperationException("v1.Length != v2.Length");
             }
 
             var d = 0.0f;
-            for (var i = 0; i < v1.Length; i++)
+            for (var i = 0; i < desiredValues.Length; i++)
             {
-                var diff = v1[i] - v2[i];
+                var diff = desiredValues[i] - predictedValues[i];
                 d += diff * diff;
             }
 
@@ -36,30 +36,30 @@ namespace MyNN.MLP.Backpropagation.Metrics
         }
 
         public float CalculatePartialDerivativeByV2Index(
-            float[] v1,
-            float[] v2,
+            float[] desiredValues,
+            float[] predictedValues,
             int v2Index
             )
         {
-            if (v1 == null)
+            if (desiredValues == null)
             {
-                throw new ArgumentNullException("v1");
+                throw new ArgumentNullException("desiredValues");
             }
-            if (v2 == null)
+            if (predictedValues == null)
             {
-                throw new ArgumentNullException("v2");
+                throw new ArgumentNullException("predictedValues");
             }
-            if (v1.Length != v2.Length)
+            if (desiredValues.Length != predictedValues.Length)
             {
                 throw new InvalidOperationException("v1.Length != v2.Length");
             }
-            if (v2Index >= v2.Length)
+            if (v2Index >= predictedValues.Length)
             {
                 throw new ArgumentException("v2Index >= v2.Length");
             }
 
             return
-                v2[v2Index] - v1[v2Index];
+                predictedValues[v2Index] - desiredValues[v2Index];
         }
 
         public string GetOpenCLPartialDerivative(
@@ -75,9 +75,9 @@ namespace MyNN.MLP.Backpropagation.Metrics
             }
 
             const string methodBody = @"
-inline float{v} {METHOD_NAME}({MODIFIER} float{v}* v1, {MODIFIER} float{v}* v2, int v2Index)
+inline float{v} {METHOD_NAME}({MODIFIER} float{v}* desiredValues, {MODIFIER} float{v}* predictedValues, int v2Index)
 {
-    float{v} result = v2[v2Index] - v1[v2Index];
+    float{v} result = predictedValues[v2Index] - desiredValues[v2Index];
 
     return result;
 }

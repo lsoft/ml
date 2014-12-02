@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using MyNN.Common.Data.Set;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 
 namespace MyNN.Common.Data.DataSetConverter
 {
@@ -28,10 +28,21 @@ namespace MyNN.Common.Data.DataSetConverter
                 throw new ArgumentNullException("beforeTransformation");
             }
 
-            var result =
-                new DataSet(
-                    beforeTransformation.Data.ConvertAll(j => _dataItemFactory.CreateDataItem(j.Input, j.Input))
-                    );
+            var list = new List<IDataItem>();
+
+            foreach (var di in beforeTransformation.Data)
+            {
+                var newdi = _dataItemFactory.CreateDataItem(di.Input, di.Input);
+                
+                list.Add(newdi);
+            }
+
+            var result = new DataSet(list);
+
+            //var result =
+            //    new DataSet(
+            //        beforeTransformation.Data.ConvertAll(j => _dataItemFactory.CreateDataItem(j.Input, j.Input))
+            //        );
 
             return result;
         }

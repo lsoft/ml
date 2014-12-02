@@ -44,8 +44,9 @@
     <Compile Include="AccuracyRecord\IAccuracyRecord.cs" />
     <Compile Include="AccuracyRecord\MetricAccuracyRecord.cs" />
     <Compile Include="Autoencoders\IStackedAutoencoder.cs" />
-    <Compile Include="Autoencoders\StackedAutoencoder.cs" />
-    <Compile Include="Autoencoders\StackedNLNCAAutoencoder.cs" />
+    <Compile Include="Autoencoders\StackedAutoencoder.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="BackpropagationFactory\IBackpropagationFactory.cs" />
     <Compile Include="Backpropagation\Backpropagation.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\IEpocheTrainer.cs" />
@@ -65,6 +66,9 @@
     <Compile Include="Backpropagation\Validation\Validation.cs" />
     <Compile Include="DBNInfo\FileDBNInformation.cs" />
     <Compile Include="DBNInfo\IDBNInformation.cs" />
+    <Compile Include="DBNInfo\WeightLoader\IWeightLoader.cs" />
+    <Compile Include="DBNInfo\WeightLoader\RBMAutoencoderWeightLoader.cs" />
+    <Compile Include="DBNInfo\WeightLoader\RBMWeightLoader.cs" />
     <Compile Include="FileSystemFeatureVisualization.cs" />
     <Compile Include="ForwardPropagationFactory\ForwardPropagationFactory.cs" />
     <Compile Include="ForwardPropagationFactory\IForwardPropagationFactory.cs" />
@@ -91,9 +95,6 @@
     <Compile Include="Structure\IMLPState.cs" />
     <Compile Include="Structure\Layer\Factory\ILayerFactory.cs" />
     <Compile Include="Structure\Layer\Factory\LayerFactory.cs" />
-    <Compile Include="DBNInfo\WeightLoader\IWeightLoader.cs" />
-    <Compile Include="DBNInfo\WeightLoader\RBMAutoencoderWeightLoader.cs" />
-    <Compile Include="DBNInfo\WeightLoader\RBMWeightLoader.cs" />
     <Compile Include="Structure\Layer\ILayer.cs" />
     <Compile Include="Structure\Layer\ILayerConfiguration.cs" />
     <Compile Include="Structure\Layer\ILayerState.cs" />

@@ -1,6 +1,7 @@
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
+using MyNN.Common.NewData.DataSet;
 using MyNN.MLP.ForwardPropagation;
 
 namespace MyNN.MLP.Backpropagation.EpocheTrainer

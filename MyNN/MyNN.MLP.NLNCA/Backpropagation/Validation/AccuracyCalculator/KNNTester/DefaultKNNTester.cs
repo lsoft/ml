@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.OutputConsole;
 using MyNN.KNN;
 using MyNN.MLP.ForwardPropagation;
@@ -55,21 +55,35 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.AccuracyCalculator.KNNTester
             var trainOutputList = forwardPropagation.ComputeOutput(_trainData);
 
             var forknn = new List<IDataItem>();
-            for (var cc = 0; cc < trainOutputList.Count; cc++)
-            {
-                forknn.Add(
-                    new DenseDataItem(
-                        trainOutputList[cc].Take(takeIntoAccount).ToArray(),
-                        _trainData[cc].Output));
+            //for (var cc = 0; cc < trainOutputList.Count; cc++)
+            //{
+            //    forknn.Add(
+            //        new DataItem(
+            //            trainOutputList[cc].Take(takeIntoAccount).ToArray(),
+            //            _trainData.Data[cc].Output));
 
-                //пускай здесь остается принудительно DenseDataItem, так как вряд ли
+            //    //пускай здесь остается принудительно DataItem, так как вряд ли
+            //    //будет реалистичный сценарий, когда будет эффективнее другой тип
+            //    //датаитема в этом месте
+            //}
+            foreach (var pair in trainOutputList.ZipEqualLength(_trainData))
+            {
+                var trainOutputItem = pair.Value1;
+                var trainItem = pair.Value2;
+
+                forknn.Add(
+                    new DataItem(
+                        trainOutputItem.Take(takeIntoAccount).ToArray(),
+                        trainItem.Output));
+
+                //пускай здесь остается принудительно DataItem, так как вряд ли
                 //будет реалистичный сценарий, когда будет эффективнее другой тип
                 //датаитема в этом месте
             }
 
             //инициализируем knn
             //var knn = new KNearest(new DataSet(forknn));
-            var knn = _kNearestFactory.CreateKNearest(new DataSet(forknn));
+            var knn = _kNearestFactory.CreateKNearest(forknn);
 
             //просчитываем валидационное множество
             var validationList = forwardPropagation.ComputeOutput(_validationData);
@@ -77,13 +91,29 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.AccuracyCalculator.KNNTester
             //проверяем валидационное множество
             correct = 0;
             total = 0;
-            for (var index = 0; index < _validationData.Count; index++)
+            //for (var index = 0; index < _validationData.Count; index++)
+            //{
+            //    var classindex = knn.Classify(
+            //        validationList[index].Take(takeIntoAccount).ToArray(),
+            //        _neighborCount);
+
+            //    if (classindex == _validationData.Data[index].OutputIndex)
+            //    {
+            //        correct++;
+            //    }
+
+            //    total++;
+            //}
+            foreach (var pair in validationList.ZipEqualLength(_validationData))
             {
+                var vli = pair.Value1;
+                var vi = pair.Value2;
+
                 var classindex = knn.Classify(
-                    validationList[index].Take(takeIntoAccount).ToArray(),
+                    vli.Take(takeIntoAccount).ToArray(),
                     _neighborCount);
 
-                if (classindex == _validationData[index].OutputIndex)
+                if (classindex == vi.OutputIndex)
                 {
                     correct++;
                 }

@@ -1,6 +1,6 @@
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 
 namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.Container
 {

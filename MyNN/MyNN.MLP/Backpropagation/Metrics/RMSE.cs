@@ -9,63 +9,63 @@ namespace MyNN.MLP.Backpropagation.Metrics
     public class RMSE : IMetrics
     {
         public float Calculate(
-            float[] v1,
-            float[] v2
+            float[] desiredValues,
+            float[] predictedValues
             )
         {
-            if (v1 == null)
+            if (desiredValues == null)
             {
-                throw new ArgumentNullException("v1");
+                throw new ArgumentNullException("desiredValues");
             }
-            if (v2 == null)
+            if (predictedValues == null)
             {
-                throw new ArgumentNullException("v2");
+                throw new ArgumentNullException("predictedValues");
             }
-            if (v1.Length != v2.Length)
+            if (desiredValues.Length != predictedValues.Length)
             {
                 throw new InvalidOperationException("v1.Length != v2.Length");
             }
 
             var d = 0.0f;
-            for (var i = 0; i < v1.Length; i++)
+            for (var i = 0; i < desiredValues.Length; i++)
             {
-                d += (v1[i] - v2[i]) * (v1[i] - v2[i]);
+                d += (desiredValues[i] - predictedValues[i]) * (desiredValues[i] - predictedValues[i]);
             }
 
             return
-                (float) Math.Sqrt(d/v1.Length);
+                (float) Math.Sqrt(d/desiredValues.Length);
         }
 
         //производная взята отсюда http://www.wolframalpha.com/input/?i=d%28sqrt%281%2Fn*%28%28t1+-+y1%29%5E2+%2B+%28t2+-+y2%29%5E2+%2B+%28t3+-+y3%29%5E2%29%29%29%2Fd%28y2%29&a=*C.d-_*DerivativesWord-
         //только со знаком минус
         public float CalculatePartialDerivativeByV2Index(
-            float[] v1,
-            float[] v2,
+            float[] desiredValues,
+            float[] predictedValues,
             int v2Index
             )
         {
-            if (v1 == null)
+            if (desiredValues == null)
             {
-                throw new ArgumentNullException("v1");
+                throw new ArgumentNullException("desiredValues");
             }
-            if (v2 == null)
+            if (predictedValues == null)
             {
-                throw new ArgumentNullException("v2");
+                throw new ArgumentNullException("predictedValues");
             }
-            if (v1.Length != v2.Length)
+            if (desiredValues.Length != predictedValues.Length)
             {
                 throw new InvalidOperationException("v1.Length != v2.Length");
             }
-            if (v2Index >= v2.Length)
+            if (v2Index >= predictedValues.Length)
             {
                 throw new ArgumentException("v2Index >= v2.Length");
             }
 
             var acc = new KahanAlgorithm.Accumulator();
 
-            for (var cc = 0; cc < v1.Length; cc++)
+            for (var cc = 0; cc < desiredValues.Length; cc++)
             {
-                var diff = v1[cc] - v2[cc];
+                var diff = desiredValues[cc] - predictedValues[cc];
                 var sqDiff = diff*diff;
                 KahanAlgorithm.AddElement(
                     ref acc,
@@ -74,7 +74,7 @@ namespace MyNN.MLP.Backpropagation.Metrics
             }
 
             var rSum = Math.Sqrt(acc.Sum);
-            var pDiff = v2[v2Index] - v1[v2Index];
+            var pDiff = predictedValues[v2Index] - desiredValues[v2Index];
 
             var result = pDiff / rSum;
 

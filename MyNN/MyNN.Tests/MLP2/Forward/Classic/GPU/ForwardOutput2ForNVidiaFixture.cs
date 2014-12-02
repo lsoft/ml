@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
 using MyNN.MLP.ForwardPropagation;
@@ -74,10 +73,10 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
         {
             var test = new ForwardOutputTester();
 
-            var dataset = new DataSet(
+            var dataset = new TestDataSet(
                 new List<IDataItem>
                 {
-                    new DenseDataItem(
+                    new DataItem(
                         new[] {0.75f},
                         new[] {1f})
                 });
@@ -128,10 +127,10 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
         {
             var test = new ForwardOutputTester();
 
-            var dataset = new DataSet(
+            var dataset = new TestDataSet(
                 new List<IDataItem>
                 {
-                    new DenseDataItem(
+                    new DataItem(
                         new[] {2f},
                         new[] {1f})
                 });
@@ -174,10 +173,10 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
         {
             var test = new ForwardOutputTester();
 
-            var dataset = new DataSet(
+            var dataset = new TestDataSet(
                 new List<IDataItem>
                 {
-                    new DenseDataItem(
+                    new DataItem(
                         new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
                         new[] {1f})
                 });
@@ -226,10 +225,10 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
         {
             var test = new ForwardOutputTester();
 
-            var dataset = new DataSet(
+            var dataset = new TestDataSet(
                 new List<IDataItem>
                 {
-                    new DenseDataItem(
+                    new DataItem(
                         new[] {-0.2f, -0.1f, 0.1f, 0.3f, 0.8f},
                         new[] {1f})
                 });

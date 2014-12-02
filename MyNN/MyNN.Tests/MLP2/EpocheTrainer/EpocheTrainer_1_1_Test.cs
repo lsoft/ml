@@ -1,9 +1,10 @@
 using System;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.LearningRateController;
+using MyNN.Common.NewData.DataSetProvider;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.MLP.Backpropagation;
@@ -22,7 +23,7 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
     internal class EpocheTrainer_1_1_Test
     {
         public void ExecuteTest(
-            DataSet dataset,
+            IDataSet dataset,
             float weight0,
             float weight1,
             Func<IFunction> functionFactory)
@@ -95,7 +96,11 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                         validation,
                         config);
 
-                alg.Train(new NoDeformationTrainDataProvider(dataset));;
+                var dataSetProvider = new TestDataSetProvider(
+                    dataset
+                    );
+
+                alg.Train(dataSetProvider);
             }
 
         }

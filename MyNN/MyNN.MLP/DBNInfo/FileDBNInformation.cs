@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MyNN.Boltzmann.BeliefNetwork;
+using MyNN.Boltzmann.BeliefNetwork.DeepBeliefNetwork;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.DBNInfo.WeightLoader;

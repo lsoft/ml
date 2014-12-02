@@ -7,19 +7,19 @@ namespace MyNN.MLP.Backpropagation.Metrics
     [Serializable]
     public class Loglikelihood : IMetrics
     {
-        public float Calculate(float[] v1, float[] v2)
+        public float Calculate(float[] desiredValues, float[] predictedValues)
         {
-            if (v1 == null)
+            if (desiredValues == null)
             {
-                throw new ArgumentNullException("v1");
+                throw new ArgumentNullException("desiredValues");
             }
-            if (v2 == null)
+            if (predictedValues == null)
             {
-                throw new ArgumentNullException("v2");
+                throw new ArgumentNullException("predictedValues");
             }
-            if (v1.Length != v2.Length)
+            if (desiredValues.Length != predictedValues.Length)
             {
-                throw new ArgumentException("v1.Length != v2.Length");
+                throw new ArgumentException("desiredValues.Length != predictedValues.Length");
             }
 
             //!!! не усредняется значение по длине векторов!
@@ -27,39 +27,39 @@ namespace MyNN.MLP.Backpropagation.Metrics
             //!!! использовать Kahan
 
             var d = 0.0f;
-            for (var i = 0; i < v1.Length; i++)
+            for (var i = 0; i < desiredValues.Length; i++)
             {
-                d += (float)(v1[i] * Math.Log(v2[i]) + (1 - v1[i]) * Math.Log(1 - v2[i]));
+                d += (float)(desiredValues[i] * Math.Log(predictedValues[i]) + (1 - desiredValues[i]) * Math.Log(1 - predictedValues[i]));
             }
             return -d;
         }
 
         public float CalculatePartialDerivativeByV2Index(
-            float[] v1, 
-            float[] v2, 
+            float[] desiredValues, 
+            float[] predictedValues, 
             int v2Index)
         {
-            if (v1 == null)
+            if (desiredValues == null)
             {
-                throw new ArgumentNullException("v1");
+                throw new ArgumentNullException("desiredValues");
             }
-            if (v2 == null)
+            if (predictedValues == null)
             {
-                throw new ArgumentNullException("v2");
+                throw new ArgumentNullException("predictedValues");
             }
-            if (v1.Length != v2.Length)
+            if (desiredValues.Length != predictedValues.Length)
             {
-                throw new ArgumentException("v1.Length != v2.Length");
+                throw new ArgumentException("desiredValues.Length != predictedValues.Length");
             }
-            if (v2Index >= v2.Length)
+            if (v2Index >= predictedValues.Length)
             {
-                throw new ArgumentException("v2Index >= v2.Length");
+                throw new ArgumentException("v2Index >= predictedValues.Length");
             }
 
             //!!! нет нумерикал стабилити!
 
             return 
-                -(v1[v2Index] / v2[v2Index] - (1 - v1[v2Index]) / (1 - v2[v2Index]));
+                -(desiredValues[v2Index] / predictedValues[v2Index] - (1 - desiredValues[v2Index]) / (1 - predictedValues[v2Index]));
         }
 
         public string GetOpenCLPartialDerivative(
@@ -77,9 +77,9 @@ namespace MyNN.MLP.Backpropagation.Metrics
             //!!! нет нумерикал стабилити!
 
             const string methodBody = @"
-inline float{v} {METHOD_NAME}({MODIFIER} float{v}* v1, {MODIFIER} float{v}* v2, int v2Index)
+inline float{v} {METHOD_NAME}({MODIFIER} float{v}* desiredValues, {MODIFIER} float{v}* predictedValues, int v2Index)
 {
-    float{v} result = -(v1[v2Index] / v2[v2Index] - (1 - v1[v2Index]) / (1 - v2[v2Index]));
+    float{v} result = -(desiredValues[v2Index] / predictedValues[v2Index] - (1 - desiredValues[v2Index]) / (1 - predictedValues[v2Index]));
 
     return result;
 }

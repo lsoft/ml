@@ -52,6 +52,21 @@ namespace MyNN.Common.ArtifactContainer
                 _serializationHelper.LoadFromFile<T>(resourceFilePath);
         }
 
+        public void SaveString(string message, string resourceName)
+        {
+            if (resourceName == null)
+            {
+                throw new ArgumentNullException("resourceName");
+            }
+
+            var resourceFilePath = Path.Combine(_rootFolder, resourceName);
+
+            File.WriteAllText(
+                resourceFilePath,
+                message
+                );
+        }
+
         public void SaveSerialized<T>(T obj, string resourceName)
         {
             if (resourceName == null)

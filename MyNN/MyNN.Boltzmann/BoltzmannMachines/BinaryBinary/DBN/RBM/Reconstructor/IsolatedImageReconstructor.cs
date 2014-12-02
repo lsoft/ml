@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.DataSet;
 
 namespace MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
 {
@@ -13,8 +15,6 @@ namespace MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
         private readonly int _imageWidth;
         private readonly int _imageHeight;
         private readonly Bitmap _bitmap;
-
-        private int _currentIndex = 0;
 
         public IsolatedImageReconstructor(
             IDataSet dataSet,
@@ -37,28 +37,34 @@ namespace MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor
                 _imageHeight * _reconstructedCount);
         }
 
-        public void AddPair(
-            int dataItemIndexIntoDataSet,
-            float[] reconstructedData)
+        public Bitmap GetReconstructedBitmap(
+            int startDataItemIndexIntoDataSet,
+            List<float[]> reconstructedDataList
+            )
         {
-            var originalData = _dataSet[dataItemIndexIntoDataSet].Input;
+            if (reconstructedDataList == null)
+            {
+                throw new ArgumentNullException("reconstructedDataList");
+            }
 
-            CreateContrastEnhancedBitmapFromLayer(
-                0,
-                _currentIndex * _imageHeight,
-                originalData);
+            var currentIndex = 0;
+            foreach (var pair in reconstructedDataList.ZipInequalLength(_dataSet.Skip(startDataItemIndexIntoDataSet)))
+            {
+                var reconstructedData = pair.Value1;
+                var originalData = pair.Value2.Input;
 
-            CreateContrastEnhancedBitmapFromLayer(
-                _imageWidth,
-                _currentIndex * _imageHeight,
-                reconstructedData);
+                CreateContrastEnhancedBitmapFromLayer(
+                    0,
+                    currentIndex * _imageHeight,
+                    originalData);
 
-            _currentIndex++;
-        }
+                CreateContrastEnhancedBitmapFromLayer(
+                    _imageWidth,
+                    currentIndex * _imageHeight,
+                    reconstructedData);
 
-        public Bitmap GetReconstructedBitmap()
-        {
-            _currentIndex = 0;
+                currentIndex++;
+            }
 
             return
                 _bitmap;

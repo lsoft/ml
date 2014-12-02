@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
@@ -16,7 +17,7 @@ namespace MyNN.KNN.OpenCL.CPU
     {
         private readonly CLProvider _clProvider;
 
-        private readonly IDataSet _dataList;
+        private readonly IList<IDataItem> _dataList;
         private readonly int _dataCount;
         private readonly int _coordinateCount;
 
@@ -27,22 +28,16 @@ namespace MyNN.KNN.OpenCL.CPU
         private readonly Kernel _calculateDistanceKernel;
 
 
-        public KNearest(IDataSet dataList)
+        public KNearest(
+            IList<IDataItem> dataList
+            )
         {
-            #region validate
-
             if (dataList == null)
             {
                 throw new ArgumentNullException("dataList");
             }
-            if (dataList.Count == 0)
-            {
-                throw new ArgumentException("dataList");
-            }
 
-            #endregion
-
-            _clProvider = new CLProvider();
+            _clProvider = new CLProvider(); //!!! ошибка, нигде не деинициализируется
 
             _dataList = dataList;
             _dataCount = dataList.Count;
@@ -59,18 +54,18 @@ namespace MyNN.KNN.OpenCL.CPU
                 _dataCount,
                 MemFlags.CopyHostPtr | MemFlags.WriteOnly);
 
-            this._kernelSource = this._kernelSource.Replace(
+            var kernelSource = KernelSource.Replace(
                 "{0}",
                 _coordinateCount.ToString());
 
             //создаем кернелы
             _calculateDistanceKernel = _clProvider.CreateKernel(
-                _kernelSource,
+                kernelSource,
                 "CalculateDistanceKernel");
 
             //заполняем массивы данных
             var index = 0;
-            foreach (var i in dataList)
+            foreach (var i in _dataList)
             {
                 Array.Copy(i.Input, 0, _dataMem.Array, index, _coordinateCount);
 
@@ -167,7 +162,7 @@ namespace MyNN.KNN.OpenCL.CPU
             return result;
         }
 
-        private string _kernelSource = @"
+        private const string KernelSource = @"
 typedef struct
 {
     float Coordinates[{0}];

@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
+using MyNN.Common.OutputConsole;
 
 namespace MyNN.Common.Other
 {
@@ -31,7 +31,7 @@ namespace MyNN.Common.Other
             {
                 var dataCount = Math.Min(totalCount, reader.ReadInt32());
 
-                Console.WriteLine("Loading " + fileName + ", total: " + dataCount);
+                ConsoleAmbientContext.Console.WriteLine("Loading " + fileName + ", total: " + dataCount);
 
                 var result = new List<IDataItem>(dataCount + 1);//1 - запас
 
@@ -104,7 +104,7 @@ namespace MyNN.Common.Other
 
         public T LoadFromFile<T>(string fileName)
         {
-            Console.WriteLine("Loading " + fileName);
+            ConsoleAmbientContext.Console.WriteLine("Loading " + fileName);
 
             var formatter = new BinaryFormatter();
             using (var stream = File.Open(fileName, FileMode.Open))

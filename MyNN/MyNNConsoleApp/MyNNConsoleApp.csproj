@@ -146,28 +146,14 @@
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
     <Compile Include="FeatureAndMetricsAccuracyCalculator.cs" />
-    <Compile Include="RefactoredForDI\TestGPUDropoutForward.cs" />
-    <Compile Include="RefactoredForDI\TrainMLPOnSDAE_Dropout.cs" />
-    <Compile Include="RefactoredForDI\TrainSDAE_Dropout.cs" />
-    <Compile Include="RefactoredForDI\TuneSDAE_Dropout.cs" />
-    <Compile Include="RefactoredForDI\TuneSDAE.cs" />
-    <Compile Include="RefactoredForDI\TrainCPUDropConnect.cs" />
-    <Compile Include="RefactoredForDI\TestBackProp.cs" />
-    <Compile Include="RefactoredForDI\TrainGPUDropConnect.cs" />
-    <Compile Include="RefactoredForDI\TrainMLP.cs" />
-    <Compile Include="RefactoredForDI\TrainAutoencoder2D.cs" />
-    <Compile Include="RefactoredForDI\TrainSDAE2D.cs" />
-    <Compile Include="RefactoredForDI\TrainDBN.cs" />
-    <Compile Include="RefactoredForDI\TrainRBM.cs" />
-    <Compile Include="RefactoredForDI\TrainNLNCAAutoencoder.cs" />
-    <Compile Include="RefactoredForDI\TrainNLNCAMLP.cs" />
-    <Compile Include="RefactoredForDI\TrainSDAE.cs" />
-    <Compile Include="RefactoredForDI\TrainAutoencoder.cs" />
+    <Compile Include="DBN\TrainDBN.cs" />
+    <Compile Include="RBM\TrainRBM.cs" />
     <Compile Include="RefactoredForDI\TrainMLPOnSDAE.cs" />
+    <Compile Include="RefactoredForDI\TrainSDAE.cs" />
+    <Compile Include="RefactoredForDI\TuneSDAE.cs" />
     <Compile Include="TfidfCalculator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrainMLPWithNoNoise.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\csharp-half-code-2\System.Half\System.Half.csproj">
@@ -368,6 +354,11 @@
     <Content Include="dll\x86\opencv_videostab249.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DropConnect\" />
+    <Folder Include="Dropout\" />
+    <Folder Include="NLNCA\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

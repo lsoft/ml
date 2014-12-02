@@ -6,17 +6,15 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
     [Serializable]
     public class FullRange : IRange
     {
-        private readonly int _dataLength;
 
         public FullRange(
-            int dataLength)
+            )
         {
-            _dataLength = dataLength;
         }
 
-        public bool[] GetIndexMask()
+        public bool[] GetIndexMask(int dataLength)
         {
-            var result = new bool[_dataLength];
+            var result = new bool[dataLength];
             result.Fill(true);
 
             return result;

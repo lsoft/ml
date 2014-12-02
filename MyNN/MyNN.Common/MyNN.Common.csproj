@@ -49,27 +49,10 @@
     <Compile Include="ArtifactContainer\IArtifactContainer.cs" />
     <Compile Include="ArtifactContainer\IArtifactReadContainer.cs" />
     <Compile Include="ArtifactContainer\SavelessArtifactContainer.cs" />
-    <Compile Include="Data\DataSetConverter\BinarizeDataSetConverter.cs" />
-    <Compile Include="Data\DataSetConverter\IDataSetConverter.cs" />
-    <Compile Include="Data\DataSetConverter\ListDataSetConverter.cs" />
-    <Compile Include="Data\DataSetConverter\NoConvertDataSetConverter.cs" />
-    <Compile Include="Data\DataSetConverter\ShuffleDataSetConverter.cs" />
-    <Compile Include="Data\DataSetConverter\ToAutoencoderDataSetConverter.cs" />
-    <Compile Include="Data\Set\DataSet.cs" />
-    <Compile Include="Data\Set\IDataSet.cs" />
-    <Compile Include="Data\Set\Item\Dense\DenseDataItem.cs" />
-    <Compile Include="Data\Set\Item\Dense\DenseDataItemFactory.cs" />
+    <Compile Include="Data\Set\Item\DataItem.cs" />
+    <Compile Include="Data\Set\Item\DataItemFactory.cs" />
     <Compile Include="Data\Set\Item\IDataItem.cs" />
     <Compile Include="Data\Set\Item\IDataItemFactory.cs" />
-    <Compile Include="Data\Set\Item\Lazy\LazyDataItem.cs" />
-    <Compile Include="Data\Set\Item\Lazy\LazyDataItemFactory.cs" />
-    <Compile Include="Data\Set\Item\Sparse\SparseDataItem.cs" />
-    <Compile Include="Data\Set\Item\Sparse\SparseDataItemFactory.cs" />
-    <Compile Include="Data\TrainDataProvider\ConverterTrainDataProvider.cs" />
-    <Compile Include="Data\TrainDataProvider\ITrainDataProvider.cs" />
-    <Compile Include="Data\TrainDataProvider\LazyNoiseDataProvider.cs" />
-    <Compile Include="Data\TrainDataProvider\NoDeformationTrainDataProvider.cs" />
-    <Compile Include="Data\TrainDataProvider\NoiseDataProvider.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\AverageNoiser.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\DistanceChangeNoiser.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\ElasticNoiser.cs" />
@@ -88,21 +71,52 @@
     <Compile Include="Data\TrainDataProvider\Noiser\SetOfNoisers.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\SetOfNoisers2.cs" />
     <Compile Include="Data\TrainDataProvider\Noiser\ZeroMaskingNoiser.cs" />
-    <Compile Include="Data\TypicalDataProvider\MNISTDataProvider.cs" />
-    <Compile Include="Data\TypicalDataProvider\MNISTElasticExpander.cs" />
-    <Compile Include="Data\TypicalDataProvider\MNISTKaggleDataProvider.cs" />
-    <Compile Include="Data\TypicalDataProvider\MNISTVisualizer.cs" />
+    <Compile Include="Data\DataLoader\MNISTElasticExpander.cs" />
+    <Compile Include="Data\DataLoader\MNISTVisualizer.cs" />
     <Compile Include="Data\Visualizer\BitmapHelper.cs" />
     <Compile Include="Data\Visualizer\IVisualizer.cs" />
     <Compile Include="Estimator\DefaultEstimator.cs" />
+    <Compile Include="IterateHelper\ZipEntry.cs" />
+    <Compile Include="IterateHelper\EnumerableExtensions.cs" />
     <Compile Include="LearningRateController\ConstLearningRate.cs" />
     <Compile Include="LearningRateController\ILearningRate.cs" />
     <Compile Include="LearningRateController\LinearLearningRate.cs" />
+    <Compile Include="NewData\DataSet\DataSetFactory.cs" />
+    <Compile Include="NewData\DataSet\IDataSetFactory.cs" />
+    <Compile Include="NewData\DataSet\ItemLoader\FromArrayDataItemLoader.cs" />
+    <Compile Include="NewData\DataSet\ItemTransformation\DataItemTransformationFactory.cs" />
+    <Compile Include="NewData\DataSet\Iterator\CacheDataIterator.cs" />
+    <Compile Include="NewData\DataSet\Iterator\CacheDataIteratorFactory.cs" />
+    <Compile Include="NewData\DataSet\Iterator\DataIterator.cs" />
+    <Compile Include="NewData\DataSet\Iterator\DataIteratorFactory.cs" />
+    <Compile Include="NewData\DataSet\Iterator\IDataIterator.cs" />
+    <Compile Include="NewData\DataSet\IDataSet.cs" />
+    <Compile Include="NewData\DataSet\IDataTransformProperties.cs" />
+    <Compile Include="NewData\DataSet\ItemLoader\KaggleMNISTDataItemLoader.cs" />
+    <Compile Include="NewData\DataSet\Iterator\IDataIteratorFactory.cs" />
+    <Compile Include="NewData\Normalizer\DefaultNormalizer.cs" />
+    <Compile Include="NewData\Normalizer\INormalizer.cs" />
+    <Compile Include="NewData\DataSet\ItemLoader\MNISTDataItemLoader.cs" />
+    <Compile Include="NewData\DataSet\ItemTransformation\ListDataItemTransformation.cs" />
+    <Compile Include="NewData\DataSet\ItemTransformation\NoiserDataItemTransformation.cs" />
+    <Compile Include="NewData\DataSet\DataSet.cs" />
+    <Compile Include="NewData\DataSet\ItemLoader\IDataItemLoader.cs" />
+    <Compile Include="NewData\DataSet\ItemTransformation\IDataItemTransformation.cs" />
+    <Compile Include="NewData\DataSet\ItemTransformation\IDataItemTransformationFactory.cs" />
+    <Compile Include="NewData\DataSet\ItemLoader\IDataItemLoaderProperties.cs" />
+    <Compile Include="NewData\DataSet\ItemTransformation\BinarizeDataItemTransformation.cs" />
+    <Compile Include="NewData\DataSet\ItemTransformation\NoConvertDataItemTransformation.cs" />
+    <Compile Include="NewData\DataSet\ItemTransformation\ToAutoencoderDataItemTransformation.cs" />
+    <Compile Include="NewData\DataSet\IterationImpossiblyException.cs" />
+    <Compile Include="NewData\DataSetProvider\DataSetProvider.cs" />
+    <Compile Include="NewData\DataSetProvider\IDataSetProvider.cs" />
+    <Compile Include="NewData\DataSet\ItemLoader\ShuffleDataItemLoader.cs" />
     <Compile Include="OpenCLHelper\MemModifierEnum.cs" />
     <Compile Include="OpenCLHelper\MemModifierHelper.cs" />
     <Compile Include="OpenCLHelper\VectorizationHelper.cs" />
     <Compile Include="OpenCLHelper\VectorizationSizeEnum.cs" />
     <Compile Include="Other\ArrayOperations.cs" />
+    <Compile Include="Other\ArrayShuffler.cs" />
     <Compile Include="Other\diapfloat.cs" />
     <Compile Include="Other\diapint.cs" />
     <Compile Include="Other\DoubleConverter.cs" />
@@ -136,6 +150,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

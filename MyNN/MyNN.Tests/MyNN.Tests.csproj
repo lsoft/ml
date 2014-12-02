@@ -133,6 +133,7 @@
     <Compile Include="MLP2\Sort\SortFixture.cs" />
     <Compile Include="MLP2\Sort\SortItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestDataSet.cs" />
     <Compile Include="TestOutputConsole.cs" />
     <Compile Include="TestPurposeValidation.cs" />
   </ItemGroup>

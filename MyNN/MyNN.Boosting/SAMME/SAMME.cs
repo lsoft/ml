@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
 
 namespace MyNN.Boosting.SAMME
@@ -27,7 +28,8 @@ namespace MyNN.Boosting.SAMME
         private readonly IEpocheDataProvider _epocheDataProvider;
         private readonly IEpocheTrainer _epocheTrainer;
 
-        private SAMMEClassifierSet _currentClassifierSet;
+        private readonly SAMMEClassifierSet _currentClassifierSet;
+
         private SAMMEClassifierSet _bestClassifierSet;
 
         public SAMME(
@@ -56,9 +58,18 @@ namespace MyNN.Boosting.SAMME
             int epocheThreshold,
             float errorThreshold)
         {
+            if (trainData == null)
+            {
+                throw new ArgumentNullException("trainData");
+            }
+            if (validationData == null)
+            {
+                throw new ArgumentNullException("validationData");
+            }
+
             _n = trainData.Count;
-            _i = trainData.First().Input.Length;
-            _o = trainData.First().OutputLength;
+            _i = trainData.InputLength;
+            _o = trainData.OutputLength;
 
             var n1 = 1f/_n;
 
@@ -158,12 +169,22 @@ namespace MyNN.Boosting.SAMME
 
         private int Validate(
             SAMMEClassifierSet classifierSet,
-            IDataSet validationData)
+            IEnumerable<IDataItem> validationDataList
+            )
         {
+            if (classifierSet == null)
+            {
+                throw new ArgumentNullException("classifierSet");
+            }
+            if (validationDataList == null)
+            {
+                throw new ArgumentNullException("validationDataList");
+            }
+
             var success = 0;
             var total = 0;
 
-            foreach (var v in validationData)
+            foreach (var v in validationDataList)
             {
                 var ri = classifierSet.Classify(v.Input, this._o);
 

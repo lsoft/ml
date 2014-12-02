@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Structure.Neuron.Function;
 
@@ -79,10 +78,10 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
         {
             var trainer = new EpocheTrainer_1_1_Test();
 
-            var dataset = new DataSet(
+            var dataset = new TestDataSet(
                 new List<IDataItem>
                 {
-                    new DenseDataItem(
+                    new DataItem(
                         new[] {0.5f},
                         new[] {2f})
                 });

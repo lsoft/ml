@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data.Set;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.Randomizer;
 
 namespace MyNN.Common.Data.DataSetConverter

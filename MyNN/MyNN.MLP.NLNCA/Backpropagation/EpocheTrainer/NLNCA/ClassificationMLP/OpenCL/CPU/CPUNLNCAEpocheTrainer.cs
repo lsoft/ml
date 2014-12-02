@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Set.Item.Dense;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
@@ -256,209 +256,254 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.O
             _clProvider.QueueFinish();
 
             //process data set
-            var currentIndex = 0;
-            do
+            var enumerator = data.StartIterate();
+            try
             {
-                #region obtain dodf calculator
-
-                var nlncaOutput = _forwardPropagation.ComputeOutput(data);
-
-                var uzkii = new List<IDataItem>();
-                var uzkiiIndex = 0;
-                foreach (var d in nlncaOutput)
+                var allowedToContinue = true;
+                for (
+                    var currentIndex = 0;
+                    allowedToContinue;
+                    currentIndex += _config.BatchSize
+                    )
                 {
-                    uzkii.Add(
-                        new DenseDataItem(d.NState, data[uzkiiIndex].Output));
-                    //пускай здесь остается принудительно DenseDataItem, так как вряд ли
-                    //будет реалистичный сценарий, когда будет эффективнее другой тип
-                    //датаитема в этом месте
+                    #region obtain dodf calculator
 
-                    uzkiiIndex++;
-                }
+                    var nlncaOutput = _forwardPropagation.ComputeOutput(data);
 
-                var dodfCalculator = _dodfCalculatorFactory(uzkii);
+                    var uzkii = new List<IDataItem>();
 
-                #endregion
-
-
-                //process one batch
-                for (int inBatchIndex = currentIndex, batchIndex = 0; inBatchIndex < currentIndex + _config.BatchSize && inBatchIndex < data.Count; ++inBatchIndex, ++batchIndex)
-                {
-                    //train data
-                    var trainData = data[inBatchIndex];
-
-                    //---------------------------- forward pass ----------------------------
-
-                    _forwardPropagation.Propagate(trainData);
-
-                    //---------------------------- backward pass, error propagation ----------------------------
-
-                    //производная по компонентам близости
-                    var dodf = dodfCalculator.CalculateDodf(inBatchIndex);
-
-                    //формируем желаемые выводы
-                    dodf.CopyTo(_desiredOutput.Array, 0);
-
-                    //отправляем на OpenCL желаемые выходы
-                    _desiredOutput.Write(BlockModeEnum.Blocking);
-
-                    //output layer
-                    var outputLayerIndex = _mlp.Layers.Length - 1;
-
-                    var outputLayer = _mlp.Layers[outputLayerIndex];
-                    var preOutputLayer = _mlp.Layers[outputLayerIndex - 1];
-
-                    var outputNablaLayer = _nablaWeights[outputLayerIndex];
-
-                    if (batchIndex == 0)
+                    foreach (var pair in nlncaOutput.ZipEqualLength(data))
                     {
-                        _outputKernelOverwrite.Last()
-                            .SetKernelArgMem(0, _containers[outputLayerIndex].NetMem)
-                            .SetKernelArgMem(1, _containers[outputLayerIndex - 1].StateMem)
-                            .SetKernelArgMem(2, _containers[outputLayerIndex].StateMem)
-                            .SetKernelArgMem(3, this._deDz[outputLayerIndex])
-                            .SetKernelArgMem(4, _desiredOutput)
-                            .SetKernelArgMem(5, _containers[outputLayerIndex].WeightMem)
-                            .SetKernelArgMem(6, outputNablaLayer)
-                            .SetKernelArg(7, 4, preOutputLayer.Neurons.Length / 4)
-                            .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
-                            .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
-                            .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
-                            .SetKernelArg(11, 4, learningRate)
-                            .SetKernelArg(12, 4, _config.RegularizationFactor)
-                            .SetKernelArg(13, 4, (float)(data.Count))
-                            .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
-                    }
-                    else
-                    {
-                        _outputKernelIncrement.Last()
-                            .SetKernelArgMem(0, _containers[outputLayerIndex].NetMem)
-                            .SetKernelArgMem(1, _containers[outputLayerIndex - 1].StateMem)
-                            .SetKernelArgMem(2, _containers[outputLayerIndex].StateMem)
-                            .SetKernelArgMem(3, this._deDz[outputLayerIndex])
-                            .SetKernelArgMem(4, _desiredOutput)
-                            .SetKernelArgMem(5, _containers[outputLayerIndex].WeightMem)
-                            .SetKernelArgMem(6, outputNablaLayer)
-                            .SetKernelArg(7, 4, preOutputLayer.Neurons.Length / 4)
-                            .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length % 4))
-                            .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
-                            .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
-                            .SetKernelArg(11, 4, learningRate)
-                            .SetKernelArg(12, 4, _config.RegularizationFactor)
-                            .SetKernelArg(13, 4, (float)(data.Count))
-                            .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
+                        var nlncav = pair.Value1;
+                        var d = pair.Value2;
+
+                        uzkii.Add(
+                            new DataItem(nlncav.NState, d.Output));
+                        //пускай здесь остается принудительно DataItem, так как вряд ли
+                        //будет реалистичный сценарий, когда будет эффективнее другой тип
+                        //датаитема в этом месте
                     }
 
+                    //var uzkiiIndex = 0;
+                    //foreach (var d in nlncaOutput)
+                    //{
+                    //    uzkii.Add(
+                    //        new DataItem(d.NState, data.Data[uzkiiIndex].Output));
+                    //    //пускай здесь остается принудительно DataItem, так как вряд ли
+                    //    //будет реалистичный сценарий, когда будет эффективнее другой тип
+                    //    //датаитема в этом месте
 
-                    //hidden layers
-                    //цикл по скрытым слоям, он должен идти последовательно, так как это "обратное распространение ошибки"
-                    //тут паралеллизовать нечего
-                    for (int hiddenLayerIndex = _mlp.Layers.Length - 2; hiddenLayerIndex > 0; hiddenLayerIndex--)
+                    //    uzkiiIndex++;
+                    //}
+
+                    var dodfCalculator = _dodfCalculatorFactory(uzkii);
+
+                    #endregion
+
+                    //process one batch
+                    for (
+                        var inBatchIndex = 0;
+                        inBatchIndex < _config.BatchSize && allowedToContinue;
+                        ++inBatchIndex
+                        )
                     {
-                        //определяем слои
-                        var prevLayer = _mlp.Layers[hiddenLayerIndex - 1];
-                        var currentLayer = _mlp.Layers[hiddenLayerIndex];
-                        var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
-
-                        if (batchIndex == 0)
+                        allowedToContinue = enumerator.MoveNext();
+                        if (allowedToContinue)
                         {
-                            _hiddenKernelOverwrite[hiddenLayerIndex]
-                                .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
-                                .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
-                                .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
-                                .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
-                                .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
-                                .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
-                                .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
-                                .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
-                                .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
-                                .SetKernelArg(10, 4, prevLayer.Neurons.Length)
-                                .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
-                                .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
-                                .SetKernelArg(13, 4, learningRate)
-                                .SetKernelArg(14, 4, _config.RegularizationFactor)
-                                .SetKernelArg(15, 4, (float)(data.Count))
-                                .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
+                            //train data
+                            var trainDataItem = enumerator.Current;
+
+                            #region forward pass
+
+                            _forwardPropagation.Propagate(trainDataItem);
+
+                            #endregion
+
+                            #region backward pass, error propagation
+
+                            #region производная по компонентам близости
+
+                            var dodf = dodfCalculator.CalculateDodf(inBatchIndex);
+
+                            //формируем желаемые выводы
+                            dodf.CopyTo(_desiredOutput.Array, 0);
+
+                            #endregion
+
+                            //отправляем на OpenCL желаемые выходы
+                            _desiredOutput.Write(BlockModeEnum.Blocking);
+
+                            #region output layer
+
+                            var outputLayerIndex = _mlp.Layers.Length - 1;
+
+                            var outputLayer = _mlp.Layers[outputLayerIndex];
+                            var preOutputLayer = _mlp.Layers[outputLayerIndex - 1];
+
+                            var outputNablaLayer = _nablaWeights[outputLayerIndex];
+
+                            if (inBatchIndex == 0)
+                            {
+                                _outputKernelOverwrite.Last()
+                                    .SetKernelArgMem(0, _containers[outputLayerIndex].NetMem)
+                                    .SetKernelArgMem(1, _containers[outputLayerIndex - 1].StateMem)
+                                    .SetKernelArgMem(2, _containers[outputLayerIndex].StateMem)
+                                    .SetKernelArgMem(3, this._deDz[outputLayerIndex])
+                                    .SetKernelArgMem(4, _desiredOutput)
+                                    .SetKernelArgMem(5, _containers[outputLayerIndex].WeightMem)
+                                    .SetKernelArgMem(6, outputNablaLayer)
+                                    .SetKernelArg(7, 4, preOutputLayer.Neurons.Length/4)
+                                    .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length%4))
+                                    .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
+                                    .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
+                                    .SetKernelArg(11, 4, learningRate)
+                                    .SetKernelArg(12, 4, _config.RegularizationFactor)
+                                    .SetKernelArg(13, 4, (float) (data.Count))
+                                    .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
+                            }
+                            else
+                            {
+                                _outputKernelIncrement.Last()
+                                    .SetKernelArgMem(0, _containers[outputLayerIndex].NetMem)
+                                    .SetKernelArgMem(1, _containers[outputLayerIndex - 1].StateMem)
+                                    .SetKernelArgMem(2, _containers[outputLayerIndex].StateMem)
+                                    .SetKernelArgMem(3, this._deDz[outputLayerIndex])
+                                    .SetKernelArgMem(4, _desiredOutput)
+                                    .SetKernelArgMem(5, _containers[outputLayerIndex].WeightMem)
+                                    .SetKernelArgMem(6, outputNablaLayer)
+                                    .SetKernelArg(7, 4, preOutputLayer.Neurons.Length/4)
+                                    .SetKernelArg(8, 4, preOutputLayer.Neurons.Length - (preOutputLayer.Neurons.Length%4))
+                                    .SetKernelArg(9, 4, preOutputLayer.Neurons.Length)
+                                    .SetKernelArg(10, 4, outputLayer.NonBiasNeuronCount)
+                                    .SetKernelArg(11, 4, learningRate)
+                                    .SetKernelArg(12, 4, _config.RegularizationFactor)
+                                    .SetKernelArg(13, 4, (float) (data.Count))
+                                    .EnqueueNDRangeKernel(outputLayer.NonBiasNeuronCount);
+                            }
+
+                            #endregion
+
+                            #region hidden layers
+
+                            //цикл по скрытым слоям, он должен идти последовательно, так как это "обратное распространение ошибки"
+                            //тут паралеллизовать нечего
+                            for (var hiddenLayerIndex = _mlp.Layers.Length - 2; hiddenLayerIndex > 0; hiddenLayerIndex--)
+                            {
+                                //определяем слои
+                                var prevLayer = _mlp.Layers[hiddenLayerIndex - 1];
+                                var currentLayer = _mlp.Layers[hiddenLayerIndex];
+                                var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
+
+                                if (inBatchIndex == 0)
+                                {
+                                    _hiddenKernelOverwrite[hiddenLayerIndex]
+                                        .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
+                                        .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
+                                        .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
+                                        .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
+                                        .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
+                                        .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
+                                        .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
+                                        .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
+                                        .SetKernelArg(8, 4, prevLayer.Neurons.Length/4)
+                                        .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length%4))
+                                        .SetKernelArg(10, 4, prevLayer.Neurons.Length)
+                                        .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
+                                        .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
+                                        .SetKernelArg(13, 4, learningRate)
+                                        .SetKernelArg(14, 4, _config.RegularizationFactor)
+                                        .SetKernelArg(15, 4, (float) (data.Count))
+                                        .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
+                                }
+                                else
+                                {
+                                    _hiddenKernelIncrement[hiddenLayerIndex]
+                                        .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
+                                        .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
+                                        .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
+                                        .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
+                                        .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
+                                        .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
+                                        .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
+                                        .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
+                                        .SetKernelArg(8, 4, prevLayer.Neurons.Length/4)
+                                        .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length%4))
+                                        .SetKernelArg(10, 4, prevLayer.Neurons.Length)
+                                        .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
+                                        .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
+                                        .SetKernelArg(13, 4, learningRate)
+                                        .SetKernelArg(14, 4, _config.RegularizationFactor)
+                                        .SetKernelArg(15, 4, (float) (data.Count))
+                                        .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
+                                }
+                            }
+
+                            #endregion
+
+                            #region logging
+
+                            var logStep = data.Count/100;
+                            if (logStep > 0 && currentIndex%logStep == 0)
+                            {
+                                ConsoleAmbientContext.Console.Write(
+                                    "Epoche progress: {0}%, {1}      ",
+                                    (currentIndex*100/data.Count),
+                                    DateTime.Now.ToString());
+
+                                ConsoleAmbientContext.Console.ReturnCarriage();
+                            }
+
+                            #endregion
+
+                            #endregion
                         }
-                        else
+                    }
+
+                    #region update weights and bias into opencl memory wrappers
+
+                    for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
+                    {
+                        var weightMem = _containers[layerIndex].WeightMem;
+                        var nablaMem = _nablaWeights[layerIndex];
+
+                        const int perKernelFloats = 1500; //по 1500 флоатов на кернел (должно быть кратно 4м!!!)
+
+                        var kernelCount = weightMem.Array.Length / perKernelFloats;
+                        if (weightMem.Array.Length % perKernelFloats > 0)
                         {
-                            _hiddenKernelIncrement[hiddenLayerIndex]
-                                .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
-                                .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
-                                .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
-                                .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
-                                .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
-                                .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
-                                .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
-                                .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
-                                .SetKernelArg(8, 4, prevLayer.Neurons.Length / 4)
-                                .SetKernelArg(9, 4, prevLayer.Neurons.Length - (prevLayer.Neurons.Length % 4))
-                                .SetKernelArg(10, 4, prevLayer.Neurons.Length)
-                                .SetKernelArg(11, 4, currentLayer.NonBiasNeuronCount)
-                                .SetKernelArg(12, 4, nextLayer.NonBiasNeuronCount)
-                                .SetKernelArg(13, 4, learningRate)
-                                .SetKernelArg(14, 4, _config.RegularizationFactor)
-                                .SetKernelArg(15, 4, (float)(data.Count))
-                                .EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount);
+                            kernelCount++;
                         }
-                    }
-                    //*/
-                    //// Make sure we're done with everything that's been requested before
-                    //_clProvider.QueueFinish();
 
-                    int logStep = data.Count / 100;
-                    if (logStep > 0 && currentIndex % logStep == 0)
-                    {
-                        ConsoleAmbientContext.Console.Write(
-                            "Epoche progress: {0}%, {1}      ",
-                            (currentIndex * 100 / data.Count),
-                            DateTime.Now.ToString());
-
-                        ConsoleAmbientContext.Console.ReturnCarriage();
+                        _updateWeightKernel
+                            .SetKernelArgMem(0, weightMem)
+                            .SetKernelArgMem(1, nablaMem)
+                            .SetKernelArg(2, 4, weightMem.Array.Length)
+                            .SetKernelArg(3, 4, perKernelFloats)
+                            .SetKernelArg(4, 4, (float)(_config.BatchSize))
+                            .EnqueueNDRangeKernel(kernelCount);
                     }
+
+                    #endregion
+
+                    // Make sure we're done with everything that's been requested before
+                    _clProvider.QueueFinish();
+
+                    #region записываем веса в весь, чтобы следующий цикл просчета uzkii не затер веса (он выполняет PushWeights)
+
+                    //считываем веса с устройства
+                    PopWeights();
+
+                    //write new weights and biases into network
+                    WritebackWeightsToMLP();
+
+                    #endregion
+
                 }
-
-                //update weights and bias into opencl memory wrappers
-
-                for (int layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
-                {
-                    var weightMem = _containers[layerIndex].WeightMem;
-                    var nablaMem = _nablaWeights[layerIndex];
-
-                    const int perKernelFloats = 1500; //по 1500 флоатов на кернел (должно быть кратно 4м!!!)
-
-                    var kernelCount = weightMem.Array.Length / perKernelFloats;
-                    if (weightMem.Array.Length % perKernelFloats > 0)
-                    {
-                        kernelCount++;
-                    }
-
-                    _updateWeightKernel
-                        .SetKernelArgMem(0, weightMem)
-                        .SetKernelArgMem(1, nablaMem)
-                        .SetKernelArg(2, 4, weightMem.Array.Length)
-                        .SetKernelArg(3, 4, perKernelFloats)
-                        .SetKernelArg(4, 4, (float)(_config.BatchSize))
-                        .EnqueueNDRangeKernel(kernelCount);
-                }
-
-                // Make sure we're done with everything that's been requested before
-                _clProvider.QueueFinish();
-
-
-                #region записываем веса в весь, чтобы следующий цикл просчета uzkii не затер веса (он выполняет PushWeights)
-
-                //считываем веса с устройства
-                PopWeights();
-
-                //write new weights and biases into network
-                WritebackWeightsToMLP();
-
-                #endregion
-
-                currentIndex += _config.BatchSize;
-            } while (currentIndex < data.Count);
+            }
+            finally
+            {
+                enumerator.Dispose();
+            }
 
             #endregion
 

@@ -4,7 +4,8 @@ using System.Drawing;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.DataSet;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
 using MyNN.MLP.Structure.Layer;
 
@@ -87,8 +88,11 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.NLNCA
                     Brushes.Black,
                     300, 450);
 
-                foreach (var netResult in netResults)
+                foreach (var pair in netResults.ZipEqualLength(_validationData))
                 {
+                    var netResult = pair.Value1;
+                    var testItem = pair.Value2;
+
                     var ox = netResult.NState[0];
                     var oy = netResult.NState[1];
 
@@ -96,15 +100,15 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.NLNCA
                     var y = (oy - miny)*(imageHeight - 1)/(maxy - miny);
 
                     g.DrawRectangle(
-                        new Pen(_colors[_validationData[ii].OutputIndex]),
+                        new Pen(_colors[testItem.OutputIndex]),
                         (int) x, (int) y, 1, 1
                         );
                     g.DrawRectangle(
-                        new Pen(_colors[_validationData[ii].OutputIndex]),
+                        new Pen(_colors[testItem.OutputIndex]),
                         (int) x, (int) y, 2, 2
                         );
                     g.DrawRectangle(
-                        new Pen(_colors[_validationData[ii].OutputIndex]),
+                        new Pen(_colors[testItem.OutputIndex]),
                         (int) x, (int) y, 3, 3
                         );
                     ii++;

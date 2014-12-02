@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using MyNN.Boltzmann.BeliefNetwork.Accuracy;
 using MyNN.Boltzmann.BeliefNetwork.FeatureExtractor;
@@ -9,9 +11,10 @@ using MyNN.Boltzmann.BoltzmannMachines;
 using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.LearningRateController;
+using MyNN.Common.NewData.DataSetProvider;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 
@@ -57,7 +60,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine
         }
 
         public void Train(
-            ITrainDataProvider trainDataProvider,
+            IDataSetProvider trainDataProvider,
             IDataSet validationData,
             ILearningRate learningRateController,
             IAccuracyController accuracyController,
@@ -138,7 +141,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine
                         learningRate));
 
                 var indexIntoEpoch = 0;
-                foreach (var batch in epocheTrainData.Split(batchSize))
+                foreach (var batch in epocheTrainData.LazySplit(batchSize))
                 {
                     ConsoleAmbientContext.Console.Write(
                         string.Format(
@@ -307,10 +310,10 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine
 
             var epocheError = 0f;
 
-            for (var indexof = 0; indexof < validationData.Count; indexof++)
+            var indexof = 0;
+            var toReconstruct = new List<float[]>();
+            foreach (var d in validationData)
             {
-                var d = validationData[indexof];
-
                 //заполняем видимое
                 _container.SetInput(d.Input);
 
@@ -321,17 +324,20 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine
 
                 if (indexof < reconstructedImageCount)
                 {
-                    _imageReconstructor.AddPair(
-                        indexof,
-                        reconstructed);
+                    toReconstruct.Add(reconstructed);
                 }
+
+                indexof++;
             }
 
             var perItemError = epocheError/validationData.Count;
 
             using (var writeStream = epochContainer.GetWriteStreamForResource("reconstruct.bmp"))
             {
-                var bitmap = _imageReconstructor.GetReconstructedBitmap();
+                var bitmap = _imageReconstructor.GetReconstructedBitmap(
+                    0,
+                    toReconstruct
+                    );
 
                 bitmap.Save(writeStream, System.Drawing.Imaging.ImageFormat.Bmp);
             }

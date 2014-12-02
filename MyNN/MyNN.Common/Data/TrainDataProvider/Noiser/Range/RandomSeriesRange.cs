@@ -7,12 +7,10 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
     [Serializable]
     public class RandomSeriesRange : IRange
     {
-        private readonly int _dataLength;
         private readonly IRandomizer _randomizer;
 
         public RandomSeriesRange(
-            IRandomizer randomizer,
-            int dataLength
+            IRandomizer randomizer
             )
         {
             if (randomizer == null)
@@ -21,15 +19,14 @@ namespace MyNN.Common.Data.TrainDataProvider.Noiser.Range
             }
 
             _randomizer = randomizer;
-            _dataLength = dataLength;
         }
 
-        public bool[] GetIndexMask()
+        public bool[] GetIndexMask(int dataLength)
         {
-            var minIncludeIndex = _randomizer.Next(_dataLength);
-            var maxExcludeIndex = minIncludeIndex + _randomizer.Next(_dataLength - minIncludeIndex);
+            var minIncludeIndex = _randomizer.Next(dataLength);
+            var maxExcludeIndex = minIncludeIndex + _randomizer.Next(dataLength - minIncludeIndex);
             
-            var result = new bool[_dataLength];
+            var result = new bool[dataLength];
             result.Fill((int index) => (minIncludeIndex <= index && index < maxExcludeIndex));
 
             return result;
