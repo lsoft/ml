@@ -28,6 +28,7 @@ using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Backpropagation.Validation.Drawer.Factory;
 using MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU;
 using MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
@@ -156,11 +157,11 @@ namespace MyNNConsoleApp.RefactoredForDI
                             new MetricsAccuracyCalculator(
                                 new HalfSquaredEuclidianDistance(),
                                 vd),
-                            new GridReconstructDrawer(
-                                new MNISTVisualizer(),
+                            new GridReconstructDrawerFactory(
+                                new MNISTVisualizerFactory(),
                                 vd,
-                                300,
-                                100)
+                                300
+                                )
                             );
                 },
                 (int depthIndex) =>

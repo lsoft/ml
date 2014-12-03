@@ -5,6 +5,7 @@ using MyNN.Common.OutputConsole;
 using MyNN.MLP.AccuracyRecord;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Backpropagation.Validation.Drawer.Factory;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure.Layer;
 
@@ -13,21 +14,21 @@ namespace MyNN.MLP.Backpropagation.Validation
     public class Validation : IValidation
     {
         private readonly IAccuracyCalculator _accuracyCalculator;
-        private readonly IDrawer _drawer;
+        private readonly IDrawerFactory _drawerFactory;
 
         public Validation(
             IAccuracyCalculator accuracyCalculator,
-            IDrawer drawer
+            IDrawerFactory drawerFactory
             )
         {
             if (accuracyCalculator == null)
             {
                 throw new ArgumentNullException("accuracyCalculator");
             }
-            //drawer allowed to be null
+            //drawerFactory allowed to be null
 
             _accuracyCalculator = accuracyCalculator;
-            _drawer = drawer;
+            _drawerFactory = drawerFactory;
         }
 
         public IAccuracyRecord Validate(
@@ -45,23 +46,20 @@ namespace MyNN.MLP.Backpropagation.Validation
                 throw new ArgumentNullException("epocheContainer");
             }
 
-            List<ILayerState> netResults;
+            var drawer = _drawerFactory != null
+                ? _drawerFactory.CreateDrawer(
+                    epocheContainer,
+                    epocheNumber
+                    )
+                : null;
+
             IAccuracyRecord accuracyRecord;
             _accuracyCalculator.CalculateAccuracy(
                 forwardPropagation,
                 epocheNumber,
-                out netResults,
+                drawer,
                 out accuracyRecord
                 );
-
-            if (_drawer != null)
-            {
-                _drawer.Draw(
-                    epocheContainer,
-                    epocheNumber,
-                    netResults
-                    );
-            }
 
             ConsoleAmbientContext.Console.WriteLine(
                 "Per item error (before regularization) = {0}",

@@ -49,6 +49,7 @@
     <Compile Include="ArtifactContainer\IArtifactContainer.cs" />
     <Compile Include="ArtifactContainer\IArtifactReadContainer.cs" />
     <Compile Include="ArtifactContainer\SavelessArtifactContainer.cs" />
+    <Compile Include="Data\DataLoader\MNISTVisualizerFactory.cs" />
     <Compile Include="Data\Set\Item\DataItem.cs" />
     <Compile Include="Data\Set\Item\DataItemFactory.cs" />
     <Compile Include="Data\Set\Item\IDataItem.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Data\DataLoader\MNISTElasticExpander.cs" />
     <Compile Include="Data\DataLoader\MNISTVisualizer.cs" />
     <Compile Include="Data\Visualizer\BitmapHelper.cs" />
+    <Compile Include="Data\Visualizer\Factory\IVisualizerFactory.cs" />
     <Compile Include="Data\Visualizer\IVisualizer.cs" />
     <Compile Include="Estimator\DefaultEstimator.cs" />
     <Compile Include="IterateHelper\ZipEntry.cs" />

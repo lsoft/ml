@@ -24,6 +24,7 @@ using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Backpropagation.Validation.Drawer.Factory;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
@@ -106,11 +107,11 @@ namespace MyNNConsoleApp.RefactoredForDI
                     new MetricsAccuracyCalculator(
                         new HalfSquaredEuclidianDistance(),
                         validationData),
-                    new GridReconstructDrawer(
-                        new MNISTVisualizer(),
+                    new GridReconstructDrawerFactory(
+                        new MNISTVisualizerFactory(),
                         validationData,
-                        300,
-                        100)
+                        300
+                        )
                     );
 
                 var alg =

@@ -11,7 +11,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                TuneSDAE.Tune();
+                
 
 
                 Console.WriteLine(".......... press any key to exit");

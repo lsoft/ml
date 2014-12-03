@@ -80,6 +80,7 @@
     <Compile Include="Backpropagation\Validation\NLNCA\IColorProvider.cs" />
     <Compile Include="Backpropagation\Validation\NLNCA\MNISTColorProvider.cs" />
     <Compile Include="Backpropagation\Validation\NLNCA\NLNCADrawer.cs" />
+    <Compile Include="Backpropagation\Validation\NLNCA\NLNCADrawerFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

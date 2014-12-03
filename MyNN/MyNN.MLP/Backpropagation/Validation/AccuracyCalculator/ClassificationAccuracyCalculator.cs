@@ -1,16 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
-using MyNN.Common.Data.Set.Item;
-using MyNN.Common.IterateHelper;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.AccuracyRecord;
 using MyNN.MLP.Backpropagation.Metrics;
+using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Backpropagation.Validation.Drawer.Factory;
 using MyNN.MLP.ForwardPropagation;
-using MyNN.MLP.Structure.Layer;
 
 namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
 {
@@ -20,6 +18,8 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
         private readonly IDataSet _validationData;
         private readonly int _domainCountThreshold;
         private readonly int _outputLength;
+        
+        private readonly AccuracyCalculatorBatchIterator _batchIterator;
 
         public ClassificationAccuracyCalculator(
             IMetrics errorMetrics,
@@ -41,18 +41,28 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
             _domainCountThreshold = domainCountThreshold;
 
             _outputLength = validationData.OutputLength;
+
+            _batchIterator = new AccuracyCalculatorBatchIterator();
         }
 
         public void CalculateAccuracy(
             IForwardPropagation forwardPropagation,
             int? epocheNumber,
-            out List<ILayerState> netResults,
+            IDrawer drawer, 
             out IAccuracyRecord accuracyRecord
             )
         {
             if (forwardPropagation == null)
             {
                 throw new ArgumentNullException("forwardPropagation");
+            }
+            //drawer allowed to be null
+
+            if (drawer != null)
+            {
+                drawer.SetSize(
+                    _validationData.Count
+                    );
             }
 
             var correctArray = new int[_outputLength];
@@ -61,59 +71,69 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
             var totalCorrectCount = 0;
             var totalFailCount = 0;
 
-            netResults = forwardPropagation.ComputeOutput(_validationData);
+            var totalErrorAcc = new KahanAlgorithm.Accumulator();
 
-            var totalError = 0f;
-
-            foreach (var pair in netResults.ZipEqualLength(_validationData))
-            {
-                var netResult = pair.Value1;
-                var testItem = pair.Value2;
-
-                #region суммируем ошибку
-
-                var err = _errorMetrics.Calculate(
-                    netResult.NState,
-                    testItem.Output);
-
-                totalError += err;
-
-                #endregion
-
-                #region вычисляем успешность классификации
-
-                var correctIndex = testItem.OutputIndex;
-
-                var success = false;
-
-                //берем максимальный вес на выходных
-                var max = netResult.NState.Max();
-                if (max > 0) //если это не нуль, значит хоть что-то да распозналось
+            _batchIterator.IterateByBatch(
+                _validationData,
+                forwardPropagation,
+                (netResult, testItem) =>
                 {
-                    //если таких (максимальных) весов больше одного, значит, сеть не смогла точно идентифицировать символ
-                    if (netResult.Count(j => Math.Abs(j - max) < float.Epsilon) == 1)
+                    #region рисуем итем
+
+                    if (drawer != null)
                     {
-                        //таки смогла, присваиваем результат
-                        var recognizeIndex = netResult.ToList().FindIndex(j => Math.Abs(j - max) < float.Epsilon);
-
-                        success = correctIndex == recognizeIndex;
+                        drawer.DrawItem(netResult);
                     }
-                }
 
-                totalArray[correctIndex]++;
+                    #endregion
 
-                if (success)
-                {
-                    totalCorrectCount++;
-                    correctArray[correctIndex]++;
-                }
-                else
-                {
-                    totalFailCount++;
-                }
+                    #region суммируем ошибку
 
-                #endregion
-            }
+                    var err = _errorMetrics.Calculate(
+                        testItem.Output,
+                        netResult.NState
+                        );
+
+                    KahanAlgorithm.AddElement(ref totalErrorAcc, err);
+
+                    #endregion
+
+                    #region вычисляем успешность классификации
+
+                    var correctIndex = testItem.OutputIndex;
+
+                    var success = false;
+
+                    //берем максимальный вес на выходных
+                    var max = netResult.NState.Max();
+                    if (max > 0) //если это не нуль, значит хоть что-то да распозналось
+                    {
+                        //если таких (максимальных) весов больше одного, значит, сеть не смогла точно идентифицировать символ
+                        if (netResult.Count(j => Math.Abs(j - max) < float.Epsilon) == 1)
+                        {
+                            //таки смогла, присваиваем результат
+                            var recognizeIndex = netResult.ToList().FindIndex(j => Math.Abs(j - max) < float.Epsilon);
+
+                            success = correctIndex == recognizeIndex;
+                        }
+                    }
+
+                    totalArray[correctIndex]++;
+
+                    if (success)
+                    {
+                        totalCorrectCount++;
+                        correctArray[correctIndex]++;
+                    }
+                    else
+                    {
+                        totalFailCount++;
+                    }
+
+                    #endregion
+                });
+
+            var totalError = totalErrorAcc.Sum;
 
             var perItemError = totalError / _validationData.Count;
             var totalCount = totalCorrectCount + totalFailCount;
@@ -191,6 +211,11 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
 
             #endregion
 
+            if (drawer != null)
+            {
+                drawer.Save();
+            }
         }
+
     }
 }

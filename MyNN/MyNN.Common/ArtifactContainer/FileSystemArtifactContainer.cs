@@ -98,7 +98,7 @@ namespace MyNN.Common.ArtifactContainer
             }
             else
             {
-                result=  new FileStream(
+                result = new FileStream(
                     resourceFilePath,
                     FileMode.Append,
                     FileAccess.Write);

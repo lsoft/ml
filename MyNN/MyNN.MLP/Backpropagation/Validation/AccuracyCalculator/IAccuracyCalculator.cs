@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using MyNN.MLP.AccuracyRecord;
+using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Backpropagation.Validation.Drawer.Factory;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure.Layer;
 
@@ -10,7 +12,7 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
         void CalculateAccuracy(
             IForwardPropagation forwardPropagation,
             int? epocheNumber,
-            out List<ILayerState> netResults,
+            IDrawer drawer,
             out IAccuracyRecord accuracyRecord
             );
     }

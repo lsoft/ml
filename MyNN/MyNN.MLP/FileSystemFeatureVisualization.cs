@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Visualizer.Factory;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
 using MyNN.Common.Data.Visualizer;
@@ -52,7 +53,7 @@ namespace MyNN.MLP
         }
 
         public void Visualize(
-            IVisualizer visualizer,
+            IVisualizerFactory visualizerFactory,
             string imageFileName,
             int nonZeroCount,
             float featureValue,
@@ -61,9 +62,9 @@ namespace MyNN.MLP
             bool clampTo01 = false
             )
         {
-            if (visualizer == null)
+            if (visualizerFactory == null)
             {
-                throw new ArgumentNullException("visualizer");
+                throw new ArgumentNullException("visualizerFactory");
             }
             if (imageFileName == null)
             {
@@ -126,12 +127,21 @@ namespace MyNN.MLP
                 images.ForEach(j => j.Transform((f) => (f < 0f ? 0f : (f > 1f ? 1f : f))));
             }
 
+            var visualizer = visualizerFactory.CreateVisualizer(
+                images.Count
+                );
+
             //visualize
             using (var s = new FileStream(imageFileName, FileMode.CreateNew, FileAccess.ReadWrite))
             {
-                visualizer.SaveAsGrid(
-                    s,
-                    images);
+                foreach (var image in images)
+                {
+                    visualizer.VisualizeGrid(
+                        image
+                        );
+                }
+
+                visualizer.SaveGrid(s);
 
                 s.Flush();
             }

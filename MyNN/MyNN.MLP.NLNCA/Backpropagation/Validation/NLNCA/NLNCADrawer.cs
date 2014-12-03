@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
@@ -15,13 +16,17 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.NLNCA
     {
         private readonly IArtifactContainer _bitmapContainer;
         private readonly IDataSet _validationData;
+        private readonly int? _epocheNumber;
 
         private readonly Color[] _colors;
+
+        private readonly List<float[]> _grid; 
 
         public NLNCADrawer(
             IDataSet validationData,
             IArtifactContainer artifactContainer,
-            IColorProvider colorProvider
+            IColorProvider colorProvider,
+            int? epocheNumber
             )
         {
             if (validationData == null)
@@ -34,37 +39,49 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.NLNCA
             }
 
             _validationData = validationData;
+            _epocheNumber = epocheNumber;
 
             _bitmapContainer = artifactContainer.GetChildContainer("bitmaps");
             _colors = colorProvider.GetColors();
+
+            _grid = new List<float[]>();
         }
 
-        public void Draw(
-            IArtifactContainer containerForSave, 
-            int? epocheNumber,
-            List<ILayerState> netResults
+        public void SetSize(int netResultCount)
+        {
+            //nothing to do
+        }
+
+        public void DrawItem(
+            ILayerState netResult
             )
         {
-            if (containerForSave == null)
+            if (netResult == null)
             {
-                throw new ArgumentNullException("containerForSave");
-            }
-            if (netResults == null)
-            {
-                throw new ArgumentNullException("netResults");
+                throw new ArgumentNullException("netResult");
             }
 
-
-            if (netResults[0].NState.Length != 2)
+            if (netResult.NState.Length != 2)
             {
                 return;
             }
 
+            //так как этот визуализаторо применяется только в 2D, то
+            //1) обычно это бывает в целях отладки на малых объемаъ
+            //2) даже если итемов будет больше 50 000 000, то массив _grid
+            //займет около гигабайта, что допустимо
+            //таким образом, просто все сохраним в ОЗУ, а потом покажем "за раз"
+
+            _grid.Add(netResult.NState);
+        }
+
+        public void Save()
+        {
             //рисуем на картинке
-            var maxx = netResults.Max(j => j.NState[0]);
-            var minx = netResults.Min(j => j.NState[0]);
-            var maxy = netResults.Max(j => j.NState[1]);
-            var miny = netResults.Min(j => j.NState[1]);
+            var maxx = _grid.Max(j => j[0]);
+            var minx = _grid.Min(j => j[0]);
+            var maxy = _grid.Max(j => j[1]);
+            var miny = _grid.Min(j => j[1]);
 
             const int imageWidth = 500;
             const int imageHeight = 500;
@@ -88,37 +105,37 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.NLNCA
                     Brushes.Black,
                     300, 450);
 
-                foreach (var pair in netResults.ZipEqualLength(_validationData))
+                foreach (var pair in _grid.ZipEqualLength(_validationData))
                 {
                     var netResult = pair.Value1;
                     var testItem = pair.Value2;
 
-                    var ox = netResult.NState[0];
-                    var oy = netResult.NState[1];
+                    var ox = netResult[0];
+                    var oy = netResult[1];
 
-                    var x = (ox - minx)*(imageWidth - 1)/(maxx - minx);
-                    var y = (oy - miny)*(imageHeight - 1)/(maxy - miny);
+                    var x = (ox - minx) * (imageWidth - 1) / (maxx - minx);
+                    var y = (oy - miny) * (imageHeight - 1) / (maxy - miny);
 
                     g.DrawRectangle(
                         new Pen(_colors[testItem.OutputIndex]),
-                        (int) x, (int) y, 1, 1
+                        (int)x, (int)y, 1, 1
                         );
                     g.DrawRectangle(
                         new Pen(_colors[testItem.OutputIndex]),
-                        (int) x, (int) y, 2, 2
+                        (int)x, (int)y, 2, 2
                         );
                     g.DrawRectangle(
                         new Pen(_colors[testItem.OutputIndex]),
-                        (int) x, (int) y, 3, 3
+                        (int)x, (int)y, 3, 3
                         );
                     ii++;
                 }
-            }
-
+            } 
+            
             using (var s = _bitmapContainer.GetWriteStreamForResource(
                 string.Format(
                     "{0}.bmp",
-                    epocheNumber != null ? epocheNumber.Value.ToString() : "_pretrain")))
+                    _epocheNumber != null ? _epocheNumber.Value.ToString() : "_pretrain")))
             {
                 bitmap.Save(s, System.Drawing.Imaging.ImageFormat.Bmp);
 

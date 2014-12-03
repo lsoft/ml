@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Data;
+using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Data.Visualizer.Factory;
 using MyNN.Common.IterateHelper;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Visualizer;
+using MyNN.Common.NewData.DataSet.Iterator;
 using MyNN.Common.Other;
 using MyNN.MLP.Structure.Layer;
 
@@ -13,89 +17,156 @@ namespace MyNN.MLP.Backpropagation.Validation.Drawer
 {
     public class GridReconstructDrawer : IDrawer
     {
-        private readonly IVisualizer _visualizer;
+        private readonly IVisualizerFactory _visualizerFactory;
         private readonly IDataSet _validationData;
-        private readonly int _visualizeAsGridCount;
-        private readonly int _visualizeAsPairCount;
+        private readonly int _visualizeCount;
+        private readonly IArtifactContainer _containerForSave;
+        
+        private int _startIndex;
+        private int _currentIndex;
+        private IDataIterator _validationDataIterator;
+        private IVisualizer _visualizer;
 
         public GridReconstructDrawer(
-            IVisualizer visualizer,
+            IVisualizerFactory visualizerFactory,
             IDataSet validationData,
-            int visualizeAsGridCount,
-            int visualizeAsPairCount
+            int visualizeCount,
+            IArtifactContainer containerForSave
             )
         {
-            if (visualizer == null)
+            if (visualizerFactory == null)
             {
-                throw new ArgumentNullException("visualizer");
+                throw new ArgumentNullException("visualizerFactory");
             }
             if (validationData == null)
             {
                 throw new ArgumentNullException("validationData");
             }
-
-            _visualizer = visualizer;
-            _validationData = validationData;
-            _visualizeAsGridCount = visualizeAsGridCount;
-            _visualizeAsPairCount = visualizeAsPairCount;
-        }
-
-        public void Draw(
-            IArtifactContainer containerForSave,
-            int? epocheNumber, 
-            List<ILayerState> netResults)
-        {
             if (containerForSave == null)
             {
                 throw new ArgumentNullException("containerForSave");
             }
-            if (netResults == null)
+
+            _visualizerFactory = visualizerFactory;
+            _validationData = validationData;
+            _visualizeCount = visualizeCount;
+            _containerForSave = containerForSave;
+
+            _startIndex = -1;
+        }
+
+        public void SetSize(
+            int netResultCount
+            )
+        {
+            if (_startIndex != -1)
             {
-                throw new ArgumentNullException("netResults");
+                throw new InvalidOperationException("Установить размер можно только один раз");
+            }
+
+            _startIndex = (int)((DateTime.Now.Millisecond / 1000f) * (Math.Min(_validationData.Count, netResultCount) - _visualizeCount));
+            _currentIndex = 0;
+            _validationDataIterator = _validationData.StartIterate();
+            _visualizer = _visualizerFactory.CreateVisualizer(
+                Math.Min(
+                    _visualizeCount,
+                    netResultCount
+            ));
+        }
+
+        public void DrawItem(
+            ILayerState netResult
+            )
+        {
+            if (netResult == null)
+            {
+                throw new ArgumentNullException("netResult");
             }
 
             if (_validationData.IsAutoencoderDataSet)
             {
-                using (var s = containerForSave.GetWriteStreamForResource("grid.bmp"))
+                if (_currentIndex < _visualizeCount)
                 {
-                    _visualizer.SaveAsGrid(
-                        s,
-                        netResults.ConvertAll(j => j.NState).Take(_visualizeAsGridCount).ToList());
-
-                    s.Flush();
+                    _visualizer.VisualizeGrid(
+                        netResult.NState
+                        );
                 }
 
-                //со случайного индекса
-                var startIndex = (int) ((DateTime.Now.Millisecond/1000f)*(Math.Min(_validationData.Count, netResults.Count) - _visualizeAsPairCount));
+                if (_currentIndex >= _startIndex)
+                {
+                    if (_currentIndex < _startIndex + _visualizeCount)
+                    {
+                        _visualizer.VisualizePair(
+                            new Pair<float[], float[]>(
+                            _validationDataIterator.Current.Output,
+                            netResult.NState)
+                            );
+                    }
+                }
 
-                var pairList = new List<Pair<float[], float[]>>();
-                //for (var cc = startIndex; cc < startIndex + _visualizeAsPairCount; cc++)
+                //using (var s = _containerForSave.GetWriteStreamForResource("grid.bmp"))
                 //{
-                //    var i = new Pair<float[], float[]>(
-                //        _validationData.Data[cc].Input,
-                //        netResults[cc].NState);
-                //    pairList.Add(i);
+                //    _visualizer.SaveAsGrid(
+                //        s,
+                //        netResult.ConvertAll(j => j.NState).Take(_visualizeAsGridCount).ToList());
+
+                //    s.Flush();
                 //}
-                foreach (var pair in netResults.ZipEqualLength(_validationData).Skip(startIndex).Take(_visualizeAsPairCount))
-                {
-                    var netResult = pair.Value1;
-                    var testItem = pair.Value2;
 
-                    pairList.Add(
-                        new Pair<float[], float[]>(
-                            testItem.Output,
-                            netResult.NState));
-                }
+                ////со случайного индекса
+                //var startIndex = (int) ((DateTime.Now.Millisecond/1000f)*(Math.Min(_validationData.Count, netResult.Count) - _visualizeAsPairCount));
 
-                using (var s = containerForSave.GetWriteStreamForResource("reconstruct.bmp"))
-                {
-                    _visualizer.SaveAsPairList(
-                        s,
-                        pairList);
+                //var pairList = new List<Pair<float[], float[]>>();
+                //foreach (var pair in netResult.ZipEqualLength(_validationData).Skip(startIndex).Take(_visualizeAsPairCount))
+                //{
+                //    var netResult = pair.Value1;
+                //    var testItem = pair.Value2;
 
-                    s.Flush();
-                }
+                //    pairList.Add(
+                //        new Pair<float[], float[]>(
+                //            testItem.Output,
+                //            netResult.NState));
+                //}
+
+                //using (var s = _containerForSave.GetWriteStreamForResource("reconstruct.bmp"))
+                //{
+                //    _visualizer.SaveAsPairList(
+                //        s,
+                //        pairList);
+
+                //    s.Flush();
+                //}
+
+                _currentIndex++;
+                _validationDataIterator.MoveNext();
             }
+        }
+
+        public void Save()
+        {
+            using (var s = _containerForSave.GetWriteStreamForResource("grid.bmp"))
+            {
+                _visualizer.SaveGrid(
+                    s
+                    );
+
+                s.Flush();
+            }
+
+            using (var s = _containerForSave.GetWriteStreamForResource("reconstruct.bmp"))
+            {
+                _visualizer.SavePairs(
+                    s
+                    );
+
+                s.Flush();
+            }
+
+            if (_validationDataIterator != null)
+            {
+                _validationDataIterator.Dispose();
+            }
+
         }
     }
 }

@@ -6,10 +6,14 @@ namespace MyNN.MLP.Backpropagation.Validation.Drawer
 {
     public interface IDrawer
     {
-        void Draw(
-            IArtifactContainer containerForSave,
-            int? epocheNumber,
-            List<ILayerState> netResults
+        void SetSize(
+            int netResultCount
             );
+
+        void DrawItem(
+            ILayerState netResult
+            );
+
+        void Save();
     }
 }

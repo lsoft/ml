@@ -30,6 +30,7 @@ using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
+using MyNN.MLP.Backpropagation.Validation.Drawer.Factory;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
@@ -119,11 +120,11 @@ namespace MyNNConsoleApp.RefactoredForDI
                 new ClassificationAccuracyCalculator(
                     new HalfSquaredEuclidianDistance(),
                     validationData),
-                new GridReconstructDrawer(
-                    new MNISTVisualizer(), 
+                new GridReconstructDrawerFactory(
+                    new MNISTVisualizerFactory(), 
                     validationData,
-                    300,
-                    100)
+                    300
+                    )
                 );
 
             using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))

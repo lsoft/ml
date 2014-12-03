@@ -398,7 +398,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
 
                             #region logging
 
-                            int logStep = data.Count/100;
+                            var logStep = data.Count/100;
                             if (logStep > 0 && currentIndex%logStep == 0)
                             {
                                 ConsoleAmbientContext.Console.Write(
@@ -454,7 +454,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             {
                 if (container.WeightMem != null)
                 {
-                    container.WeightMem.Read(BlockModeEnum.Blocking);
+                    container.WeightMem.Read(BlockModeEnum.Blocking); //!!! возможно, считывать в нон блокинг но после цикла queue.waitforfinish ? и так во всех епох трейнерах
                 }
             }
 
@@ -465,7 +465,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                 var weightLayer = _containers[layerIndex].WeightMem;
 
                 var weightShiftIndex = 0;
-                for (int neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; ++neuronIndex)
+                for (var neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; ++neuronIndex)
                 {
                     var neuron = layer.Neurons[neuronIndex];
 

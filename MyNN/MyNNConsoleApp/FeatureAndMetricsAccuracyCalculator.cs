@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.Data;
 using MyNN.Common.Data.DataLoader;
+using MyNN.Common.Data.Visualizer;
+using MyNN.Common.Data.Visualizer.Factory;
 using MyNN.Common.IterateHelper;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Data.Set.Item;
@@ -13,6 +15,7 @@ using MyNN.MLP;
 using MyNN.MLP.AccuracyRecord;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
+using MyNN.MLP.Backpropagation.Validation.Drawer;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagationFactory;
@@ -28,13 +31,15 @@ namespace MyNNConsoleApp
         private readonly IMetrics _metrics;
         private readonly IDataSet _validationData;
         private readonly IDataItemFactory _dataItemFactory;
+        private readonly IVisualizerFactory _visualizerFactory;
 
         public FeatureAndMetricsAccuracyCalculator(
             string mlpName,
             CLProvider clProvider,
             IMetrics metrics,
             IDataSet validationData,
-            IDataItemFactory dataItemFactory
+            IDataItemFactory dataItemFactory,
+            IVisualizerFactory visualizerFactory
             )
         {
             if (mlpName == null)
@@ -57,18 +62,23 @@ namespace MyNNConsoleApp
             {
                 throw new ArgumentNullException("dataItemFactory");
             }
+            if (visualizerFactory == null)
+            {
+                throw new ArgumentNullException("visualizerFactory");
+            }
 
             _mlpName = mlpName;
             _clProvider = clProvider;
             _metrics = metrics;
             _validationData = validationData;
             _dataItemFactory = dataItemFactory;
+            _visualizerFactory = visualizerFactory;
         }
 
         public void CalculateAccuracy(
             IForwardPropagation forwardPropagation,
             int? epocheNumber,
-            out List<ILayerState> netResults,
+            IDrawer drawer,
             out IAccuracyRecord accuracyRecord
             )
         {
@@ -76,6 +86,9 @@ namespace MyNNConsoleApp
             {
                 throw new ArgumentNullException("forwardPropagation");
             }
+            //drawer allowed to be null
+
+            //в этом классе drawer не используетс€, так как фичи визуализируютс€ по другому
 
             var fff = new FileSystemFeatureVisualization(
                 new NoRandomRandomizer(),
@@ -88,7 +101,7 @@ namespace MyNNConsoleApp
                 );
 
             fff.Visualize(
-                new MNISTVisualizer(),
+                _visualizerFactory,
                 string.Format("{1}/_{0}_feature.bmp", epocheNumber != null ? epocheNumber.Value : -1, _mlpName),
                 10,
                 2f,
@@ -96,7 +109,7 @@ namespace MyNNConsoleApp
                 false,
                 true);
 
-            netResults = forwardPropagation.ComputeOutput(_validationData);
+            var netResults = forwardPropagation.ComputeOutput(_validationData);
 
             //преобразуем в вид, когда в DataItem.Input - правильный ¬џ’ќƒ (обучаемый выход),
             //а в DataItem.Output - –≈јЋ№Ќџ… выход, а их разница - ошибка обучени€

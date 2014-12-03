@@ -57,9 +57,13 @@
     <Compile Include="Backpropagation\Metrics\Loglikelihood.cs" />
     <Compile Include="Backpropagation\Metrics\RMSE.cs" />
     <Compile Include="Backpropagation\Metrics\TestPurposeMetric.cs" />
+    <Compile Include="Backpropagation\Validation\AccuracyCalculator\AccuracyCalculatorBatchIterator.cs" />
     <Compile Include="Backpropagation\Validation\AccuracyCalculator\ClassificationAccuracyCalculator.cs" />
+    <Compile Include="Backpropagation\Validation\AccuracyCalculator\GiveResultDelegate.cs" />
     <Compile Include="Backpropagation\Validation\AccuracyCalculator\IAccuracyCalculator.cs" />
     <Compile Include="Backpropagation\Validation\AccuracyCalculator\MetricsAccuracyCalculator.cs" />
+    <Compile Include="Backpropagation\Validation\Drawer\Factory\GridReconstructDrawerFactory.cs" />
+    <Compile Include="Backpropagation\Validation\Drawer\Factory\IDrawerFactory.cs" />
     <Compile Include="Backpropagation\Validation\Drawer\GridReconstructDrawer.cs" />
     <Compile Include="Backpropagation\Validation\Drawer\IDrawer.cs" />
     <Compile Include="Backpropagation\Validation\IValidation.cs" />
