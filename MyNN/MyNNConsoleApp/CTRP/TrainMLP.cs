@@ -32,13 +32,21 @@ namespace MyNNConsoleApp.CTRP
             var randomizer = new DefaultRandomizer(2387184);
 
             var trainDataSetProvider = GetTrainProvider(
-                300000,//10000
+                int.MaxValue,
+                //3000000,
+                //1000000,
+                //100000,
+                //10000
                 false,
                 false
                 );
             
             var validationData = GetValidation(
-                100000,//10000
+                int.MaxValue,
+                //2000000,
+                //500000,
+                //100000,
+                //10000
                 false,
                 false
                 );
@@ -82,7 +90,7 @@ namespace MyNNConsoleApp.CTRP
                 new int[]
                 {
                     validationData.InputLength,
-                    400,
+                    800,
                     validationData.OutputLength
                 });
 
@@ -103,27 +111,29 @@ namespace MyNNConsoleApp.CTRP
             {
                 const int epocheCount = 50;
 
-                //0.433
+                //0.3946806
+                var config = new LearningAlgorithmConfig(
+                    new HalfSquaredEuclidianDistance(),
+                    new LinearLearningRate(0.02f, 0.99f),
+                    1,
+                    0f,
+                    epocheCount,
+                    -1f,
+                    -1f
+                    );
+
+                //0,395562
                 //var config = new LearningAlgorithmConfig(
-                //    new HalfSquaredEuclidianDistance(), 
-                //    new LinearLearningRate(0.02f, 0.99f),
-                //    1,
-                //    0f,
+                //    new Loglikelihood(),
+                //    new LinearLearningRate(0.00002f, 0.99f),
+                //    30,
+                //    0.0f,
                 //    epocheCount,
                 //    -1f,
                 //    -1f
                 //    );
 
-                //0.432
-                var config = new LearningAlgorithmConfig(
-                    new Loglikelihood(),
-                    new LinearLearningRate(0.00002f, 0.99f),
-                    10,
-                    0.001f,
-                    epocheCount,
-                    -1f,
-                    -1f
-                    );
+               
 
                 var mlpFolderName = string.Format(
                     "mlp{0}",
@@ -177,7 +187,7 @@ namespace MyNNConsoleApp.CTRP
             }
 
             var iteratorFactory = new CacheDataIteratorFactory(
-                100,
+                10000,
                 new DataIteratorFactory()
                 );
 
@@ -228,7 +238,7 @@ namespace MyNNConsoleApp.CTRP
             }
 
             var iteratorFactory = new CacheDataIteratorFactory(
-                100,
+                10000,
                 new DataIteratorFactory()
                 );
 

@@ -22,6 +22,10 @@ namespace MyNNConsoleApp.CTRP
         private readonly Dictionary<int, float[]> _maxfloats = new Dictionary<int, float[]>();
 
         private long _itemSize;
+        private int _inDataSetCount;
+        
+        private Dictionary<int, int> _indexDict;
+        private Random _random = new Random(DateTime.Now.Millisecond);
 
         public int Count
         {
@@ -89,6 +93,28 @@ namespace MyNNConsoleApp.CTRP
                 throw new ArgumentException("index >= this.Count");
             }
 
+            #region пересортировка данных, если мы просим загрузить меньше, чем в датасете
+
+            if (_indexDict == null)
+            {
+                if(_desiredCount < _inDataSetCount)
+                {
+                    _indexDict = new Dictionary<int, int>();
+                }
+            }
+
+            if (_indexDict != null)
+            {
+                if (!_indexDict.ContainsKey(index))
+                {
+                    _indexDict.Add(index, _random.Next(_desiredCount));
+                }
+
+                index = _indexDict[index];
+            }
+
+            #endregion
+
             _filestream.Position = 12 + index*_itemSize;
 
             using (var br = new BinaryReader(_filestream, Encoding.Default, true))
@@ -152,7 +178,8 @@ namespace MyNNConsoleApp.CTRP
         {
             using (var br = new BinaryReader(_filestream, Encoding.Default, true))
             {
-                this.Count = Math.Min(_desiredCount, br.ReadInt32());
+                this._inDataSetCount =  br.ReadInt32();
+                this.Count = Math.Min(_desiredCount, _inDataSetCount);
                 this._itemSize = br.ReadInt64();
             }
 
