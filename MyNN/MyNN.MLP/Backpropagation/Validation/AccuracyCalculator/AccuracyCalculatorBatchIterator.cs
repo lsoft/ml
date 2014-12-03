@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MyNN.Common.Data.Set.Item;
 using MyNN.Common.IterateHelper;
@@ -33,7 +34,10 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
             Task task = null;
             try
             {
-                foreach (var validationBatch in validationData.LazySplit(5000))
+                const int batchSize = 5000;
+
+                var batchIndex = 0;
+                foreach (var validationBatch in validationData.LazySplit(batchSize))
                 {
                     var netResults = forwardPropagation.ComputeOutput(validationBatch);
 
@@ -63,6 +67,11 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
                         new Pair<List<IDataItem>, List<ILayerState>>(validationBatch, netResults)
                         );
                     task.Start();
+
+                    Console.Write("Validated {0}   ", (batchIndex * batchSize));
+                    Console.SetCursorPosition(0, Console.CursorTop);
+
+                    batchIndex++;
                 }
 
                 if (task != null)

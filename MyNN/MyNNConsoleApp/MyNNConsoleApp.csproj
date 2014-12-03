@@ -145,6 +145,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
+    <Compile Include="CTRP\CRPDataItemLoader.cs" />
+    <Compile Include="CTRP\Item.cs" />
+    <Compile Include="CTRP\TrainMLP.cs" />
     <Compile Include="FeatureAndMetricsAccuracyCalculator.cs" />
     <Compile Include="DBN\TrainDBN.cs" />
     <Compile Include="RBM\TrainRBM.cs" />
