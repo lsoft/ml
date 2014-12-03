@@ -11,8 +11,7 @@ namespace MyNN.Common.NewData.DataSet.Iterator
         private readonly int _cacheSize;
         private readonly IDataIterator _iterator;
         
-        private readonly ConcurrentStack<IDataItem> _stack;
-        
+        private ConcurrentQueue<IDataItem> _queue;
         private Thread _t;
         private bool _isNeedToStop;
 
@@ -52,7 +51,7 @@ namespace MyNN.Common.NewData.DataSet.Iterator
             _cacheSize = cacheSize;
             _iterator = iterator;
 
-            _stack = new ConcurrentStack<IDataItem>();
+            _queue = new ConcurrentQueue<IDataItem>();
 
             StartBackground();
         }
@@ -60,7 +59,7 @@ namespace MyNN.Common.NewData.DataSet.Iterator
         public bool MoveNext()
         {
             IDataItem newItem;
-            while (!_stack.TryPop(out newItem))
+            while (!_queue.TryDequeue(out newItem))
             {
                 Thread.Sleep(20);
             }
@@ -74,17 +73,22 @@ namespace MyNN.Common.NewData.DataSet.Iterator
         public void Reset()
         {
             StopBackground();
+
+            _iterator.Reset();
+
             StartBackground();
         }
 
         public void Dispose()
         {
             StopBackground();
+
+            _iterator.Dispose();
         }
 
         private void StartBackground()
         {
-            _stack.Clear();
+            _queue = new ConcurrentQueue<IDataItem>();
 
             _isNeedToStop = false;
             _t = new Thread(InternalStayCacheInActualState);
@@ -101,20 +105,24 @@ namespace MyNN.Common.NewData.DataSet.Iterator
         private void InternalStayCacheInActualState(
             )
         {
-            while (_isNeedToStop)
+            var maycontinue = true;
+            while (!_isNeedToStop)
             {
-                while (_stack.Count < _cacheSize)
+                while (maycontinue && _queue.Count < _cacheSize)
                 {
                     //добавляем в кеш значения
 
                     if (_iterator.MoveNext())
                     {
-                        this._stack.Push(_iterator.Current);
+                        var cv = _iterator.Current;
+                        this._queue.Enqueue(cv);
                     }
                     else
                     {
                         //кончились значения
-                        this._stack.Push(null);
+                        this._queue.Enqueue(null);
+                        maycontinue = false;
+                        break;
                     }
                 }
 

@@ -12,13 +12,16 @@ namespace MyNN.Tests.MLP2.Metrics
     public class MetricTester
     {
         public void Test(
-            IMetrics metric
+            IMetrics metric,
+            Func<Random, float> randomProvider = null
             )
         {
             if (metric == null)
             {
                 throw new ArgumentNullException("metric");
             }
+
+            randomProvider = randomProvider ?? new Func<Random, float>((random) => (float) (random.NextDouble()*2 - 0.5f));
 
             const int length = 97;
             const string methodName = "CalculateMetric";
@@ -75,10 +78,10 @@ namespace MyNN.Tests.MLP2.Metrics
 
                 for (var cc = 0; cc < 10000; cc++)
                 {
-                    v1.Array.Fill(() => (float)random.NextDouble() * 2 - 0.5f);
+                    v1.Array.Fill(() => randomProvider(random));
                     v1.Write(BlockModeEnum.Blocking);
 
-                    v2.Array.Fill(() => (float)random.NextDouble() * 2 - 0.5f);
+                    v2.Array.Fill(() => randomProvider(random));
                     v2.Write(BlockModeEnum.Blocking);
 
                     var v2Index = random.Next(length);

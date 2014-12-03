@@ -13,7 +13,8 @@ namespace MyNN.Tests.MLP2.Metrics
 
             var mt = new MetricTester();
             mt.Test(
-                metric
+                metric,
+                (random) => (float) (random.NextDouble() * 0.7f + 0.1f)
                 );
         }
     }

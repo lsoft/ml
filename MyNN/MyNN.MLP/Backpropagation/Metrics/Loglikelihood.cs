@@ -1,5 +1,6 @@
 using System;
 using MyNN.Common.OpenCLHelper;
+using MyNN.Common.Other;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.MLP.Backpropagation.Metrics
@@ -7,6 +8,8 @@ namespace MyNN.MLP.Backpropagation.Metrics
     [Serializable]
     public class Loglikelihood : IMetrics
     {
+        private const float Epsilon = 0.00001f;
+
         public float Calculate(float[] desiredValues, float[] predictedValues)
         {
             if (desiredValues == null)
@@ -22,15 +25,28 @@ namespace MyNN.MLP.Backpropagation.Metrics
                 throw new ArgumentException("desiredValues.Length != predictedValues.Length");
             }
 
-            //!!! не усредняется значение по длине векторов!
-            //!!! нет нумерикал стабилити: https://www.kaggle.com/wiki/LogarithmicLoss
-            //!!! использовать Kahan
+            var dacc = new KahanAlgorithm.Accumulator();
 
-            var d = 0.0f;
             for (var i = 0; i < desiredValues.Length; i++)
             {
-                d += (float)(desiredValues[i] * Math.Log(predictedValues[i]) + (1 - desiredValues[i]) * Math.Log(1 - predictedValues[i]));
+                var desiredValue = desiredValues[i];
+                desiredValue = Math.Min(Math.Max(Epsilon, desiredValue), 1f - Epsilon);
+
+                var predictedValue = predictedValues[i];
+                predictedValue = Math.Min(Math.Max(Epsilon, predictedValue), 1f - Epsilon);
+
+                var delta = (float) (desiredValue*Math.Log(predictedValue) + (1 - desiredValue)*Math.Log(1 - predictedValue));
+
+                KahanAlgorithm.AddElement(
+                    ref dacc,
+                    delta
+                    );
             }
+
+            var d = dacc.Sum;
+
+            d /= desiredValues.Length;
+
             return -d;
         }
 
@@ -56,10 +72,14 @@ namespace MyNN.MLP.Backpropagation.Metrics
                 throw new ArgumentException("v2Index >= predictedValues.Length");
             }
 
-            //!!! нет нумерикал стабилити!
+            var desiredValue = desiredValues[v2Index];
+            desiredValue = Math.Min(Math.Max(Epsilon, desiredValue), 1f - Epsilon);
 
-            return 
-                -(desiredValues[v2Index] / predictedValues[v2Index] - (1 - desiredValues[v2Index]) / (1 - predictedValues[v2Index]));
+            var predictedValue = predictedValues[v2Index];
+            predictedValue = Math.Min(Math.Max(Epsilon, predictedValue), 1f - Epsilon);
+
+            return
+                -(desiredValue / predictedValue - (1 - desiredValue) / (1 - predictedValue));
         }
 
         public string GetOpenCLPartialDerivative(
@@ -74,12 +94,19 @@ namespace MyNN.MLP.Backpropagation.Metrics
                 throw new ArgumentNullException("methodName");
             }
 
-            //!!! нет нумерикал стабилити!
-
             const string methodBody = @"
 inline float{v} {METHOD_NAME}({MODIFIER} float{v}* desiredValues, {MODIFIER} float{v}* predictedValues, int v2Index)
 {
-    float{v} result = -(desiredValues[v2Index] / predictedValues[v2Index] - (1 - desiredValues[v2Index]) / (1 - predictedValues[v2Index]));
+    const float{v} Epsilon = 0.00001;
+    const float{v} Epsilonm1 = 1 - 0.00001;
+
+    float{v} desiredValue = desiredValues[v2Index];
+    desiredValue = min(max(Epsilon, desiredValue), Epsilonm1);
+
+    float{v} predictedValue = predictedValues[v2Index];
+    predictedValue = min(max(Epsilon, predictedValue), Epsilonm1);
+
+    float{v} result = -(desiredValue / predictedValue - (1 - desiredValue) / (1 - predictedValue));
 
     return result;
 }
