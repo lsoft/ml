@@ -138,7 +138,7 @@ namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator
             var perItemError = totalError / _validationData.Count;
             var totalCount = totalCorrectCount + totalFailCount;
 
-            var correctPercentCount = ((int)(totalCorrectCount * 10000 / totalCount) / 100.0);
+            var correctPercentCount = ((int)((long)totalCorrectCount * 10000 / totalCount) / 100.0);
 
             accuracyRecord = new ClassificationAccuracyRecord(
                 epocheNumber ?? 0,
