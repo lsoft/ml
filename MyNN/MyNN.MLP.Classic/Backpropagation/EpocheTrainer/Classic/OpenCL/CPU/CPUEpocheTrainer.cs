@@ -367,7 +367,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU
                             {
                                 ConsoleAmbientContext.Console.Write(
                                     "Epoche progress: {0}%, {1}      ",
-                                    (currentIndex*100/data.Count),
+                                    ((long)currentIndex * 100 / data.Count),
                                     DateTime.Now.ToString());
 
                                 ConsoleAmbientContext.Console.ReturnCarriage();
