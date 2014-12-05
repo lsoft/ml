@@ -1,5 +1,6 @@
 using System;
 using MyNN.Common.Data.Set.Item;
+using MyNN.Common.Other;
 
 namespace MyNN.Common.NewData.DataSet.ItemTransformation
 {
@@ -37,7 +38,7 @@ namespace MyNN.Common.NewData.DataSet.ItemTransformation
                 throw new ArgumentNullException("before");
             }
 
-            var newItem = _dataItemFactory.CreateDataItem(before.Input, before.Input);
+            var newItem = _dataItemFactory.CreateDataItem(before.Input, before.Input.CloneArray());
 
             return
                 newItem;
