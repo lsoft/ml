@@ -34,6 +34,14 @@ namespace MyNNConsoleApp
     {
         public static void DoCompare()
         {
+            Do(true);
+            Do(false); 
+        }
+
+        private static void Do(
+            bool userOpencl
+            )
+        {
             var randomizer = 
                 new NoRandomRandomizer();
                 //new DefaultRandomizer(2387184);
@@ -64,13 +72,13 @@ namespace MyNNConsoleApp
                 new IFunction[]
                 {
                     null,
-                    new RLUFunction(), 
-                    new SigmoidFunction(1f), 
+                    //new LinearFunction(1f), 
+                    new LinearFunction(1f), 
                 },
                 new int[]
                 {
                     validationData.InputLength,
-                    100,
+                    //100,
                     validationData.OutputLength
                 });
 
@@ -82,7 +90,7 @@ namespace MyNNConsoleApp
 
             var validation = new Validation(
                 new ClassificationAccuracyCalculator(
-                    new Loglikelihood(), 
+                    new HalfSquaredEuclidianDistance(), 
                     validationData), 
                 null
                 );
@@ -91,8 +99,8 @@ namespace MyNNConsoleApp
 
             var config = new LearningAlgorithmConfig(
                 new HalfSquaredEuclidianDistance(),
-                new LinearLearningRate(0.02f, 0.99f),
-                10,
+                new ConstLearningRate(0.02f), 
+                1,
                 0f,
                 epocheCount,
                 -1f,
@@ -107,41 +115,46 @@ namespace MyNNConsoleApp
 
             var mlpContainerHelper = new MLPContainerHelper();
 
-            var algo = new Backpropagation(
-                new CSharpEpocheTrainer(
+
+            if (userOpencl)
+            {
+                using (var clProvider = new CLProvider())
+                {
+                    var algo = new Backpropagation(
+                        new CPUEpocheTrainer(
+                            VectorizationSizeEnum.NoVectorization,
+                            mlp,
+                            config,
+                            clProvider),
+                        mlpContainerHelper,
+                        mlpContainer,
+                        mlp,
+                        validation,
+                        config
+                        );
+
+                    algo.Train(
+                        trainDataSetProvider
+                        );
+                }
+            }
+            else
+            {
+                var algo = new Backpropagation(
+                    new CSharpEpocheTrainer(
+                        mlp,
+                        config),
+                    mlpContainerHelper,
+                    mlpContainer,
                     mlp,
-                    config),
-                mlpContainerHelper,
-                mlpContainer,
-                mlp,
-                validation,
-                config
-                );
+                    validation,
+                    config
+                    );
 
-            algo.Train(
-                trainDataSetProvider
-                );
-
-
-            //using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), false))
-            //{
-            //    var algo = new Backpropagation(
-            //        new CPUEpocheTrainer(
-            //            VectorizationSizeEnum.VectorizationMode16,
-            //            mlp,
-            //            config,
-            //            clProvider),
-            //        mlpContainerHelper,
-            //        mlpContainer,
-            //        mlp,
-            //        validation,
-            //        config
-            //        );
-
-            //    algo.Train(
-            //        trainDataSetProvider
-            //        );
-            //}
+                algo.Train(
+                    trainDataSetProvider
+                    );
+            }
         }
 
         private static IDataSetProvider GetTrainProvider(
@@ -150,8 +163,6 @@ namespace MyNNConsoleApp
             bool isNeedToNormalize
             )
         {
-            var rndSeed = 81262;
-
             var dataItemFactory = new DataItemFactory();
 
             var dataItemLoader = new MNISTDataItemLoader(

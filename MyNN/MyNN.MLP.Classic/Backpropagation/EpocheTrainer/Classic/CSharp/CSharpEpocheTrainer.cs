@@ -29,8 +29,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp
         private float[][] _nablaWeights;
         private float[] _desiredOutput;
 
-        private HiddenLayerKernel[] _hiddenKernel;
-        private OutputLayerKernel[] _outputKernel;
+        private HiddenLayerKernel[] _hiddenKernels;
+        private OutputLayerKernel _outputKernel;
         private UpdateWeightKernel _updateWeightKernel;
 
         private readonly MLP.ForwardPropagation.ForwardPropagation _forwardPropagation;
@@ -105,21 +105,20 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp
 
         private void LoadPrograms()
         {
-            _hiddenKernel = new HiddenLayerKernel[_mlp.Layers.Length];
-            _outputKernel = new OutputLayerKernel[_mlp.Layers.Length];
+            _hiddenKernels = new HiddenLayerKernel[_mlp.Layers.Length];
 
             for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; layerIndex++)
             {
-                _hiddenKernel[layerIndex] = new HiddenLayerKernel(
-                    _mlp.Layers[layerIndex],
-                    _config
-                    );
-
-                _outputKernel[layerIndex] = new OutputLayerKernel(
+                _hiddenKernels[layerIndex] = new HiddenLayerKernel(
                     _mlp.Layers[layerIndex],
                     _config
                     );
             }
+
+            _outputKernel = new OutputLayerKernel(
+                _mlp.Layers.Last(),
+                _config
+                );
 
             //определяем кернел обновления весов
             _updateWeightKernel = new UpdateWeightKernel();
@@ -165,7 +164,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp
             #region one epoche
 
             //переносим веса сети в объекты OpenCL
-            //_clProvider.Unpack();
             _forwardPropagation.PushWeights();
 
             _forwardPropagation.ClearAndPushHiddenLayers();
@@ -216,7 +214,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp
 
                             if (inBatchIndex == 0)
                             {
-                                _outputKernel.Last().CalculateOverwrite(
+                                _outputKernel.CalculateOverwrite(
                                     _containers[outputLayerIndex].NetMem,
                                     _containers[outputLayerIndex - 1].StateMem,
                                     _containers[outputLayerIndex].StateMem,
@@ -234,7 +232,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp
                             }
                             else
                             {
-                                _outputKernel.Last().CalculateIncrement(
+                                _outputKernel.CalculateIncrement(
                                     _containers[outputLayerIndex].NetMem,
                                     _containers[outputLayerIndex - 1].StateMem,
                                     _containers[outputLayerIndex].StateMem,
@@ -265,7 +263,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp
 
                                 if (inBatchIndex == 0)
                                 {
-                                    _hiddenKernel[hiddenLayerIndex].CalculateOverwrite(
+                                    _hiddenKernels[hiddenLayerIndex].CalculateOverwrite(
                                         _containers[hiddenLayerIndex].NetMem,
                                         _containers[hiddenLayerIndex - 1].StateMem,
                                         _containers[hiddenLayerIndex].StateMem,
@@ -284,7 +282,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp
                                 }
                                 else
                                 {
-                                    _hiddenKernel[hiddenLayerIndex].CalculateIncrement(
+                                    _hiddenKernels[hiddenLayerIndex].CalculateIncrement(
                                         _containers[hiddenLayerIndex].NetMem,
                                         _containers[hiddenLayerIndex - 1].StateMem,
                                         _containers[hiddenLayerIndex].StateMem,
@@ -324,7 +322,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp
                         }
                     }
 
-                    #region update weights and bias into opencl memory wrappers
+                    #region update weights and bias
 
                     for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
                     {
@@ -334,7 +332,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp
                         _updateWeightKernel.UpdateWeigths(
                             weightMem,
                             nablaMem,
-                            _config.BatchSize);
+                            (float)_config.BatchSize
+                            );
                     }
 
                     #endregion
