@@ -22,7 +22,7 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
 {
     internal class EpocheTrainer_1_1_Test
     {
-        public void ExecuteTest(
+        public void ExecuteOpenCLTest(
             IDataSet dataset,
             float weight0,
             float weight1,

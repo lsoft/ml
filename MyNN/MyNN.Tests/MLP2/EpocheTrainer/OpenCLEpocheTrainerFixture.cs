@@ -86,7 +86,7 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                         new[] {2f})
                 });
 
-            trainer.ExecuteTest(
+            trainer.ExecuteOpenCLTest(
                 dataset,
                 1f,
                 1f,

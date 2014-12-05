@@ -32,7 +32,6 @@ namespace MyNNConsoleApp
                 //Console.WriteLine(item0);
                 //Console.WriteLine(itemlast);
 
-
                 TrainMLP.DoTrain();
 
                 Console.WriteLine(".......... press any key to exit");
