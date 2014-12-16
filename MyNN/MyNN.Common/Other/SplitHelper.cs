@@ -35,7 +35,8 @@ namespace MyNN.Common.Other
 
             if (result.Count > 0)
             {
-                yield return result;
+                yield return
+                    result;
             }
         }
 

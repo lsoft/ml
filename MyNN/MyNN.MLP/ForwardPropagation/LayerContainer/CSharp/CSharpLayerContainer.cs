@@ -61,7 +61,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             StateMem = new float[currentLayerTotalNeuronCount];
 
             //веса
-            WeightMem = new float[currentLayerTotalNeuronCount*previousLayerTotalNeuronCount];
+            WeightMem = new float[currentLayerNonBiasNeuronCount * previousLayerTotalNeuronCount];
         }
 
         public void ClearAndPushHiddenLayers()

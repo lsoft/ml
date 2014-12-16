@@ -11,7 +11,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                
+                CompareBP.DoCompare();
 
 
                 Console.WriteLine(".......... press any key to exit");
