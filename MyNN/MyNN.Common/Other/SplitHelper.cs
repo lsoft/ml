@@ -32,6 +32,11 @@ namespace MyNN.Common.Other
                     currentIndex = 0;
                 }
             }
+
+            if (result.Count > 0)
+            {
+                yield return result;
+            }
         }
 
         public static List<List<T>> CompleteSplit<T>(
