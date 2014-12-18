@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.Other;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;

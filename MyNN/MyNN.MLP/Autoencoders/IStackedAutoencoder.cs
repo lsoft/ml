@@ -1,5 +1,4 @@
 ﻿using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
 using MyNN.MLP.Structure;
 

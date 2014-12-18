@@ -1,12 +1,12 @@
 ﻿using System;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.LearningRateController;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.DataSet.ItemLoader;
 using MyNN.Common.NewData.DataSet.ItemTransformation;
 using MyNN.Common.NewData.DataSet.Iterator;
 using MyNN.Common.NewData.DataSetProvider;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.NewData.Normalizer;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;

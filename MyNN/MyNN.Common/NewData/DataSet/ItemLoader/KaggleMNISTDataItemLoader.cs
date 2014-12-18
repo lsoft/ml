@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.NewData.Normalizer;
 using MyNN.Common.OutputConsole;
 

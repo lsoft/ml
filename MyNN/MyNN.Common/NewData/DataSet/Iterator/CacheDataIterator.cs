@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Threading;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 
 namespace MyNN.Common.NewData.DataSet.Iterator
 {

@@ -1,7 +1,7 @@
 using System;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data.Visualizer.Factory;
 using MyNN.Common.NewData.DataSet;
+using MyNN.Common.NewData.Visualizer.Factory;
 
 namespace MyNN.MLP.Backpropagation.Validation.Drawer.Factory
 {

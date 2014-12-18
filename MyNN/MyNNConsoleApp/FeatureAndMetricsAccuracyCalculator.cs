@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MyNN.Common.Data;
-using MyNN.Common.Data.DataLoader;
-using MyNN.Common.Data.Visualizer;
-using MyNN.Common.Data.Visualizer.Factory;
 using MyNN.Common.IterateHelper;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
+using MyNN.Common.NewData.Visualizer.Factory;
 using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;

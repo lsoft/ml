@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using MyNN.Common.Data;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.NewData.DataSet;
+using MyNN.Common.NewData.Item;
 
 namespace MyNN.KNN.OpenCL.CPU.Factory
 {

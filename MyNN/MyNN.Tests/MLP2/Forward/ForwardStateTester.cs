@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
 using MyNN.MLP.ForwardPropagation;

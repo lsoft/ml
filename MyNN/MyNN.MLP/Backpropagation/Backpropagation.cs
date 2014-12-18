@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.NewData.DataSetProvider;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;

@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.NewData.DataSet.ItemLoader;
 using MyNN.Common.NewData.DataSet.ItemTransformation;
+using MyNN.Common.NewData.Item;
 
 namespace MyNN.Common.NewData.DataSet.Iterator
 {

@@ -7,13 +7,13 @@ using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyC
 using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Reconstructor;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.LearningRateController;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.DataSet.ItemLoader;
 using MyNN.Common.NewData.DataSet.ItemTransformation;
 using MyNN.Common.NewData.DataSet.Iterator;
 using MyNN.Common.NewData.DataSetProvider;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.NewData.Normalizer;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;

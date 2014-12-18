@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.Randomizer;
 
 namespace MyNN.Common.NewData.DataSet.ItemTransformation

@@ -2,9 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 
 namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.OpenCL.DistanceDict.Generation1
 {

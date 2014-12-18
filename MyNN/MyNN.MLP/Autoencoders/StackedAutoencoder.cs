@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data;
 using MyNN.Common.IterateHelper;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.NewData.DataSet.ItemLoader;
 using MyNN.Common.NewData.DataSetProvider;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.NewData.Normalizer;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.Randomizer;
 
 namespace MyNN.Common.NewData.DataSet.ItemLoader

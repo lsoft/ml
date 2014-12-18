@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Classic.ForwardPropagation.CSharp;

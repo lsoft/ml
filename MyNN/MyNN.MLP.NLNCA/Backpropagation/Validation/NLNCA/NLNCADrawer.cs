@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data;
 using MyNN.Common.IterateHelper;
 using MyNN.Common.NewData.DataSet;
 using MyNN.MLP.Backpropagation.Validation.Drawer;

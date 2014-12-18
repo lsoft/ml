@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.Algorithm;
 using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.Container;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.DataSet.ItemLoader;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.NewData.Normalizer;
 
 namespace MyNN.Boltzmann.BeliefNetwork.DeepBeliefNetwork.Converter

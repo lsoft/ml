@@ -1,5 +1,4 @@
-﻿using MyNN.Common.Data;
-using MyNN.Common.NewData.DataSet;
+﻿using MyNN.Common.NewData.DataSet;
 
 namespace MyNN.Boltzmann.BeliefNetwork.FreeEnergyCalculator
 {

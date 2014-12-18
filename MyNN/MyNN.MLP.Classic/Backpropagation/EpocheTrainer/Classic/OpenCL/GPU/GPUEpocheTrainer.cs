@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Backpropagation.EpocheTrainer;

@@ -1,7 +1,5 @@
 using MyNN.Boltzmann.BeliefNetwork.Accuracy;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.TrainDataProvider;
 using MyNN.Common.LearningRateController;
 using MyNN.Common.NewData.DataSetProvider;
 

@@ -1,5 +1,5 @@
 using System;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.Other;
 
 namespace MyNN.Common.NewData.DataSet.ItemTransformation

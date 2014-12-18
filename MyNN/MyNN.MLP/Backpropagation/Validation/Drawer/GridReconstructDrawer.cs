@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data;
-using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Visualizer.Factory;
 using MyNN.Common.IterateHelper;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Visualizer;
 using MyNN.Common.NewData.DataSet.Iterator;
+using MyNN.Common.NewData.Visualizer;
+using MyNN.Common.NewData.Visualizer.Factory;
 using MyNN.Common.Other;
 using MyNN.MLP.Structure.Layer;
 

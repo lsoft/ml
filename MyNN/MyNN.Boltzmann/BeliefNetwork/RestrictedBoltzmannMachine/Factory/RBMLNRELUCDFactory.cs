@@ -7,8 +7,8 @@ using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container;
 using MyNN.Boltzmann.BoltzmannMachines;
 using MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.NewData.DataSet;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.Randomizer;
 
 namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.Factory

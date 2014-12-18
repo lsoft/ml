@@ -1,4 +1,4 @@
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 using MyNN.MLP.Structure.Layer;
 
 namespace MyNN.MLP.Backpropagation.Validation.AccuracyCalculator

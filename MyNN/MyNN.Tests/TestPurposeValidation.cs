@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.Data;
 using MyNN.Common.IterateHelper;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 using MyNN.MLP.AccuracyRecord;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;

@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MyNN.Common.Data;
-using MyNN.Common.Data.Visualizer.Factory;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.Visualizer;
+using MyNN.Common.NewData.Item;
+using MyNN.Common.NewData.Visualizer.Factory;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;

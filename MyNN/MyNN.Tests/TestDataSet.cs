@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.DataSet.ItemLoader;
 using MyNN.Common.NewData.DataSet.ItemTransformation;
 using MyNN.Common.NewData.DataSet.Iterator;
+using MyNN.Common.NewData.Item;
 
 namespace MyNN.Tests
 {

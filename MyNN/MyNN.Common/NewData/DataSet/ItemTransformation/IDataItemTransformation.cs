@@ -1,4 +1,4 @@
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 
 namespace MyNN.Common.NewData.DataSet.ItemTransformation
 {

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.IterateHelper;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.Other;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure.Layer;

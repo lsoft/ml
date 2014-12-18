@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.NewData.DataSet.Iterator;
+using MyNN.Common.NewData.Item;
 
 namespace MyNN.Tests
 {

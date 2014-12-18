@@ -2,9 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MyNN.Boltzmann.BeliefNetwork.FreeEnergyCalculator;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 
 namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEnergyCalculator
 {

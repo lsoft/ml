@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.OutputConsole;
 using OpenCL.Net.Wrapper.DeviceChooser;
 using OpenCL.Net.Wrapper.Mem;

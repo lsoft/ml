@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MyNN.Common.Data;
-using MyNN.Common.Data.Set.Item;
 using MyNN.Common.NewData.DataSet;
+using MyNN.Common.NewData.Item;
 using MyNN.Common.Other;
 
 namespace MyNN.Boosting.SAMME

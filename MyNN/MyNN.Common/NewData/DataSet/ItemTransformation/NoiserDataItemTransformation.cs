@@ -1,6 +1,6 @@
 using System;
-using MyNN.Common.Data.Set.Item;
-using MyNN.Common.Data.TrainDataProvider.Noiser;
+using MyNN.Common.NewData.Item;
+using MyNN.Common.NewData.Noiser;
 using MyNN.Common.Other;
 
 namespace MyNN.Common.NewData.DataSet.ItemTransformation

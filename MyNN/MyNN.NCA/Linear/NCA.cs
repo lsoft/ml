@@ -4,9 +4,8 @@ using System.IO;
 using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Generic;
 using MathNet.Numerics.LinearAlgebra.Single;
-using MyNN.Common.Data;
 using MyNN.Common.NewData.DataSet;
-using MyNN.Common.Data.Set.Item;
+using MyNN.Common.NewData.Item;
 
 
 namespace MyNN.NCA.Linear
