@@ -3,6 +3,7 @@ using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.Item;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
+using OpenCvSharp;
 
 namespace MyNN.Common.NewData.Noiser
 {

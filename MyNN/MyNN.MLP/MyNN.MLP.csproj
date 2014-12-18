@@ -52,9 +52,11 @@
     <Compile Include="Backpropagation\EpocheTrainer\IEpocheTrainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\IKernelTextProvider.cs" />
     <Compile Include="Backpropagation\IBackpropagation.cs" />
+    <Compile Include="Backpropagation\Metrics\AUC.cs" />
     <Compile Include="Backpropagation\Metrics\HalfSquaredEuclidianDistance.cs" />
     <Compile Include="Backpropagation\Metrics\IMetrics.cs" />
     <Compile Include="Backpropagation\Metrics\Loglikelihood.cs" />
+    <Compile Include="Backpropagation\Metrics\MultiClassLogLoss.cs" />
     <Compile Include="Backpropagation\Metrics\RMSE.cs" />
     <Compile Include="Backpropagation\Metrics\TestPurposeMetric.cs" />
     <Compile Include="Backpropagation\Validation\AccuracyCalculator\AccuracyCalculatorBatchIterator.cs" />

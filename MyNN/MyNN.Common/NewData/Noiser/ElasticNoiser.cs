@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
+using OpenCvSharp;
 
 namespace MyNN.Common.NewData.Noiser
 {

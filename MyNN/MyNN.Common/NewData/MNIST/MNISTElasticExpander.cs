@@ -8,6 +8,7 @@ using MyNN.Common.NewData.DataSet.ItemLoader;
 using MyNN.Common.NewData.Item;
 using MyNN.Common.NewData.Normalizer;
 using MyNN.Common.Randomizer;
+using OpenCvSharp;
 
 namespace MyNN.Common.NewData.MNIST
 {

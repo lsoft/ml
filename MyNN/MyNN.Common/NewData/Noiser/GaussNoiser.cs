@@ -1,4 +1,5 @@
 ﻿using System;
+using MathNet.Numerics.Distributions;
 using MyNN.Common.NewData.Noiser.Range;
 
 namespace MyNN.Common.NewData.Noiser
