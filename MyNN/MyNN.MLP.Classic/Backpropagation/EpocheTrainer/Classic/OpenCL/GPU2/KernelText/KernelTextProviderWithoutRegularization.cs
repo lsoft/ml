@@ -5,7 +5,7 @@ using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
 
-namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText
+namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU2.KernelText
 {
     internal class KernelTextProviderWithoutRegularization : IKernelTextProvider
     {
@@ -143,44 +143,19 @@ __kernel void HiddenLayerTrain(
     float regularizationFactor,
     float dataCount,
 
-    __local float * local_accum
+    __local float * local_accum,
 
+    __global float * preprocessed
     )
 {
     int neuronIndex = get_group_id(0);
 
     if(neuronIndex < currentLayerNeuronCount) //проверка лишняя, см. как осуществляется вызов. в случае, если изменился вызов, то эта проверка будет ошибочна, так как внутри нее есть синхронизация внутри воркгруп!!! ОШИБКА!!!
     {
-        int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex); //!!! ненужная операция! исправить также в withRegularization   и в других видах бекпропа проверить и исправить
+        int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
-        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (with Kahan Algorithm)
-
-        KahanAccumulator accDeDz = GetEmptyKahanAcc();
-        for (
-            int nextNeuronIndex = get_local_id(0);
-            nextNeuronIndex < nextLayerNeuronCount; 
-            nextNeuronIndex += get_local_size(0)
-            )
-        {
-            int nextWeightIndex = 
-                ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + 
-                neuronIndex;
-
-            float nextWeight = nextLayerWeights[nextWeightIndex];
-            float nextNabla = nextLayerDeDz[nextNeuronIndex];
-            float multiplied = nextWeight * nextNabla;
-
-            KahanAddElement(&accDeDz, multiplied);
-        }
-
-        local_accum[get_local_id(0)] = accDeDz.Sum;
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        WarpReductionToFirstElement(local_accum);
-        barrier(CLK_LOCAL_MEM_FENCE);
-        float currentDeDz = local_accum[0];
-
-
+        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего уже выполнен
+        float currentDeDz = preprocessed[neuronIndex];
 
         float nOut = currentLayerNET[neuronIndex];
         currentDeDz *= <DerivativeMethodCall>(nOut);

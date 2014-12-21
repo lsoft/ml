@@ -151,6 +151,7 @@ namespace OpenCL.Net.Wrapper
                 1,
                 new[] { _device },
                 string.Empty,
+                //"-cl-opt-disable",
                 //"-cl-opt-disable -cl-single-precision-constant -cl-fast-relaxed-math", 
                 //"-cl-denorms-are-zero",
                 //"-cl-single-precision-constant",

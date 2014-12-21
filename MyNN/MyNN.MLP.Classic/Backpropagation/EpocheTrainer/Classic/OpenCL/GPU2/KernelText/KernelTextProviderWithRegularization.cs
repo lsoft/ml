@@ -5,9 +5,12 @@ using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
 
-namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText
+namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU2.KernelText
 {
-    internal class KernelTextProviderWithoutRegularization : IKernelTextProvider
+    /// <summary>
+    /// Kernel source provider for classic backpropagation epoche trainer that enables CPU-OpenCL
+    /// </summary>
+    internal class KernelTextProviderWithRegularization : IKernelTextProvider
     {
         private const string DerivativeMethodName = "Derivative";
         private const string MetricMethodName = "CalculateMetric";
@@ -15,7 +18,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Kern
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
-        public KernelTextProviderWithoutRegularization(
+        public KernelTextProviderWithRegularization(
             IMLP mlp,
             ILearningAlgorithmConfig config)
         {
@@ -27,9 +30,9 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Kern
             {
                 throw new ArgumentNullException("config");
             }
-            if (Math.Abs(config.RegularizationFactor) >= float.Epsilon)
+            if (Math.Abs(config.RegularizationFactor) < float.Epsilon)
             {
-                throw new ArgumentException("Math.Abs(config.RegularizationFactor) >= float.Epsilon");
+                throw new ArgumentException("Math.Abs(config.RegularizationFactor) < float.Epsilon");
             }
 
             _mlp = mlp;
@@ -66,7 +69,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Kern
 ");
 
             result =
-                result.Replace("<weight_update>", @"
+                result.Replace("<weight_update>",@"
         nabla[nablaNeuronShift + weightIndex] = deltaWeight;
 ");
 
@@ -122,6 +125,7 @@ inline int ComputeWeightIndex(
         previousLayerNeuronCount * neuronIndex;
 }
 
+
 __kernel void HiddenLayerTrain(
     __global float * currentLayerNET,
 
@@ -143,49 +147,25 @@ __kernel void HiddenLayerTrain(
     float regularizationFactor,
     float dataCount,
 
-    __local float * local_accum
+    __local float * local_accum,
+
+    __global float * preprocessed
 
     )
 {
     int neuronIndex = get_group_id(0);
 
-    if(neuronIndex < currentLayerNeuronCount) //проверка лишняя, см. как осуществляется вызов. в случае, если изменился вызов, то эта проверка будет ошибочна, так как внутри нее есть синхронизация внутри воркгруп!!! ОШИБКА!!!
+    if(neuronIndex < currentLayerNeuronCount)
     {
-        int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex); //!!! ненужная операция! исправить также в withRegularization   и в других видах бекпропа проверить и исправить
 
-        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (with Kahan Algorithm)
+        int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
-        KahanAccumulator accDeDz = GetEmptyKahanAcc();
-        for (
-            int nextNeuronIndex = get_local_id(0);
-            nextNeuronIndex < nextLayerNeuronCount; 
-            nextNeuronIndex += get_local_size(0)
-            )
-        {
-            int nextWeightIndex = 
-                ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + 
-                neuronIndex;
-
-            float nextWeight = nextLayerWeights[nextWeightIndex];
-            float nextNabla = nextLayerDeDz[nextNeuronIndex];
-            float multiplied = nextWeight * nextNabla;
-
-            KahanAddElement(&accDeDz, multiplied);
-        }
-
-        local_accum[get_local_id(0)] = accDeDz.Sum;
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        WarpReductionToFirstElement(local_accum);
-        barrier(CLK_LOCAL_MEM_FENCE);
-        float currentDeDz = local_accum[0];
-
-
+        //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего уже выполнен
+        float currentDeDz = preprocessed[neuronIndex];
 
         float nOut = currentLayerNET[neuronIndex];
         currentDeDz *= <DerivativeMethodCall>(nOut);
         currentLayerDeDz[neuronIndex] = currentDeDz;
-
 
         //невекторизованная часть
         for (
@@ -200,13 +180,15 @@ __kernel void HiddenLayerTrain(
         {
             float prevOut = previousLayerLastState[currentWeightIndex];
 
-            float n = learningRate * currentDeDz * prevOut;
+            float regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount;
+            float coef = prevOut + regularizationCoef;
+            float n = learningRate * currentDeDz * coef;
 
             <nabla_update>
         }
-
     }
 }
+//*/
 
 __kernel void OutputLayerTrain(
     __global float * currentLayerNET,
@@ -248,7 +230,10 @@ __kernel void OutputLayerTrain(
         currentLayerDeDz[neuronIndex] = n;
 
         int nablaNeuronShift = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
+        int nablaNeuronShift4 = nablaNeuronShift / 4;
+        int nablaNeuronShift4Shift = nablaNeuronShift - nablaNeuronShift4 * 4;
 
+        //невекторизованная часть
         for (
             int weightIndex = get_local_id(0);
             weightIndex < previousLayerNeuronCountTotal; 
@@ -259,11 +244,13 @@ __kernel void OutputLayerTrain(
 //            weightIndex < previousLayerNeuronCountTotal; 
 //            ++weightIndex)
         {
-            float deltaWeight = learningRate * n * previousLayerLastState[weightIndex];
+            float deltaWeight =
+                learningRate *
+                n *
+                (previousLayerLastState[weightIndex] + regularizationFactor * currentLayerWeights[nablaNeuronShift + weightIndex] / dataCount);
 
             <weight_update>
         }
-
     }
 }
 ";

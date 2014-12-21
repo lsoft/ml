@@ -11,6 +11,8 @@ namespace OpenCL.Net.Wrapper
         private readonly Program _program;
         private readonly OpenCL.Net.Kernel _kernel;
 
+        private bool _disposed = false;
+
         public Kernel(
             CommandQueue commandQueue,
             Program program,
@@ -269,8 +271,13 @@ namespace OpenCL.Net.Wrapper
 
         public void Dispose()
         {
-            Cl.ReleaseKernel(_kernel);
-            Cl.ReleaseProgram(_program);
+            if (!_disposed)
+            {
+                Cl.ReleaseKernel(_kernel);
+                Cl.ReleaseProgram(_program);
+
+                _disposed = true;
+            }
         }
     }
 }
