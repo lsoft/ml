@@ -54,10 +54,6 @@
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelText\KernelTextProvider.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelText\KernelTextProviderWithRegularization.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\CPUTransposeEpocheTrainer.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\CPU\KernelConstructor.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\GPU\GPUTransposeEpocheTrainer.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\TransposedClassic\OpenCL\GPU\KernelConstructor.cs" />
     <Compile Include="Transposer\IOpenCLTransposer.cs" />
     <Compile Include="Transposer\ITransposer.cs" />
     <Compile Include="Transposer\TransposerNvidia.cs" />
