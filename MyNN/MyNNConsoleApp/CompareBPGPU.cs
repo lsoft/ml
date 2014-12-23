@@ -55,7 +55,7 @@ namespace MyNNConsoleApp
                 new DefaultRandomizer(1);
 
             var trainDataSetProvider = GetTrainProvider(
-                10,
+                100,
                 false,
                 false
                 );
@@ -88,9 +88,9 @@ namespace MyNNConsoleApp
                 new int[]
                 {
                     validationData.InputLength,
-                    800,
+                    8000,
                     100,
-                    800,
+                    8000,
                     validationData.OutputLength 
                 });
 

@@ -194,7 +194,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU2
             //создаем массива для просчета скрытых слоев
             for (var i = 1; i < _mlp.Layers.Length - 1; i++)
             {
-                var aggregationFactor = UpTo(_mlp.Layers[i].NonBiasNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
+                var aggregationFactor = UpTo(_mlp.Layers[i + 1].NonBiasNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
 
                 _aggregationFactors[i] = aggregationFactor;
 

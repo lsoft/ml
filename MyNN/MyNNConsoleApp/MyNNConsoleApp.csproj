@@ -145,8 +145,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
-    <Compile Include="CompareBPGPU.cs" />
-    <Compile Include="CompareBP.cs" />
     <Compile Include="FeatureAndMetricsAccuracyCalculator.cs" />
     <Compile Include="DBN\TrainDBN.cs" />
     <Compile Include="RBM\TrainRBM.cs" />

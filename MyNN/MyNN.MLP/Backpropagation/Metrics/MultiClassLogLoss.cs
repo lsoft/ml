@@ -31,11 +31,14 @@ namespace MyNN.MLP.Backpropagation.Metrics
                 throw new ArgumentException("desiredValues.Length != predictedValues.Length");
             }
 
+            var sum = predictedValues.Sum();
+
             var acc = new KahanAlgorithm.Accumulator();
 
             for (var j = 0; j < desiredValues.Length; j++)
             {
-                var p = Math.Max(Math.Min(predictedValues[j], ExtremeValueM1), ExtremeValue);
+                var normalizedprection = predictedValues[j]/sum;
+                var p = Math.Max(Math.Min(normalizedprection, ExtremeValueM1), ExtremeValue);
 
                 var atom = desiredValues[j] * Math.Log(p, Math.E);
 
