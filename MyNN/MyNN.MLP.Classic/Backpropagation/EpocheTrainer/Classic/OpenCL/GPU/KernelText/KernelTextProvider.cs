@@ -53,7 +53,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Kern
                 _kp.GetIncrementCalculationKernelsSource(layerIndex);
         }
 
-        
         public string GetPreprocessHiddenKernelZeroSource(
             int groupSize
             )
@@ -141,7 +140,6 @@ __kernel void PreprocessKernel0(
             return
                 kernelText;
         }
-        //*/
 
         public string GetPreprocessHiddenKernelOneSource(
             )

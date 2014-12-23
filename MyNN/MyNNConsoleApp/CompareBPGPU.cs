@@ -21,9 +21,9 @@ using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
-using MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU;
-using MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU2;
 using MyNN.MLP.DropConnect.Inferencer.Factory;
+using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU;
+using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU2;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure.Factory;
@@ -57,7 +57,7 @@ namespace MyNNConsoleApp
                 new NoRandomRandomizer();
 
             var trainDataSetProvider = GetTrainProvider(
-                10,
+                100,
                 false,
                 false
                 );
@@ -90,9 +90,9 @@ namespace MyNNConsoleApp
                 new int[]
                 {
                     validationData.InputLength,
-                    800,
+                    8000,
                     100,
-                    800,
+                    8000,
                     validationData.OutputLength 
                 });
 
@@ -146,12 +146,14 @@ namespace MyNNConsoleApp
                 if (useNew)
                 {
                     var algo = new Backpropagation(
-                        new DropConnect2EpocheTrainer(
+                        new GPU2DropoutEpocheTrainer(
+                            randomizer,
+                            maskContainerFactory,
                             mlp,
                             config,
-                            maskContainerFactory,
-                            inferencerFactory,
-                            clProvider),
+                            clProvider,
+                            0.5f
+                            ),
                         mlpContainerHelper,
                         mlpContainer,
                         mlp,
@@ -168,12 +170,14 @@ namespace MyNNConsoleApp
                 else
                 {
                     var algo = new Backpropagation(
-                        new DropConnectEpocheTrainer(
+                        new GPUDropoutEpocheTrainer(
+                            randomizer,
+                            maskContainerFactory,
                             mlp,
                             config,
-                            maskContainerFactory,
-                            inferencerFactory,
-                            clProvider),
+                            clProvider,
+                            0.5f
+                            ),
                         mlpContainerHelper,
                         mlpContainer,
                         mlp,

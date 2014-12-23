@@ -7,6 +7,9 @@ using MyNN.MLP.Structure;
 
 namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.KernelText
 {
+    /// <summary>
+    /// Kernel source provider for dropout backpropagation epoche trainer that enables GPU-OpenCL
+    /// </summary>
     internal class KernelTextProviderWithoutRegularization : IKernelTextProvider
     {
         private const string DerivativeMethodName = "Derivative";
@@ -126,12 +129,8 @@ __kernel void HiddenLayerTrain(
     __global float * currentLayerNET,
 
     __global float * previousLayerLastState,
-    __global float * currentLayerLastState,
     __global float * currentLayerDeDz,
-    __global float * nextLayerDeDz,
-
     __global float * currentLayerWeights,
-    __global float * nextLayerWeights,
             
     __global float * nabla,
 
@@ -141,14 +140,14 @@ __kernel void HiddenLayerTrain(
 
     int previousLayerNeuronCount,
     int currentLayerNeuronCount,
-    int nextLayerNeuronCount,
 
     float learningRate,
     float regularizationFactor,
     float dataCount,
 
-    __local float * local_accum
+    __local float * local_accum,
 
+    __global float * preprocessed
     )
 {
     int neuronIndex = get_group_id(0);
@@ -157,32 +156,8 @@ __kernel void HiddenLayerTrain(
     {
         int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
-        //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего (with Kahan Algorithm)
-
-        KahanAccumulator accDeDz = GetEmptyKahanAcc();
-        for (
-            int nextNeuronIndex = get_local_id(0);
-            nextNeuronIndex < nextLayerNeuronCount; 
-            nextNeuronIndex += get_local_size(0)
-            )
-        {
-            int nextWeightIndex = 
-                ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + 
-                neuronIndex;
-
-            float nextWeight = nextLayerWeights[nextWeightIndex];
-            float nextNabla = nextLayerDeDz[nextNeuronIndex];
-            float multiplied = nextWeight * nextNabla;
-
-            KahanAddElement(&accDeDz, multiplied);
-        }
-
-        local_accum[get_local_id(0)] = accDeDz.Sum;
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        WarpReductionToFirstElement(local_accum);
-        barrier(CLK_LOCAL_MEM_FENCE);
-        float currentDeDz = local_accum[0];
+        //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего уже выполнен
+        float currentDeDz = preprocessed[neuronIndex];
 
         //вычисл€ем маску
         uint maski = masks[neuronIndex + maskShift];
