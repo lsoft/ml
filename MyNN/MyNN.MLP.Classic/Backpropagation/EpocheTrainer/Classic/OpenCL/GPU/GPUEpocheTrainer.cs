@@ -2,6 +2,7 @@
 using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.NewData.DataSet;
+using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText;
@@ -23,6 +24,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
     /// </summary>
     public class GPUEpocheTrainer : IEpocheTrainer
     {
+        private const int PreprocessGroupSize = 16;
+
         private readonly IMemLayerContainer[] _containers;
         private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
@@ -31,13 +34,18 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
 
         private MemFloat[] _deDz;
         private MemFloat[] _nablaWeights;
+        private MemFloat[] _preprocessCache;
         private MemFloat _desiredOutput;
+
+        private int[] _aggregationFactors;
 
         private Kernel[] _hiddenKernelIncrement, _hiddenKernelOverwrite;
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
         private Kernel _updateWeightKernel;
+        private Kernel _preprocessKernel0, _preprocessKernel1;
 
         private readonly MLP.ForwardPropagation.ForwardPropagation _forwardPropagation;
+
         public IForwardPropagation ForwardPropagation
         {
             get
@@ -113,6 +121,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
         {
             _nablaWeights = new MemFloat[_mlp.Layers.Length];
             _deDz = new MemFloat[_mlp.Layers.Length];
+            _preprocessCache = new MemFloat[_mlp.Layers.Length];
+            _aggregationFactors = new int[_mlp.Layers.Length];
         }
 
         private void LoadPrograms()
@@ -149,6 +159,17 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             _updateWeightKernel = _clProvider.CreateKernel(
                 kg.UpdateWeightKernelSource,
                 "UpdateWeightKernel");
+
+            _preprocessKernel0 = _clProvider.CreateKernel(
+                kg.GetPreprocessHiddenKernelZeroSource(PreprocessGroupSize),
+                "PreprocessKernel0"
+                );
+
+            _preprocessKernel1 = _clProvider.CreateKernel(
+                kg.GetPreprocessHiddenKernelOneSource(),
+                "PreprocessKernel1"
+                );
+
         }
 
         #endregion
@@ -168,6 +189,19 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                 _deDz[i] = _clProvider.CreateFloatMem(
                     _mlp.Layers[i].NonBiasNeuronCount,
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            }
+
+            //создаем массива для просчета скрытых слоев
+            for (var i = 1; i < _mlp.Layers.Length - 1; i++)
+            {
+                var aggregationFactor = UpTo(_mlp.Layers[i + 1].NonBiasNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
+
+                _aggregationFactors[i] = aggregationFactor;
+
+                _preprocessCache[i] = _clProvider.CreateFloatMem(
+                    _mlp.Layers[i].NonBiasNeuronCount * aggregationFactor,
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite
+                    );
             }
 
             var outputLength = _mlp.Layers.Last().NonBiasNeuronCount;
@@ -195,7 +229,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             #region one epoche
 
             //переносим веса сети в объекты OpenCL
-            //_clProvider.Unpack();
             _forwardPropagation.PushWeights();
 
             //гоним на устройство
@@ -204,6 +237,14 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                 if (nw != null)
                 {
                     nw.Write(BlockModeEnum.NonBlocking);
+                }
+            }
+            foreach (var pc in _preprocessCache)
+            {
+                if (pc != null)
+                {
+                    pc.Array.Clear();
+                    pc.Write(BlockModeEnum.Blocking);
                 }
             }
 
@@ -326,30 +367,22 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                                 var currentLayer = _mlp.Layers[hiddenLayerIndex];
                                 var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
 
-                                const uint HiddenLocalGroupSize = 64;
-                                uint HiddenGlobalGroupSize =
-                                    (uint) currentLayer.NonBiasNeuronCount*HiddenLocalGroupSize
-                                    ;
+                                /*
+                                {
+                                    _clProvider.QueueFinish();
 
-                                if (inBatchIndex == 0)
-                                {
-                                    _hiddenKernelOverwrite[hiddenLayerIndex]
-                                        .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
-                                        .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
-                                        .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
-                                        .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
-                                        .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
-                                        .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
-                                        .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
-                                        .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
-                                        .SetKernelArg(8, 4, prevLayer.Neurons.Length)
-                                        .SetKernelArg(9, 4, currentLayer.NonBiasNeuronCount)
-                                        .SetKernelArg(10, 4, nextLayer.NonBiasNeuronCount)
-                                        .SetKernelArg(11, 4, learningRate)
-                                        .SetKernelArg(12, 4, _config.RegularizationFactor)
-                                        .SetKernelArg(13, 4, (float) (data.Count))
-                                        .SetKernelArgLocalMem(14, 4*HiddenLocalGroupSize)
-                                        //.EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount)
+                                    const uint HiddenLocalGroupSize = 64;
+                                    uint HiddenGlobalGroupSize =
+                                        (uint)currentLayer.NonBiasNeuronCount * HiddenLocalGroupSize
+                                        ;
+
+                                    _preprocessKernel0
+                                        .SetKernelArgMem(0, this._deDz[hiddenLayerIndex + 1])
+                                        .SetKernelArgMem(1, _containers[hiddenLayerIndex + 1].WeightMem)
+                                        .SetKernelArgMem(2, _preprocessCache[hiddenLayerIndex])
+                                        .SetKernelArg(3, sizeof(int), currentLayer.NonBiasNeuronCount)
+                                        .SetKernelArg(4, sizeof(int), nextLayer.NonBiasNeuronCount)
+                                        .SetKernelArgLocalMem(5, 4 * HiddenLocalGroupSize)
                                         .EnqueueNDRangeKernel(
                                             new[]
                                             {
@@ -361,36 +394,144 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                                             })
                                         ;
                                 }
-                                else
+                                //*/
+
                                 {
-                                    _hiddenKernelIncrement[hiddenLayerIndex]
-                                        .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
-                                        .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
-                                        .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
-                                        .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
-                                        .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
-                                        .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
-                                        .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
-                                        .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
-                                        .SetKernelArg(8, 4, prevLayer.Neurons.Length)
-                                        .SetKernelArg(9, 4, currentLayer.NonBiasNeuronCount)
-                                        .SetKernelArg(10, 4, nextLayer.NonBiasNeuronCount)
-                                        .SetKernelArg(11, 4, learningRate)
-                                        .SetKernelArg(12, 4, _config.RegularizationFactor)
-                                        .SetKernelArg(13, 4, (float) (data.Count))
-                                        .SetKernelArgLocalMem(14, 4*HiddenLocalGroupSize)
-                                        //.EnqueueNDRangeKernel(currentLayer.NonBiasNeuronCount)
+                                    _preprocessKernel0
+                                        .SetKernelArgMem(0, this._deDz[hiddenLayerIndex + 1])
+                                        .SetKernelArgMem(1, _containers[hiddenLayerIndex + 1].WeightMem)
+                                        .SetKernelArgMem(2, _preprocessCache[hiddenLayerIndex])
+                                        .SetKernelArg(3, sizeof(int), currentLayer.NonBiasNeuronCount)
+                                        .SetKernelArg(4, sizeof(int), nextLayer.NonBiasNeuronCount)
                                         .EnqueueNDRangeKernel(
                                             new[]
                                             {
-                                                HiddenGlobalGroupSize
+                                                UpTo(currentLayer.NonBiasNeuronCount, PreprocessGroupSize),
+                                                UpTo(nextLayer.NonBiasNeuronCount, PreprocessGroupSize)
                                             },
                                             new[]
                                             {
-                                                HiddenLocalGroupSize
+                                                PreprocessGroupSize,
+                                                PreprocessGroupSize,
                                             })
                                         ;
+
+                                    var aggregationFactor = _aggregationFactors[hiddenLayerIndex];
+
+                                    for (; ; )
+                                    {
+                                        if (aggregationFactor == 1)
+                                        {
+                                            break;
+                                        }
+
+                                        int currentLocalGroupSize;
+                                        if (aggregationFactor < PreprocessGroupSize)
+                                        {
+                                            currentLocalGroupSize = aggregationFactor;
+                                        }
+                                        else
+                                        {
+                                            currentLocalGroupSize = PreprocessGroupSize;
+                                        }
+
+                                        var globalx = UpTo(currentLayer.NonBiasNeuronCount, currentLocalGroupSize);
+                                        var globaly = UpTo(aggregationFactor, currentLocalGroupSize);
+
+                                        _preprocessKernel1
+                                            .SetKernelArgMem(0, _preprocessCache[hiddenLayerIndex])
+                                            .SetKernelArg(1, sizeof(int), currentLayer.NonBiasNeuronCount)
+                                            .SetKernelArg(2, sizeof(int), aggregationFactor)
+                                            .SetKernelArg(3, sizeof(int), currentLocalGroupSize)
+                                            .SetKernelArg(4, sizeof(int), currentLocalGroupSize)
+                                            .SetKernelArgLocalMem(5, sizeof(float) * currentLocalGroupSize * currentLocalGroupSize)
+                                            .EnqueueNDRangeKernel(
+                                                new[]
+                                                {
+                                                    globalx,
+                                                    globaly
+                                                },
+                                                new[]
+                                                {
+                                                    currentLocalGroupSize,
+                                                    currentLocalGroupSize,
+                                                })
+                                                ;
+
+                                        aggregationFactor = UpTo(aggregationFactor, currentLocalGroupSize) / currentLocalGroupSize;
+
+                                    }
                                 }
+
+                                {
+                                    const uint HiddenLocalGroupSize = 64;
+                                    uint HiddenGlobalGroupSize =
+                                        (uint) currentLayer.NonBiasNeuronCount*HiddenLocalGroupSize
+                                        ;
+
+
+                                    if (inBatchIndex == 0)
+                                    {
+                                        _hiddenKernelOverwrite[hiddenLayerIndex]
+                                            .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
+                                            .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
+                                            .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
+                                            .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
+                                            .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
+                                            .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
+                                            .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
+                                            .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
+                                            .SetKernelArg(8, 4, prevLayer.Neurons.Length)
+                                            .SetKernelArg(9, 4, currentLayer.NonBiasNeuronCount)
+                                            .SetKernelArg(10, 4, nextLayer.NonBiasNeuronCount)
+                                            .SetKernelArg(11, 4, learningRate)
+                                            .SetKernelArg(12, 4, _config.RegularizationFactor)
+                                            .SetKernelArg(13, 4, (float) (data.Count))
+                                            .SetKernelArgLocalMem(14, 4*HiddenLocalGroupSize)
+                                            .SetKernelArgMem(15, _preprocessCache[hiddenLayerIndex])
+                                            .EnqueueNDRangeKernel(
+                                                new[]
+                                                {
+                                                    HiddenGlobalGroupSize
+                                                },
+                                                new[]
+                                                {
+                                                    HiddenLocalGroupSize
+                                                })
+                                            ;
+                                    }
+                                    else
+                                    {
+                                        _hiddenKernelIncrement[hiddenLayerIndex]
+                                            .SetKernelArgMem(0, _containers[hiddenLayerIndex].NetMem)
+                                            .SetKernelArgMem(1, _containers[hiddenLayerIndex - 1].StateMem)
+                                            .SetKernelArgMem(2, _containers[hiddenLayerIndex].StateMem)
+                                            .SetKernelArgMem(3, this._deDz[hiddenLayerIndex])
+                                            .SetKernelArgMem(4, this._deDz[hiddenLayerIndex + 1])
+                                            .SetKernelArgMem(5, _containers[hiddenLayerIndex].WeightMem)
+                                            .SetKernelArgMem(6, _containers[hiddenLayerIndex + 1].WeightMem)
+                                            .SetKernelArgMem(7, _nablaWeights[hiddenLayerIndex])
+                                            .SetKernelArg(8, 4, prevLayer.Neurons.Length)
+                                            .SetKernelArg(9, 4, currentLayer.NonBiasNeuronCount)
+                                            .SetKernelArg(10, 4, nextLayer.NonBiasNeuronCount)
+                                            .SetKernelArg(11, 4, learningRate)
+                                            .SetKernelArg(12, 4, _config.RegularizationFactor)
+                                            .SetKernelArg(13, 4, (float) (data.Count))
+                                            .SetKernelArgLocalMem(14, 4*HiddenLocalGroupSize)
+                                            .SetKernelArgMem(15, _preprocessCache[hiddenLayerIndex])
+                                            .EnqueueNDRangeKernel(
+                                                new[]
+                                                {
+                                                    HiddenGlobalGroupSize
+                                                },
+                                                new[]
+                                                {
+                                                    HiddenLocalGroupSize
+                                                })
+                                            ;
+                                    }
+                                }
+                                //*/
                             }
 
                             #endregion
@@ -476,6 +617,27 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             }
 
         }
+
+
+        private static int UpTo(int value, int step)
+        {
+            if (value < step)
+            {
+                return step;
+            }
+
+            var ostatok = value % step;
+
+            if (ostatok == 0)
+            {
+                return value;
+            }
+
+            return
+                value + step - ostatok;
+
+        }
+
 
     }
 }
