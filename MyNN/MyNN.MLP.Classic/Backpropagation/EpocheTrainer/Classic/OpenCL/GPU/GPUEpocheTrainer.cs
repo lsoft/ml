@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using MyNN.Common;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
@@ -34,15 +35,15 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
 
         private MemFloat[] _deDz;
         private MemFloat[] _nablaWeights;
-        private MemFloat[] _preprocessCache;
         private MemFloat _desiredOutput;
-
-        private int[] _aggregationFactors;
+        private MemFloat[] _preprocessCache;
 
         private Kernel[] _hiddenKernelIncrement, _hiddenKernelOverwrite;
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
         private Kernel _updateWeightKernel;
         private Kernel _preprocessKernel0, _preprocessKernel1;
+
+        private int[] _aggregationFactors;
 
         private readonly MLP.ForwardPropagation.ForwardPropagation _forwardPropagation;
 
@@ -121,6 +122,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
         {
             _nablaWeights = new MemFloat[_mlp.Layers.Length];
             _deDz = new MemFloat[_mlp.Layers.Length];
+            
             _preprocessCache = new MemFloat[_mlp.Layers.Length];
             _aggregationFactors = new int[_mlp.Layers.Length];
         }
@@ -194,7 +196,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             //создаем массива для просчета скрытых слоев
             for (var i = 1; i < _mlp.Layers.Length - 1; i++)
             {
-                var aggregationFactor = UpTo(_mlp.Layers[i + 1].NonBiasNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
+                var aggregationFactor = Helper.UpTo(_mlp.Layers[i + 1].NonBiasNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
 
                 _aggregationFactors[i] = aggregationFactor;
 
@@ -367,35 +369,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                                 var currentLayer = _mlp.Layers[hiddenLayerIndex];
                                 var nextLayer = _mlp.Layers[hiddenLayerIndex + 1];
 
-                                /*
-                                {
-                                    _clProvider.QueueFinish();
-
-                                    const uint HiddenLocalGroupSize = 64;
-                                    uint HiddenGlobalGroupSize =
-                                        (uint)currentLayer.NonBiasNeuronCount * HiddenLocalGroupSize
-                                        ;
-
-                                    _preprocessKernel0
-                                        .SetKernelArgMem(0, this._deDz[hiddenLayerIndex + 1])
-                                        .SetKernelArgMem(1, _containers[hiddenLayerIndex + 1].WeightMem)
-                                        .SetKernelArgMem(2, _preprocessCache[hiddenLayerIndex])
-                                        .SetKernelArg(3, sizeof(int), currentLayer.NonBiasNeuronCount)
-                                        .SetKernelArg(4, sizeof(int), nextLayer.NonBiasNeuronCount)
-                                        .SetKernelArgLocalMem(5, 4 * HiddenLocalGroupSize)
-                                        .EnqueueNDRangeKernel(
-                                            new[]
-                                            {
-                                                HiddenGlobalGroupSize
-                                            },
-                                            new[]
-                                            {
-                                                HiddenLocalGroupSize
-                                            })
-                                        ;
-                                }
-                                //*/
-
                                 {
                                     _preprocessKernel0
                                         .SetKernelArgMem(0, this._deDz[hiddenLayerIndex + 1])
@@ -406,8 +379,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                                         .EnqueueNDRangeKernel(
                                             new[]
                                             {
-                                                UpTo(currentLayer.NonBiasNeuronCount, PreprocessGroupSize),
-                                                UpTo(nextLayer.NonBiasNeuronCount, PreprocessGroupSize)
+                                                Helper.UpTo(currentLayer.NonBiasNeuronCount, PreprocessGroupSize),
+                                                Helper.UpTo(nextLayer.NonBiasNeuronCount, PreprocessGroupSize)
                                             },
                                             new[]
                                             {
@@ -435,8 +408,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                                             currentLocalGroupSize = PreprocessGroupSize;
                                         }
 
-                                        var globalx = UpTo(currentLayer.NonBiasNeuronCount, currentLocalGroupSize);
-                                        var globaly = UpTo(aggregationFactor, currentLocalGroupSize);
+                                        var globalx = Helper.UpTo(currentLayer.NonBiasNeuronCount, currentLocalGroupSize);
+                                        var globaly = Helper.UpTo(aggregationFactor, currentLocalGroupSize);
 
                                         _preprocessKernel1
                                             .SetKernelArgMem(0, _preprocessCache[hiddenLayerIndex])
@@ -458,7 +431,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
                                                 })
                                                 ;
 
-                                        aggregationFactor = UpTo(aggregationFactor, currentLocalGroupSize) / currentLocalGroupSize;
+                                        aggregationFactor = Helper.UpTo(aggregationFactor, currentLocalGroupSize) / currentLocalGroupSize;
 
                                     }
                                 }
@@ -617,27 +590,5 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU
             }
 
         }
-
-
-        private static int UpTo(int value, int step)
-        {
-            if (value < step)
-            {
-                return step;
-            }
-
-            var ostatok = value % step;
-
-            if (ostatok == 0)
-            {
-                return value;
-            }
-
-            return
-                value + step - ostatok;
-
-        }
-
-
     }
 }

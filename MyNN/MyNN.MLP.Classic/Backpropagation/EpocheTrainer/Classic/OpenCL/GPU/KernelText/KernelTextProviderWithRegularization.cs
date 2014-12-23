@@ -157,7 +157,6 @@ __kernel void HiddenLayerTrain(
 
     if(neuronIndex < currentLayerNeuronCount)
     {
-
         int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
         //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего уже выполнен

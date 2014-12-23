@@ -53,85 +53,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Kern
                 _kp.GetIncrementCalculationKernelsSource(layerIndex);
         }
 
-        /*
-        public string GetPreprocessHiddenKernelZeroSource(
-            int groupSize
-            )
-        {
-            var kernelText = @"
-inline int ComputeWeightIndex(
-    int previousLayerNeuronCount,
-    int neuronIndex)
-{
-    return
-        previousLayerNeuronCount * neuronIndex;
-}
-
-__kernel void PreprocessKernel0(
-    __global read_only float * nextLayerDeDz,
-    __global read_only float * nextLayerWeights,
-    __global write_only float * results,
-
-    int currentLayerNeuronCount,
-    int nextLayerNeuronCount,
-
-    __local float * local_accum
-
-    )
-{
-    int neuronIndex = get_group_id(0);
-
-    // просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (with Kahan Algorithm)
-
-    KahanAccumulator accDeDz = GetEmptyKahanAcc();
-    for (
-        int nextNeuronIndex = get_local_id(0);
-        nextNeuronIndex < nextLayerNeuronCount; 
-        nextNeuronIndex += get_local_size(0)
-        )
-    {
-        int nextWeightIndex = 
-            ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + 
-            neuronIndex;
-
-        float nextWeight = nextLayerWeights[nextWeightIndex];
-        float nextNabla = nextLayerDeDz[nextNeuronIndex];
-        float multiplied = nextWeight * nextNabla;
-
-        KahanAddElement(&accDeDz, multiplied);
-    }
-
-    local_accum[get_local_id(0)] = accDeDz.Sum;
-    barrier(CLK_LOCAL_MEM_FENCE);
-
-    WarpReductionToFirstElement(local_accum);
-    barrier(CLK_LOCAL_MEM_FENCE);
-    float currentDeDz = local_accum[0];
-
-    if(get_local_id(0) == 0)
-    {
-        results[neuronIndex] = currentDeDz;
-    }
-
-    barrier(CLK_LOCAL_MEM_FENCE);
-}
-";
-
-            return
-                kernelText;
-
-        }
-        //*/
-
-        /*
-        public string GetPreprocessHiddenKernelZeroSource(
-            int groupSize
-            )
-        {
-            return
-                GetPreprocessHiddenKernelZeroSource_New(groupSize);
-        }
-        //*/
         
         public string GetPreprocessHiddenKernelZeroSource(
             int groupSize
@@ -202,29 +123,6 @@ __kernel void PreprocessKernel0(
     }
 
     barrier(CLK_LOCAL_MEM_FENCE);
-
-
-
-
-//    if(ingrx == 0 && ingry == 0)
-//    {
-//        for(int ix = 0; ix < groupsizex; ix++)
-//        {
-//            KahanAccumulator acc = GetEmptyKahanAcc();
-//            
-//            for(int iy = 0; iy < groupsizey; iy++)
-//            {
-//                //cache[ix] += cache[ix + groupsizey * iy];
-//                KahanAddElement(&acc, cache[ix + groupsizey * iy]);
-//            }
-//
-//            cache[ix] = acc.Sum;
-//        }
-//    }
-//    barrier(CLK_LOCAL_MEM_FENCE);
-
-
-
 
     //если группа не вылазит за пределы MLP
     if(globalx < currentNeuronCount)
@@ -312,28 +210,6 @@ __kernel void PreprocessKernel1(
     }
 
     barrier(CLK_LOCAL_MEM_FENCE);
-
-
-//    if(ingrx == 0 && ingry == 0)
-//    {
-//        for(int ix = 0; ix < groupsizex; ix++)
-//        {
-//
-//            KahanAccumulator acc = GetEmptyKahanAcc();
-//            
-//            for(int iy = 0; iy < groupsizey; iy++)
-//            {
-//                //cache[ix] += cache[ix + groupsizey * iy];
-//                KahanAddElement(&acc, cache[ix + groupsizey * iy]);
-//            }
-//
-//            cache[ix] = acc.Sum;
-//        }
-//    }
-//    barrier(CLK_LOCAL_MEM_FENCE);
-
-
-
 
     //если группа не вылазит за пределы MLP
     if(globalx < currentNeuronCount)

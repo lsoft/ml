@@ -51,6 +51,7 @@
     <Compile Include="ArtifactContainer\IArtifactReadContainer.cs" />
     <Compile Include="ArtifactContainer\SavelessArtifactContainer.cs" />
     <Compile Include="Estimator\DefaultEstimator.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="IterateHelper\ZipEntry.cs" />
     <Compile Include="IterateHelper\EnumerableExtensions.cs" />
     <Compile Include="LearningRateController\ConstLearningRate.cs" />
@@ -135,6 +136,7 @@
     <Compile Include="OutputConsole\DefaultOutputConsole.cs" />
     <Compile Include="OutputConsole\IOutputConsole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Randomizer\ConstRandomizer.cs" />
     <Compile Include="Randomizer\DefaultRandomizer.cs" />
     <Compile Include="Randomizer\IRandomizer.cs" />
     <Compile Include="Randomizer\NoRandomRandomizer.cs" />

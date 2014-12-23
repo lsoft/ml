@@ -16,13 +16,14 @@ using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
+using MyNN.Mask.Factory;
 using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU2;
+using MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU;
+using MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU2;
+using MyNN.MLP.DropConnect.Inferencer.Factory;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure.Factory;
@@ -52,16 +53,17 @@ namespace MyNNConsoleApp
             )
         {
             var randomizer = 
-                new DefaultRandomizer(1);
+                //new DefaultRandomizer(1);
+                new NoRandomRandomizer();
 
             var trainDataSetProvider = GetTrainProvider(
-                100,
+                10,
                 false,
                 false
                 );
             
             var validationData = GetValidation(
-                1000,
+                100,
                 false,
                 false
                 );
@@ -88,9 +90,9 @@ namespace MyNNConsoleApp
                 new int[]
                 {
                     validationData.InputLength,
-                    8000,
+                    800,
                     100,
-                    8000,
+                    800,
                     validationData.OutputLength 
                 });
 
@@ -127,15 +129,28 @@ namespace MyNNConsoleApp
 
             var mlpContainerHelper = new MLPContainerHelper();
 
-
-            if (useNew)
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(false), true))
             {
-                using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(false), true))
+                var maskContainerFactory = new BigArrayMaskContainerFactory(
+                    new ConstRandomizer(0.5f, 5),
+                    clProvider
+                    );
+
+                var inferencerFactory = new GPULayerInferencerFactory(
+                    new ConstRandomizer(0.5f, 3), 
+                    clProvider,
+                    1,
+                    0.5f
+                    );
+
+                if (useNew)
                 {
                     var algo = new Backpropagation(
-                        new GPU2EpocheTrainer(
+                        new DropConnect2EpocheTrainer(
                             mlp,
                             config,
+                            maskContainerFactory,
+                            inferencerFactory,
                             clProvider),
                         mlpContainerHelper,
                         mlpContainer,
@@ -150,15 +165,14 @@ namespace MyNNConsoleApp
 
                     return acc.PerItemError;
                 }
-            }
-            else
-            {
-                using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(false), true))
+                else
                 {
                     var algo = new Backpropagation(
-                        new GPUEpocheTrainer(
+                        new DropConnectEpocheTrainer(
                             mlp,
                             config,
+                            maskContainerFactory,
+                            inferencerFactory,
                             clProvider),
                         mlpContainerHelper,
                         mlpContainer,
