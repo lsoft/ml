@@ -130,18 +130,14 @@ __kernel void HiddenLayerTrain(
     __global float * currentLayerNET,
 
     __global float * previousLayerLastState,
-    __global float * currentLayerLastState,
     __global float * currentLayerDeDz,
-    __global float * nextLayerDeDz,
 
     __global float * currentLayerWeights,
-    __global float * nextLayerWeights,
             
     __global float * nabla,
 
     int previousLayerNeuronCount,
     int currentLayerNeuronCount,
-    int nextLayerNeuronCount,
 
     float learningRate,
     float regularizationFactor,
