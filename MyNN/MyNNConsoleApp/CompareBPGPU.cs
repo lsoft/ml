@@ -55,7 +55,7 @@ namespace MyNNConsoleApp
                 new DefaultRandomizer(1);
 
             var trainDataSetProvider = GetTrainProvider(
-                1000,
+                10,
                 false,
                 false
                 );
@@ -82,13 +82,15 @@ namespace MyNNConsoleApp
                     null,
                     new RLUFunction(), 
                     new RLUFunction(), 
+                    new RLUFunction(), 
                     new SigmoidFunction(1f), 
                 },
                 new int[]
                 {
                     validationData.InputLength,
-                    8000,
-                    8000,
+                    800,
+                    100,
+                    800,
                     validationData.OutputLength 
                 });
 
@@ -109,8 +111,8 @@ namespace MyNNConsoleApp
 
             var config = new LearningAlgorithmConfig(
                 new HalfSquaredEuclidianDistance(),
-                new ConstLearningRate(0.00002f), 
-                1,
+                new ConstLearningRate(1/128f), 
+                2,
                 0f,
                 epocheCount,
                 -1f,

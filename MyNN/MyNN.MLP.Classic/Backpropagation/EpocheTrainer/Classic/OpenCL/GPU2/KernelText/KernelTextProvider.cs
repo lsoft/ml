@@ -150,7 +150,7 @@ __kernel void PreprocessKernel0(
     const int groupsizex = <GROUP_SIZE>;
     const int groupsizey = <GROUP_SIZE>;
 
-    __local float cache[groupsizex * groupsizey];
+    __local float cache[<GROUP_SIZE> * <GROUP_SIZE>];
 
     int globalx = get_global_id(0);
     int globaly = get_global_id(1);
