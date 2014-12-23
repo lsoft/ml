@@ -29,7 +29,6 @@ using MyNN.MLP.Backpropagation.Validation.Drawer;
 using MyNN.MLP.Backpropagation.Validation.Drawer.Factory;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.TransposedClassic.OpenCL.GPU;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;

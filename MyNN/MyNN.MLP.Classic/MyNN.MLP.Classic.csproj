@@ -41,7 +41,6 @@
   <ItemGroup>
     <Compile Include="BackpropagationFactory\Classic\OpenCL\CPU\CPUBackpropagationFactory.cs" />
     <Compile Include="BackpropagationFactory\Classic\OpenCL\GPU\GPUBackpropagationFactory.cs" />
-    <Compile Include="BackpropagationFactory\TransposedClassic\OpenCL\CPU\CPUTransposeBackpropagationFactory.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\CSharpEpocheTrainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Kernel\HiddenLayerKernel.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Kernel\OutputLayerKernel.cs" />
