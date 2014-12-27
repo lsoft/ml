@@ -5,7 +5,7 @@ using OpenCL.Net.Wrapper.Mem;
 using OpenCL.Net.Wrapper.Mem.Data;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
-namespace MyNN.MLP.Classic.Transposer
+namespace MyNN.MLP.Transposer
 {
     public class TransposerNvidia : IOpenCLTransposer
     {

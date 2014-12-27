@@ -114,7 +114,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Img
             WeightMem = weightMem;
         }
 
-        public void ClearAndPushHiddenLayers()
+        public void ClearAndPushNetAndState()
         {
             ClearHiddenLayers();
 
@@ -140,7 +140,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Img
             this.StateMem.Write(BlockModeEnum.NonBlocking);
         }
 
-        public void PushInput(float[] data)
+        public void ReadInput(float[] data)
         {
             if (data.Length != _currentLayerNonBiasNeuronCount)
             {
@@ -166,7 +166,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Img
             _clProvider.QueueFinish();
         }
 
-        public void PushWeights(ILayer layer)
+        public void ReadWeightsFromLayer(ILayer layer)
         {
             if (layer == null)
             {
@@ -194,18 +194,35 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Img
             
         }
 
-        public void PopHiddenState()
-        {
-            //читаем его из opencl
-            this.NetMem.Read(BlockModeEnum.Blocking);
-            this.StateMem.Read(BlockModeEnum.Blocking);
-        }
-
-        public void PopLastLayerState()
+        public void PopNetAndState()
         {
             //извлекаем из Opencl последний слой
             this.NetMem.Read(BlockModeEnum.Blocking);
             this.StateMem.Read(BlockModeEnum.Blocking);
+        }
+
+        public void PopWeights()
+        {
+            if (this.WeightMem != null)
+            {
+                this.WeightMem.Read(BlockModeEnum.Blocking);
+            }
+        }
+
+        public void WritebackWeightsToMLP(ILayer layer)
+        {
+            var weightLayer = this.WeightMem;
+
+            var weightShiftIndex = 0;
+            for (var neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; ++neuronIndex)
+            {
+                var neuron = layer.Neurons[neuronIndex];
+
+                var weightCount = neuron.Weights.Length;
+
+                Array.Copy(weightLayer.Array, weightShiftIndex, neuron.Weights, 0, weightCount);
+                weightShiftIndex += weightCount;
+            }
         }
 
         public ILayerState GetLayerState()

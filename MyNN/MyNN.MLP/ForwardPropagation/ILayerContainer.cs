@@ -4,16 +4,18 @@ namespace MyNN.MLP.ForwardPropagation
 {
     public interface ILayerContainer
     {
-        void ClearAndPushHiddenLayers();
+        void ClearAndPushNetAndState();
 
-        void PushInput(float[] data);
+        void ReadInput(float[] data);
         
-        void PushWeights(ILayer layer);
-        
-        void PopHiddenState();
-        
-        void PopLastLayerState();
+        void ReadWeightsFromLayer(ILayer layer);
+
+        void PopNetAndState();
         
         ILayerState GetLayerState();
+
+        void PopWeights();
+
+        void WritebackWeightsToMLP(ILayer layer);
     }
 }

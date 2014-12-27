@@ -41,21 +41,19 @@
   <ItemGroup>
     <Compile Include="BackpropagationFactory\Classic\OpenCL\CPU\CPUBackpropagationFactory.cs" />
     <Compile Include="BackpropagationFactory\Classic\OpenCL\GPU\GPUBackpropagationFactory.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\CSharpEpocheTrainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Kernel\HiddenLayerKernel.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Kernel\OutputLayerKernel.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Kernel\UpdateWeightKernel.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\CPUEpocheTrainer.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\Backpropagator\CPUOutputLayerBackpropagator.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\Backpropagator\CPUHiddenLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProvider.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\CPU\KernelText\KernelTextProviderWithRegularization.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\GPUEpocheTrainer.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\Backpropagator\GPUHiddenLayerBackpropagator.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\Backpropagator\GPUOutputLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelText\KernelTextProvider.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\OpenCL\GPU\KernelText\KernelTextProviderWithRegularization.cs" />
-    <Compile Include="Transposer\IOpenCLTransposer.cs" />
-    <Compile Include="Transposer\ITransposer.cs" />
-    <Compile Include="Transposer\TransposerNvidia.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -79,6 +77,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

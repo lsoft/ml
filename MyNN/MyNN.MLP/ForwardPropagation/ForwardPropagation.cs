@@ -23,7 +23,7 @@ namespace MyNN.MLP.ForwardPropagation
             }
         }
 
-        private readonly ILayerContainer[] _mems;
+        private readonly ILayerContainer[] _containers;
         private readonly ILayerPropagator[] _propagators;
 
         private ILayerContainer _lastContainer
@@ -31,7 +31,7 @@ namespace MyNN.MLP.ForwardPropagation
             get
             {
                 return
-                    _mems.Last();
+                    _containers.Last();
             }
         }
 
@@ -79,7 +79,7 @@ namespace MyNN.MLP.ForwardPropagation
 
             #endregion
 
-            _mems = containers;
+            _containers = containers;
             _propagators = propagators;
             _mlp = mlp;
         }
@@ -161,7 +161,7 @@ namespace MyNN.MLP.ForwardPropagation
 
                 for (var layerIndex = 0; layerIndex < _mlp.Layers.Count(); layerIndex++)
                 {
-                    var ls = _mems[layerIndex].GetLayerState();
+                    var ls = _containers[layerIndex].GetLayerState();
                     listls.Add(ls);
                 }
 
@@ -177,7 +177,7 @@ namespace MyNN.MLP.ForwardPropagation
         {
             for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; layerIndex++)
             {
-                _mems[layerIndex].ClearAndPushHiddenLayers();
+                _containers[layerIndex].ClearAndPushNetAndState();
             }
         }
 
@@ -189,7 +189,7 @@ namespace MyNN.MLP.ForwardPropagation
             }
 
             //записываем значения в сеть
-            _mems[0].PushInput(d.Input);
+            _containers[0].ReadInput(d.Input);
             
             //начинаем считать
             var layerCount = _mlp.Layers.Length;
@@ -210,7 +210,7 @@ namespace MyNN.MLP.ForwardPropagation
             for (var layerIndex = 1; layerIndex < layerCount; ++layerIndex)
             {
                 var layer = _mlp.Layers[layerIndex];
-                _mems[layerIndex].PushWeights(layer);
+                _containers[layerIndex].ReadWeightsFromLayer(layer);
             }
         }
 
@@ -229,14 +229,14 @@ namespace MyNN.MLP.ForwardPropagation
             for (var layerIndex = 1; layerIndex < layerCount - 1; layerIndex++)
             {
                 //читаем его из opencl
-                _mems[layerIndex].PopHiddenState();
+                _containers[layerIndex].PopNetAndState();
             }
         }
 
         private void PopLastLayerState()
         {
             //извлекаем из Opencl последний слой
-            _lastContainer.PopLastLayerState();
+            _lastContainer.PopNetAndState();
         }
 
     }

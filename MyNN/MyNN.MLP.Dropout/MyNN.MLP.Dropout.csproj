@@ -45,11 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackpropagationFactory\Dropout\OpenCL\GPU\GPUDropoutBackpropagationFactory.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\CPUDropoutEpocheTrainer.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProvider.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\CPU\KernelText\KernelTextProviderWithRegularization.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\GPUDropoutEpocheTrainer.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\Backpropagator\GPUDropoutOutputLayerBackpropagator.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\Backpropagator\GPUDropoutHiddenLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\KernelText\KernelTextProvider.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\KernelText\KernelTextProviderWithoutRegularization.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Dropout\OpenCL\GPU\KernelText\KernelTextProviderWithRegularization.cs" />

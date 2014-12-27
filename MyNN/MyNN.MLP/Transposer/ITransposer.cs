@@ -1,4 +1,4 @@
-﻿namespace MyNN.MLP.Classic.Transposer
+﻿namespace MyNN.MLP.Transposer
 {
     public interface ITransposer
     {

@@ -54,10 +54,10 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.OpenCL.GPU2
                 plc.NetMem.Array[0] = 1f;
                 plc.StateMem.Array[0] = 1f;
 
-                plc.PushHiddenLayers();
+                plc.PushNetAndState();
 
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
+                clc.ClearAndPushNetAndState();
+                clc.ReadWeightsFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -115,10 +115,10 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.OpenCL.GPU2
                 plc.NetMem.Array[0] = 1f;
                 plc.StateMem.Array[0] = 1f;
 
-                plc.PushHiddenLayers();
+                plc.PushNetAndState();
 
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
+                clc.ClearAndPushNetAndState();
+                clc.ReadWeightsFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -176,10 +176,10 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.OpenCL.GPU2
                 plc.NetMem.Array[0] = 1f;
                 plc.StateMem.Array[0] = 1f;
 
-                plc.PushHiddenLayers();
+                plc.PushNetAndState();
 
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
+                clc.ClearAndPushNetAndState();
+                clc.ReadWeightsFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -242,10 +242,10 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.OpenCL.GPU2
                 plc.NetMem.Array[1] = 1f;
                 plc.StateMem.Array[1] = 1f;
 
-                plc.PushHiddenLayers();
+                plc.PushNetAndState();
 
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
+                clc.ClearAndPushNetAndState();
+                clc.ReadWeightsFromLayer(l);
 
                 clProvider.QueueFinish();
 
@@ -311,10 +311,10 @@ namespace MyNN.Tests.MLP2.LayerPropagator.DropConnect.OpenCL.GPU2
                 plc.NetMem.Array[1] = 1f;
                 plc.StateMem.Array[1] = 1f;
 
-                plc.PushHiddenLayers();
+                plc.PushNetAndState();
 
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
+                clc.ClearAndPushNetAndState();
+                clc.ReadWeightsFromLayer(l);
 
                 clProvider.QueueFinish();
 

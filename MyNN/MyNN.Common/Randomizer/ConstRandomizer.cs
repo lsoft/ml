@@ -52,7 +52,7 @@ namespace MyNN.Common.Randomizer
             {
                 for (var i = 0; i < buffer.Length; i++)
                 {
-                    buffer[i] = (byte)(_ivalue % 256);
+                    buffer[i] = (byte)((_ivalue + i) % 256);
                 }
             }
         }

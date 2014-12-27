@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.Item;
@@ -8,6 +9,9 @@ using MyNN.Common.Randomizer;
 using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.BackpropagationFactory;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
+using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.OpenCL.CPU;
@@ -20,7 +24,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
     /// <summary>
     /// Factory for NLNCA-backpropagation algorithm enables CPU-OpenCL
     /// </summary>
-    public class CPUNLNCABackpropagationFactory : IBackpropagationFactory
+    public class CPUNLNCAAuthencoderBackpropagationFactory : IBackpropagationFactory
     {
         private readonly IMLPContainerHelper _mlpContainerHelper;
         private readonly Func<List<IDataItem>, IDodfCalculator> _dodfCalculatorFactory;
@@ -28,7 +32,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
         private readonly float _lambda;
         private readonly float _partOfTakeIntoAccount;
 
-        public CPUNLNCABackpropagationFactory(
+        public CPUNLNCAAuthencoderBackpropagationFactory(
             IMLPContainerHelper mlpContainerHelper,
             Func<List<IDataItem>, IDodfCalculator> dodfCalculatorFactory,
             int ncaLayerIndex,
@@ -55,7 +59,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
             IRandomizer randomizer,
             CLProvider clProvider,
             IArtifactContainer artifactContainer,
-            IMLP net,
+            IMLP mlp,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config)
         {
@@ -71,9 +75,9 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
             {
                 throw new ArgumentNullException("artifactContainer");
             }
-            if (net == null)
+            if (mlp == null)
             {
-                throw new ArgumentNullException("net");
+                throw new ArgumentNullException("mlp");
             }
             if (validationDataProvider == null)
             {
@@ -84,23 +88,44 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
                 throw new ArgumentNullException("config");
             }
 
-            var takeIntoAccount = (int)(net.Layers[_ncaLayerIndex].NonBiasNeuronCount*_partOfTakeIntoAccount);
+            var takeIntoAccount = (int)(mlp.Layers[_ncaLayerIndex].NonBiasNeuronCount*_partOfTakeIntoAccount);
+
+            var cc = new CPUPropagatorComponentConstructor(
+                clProvider,
+                VectorizationSizeEnum.VectorizationMode16
+                );
+
+            ILayerContainer[] containers;
+            ILayerPropagator[] propagators;
+            cc.CreateComponents(
+                mlp,
+                out containers,
+                out propagators);
+
+            var forwardPropagation = new ForwardPropagation.ForwardPropagation(
+                containers,
+                propagators,
+                mlp
+                );
 
             var algo = new MLP.Backpropagation.Backpropagation(
                 new CPUAutoencoderNLNCAEpocheTrainer(
-                    VectorizationSizeEnum.VectorizationMode16,
-                    net,
+                    mlp,
                     config,
                     clProvider,
                     _dodfCalculatorFactory,
                     _ncaLayerIndex,
                     _lambda,
-                    takeIntoAccount), 
+                    takeIntoAccount,
+                    forwardPropagation
+                    ), 
                 _mlpContainerHelper,
                 artifactContainer,
-                net,
+                mlp,
                 validationDataProvider,
-                config);
+                config,
+                forwardPropagation
+                );
 
             return algo;
         }

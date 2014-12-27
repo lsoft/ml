@@ -18,18 +18,28 @@ using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
 using MyNN.Mask.Factory;
 using MyNN.MLP.Backpropagation;
+using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
+using MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
+using MyNN.MLP.DesiredValues;
+using MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU;
+using MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU;
 using MyNN.MLP.DropConnect.Inferencer.Factory;
-using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU;
-using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU2;
+using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure.Factory;
 using MyNN.MLP.Structure.Layer.Factory;
 using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
+using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
@@ -55,6 +65,7 @@ namespace MyNNConsoleApp
             var randomizer = 
                 //new DefaultRandomizer(1);
                 new NoRandomRandomizer();
+                //new ConstRandomizer(0.5f, 5);
 
             var trainDataSetProvider = GetTrainProvider(
                 100,
@@ -90,9 +101,9 @@ namespace MyNNConsoleApp
                 new int[]
                 {
                     validationData.InputLength,
-                    8000,
+                    800,
                     100,
-                    8000,
+                    800,
                     validationData.OutputLength 
                 });
 
@@ -130,6 +141,7 @@ namespace MyNNConsoleApp
             var mlpContainerHelper = new MLPContainerHelper();
 
             using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(false), true))
+            //using (var clProvider = new CLProvider())
             {
                 var maskContainerFactory = new BigArrayMaskContainerFactory(
                     new ConstRandomizer(0.5f, 5),
@@ -137,20 +149,44 @@ namespace MyNNConsoleApp
                     );
 
                 var inferencerFactory = new GPULayerInferencerFactory(
-                    new ConstRandomizer(0.5f, 3), 
+                    new ConstRandomizer(0.5f, 3),
                     clProvider,
                     1,
                     0.5f
                     );
 
-                if (useNew)
+                if (!useNew)
                 {
+                    #region создаем компоненты выведения
+
+                    IForwardPropagation inferenceForwardPropagation;
+                    {
+                        var cc = new MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU.PropagatorComponentConstructor(
+                            clProvider,
+                            inferencerFactory
+                            );
+
+                        ILayerContainer[] containers;
+                        ILayerPropagator[] propagators;
+                        cc.CreateComponents(
+                            mlp,
+                            out containers,
+                            out propagators);
+
+                        inferenceForwardPropagation = new MyNN.MLP.ForwardPropagation.ForwardPropagation(
+                            containers,
+                            propagators,
+                            mlp
+                            );
+                    }
+
+                    #endregion
+
                     var algo = new Backpropagation(
-                        new GPU2DropoutEpocheTrainer(
-                            randomizer,
-                            maskContainerFactory,
+                        new DropConnectEpocheTrainer(
                             mlp,
                             config,
+                            maskContainerFactory,
                             clProvider,
                             0.5f
                             ),
@@ -158,7 +194,8 @@ namespace MyNNConsoleApp
                         mlpContainer,
                         mlp,
                         validation,
-                        config
+                        config,
+                        inferenceForwardPropagation
                         );
 
                     var acc = algo.Train(
@@ -169,16 +206,16 @@ namespace MyNNConsoleApp
                 }
                 else
                 {
-                    var algo = new Backpropagation(
-                        new GPUDropoutEpocheTrainer(
-                            randomizer,
-                            maskContainerFactory,
-                            mlp,
-                            config,
-                            clProvider,
-                            0.5f
-                            ),
-                        mlpContainerHelper,
+                    var backpropagationFactory = new GPUDropConnectBackpropagationFactory(
+                        maskContainerFactory,
+                        inferencerFactory,
+                        0.5f,
+                        mlpContainerHelper
+                        );
+
+                    var algo = backpropagationFactory.CreateBackpropagation(
+                        randomizer,
+                        clProvider,
                         mlpContainer,
                         mlp,
                         validation,
@@ -291,9 +328,7 @@ namespace MyNNConsoleApp
             return
                 validationDataSet;
         }
-
     }
-
 
     [Serializable]
     public class MNISTDataItemLoaderForDelete : IDataItemLoader

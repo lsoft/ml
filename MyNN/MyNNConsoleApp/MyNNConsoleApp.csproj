@@ -196,14 +196,6 @@
       <Project>{6B97FBA5-C72D-4BEA-88FB-D2C2C115E470}</Project>
       <Name>MyNN.MLP.DropConnect</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MyNN.MLP.Dropout.ForwardPropagation\MyNN.MLP.Dropout.ForwardPropagation.csproj">
-      <Project>{1bf034a8-f0eb-4c94-b671-ab46fbb93e97}</Project>
-      <Name>MyNN.MLP.Dropout.ForwardPropagation</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyNN.MLP.Dropout\MyNN.MLP.Dropout.csproj">
-      <Project>{1C8AF3A1-E95B-43A2-AF1E-6238A89AB53C}</Project>
-      <Name>MyNN.MLP.Dropout</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.NLNCA\MyNN.MLP.NLNCA.csproj">
       <Project>{5A82E05A-C2DA-42F4-A5F7-C79355E48E5F}</Project>
       <Name>MyNN.MLP.NLNCA</Name>

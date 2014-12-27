@@ -64,7 +64,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             WeightMem = new float[currentLayerNonBiasNeuronCount * previousLayerTotalNeuronCount];
         }
 
-        public void ClearAndPushHiddenLayers()
+        public void ClearAndPushNetAndState()
         {
             var nml = this.NetMem.Length;
             Array.Clear(this.NetMem, 0, nml);
@@ -75,7 +75,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             this.StateMem[sml - 1] = 1f;
         }
 
-        public void PushInput(float[] data)
+        public void ReadInput(float[] data)
         {
             if (data.Length != _currentLayerNonBiasNeuronCount)
             {
@@ -95,7 +95,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             }
         }
 
-        public void PushWeights(ILayer layer)
+        public void ReadWeightsFromLayer(ILayer layer)
         {
             if (layer == null)
             {
@@ -120,14 +120,30 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             }
         }
 
-        public void PopHiddenState()
+        public void PopNetAndState()
         {
             //nothing to do
         }
 
-        public void PopLastLayerState()
+        public void PopWeights()
         {
             //nothing to do
+        }
+
+        public void WritebackWeightsToMLP(ILayer layer)
+        {
+            var weightLayer = this.WeightMem;
+
+            var weightShiftIndex = 0;
+            for (var neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; ++neuronIndex)
+            {
+                var neuron = layer.Neurons[neuronIndex];
+
+                var weightCount = neuron.Weights.Length;
+
+                Array.Copy(weightLayer, weightShiftIndex, neuron.Weights, 0, weightCount);
+                weightShiftIndex += weightCount;
+            }
         }
 
         public ILayerState GetLayerState()

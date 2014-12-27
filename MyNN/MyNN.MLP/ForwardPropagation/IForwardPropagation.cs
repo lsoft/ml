@@ -42,5 +42,11 @@ namespace MyNN.MLP.ForwardPropagation
         /// <returns>Значение выходного слоя</returns>
         /// <returns>Состояние каждого нейрона сети для каждого примера</returns>
         List<IMLPState> ComputeState(IEnumerable<IDataItem> dataItemList);
+
+        //!!! требуется отрефакторить этот блок
+        void PushWeights();
+        void ClearAndPushHiddenLayers();
+        void Propagate(IDataItem d);
+
     }
 }

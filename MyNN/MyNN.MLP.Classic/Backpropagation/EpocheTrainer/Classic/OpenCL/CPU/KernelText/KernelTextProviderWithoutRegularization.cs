@@ -38,6 +38,16 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
 
         #region calculation kernels source
 
+        public string GetPreprocessHiddenKernelZeroSource(int groupSize)
+        {
+            throw new NotSupportedException();
+        }
+
+        public string GetPreprocessHiddenKernelOneSource()
+        {
+            throw new NotSupportedException();
+        }
+
         public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);

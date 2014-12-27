@@ -7,6 +7,7 @@ using MyNN.Common.OutputConsole;
 using MyNN.MLP.AccuracyRecord;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.Validation;
+using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
@@ -19,6 +20,7 @@ namespace MyNN.MLP.Backpropagation
         private readonly IMLP _mlp;
         private readonly IValidation _validation;
         private readonly ILearningAlgorithmConfig _config;
+        private readonly IForwardPropagation _inferenceForwardPropagation;
         private readonly IEpocheTrainer _epocheTrainer;
         private readonly IMLPContainerHelper _mlpContainerHelper;
         private readonly IArtifactContainer _artifactContainer;
@@ -31,7 +33,9 @@ namespace MyNN.MLP.Backpropagation
             IArtifactContainer artifactContainer,
             IMLP mlp,
             IValidation validation,
-            ILearningAlgorithmConfig config)
+            ILearningAlgorithmConfig config,
+            IForwardPropagation inferenceForwardPropagation
+            )
         {
             if (epocheTrainer == null)
             {
@@ -49,6 +53,10 @@ namespace MyNN.MLP.Backpropagation
             {
                 throw new ArgumentNullException("validation");
             }
+            if (inferenceForwardPropagation == null)
+            {
+                throw new ArgumentNullException("inferenceForwardPropagation");
+            }
 
             _epocheTrainer = epocheTrainer;
             _mlpContainerHelper = mlpContainerHelper;
@@ -56,6 +64,7 @@ namespace MyNN.MLP.Backpropagation
             _mlp = mlp;
             _validation = validation;
             _config = config;
+            _inferenceForwardPropagation = inferenceForwardPropagation;
         }
 
         public IAccuracyRecord Train(IDataSetProvider dataSetProvider)
@@ -68,14 +77,6 @@ namespace MyNN.MLP.Backpropagation
             ConsoleAmbientContext.Console.WriteLine(
                 "BACKPROPAGATION STARTED WITH {0}",
                 _mlp.GetLayerInformation());
-            ConsoleAmbientContext.Console.WriteLine(
-                "EPOCHE TRAINER = {0}",
-                this._epocheTrainer.GetType().Name
-                );
-            ConsoleAmbientContext.Console.WriteLine(
-                "FORWARDER = {0}",
-                _epocheTrainer.ForwardPropagation.GetType().Name
-                );
 
             #region валидируем дефолтовую сеть
 
@@ -86,7 +87,7 @@ namespace MyNN.MLP.Backpropagation
             var preTrainContainer = _artifactContainer.GetChildContainer("_pretrain");
 
             _validation.Validate(
-                _epocheTrainer.ForwardPropagation,
+                _inferenceForwardPropagation,
                 null,
                 preTrainContainer
                 );
@@ -164,7 +165,7 @@ namespace MyNN.MLP.Backpropagation
 
                 //внешняя функция для обсчета на тестовом множестве
                 epocheAccuracyRecord = _validation.Validate(
-                    _epocheTrainer.ForwardPropagation,
+                    _inferenceForwardPropagation,
                     epochNumber,
                     epocheContainer
                     );
@@ -240,7 +241,7 @@ namespace MyNN.MLP.Backpropagation
                     
                     _mlpContainerHelper.SaveMLP(
                         epocheContainer,
-                        _epocheTrainer.ForwardPropagation.MLP,
+                        _inferenceForwardPropagation.MLP,
                         epocheAccuracyRecord);
                 }
 

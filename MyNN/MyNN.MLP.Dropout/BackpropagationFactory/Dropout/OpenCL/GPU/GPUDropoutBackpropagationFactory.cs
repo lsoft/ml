@@ -1,11 +1,21 @@
 ﻿using System;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Randomizer;
+using MyNN.Mask;
 using MyNN.Mask.Factory;
 using MyNN.MLP.Backpropagation;
+using MyNN.MLP.Backpropagation.EpocheTrainer;
+using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.BackpropagationFactory;
+using MyNN.MLP.DesiredValues;
 using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU;
+using MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Backpropagator;
+using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Backpropagator;
+using MyNN.MLP.Dropout.ForwardPropagation.OpenCL;
+using MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU;
+using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
@@ -18,35 +28,35 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
     /// </summary>
     public class GPUDropoutBackpropagationFactory : IBackpropagationFactory
     {
-        private readonly IMLPContainerHelper _mlpContainerHelper;
         private readonly IOpenCLMaskContainerFactory _maskContainerFactory;
         private readonly float _p;
+        private readonly IMLPContainerHelper _mlpContainerHelper;
 
         public GPUDropoutBackpropagationFactory(
-            IMLPContainerHelper mlpContainerHelper,
             IOpenCLMaskContainerFactory maskContainerFactory,
-            float p
+            float p,
+            IMLPContainerHelper mlpContainerHelper
             )
         {
-            if (mlpContainerHelper == null)
-            {
-                throw new ArgumentNullException("mlpContainerHelper");
-            }
             if (maskContainerFactory == null)
             {
                 throw new ArgumentNullException("maskContainerFactory");
             }
+            if (mlpContainerHelper == null)
+            {
+                throw new ArgumentNullException("mlpContainerHelper");
+            }
 
-            _mlpContainerHelper = mlpContainerHelper;
             _maskContainerFactory = maskContainerFactory;
             _p = p;
+            _mlpContainerHelper = mlpContainerHelper;
         }
 
         public IBackpropagation CreateBackpropagation(
             IRandomizer randomizer,
             CLProvider clProvider,
             IArtifactContainer artifactContainer,
-            IMLP net,
+            IMLP mlp,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config)
         {
@@ -62,9 +72,9 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
             {
                 throw new ArgumentNullException("artifactContainer");
             }
-            if (net == null)
+            if (mlp == null)
             {
-                throw new ArgumentNullException("net");
+                throw new ArgumentNullException("mlp");
             }
             if (validationDataProvider == null)
             {
@@ -75,20 +85,111 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
                 throw new ArgumentNullException("config");
             }
 
-            var algo = new MLP.Backpropagation.Backpropagation(
-                new GPUDropoutEpocheTrainer(
+            var propagatorComponentConstructor = new GPUMaskForwardPropagatorComponentConstructor(
+                randomizer,
+                clProvider,
+                _maskContainerFactory,
+                _p
+                );
+
+            var kernelTextProvider = new MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.KernelText.KernelTextProvider(mlp, config);
+            var desiredValuesContainer = new MemDesiredValuesContainer(clProvider, mlp);
+            var backpropagators = new IMemLayerBackpropagator[mlp.Layers.Length];
+
+            IForwardPropagation trainForwardPropagation;
+            ILayerContainer[] trainContainers;
+            {
+                ILayerContainer[] containers;
+                ILayerPropagator[] propagators;
+                propagatorComponentConstructor.CreateComponents(
+                    mlp,
+                    out containers,
+                    out propagators);
+
+                trainContainers = containers;
+
+                trainForwardPropagation = new MLP.ForwardPropagation.ForwardPropagation(
+                    containers,
+                    propagators,
+                    mlp
+                    );
+
+                //создаем бекпропагаторы
+                for (var layerIndex = mlp.Layers.Length - 1; layerIndex > 0; layerIndex--)
+                {
+                    var isLastLayer = layerIndex == mlp.Layers.Length - 1;
+
+                    if (isLastLayer)
+                    {
+                        backpropagators[layerIndex] = new GPUDropoutOutputLayerBackpropagator(
+                            clProvider,
+                            mlp,
+                            config,
+                            containers[layerIndex - 1] as IMemLayerContainer,
+                            containers[layerIndex] as IMemLayerContainer,
+                            kernelTextProvider,
+                            desiredValuesContainer
+                            );
+                    }
+                    else
+                    {
+                        backpropagators[layerIndex] = new GPUDropoutHiddenLayerBackpropagator(
+                            clProvider,
+                            mlp,
+                            config,
+                            layerIndex,
+                            containers[layerIndex - 1] as IMemLayerContainer,
+                            containers[layerIndex] as IMemLayerContainer,
+                            containers[layerIndex + 1] as IMemLayerContainer,
+                            kernelTextProvider,
+                            backpropagators[layerIndex + 1].DeDz,
+                            propagators[layerIndex] as IDropoutLayerPropagator
+                            );
+                    }
+                }
+            }
+
+            IForwardPropagation inferenceForwardPropagation;
+            {
+                var cc = new GPUInferencePropagatorComponentConstructor(
                     randomizer,
-                    _maskContainerFactory,
-                    net,
-                    config,
                     clProvider,
+                    _maskContainerFactory,
                     _p
+                    );
+
+                ILayerContainer[] containers;
+                ILayerPropagator[] propagators;
+                cc.CreateComponents(
+                    mlp,
+                    out containers,
+                    out propagators);
+
+                inferenceForwardPropagation = new MLP.ForwardPropagation.ForwardPropagation(
+                    containers,
+                    propagators,
+                    mlp
+                    );
+            }
+
+
+            var algo = new MLP.Backpropagation.Backpropagation(
+                new EpocheTrainer(
+                    mlp,
+                    config,
+                    trainContainers,
+                    desiredValuesContainer,
+                    backpropagators,
+                    () => clProvider.QueueFinish(),
+                    trainForwardPropagation
                     ),
                 _mlpContainerHelper,
                 artifactContainer,
-                net,
+                mlp,
                 validationDataProvider,
-                config);
+                config,
+                inferenceForwardPropagation
+                );
 
             return algo;
         }

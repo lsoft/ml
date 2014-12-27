@@ -49,8 +49,12 @@
     </Compile>
     <Compile Include="BackpropagationFactory\IBackpropagationFactory.cs" />
     <Compile Include="Backpropagation\Backpropagation.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\Factory\IMemLayerBackpropagatorFactory.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\ILayerBackpropagator.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\IMemLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\IEpocheTrainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\IKernelTextProvider.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\EpocheTrainer.cs" />
     <Compile Include="Backpropagation\IBackpropagation.cs" />
     <Compile Include="Backpropagation\Metrics\AUC.cs" />
     <Compile Include="Backpropagation\Metrics\HalfSquaredEuclidianDistance.cs" />
@@ -75,6 +79,9 @@
     <Compile Include="DBNInfo\WeightLoader\IWeightLoader.cs" />
     <Compile Include="DBNInfo\WeightLoader\RBMAutoencoderWeightLoader.cs" />
     <Compile Include="DBNInfo\WeightLoader\RBMWeightLoader.cs" />
+    <Compile Include="DesiredValues\IDesiredValuesContainer.cs" />
+    <Compile Include="DesiredValues\IMemDesiredValuesContainer.cs" />
+    <Compile Include="DesiredValues\MemDesiredValuesContainer.cs" />
     <Compile Include="FileSystemFeatureVisualization.cs" />
     <Compile Include="ForwardPropagationFactory\ForwardPropagationFactory.cs" />
     <Compile Include="ForwardPropagationFactory\IForwardPropagationFactory.cs" />
@@ -128,6 +135,9 @@
     <Compile Include="Structure\Neuron\InputNeuron.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structure\Neuron\NeuronConfiguration.cs" />
+    <Compile Include="Transposer\IOpenCLTransposer.cs" />
+    <Compile Include="Transposer\ITransposer.cs" />
+    <Compile Include="Transposer\TransposerNvidia.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyNN.Boltzmann\MyNN.Boltzmann.csproj">

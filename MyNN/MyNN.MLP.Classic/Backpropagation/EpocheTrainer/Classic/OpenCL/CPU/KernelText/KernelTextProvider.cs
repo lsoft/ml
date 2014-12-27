@@ -8,7 +8,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
     /// <summary>
     /// Kernel source provider for classic backpropagation epoche trainer that enables CPU-OpenCL
     /// </summary>
-    internal class KernelTextProvider : IKernelTextProvider
+    public class KernelTextProvider : IKernelTextProvider
     {
         private readonly IKernelTextProvider _kp;
         
@@ -40,6 +40,16 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
         }
 
         #region calculation kernels source
+
+        public string GetPreprocessHiddenKernelZeroSource(int groupSize)
+        {
+            throw new NotSupportedException();
+        }
+
+        public string GetPreprocessHiddenKernelOneSource()
+        {
+            throw new NotSupportedException();
+        }
 
         public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {

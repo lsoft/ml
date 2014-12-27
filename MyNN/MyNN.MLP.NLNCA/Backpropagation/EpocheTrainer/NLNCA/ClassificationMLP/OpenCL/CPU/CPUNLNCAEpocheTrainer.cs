@@ -44,15 +44,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.O
         private Kernel[] _outputKernelIncrement, _outputKernelOverwrite;
         private Kernel _updateWeightKernel;
 
-        private readonly ForwardPropagation.ForwardPropagation _forwardPropagation;
-        public IForwardPropagation ForwardPropagation
-        {
-            get
-            {
-                return
-                    _forwardPropagation;
-            }
-        }
+        private readonly IForwardPropagation _forwardPropagation;
 
         /// <summary>
         /// Constructor
@@ -62,12 +54,14 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.O
         /// <param name="config">Learning config</param>
         /// <param name="clProvider">OpenCL provider</param>
         /// <param name="dodfCalculatorFactory">dOdF calculator factory (for details about dOdF please refer https://www.cs.toronto.edu/~hinton/absps/nonlinnca.pdf )</param>
+        /// <param name="forwardPropagation">Train forwarder</param>
         public CPUNLNCAEpocheTrainer(
             VectorizationSizeEnum vse,
             IMLP mlp,
             ILearningAlgorithmConfig config,
             CLProvider clProvider,
-            Func<List<IDataItem>, IDodfCalculator> dodfCalculatorFactory
+            Func<List<IDataItem>, IDodfCalculator> dodfCalculatorFactory,
+            IForwardPropagation forwardPropagation
             )
         {
             if (mlp == null)
@@ -85,6 +79,10 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.O
             if (dodfCalculatorFactory == null)
             {
                 throw new ArgumentNullException("dodfCalculatorFactory");
+            }
+            if (forwardPropagation == null)
+            {
+                throw new ArgumentNullException("forwardPropagation");
             }
 
             //not any activation function is allowed to correctly work under NCA-pressure
@@ -109,26 +107,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.ClassificationMLP.O
             _config = config;
             _clProvider = clProvider;
             _dodfCalculatorFactory = dodfCalculatorFactory;
-
-            var cc = new CPUPropagatorComponentConstructor(
-                _clProvider,
-                vse
-                );
-
-            ILayerContainer[] containers;
-            ILayerPropagator[] propagators;
-            cc.CreateComponents(
-                mlp,
-                out containers,
-                out propagators);
-
-            _containers = containers.ToList().ConvertAll(j => j as IMemLayerContainer).ToArray();
-
-            _forwardPropagation = new ForwardPropagation.ForwardPropagation(
-                containers,
-                propagators,
-                _mlp
-                );
+            _forwardPropagation = forwardPropagation;
 
             this.PrepareInfrastructure();
         }

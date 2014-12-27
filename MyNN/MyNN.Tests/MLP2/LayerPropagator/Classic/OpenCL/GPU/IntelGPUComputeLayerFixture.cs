@@ -49,10 +49,10 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
                 plc.NetMem.Array[0] = 1f;
                 plc.StateMem.Array[0] = 1f;
 
-                plc.PushHiddenLayers();
+                plc.PushNetAndState();
 
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
+                clc.ClearAndPushNetAndState();
+                clc.ReadWeightsFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -101,10 +101,10 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
                 plc.NetMem.Array[1] = 1f;
                 plc.StateMem.Array[1] = 1f;
 
-                plc.PushHiddenLayers();
+                plc.PushNetAndState();
 
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
+                clc.ClearAndPushNetAndState();
+                clc.ReadWeightsFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -150,10 +150,10 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
                 plc.NetMem.Array.Fill(1f);
                 plc.StateMem.Array.Fill(1f);
 
-                plc.PushHiddenLayers();
+                plc.PushNetAndState();
 
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
+                clc.ClearAndPushNetAndState();
+                clc.ReadWeightsFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -199,10 +199,10 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
                 plc.NetMem.Array.Fill((a) => (float) a);
                 plc.StateMem.Array.Fill((a) => (float) a);
 
-                plc.PushHiddenLayers();
+                plc.PushNetAndState();
 
-                clc.ClearAndPushHiddenLayers();
-                clc.PushWeights(l);
+                clc.ClearAndPushNetAndState();
+                clc.ReadWeightsFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();

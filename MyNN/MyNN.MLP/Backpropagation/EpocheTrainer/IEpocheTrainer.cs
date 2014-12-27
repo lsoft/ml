@@ -11,14 +11,6 @@ namespace MyNN.MLP.Backpropagation.EpocheTrainer
     public interface IEpocheTrainer
     {
         /// <summary>
-        /// Forward propagator
-        /// </summary>
-        IForwardPropagation ForwardPropagation
-        {
-            get;
-        }
-
-        /// <summary>
         /// Primary init
         /// </summary>
         /// <param name="data">Train dataset</param>

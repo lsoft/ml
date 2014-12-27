@@ -1,6 +1,6 @@
 ﻿using OpenCL.Net.Wrapper.Mem.Data;
 
-namespace MyNN.MLP.Classic.Transposer
+namespace MyNN.MLP.Transposer
 {
     public interface IOpenCLTransposer : ITransposer
     {

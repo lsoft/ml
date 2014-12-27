@@ -22,14 +22,18 @@ using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.Backpropagation;
+using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
 using MyNN.MLP.Backpropagation.Validation.Drawer;
 using MyNN.MLP.Backpropagation.Validation.Drawer.Factory;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
+using MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
+using MyNN.MLP.DesiredValues;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
@@ -47,6 +51,8 @@ namespace MyNNConsoleApp.RefactoredForDI
     {
         public static void DoTrain()
         {
+            var randomizer = new DefaultRandomizer(21425);
+
             const int trainMaxCountFilesInCategory = 1000;
             const int validationMaxCountFilesInCategory = 300;
 
@@ -144,17 +150,35 @@ namespace MyNNConsoleApp.RefactoredForDI
 
                 var mlpContainerHelper = new MLPContainerHelper();
 
-                var algo = new Backpropagation(
-                    new GPUEpocheTrainer(
-                        mlp,
-                        config,
-                        clProvider),
-                    mlpContainerHelper,
+                var backpropagationFactory = new GPUBackpropagationFactory(
+                    mlpContainerHelper
+                    );
+
+                var algo = backpropagationFactory.CreateBackpropagation(
+                    randomizer,
+                    clProvider,
                     mlpContainer,
                     mlp,
                     validation,
                     config
                     );
+
+                //var algo = new Backpropagation(
+                //    new EpocheTrainer(
+                //        clProvider,
+                //        mlp,
+                //        config,
+                //        new GPUPropagatorComponentConstructor(clProvider),
+                //        new MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText.KernelTextProvider(mlp, config),
+                //        new MemDesiredValuesContainer(clProvider, mlp),
+                //        new GPULayerBackpropagatorFactory(clProvider, mlp, config)
+                //        ),
+                //    mlpContainerHelper,
+                //    mlpContainer,
+                //    mlp,
+                //    validation,
+                //    config
+                //    );
 
                 algo.Train(
                     trainDataSetProvider

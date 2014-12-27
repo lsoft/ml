@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.LearningRateController;
@@ -8,6 +9,10 @@ using MyNN.Common.Other;
 using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
+using MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
+using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure.Factory;
@@ -81,24 +86,60 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                     new SerializationHelper()
                     );
 
-                var alg =
-                    new Backpropagation(
-                        new CPUEpocheTrainer(
-                            VectorizationSizeEnum.NoVectorization,
-                            mlp,
-                            config,
-                            clProvider),
-                        mlpContainer,
-                        artifactContainer,
-                        mlp,
-                        validation,
-                        config);
+                //var cc = new CPUPropagatorComponentConstructor(
+                //    clProvider,
+                //    VectorizationSizeEnum.NoVectorization
+                //    );
+
+                //ILayerContainer[] containers;
+                //ILayerPropagator[] propagators;
+                //cc.CreateComponents(
+                //    mlp,
+                //    out containers,
+                //    out propagators);
+
+                //var forwardPropagation = new MLP.ForwardPropagation.ForwardPropagation(
+                //    containers,
+                //    propagators,
+                //    mlp
+                //    );
+
+                var algof = new CPUBackpropagationFactory(
+                    mlpContainer,
+                    VectorizationSizeEnum.VectorizationMode16
+                    );
+
+                var algo = algof.CreateBackpropagation(
+                    randomizer,
+                    clProvider,
+                    artifactContainer,
+                    mlp,
+                    validation,
+                    config
+                    );
+
+                //var algo =
+                //    new Backpropagation(
+                //        new CPUEpocheTrainer(
+                //            mlp,
+                //            config,
+                //            clProvider,
+                //            containers.ToList().ConvertAll(j => j as IMemLayerContainer).ToArray(),
+                //            forwardPropagation
+                //            ),
+                //        mlpContainer,
+                //        artifactContainer,
+                //        mlp,
+                //        validation,
+                //        config,
+                //        forwardPropagation
+                //        );
 
                 var dataSetProvider = new TestDataSetProvider(
                     dataset
                     );
 
-                alg.Train(dataSetProvider);
+                algo.Train(dataSetProvider);
             }
 
         }

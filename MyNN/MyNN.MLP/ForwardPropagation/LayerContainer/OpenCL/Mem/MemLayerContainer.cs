@@ -109,14 +109,14 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             WeightMem = weightMem;
         }
 
-        public void ClearAndPushHiddenLayers()
+        public void ClearAndPushNetAndState()
         {
-            ClearHiddenLayers();
+            ClearNetAndState();
 
-            PushHiddenLayers();
+            PushNetAndState();
         }
 
-        public void ClearHiddenLayers()
+        public void ClearNetAndState()
         {
             var nml = this.NetMem.Array.Length;
             Array.Clear(this.NetMem.Array, 0, nml);
@@ -128,15 +128,19 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
         }
 
 
-        public void PushHiddenLayers()
+        public void PushNetAndState()
         {
             this.NetMem.Write(BlockModeEnum.NonBlocking);
 
             this.StateMem.Write(BlockModeEnum.NonBlocking);
         }
 
-        public void PushInput(float[] data)
+        public void ReadInput(float[] data)
         {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
             if (data.Length != _currentLayerNonBiasNeuronCount)
             {
                 throw new ArgumentException("data.Length != _currentLayerNonBiasNeuronCount");
@@ -161,7 +165,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             _clProvider.QueueFinish();
         }
 
-        public void PushWeights(ILayer layer)
+        public void ReadWeightsFromLayer(ILayer layer)
         {
             if (layer == null)
             {
@@ -189,14 +193,31 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             
         }
 
-        public void PopHiddenState()
+        public void PopWeights()
         {
-            //читаем его из opencl
-            this.NetMem.Read(BlockModeEnum.Blocking);
-            this.StateMem.Read(BlockModeEnum.Blocking);
+            if (this.WeightMem != null)
+            {
+                this.WeightMem.Read(BlockModeEnum.Blocking);
+            }
         }
 
-        public void PopLastLayerState()
+        public void WritebackWeightsToMLP(ILayer layer)
+        {
+            var weightLayer = this.WeightMem;
+
+            var weightShiftIndex = 0;
+            for (var neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; ++neuronIndex)
+            {
+                var neuron = layer.Neurons[neuronIndex];
+
+                var weightCount = neuron.Weights.Length;
+
+                Array.Copy(weightLayer.Array, weightShiftIndex, neuron.Weights, 0, weightCount);
+                weightShiftIndex += weightCount;
+            }
+        }
+
+        public void PopNetAndState()
         {
             //извлекаем из Opencl последний слой
             this.NetMem.Read(BlockModeEnum.Blocking);

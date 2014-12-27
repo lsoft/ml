@@ -8,7 +8,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Kern
     /// <summary>
     /// Kernel source provider for classic backpropagation epoche trainer that enables CPU-OpenCL
     /// </summary>
-    internal class KernelTextProvider : IKernelTextProvider
+    public class KernelTextProvider : IKernelTextProvider
     {
         private readonly IKernelTextProvider _kp;
 

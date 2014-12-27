@@ -2,9 +2,17 @@
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.Backpropagation;
+using MyNN.MLP.Backpropagation.EpocheTrainer;
+using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.BackpropagationFactory;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Backpropagator;
+using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
+using MyNN.MLP.DesiredValues;
+using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
@@ -35,7 +43,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
             IRandomizer randomizer,
             CLProvider clProvider,
             IArtifactContainer artifactContainer,
-            IMLP net,
+            IMLP mlp,
             IValidation validationDataProvider,
             ILearningAlgorithmConfig config)
         {
@@ -51,9 +59,9 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
             {
                 throw new ArgumentNullException("artifactContainer");
             }
-            if (net == null)
+            if (mlp == null)
             {
-                throw new ArgumentNullException("net");
+                throw new ArgumentNullException("mlp");
             }
             if (validationDataProvider == null)
             {
@@ -64,16 +72,76 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
                 throw new ArgumentNullException("config");
             }
 
+            var propagatorComponentConstructor = new GPUPropagatorComponentConstructor(clProvider);
+
+            ILayerContainer[] containers;
+            ILayerPropagator[] propagators;
+            propagatorComponentConstructor.CreateComponents(
+                mlp,
+                out containers,
+                out propagators);
+
+            var kernelTextProvider = new MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText.KernelTextProvider(mlp, config);
+
+            var desiredValuesContainer = new MemDesiredValuesContainer(clProvider, mlp);
+
+            //создаем бекпропагаторы
+            var backpropagators = new IMemLayerBackpropagator[mlp.Layers.Length];
+            for (var layerIndex = mlp.Layers.Length - 1; layerIndex > 0; layerIndex--)
+            {
+                var isLastLayer = layerIndex == mlp.Layers.Length - 1;
+
+                if (isLastLayer)
+                {
+                    backpropagators[layerIndex] = new GPUOutputLayerBackpropagator(
+                        clProvider,
+                        mlp,
+                        config,
+                        containers[layerIndex - 1] as IMemLayerContainer,
+                        containers[layerIndex] as IMemLayerContainer,
+                        kernelTextProvider,
+                        desiredValuesContainer
+                        );
+                }
+                else
+                {
+                    backpropagators[layerIndex] = new GPUHiddenLayerBackpropagator(
+                        clProvider,
+                        mlp,
+                        config,
+                        layerIndex,
+                        containers[layerIndex - 1] as IMemLayerContainer,
+                        containers[layerIndex] as IMemLayerContainer,
+                        containers[layerIndex + 1] as IMemLayerContainer,
+                        kernelTextProvider,
+                        backpropagators[layerIndex + 1].DeDz
+                        );
+                }
+            }
+
+            var forwardPropagation = new MLP.ForwardPropagation.ForwardPropagation(
+                containers,
+                propagators,
+                mlp
+                );
+
             var algo = new MLP.Backpropagation.Backpropagation(
-                new GPUEpocheTrainer(
-                    net,
+                new EpocheTrainer(
+                    mlp,
                     config,
-                    clProvider),
+                    containers,
+                    desiredValuesContainer,
+                    backpropagators,
+                    () => clProvider.QueueFinish(),
+                    forwardPropagation
+                    ),
                 _mlpContainerHelper,
                 artifactContainer,
-                net,
+                mlp,
                 validationDataProvider,
-                config);
+                config,
+                forwardPropagation
+                );
 
             return algo;
         }
