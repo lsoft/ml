@@ -24,26 +24,32 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
     /// </summary>
     public class CPUBackpropagationFactory : IBackpropagationFactory
     {
+        private readonly CLProvider _clProvider;
         private readonly IMLPContainerHelper _mlpContainerHelper;
         private readonly VectorizationSizeEnum _vs;
 
         public CPUBackpropagationFactory(
+            CLProvider clProvider,
             IMLPContainerHelper mlpContainerHelper,
             VectorizationSizeEnum vs
             )
         {
+            if (clProvider == null)
+            {
+                throw new ArgumentNullException("clProvider");
+            }
             if (mlpContainerHelper == null)
             {
                 throw new ArgumentNullException("mlpContainerHelper");
             }
 
+            _clProvider = clProvider;
             _mlpContainerHelper = mlpContainerHelper;
             _vs = vs;
         }
 
         public IBackpropagation CreateBackpropagation(
             IRandomizer randomizer,
-            CLProvider clProvider,
             IArtifactContainer artifactContainer,
             IMLP mlp,
             IValidation validationDataProvider,
@@ -53,10 +59,6 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
-            }
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
             }
             if (artifactContainer == null)
             {
@@ -76,7 +78,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
             }
 
             var propagatorComponentConstructor = new CPUPropagatorComponentConstructor(
-                clProvider,
+                _clProvider,
                 _vs
                 );
 
@@ -89,7 +91,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
 
             var kernelTextProvider = new MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText.KernelTextProvider(mlp, config);
 
-            var desiredValuesContainer = new MemDesiredValuesContainer(clProvider, mlp);
+            var desiredValuesContainer = new MemDesiredValuesContainer(_clProvider, mlp);
 
             //создаем бекпропагаторы
             var backpropagators = new IMemLayerBackpropagator[mlp.Layers.Length];
@@ -100,7 +102,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
                 if (isLastLayer)
                 {
                     backpropagators[layerIndex] = new CPUOutputLayerBackpropagator(
-                        clProvider,
+                        _clProvider,
                         mlp,
                         config,
                         containers[layerIndex - 1] as IMemLayerContainer,
@@ -112,7 +114,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
                 else
                 {
                     backpropagators[layerIndex] = new CPUHiddenLayerBackpropagator(
-                        clProvider,
+                        _clProvider,
                         mlp,
                         config,
                         layerIndex,
@@ -138,7 +140,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
                     containers,
                     desiredValuesContainer,
                     backpropagators,
-                    () => clProvider.QueueFinish(),
+                    () => _clProvider.QueueFinish(),
                     forwardPropagation
                     ),
                 _mlpContainerHelper,

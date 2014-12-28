@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using MyNN.Common;
 using MyNN.Common.ArtifactContainer;
@@ -26,7 +27,7 @@ namespace MyNN.MLP.Backpropagation.EpocheTrainer
         private readonly Action _batchAwaiter;
 
         private readonly IForwardPropagation _forwardPropagation;
-        private readonly IMemDesiredValuesContainer _desiredValuesContainer;
+        private readonly IDesiredValuesContainer _desiredValuesContainer;
 
 
         /// <summary>
@@ -43,7 +44,7 @@ namespace MyNN.MLP.Backpropagation.EpocheTrainer
             IMLP mlp,
             ILearningAlgorithmConfig config,
             ILayerContainer[] containers,
-            IMemDesiredValuesContainer desiredValuesContainer,
+            IDesiredValuesContainer desiredValuesContainer,
             ILayerBackpropagator[] backpropagators,
             Action batchAwaiter,
             IForwardPropagation forwardPropagation
@@ -128,6 +129,8 @@ namespace MyNN.MLP.Backpropagation.EpocheTrainer
                     currentIndex += _config.BatchSize
                     )
                 {
+                    var batchProcessedOneItemAtLeast = false;
+
                     //process one batch
                     for (
                         var inBatchIndex = 0;
@@ -180,14 +183,19 @@ namespace MyNN.MLP.Backpropagation.EpocheTrainer
                             #endregion
 
                             #endregion
+
+                            batchProcessedOneItemAtLeast = true;
                         }
                     }
 
                     #region update weights and bias into opencl memory wrappers
 
-                    for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
+                    if (batchProcessedOneItemAtLeast)
                     {
-                        _backpropagators[layerIndex].UpdateWeights();
+                        for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
+                        {
+                            _backpropagators[layerIndex].UpdateWeights();
+                        }
                     }
 
                     #endregion

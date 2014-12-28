@@ -318,6 +318,8 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
 
                     #endregion
 
+                    var batchProcessedOneItemAtLeast = false;
+
                     //process one batch
                     for (
                         var inBatchIndex = 0;
@@ -512,31 +514,36 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
                             _clProvider.QueueFinish();
 
                             #endregion
+
+                            batchProcessedOneItemAtLeast = true;
                         }
                     }
 
                     #region update weights and bias into opencl memory wrappers
 
-                    for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
+                    if (batchProcessedOneItemAtLeast)
                     {
-                        var weightMem = _containers[layerIndex].WeightMem;
-                        var nablaMem = _nablaWeights[layerIndex];
-
-                        const int perKernelFloats = 1500; //по 1500 флоатов на кернел (должно быть кратно 4м!!!)
-
-                        var kernelCount = weightMem.Array.Length / perKernelFloats;
-                        if (weightMem.Array.Length % perKernelFloats > 0)
+                        for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
                         {
-                            kernelCount++;
-                        }
+                            var weightMem = _containers[layerIndex].WeightMem;
+                            var nablaMem = _nablaWeights[layerIndex];
 
-                        _updateWeightKernel
-                            .SetKernelArgMem(0, weightMem)
-                            .SetKernelArgMem(1, nablaMem)
-                            .SetKernelArg(2, 4, weightMem.Array.Length)
-                            .SetKernelArg(3, 4, perKernelFloats)
-                            .SetKernelArg(4, 4, (float)(_config.BatchSize))
-                            .EnqueueNDRangeKernel(kernelCount);
+                            const int perKernelFloats = 1500; //по 1500 флоатов на кернел (должно быть кратно 4м!!!)
+
+                            var kernelCount = weightMem.Array.Length/perKernelFloats;
+                            if (weightMem.Array.Length%perKernelFloats > 0)
+                            {
+                                kernelCount++;
+                            }
+
+                            _updateWeightKernel
+                                .SetKernelArgMem(0, weightMem)
+                                .SetKernelArgMem(1, nablaMem)
+                                .SetKernelArg(2, 4, weightMem.Array.Length)
+                                .SetKernelArg(3, 4, perKernelFloats)
+                                .SetKernelArg(4, 4, (float) (_config.BatchSize))
+                                .EnqueueNDRangeKernel(kernelCount);
+                        }
                     }
 
                     #endregion

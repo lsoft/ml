@@ -39,8 +39,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackpropagationFactory\Classic\CSharp\CSharpBackpropagationFactory.cs" />
     <Compile Include="BackpropagationFactory\Classic\OpenCL\CPU\CPUBackpropagationFactory.cs" />
     <Compile Include="BackpropagationFactory\Classic\OpenCL\GPU\GPUBackpropagationFactory.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Backpropagator\CSharpOutputLayerBackpropagator.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Backpropagator\CSharpHiddenLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Kernel\HiddenLayerKernel.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Kernel\OutputLayerKernel.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Kernel\UpdateWeightKernel.cs" />

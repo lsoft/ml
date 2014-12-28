@@ -120,12 +120,12 @@ namespace MyNNConsoleApp.RefactoredForDI
                     );
 
                 var backpropagationFactory = new GPUBackpropagationFactory(
+                    clProvider,
                     mlpContainerHelper
                     );
 
                 var algo = backpropagationFactory.CreateBackpropagation(
                     randomizer,
-                    clProvider,
                     mlpContainer,
                     mlp,
                     validation,

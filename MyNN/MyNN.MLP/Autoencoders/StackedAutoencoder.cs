@@ -206,7 +206,6 @@ namespace MyNN.MLP.Autoencoders
 
                     var algo = backpropagationFactory.CreateBackpropagation(
                         _randomizer,
-                        clProvider,
                         mlpContainer,
                         mlp,
                         validation,

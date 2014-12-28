@@ -27,18 +27,24 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
     /// </summary>
     public class GPUDropConnectBackpropagationFactory : IBackpropagationFactory
     {
+        private readonly CLProvider _clProvider;
         private readonly IOpenCLMaskContainerFactory _maskContainerFactory;
         private readonly ILayerInferencerFactory _layerInferencerFactory;
         private readonly float _p;
         private readonly IMLPContainerHelper _mlpContainerHelper;
 
         public GPUDropConnectBackpropagationFactory(
+            CLProvider clProvider,
             IOpenCLMaskContainerFactory maskContainerFactory,
             ILayerInferencerFactory layerInferencerFactory,
             float p,
             IMLPContainerHelper mlpContainerHelper
             )
         {
+            if (clProvider == null)
+            {
+                throw new ArgumentNullException("clProvider");
+            }
             if (maskContainerFactory == null)
             {
                 throw new ArgumentNullException("maskContainerFactory");
@@ -52,6 +58,7 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
                 throw new ArgumentNullException("mlpContainerHelper");
             }
 
+            _clProvider = clProvider;
             _maskContainerFactory = maskContainerFactory;
             _layerInferencerFactory = layerInferencerFactory;
             _p = p;
@@ -60,7 +67,6 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
 
         public IBackpropagation CreateBackpropagation(
             IRandomizer randomizer,
-            CLProvider clProvider,
             IArtifactContainer artifactContainer,
             IMLP mlp,
             IValidation validationDataProvider,
@@ -70,9 +76,9 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
             {
                 throw new ArgumentNullException("randomizer");
             }
-            if (clProvider == null)
+            if (_clProvider == null)
             {
-                throw new ArgumentNullException("clProvider");
+                throw new ArgumentNullException("_clProvider");
             }
             if (artifactContainer == null)
             {
@@ -92,13 +98,13 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
             }
 
             var propagatorComponentConstructor = new MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.PropagatorComponentConstructor(
-                clProvider,
+                _clProvider,
                 _maskContainerFactory,
                 _p
                 );
 
             var kernelTextProvider = new MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU.KernelText.KernelTextProvider(mlp, config);
-            var desiredValuesContainer = new MemDesiredValuesContainer(clProvider, mlp);
+            var desiredValuesContainer = new MemDesiredValuesContainer(_clProvider, mlp);
             var backpropagators = new IMemLayerBackpropagator[mlp.Layers.Length];
 
             IForwardPropagation trainForwardPropagation;
@@ -127,7 +133,7 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
                     if (isLastLayer)
                     {
                         backpropagators[layerIndex] = new GPUDropConnectOutputLayerBackpropagator(
-                            clProvider,
+                            _clProvider,
                             mlp,
                             config,
                             containers[layerIndex - 1] as IMemLayerContainer,
@@ -140,7 +146,7 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
                     else
                     {
                         backpropagators[layerIndex] = new GPUDropConnectHiddenLayerBackpropagator(
-                            clProvider,
+                            _clProvider,
                             mlp,
                             config,
                             layerIndex,
@@ -158,7 +164,7 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
             IForwardPropagation inferenceForwardPropagation;
             {
                 var cc = new MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU.PropagatorComponentConstructor(
-                    clProvider,
+                    _clProvider,
                     _layerInferencerFactory
                     );
 
@@ -184,7 +190,7 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
                     trainContainers,
                     desiredValuesContainer,
                     backpropagators,
-                    () => clProvider.QueueFinish(),
+                    () => _clProvider.QueueFinish(),
                     trainForwardPropagation
                     ),
                 _mlpContainerHelper,

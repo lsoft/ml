@@ -7,42 +7,38 @@ using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.BackpropagationFactory;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backpropagator;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Backpropagator;
+using MyNN.MLP.Classic.ForwardPropagation.CSharp;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.ForwardPropagation;
+using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure;
 using OpenCL.Net.Wrapper;
 
-namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
+namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.CSharp
 {
     /// <summary>
-    /// Factory for classic backpropagation algorithm enables GPU-OpenCL
+    /// Factory for classic backpropagation algorithm enables CSharp
     /// </summary>
-    public class GPUBackpropagationFactory : IBackpropagationFactory
+    public class CSharpBackpropagationFactory : IBackpropagationFactory
     {
-        private readonly CLProvider _clProvider;
         private readonly IMLPContainerHelper _mlpContainerHelper;
 
-        public GPUBackpropagationFactory(
-            CLProvider clProvider,
+        public CSharpBackpropagationFactory(
             IMLPContainerHelper mlpContainerHelper
             )
         {
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
-            }
             if (mlpContainerHelper == null)
             {
                 throw new ArgumentNullException("mlpContainerHelper");
             }
 
-            _clProvider = clProvider;
             _mlpContainerHelper = mlpContainerHelper;
         }
 
@@ -51,15 +47,12 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
             IArtifactContainer artifactContainer,
             IMLP mlp,
             IValidation validationDataProvider,
-            ILearningAlgorithmConfig config)
+            ILearningAlgorithmConfig config
+            )
         {
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
-            }
-            if (_clProvider == null)
-            {
-                throw new ArgumentNullException("_clProvider");
             }
             if (artifactContainer == null)
             {
@@ -78,7 +71,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
                 throw new ArgumentNullException("config");
             }
 
-            var propagatorComponentConstructor = new GPUPropagatorComponentConstructor(_clProvider);
+            var propagatorComponentConstructor = new CSharpPropagatorComponentConstructor();
 
             ILayerContainer[] containers;
             ILayerPropagator[] propagators;
@@ -87,39 +80,33 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
                 out containers,
                 out propagators);
 
-            var kernelTextProvider = new MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.KernelText.KernelTextProvider(mlp, config);
-
-            var desiredValuesContainer = new MemDesiredValuesContainer(_clProvider, mlp);
+            var desiredValuesContainer = new CSharpDesiredValuesContainer(mlp);
 
             //создаем бекпропагаторы
-            var backpropagators = new IMemLayerBackpropagator[mlp.Layers.Length];
+            var backpropagators = new ICSharpLayerBackpropagator[mlp.Layers.Length];
             for (var layerIndex = mlp.Layers.Length - 1; layerIndex > 0; layerIndex--)
             {
                 var isLastLayer = layerIndex == mlp.Layers.Length - 1;
 
                 if (isLastLayer)
                 {
-                    backpropagators[layerIndex] = new GPUOutputLayerBackpropagator(
-                        _clProvider,
+                    backpropagators[layerIndex] = new CSharpOutputLayerBackpropagator(
                         mlp,
                         config,
-                        containers[layerIndex - 1] as IMemLayerContainer,
-                        containers[layerIndex] as IMemLayerContainer,
-                        kernelTextProvider,
+                        containers[layerIndex - 1] as ICSharpLayerContainer,
+                        containers[layerIndex] as ICSharpLayerContainer,
                         desiredValuesContainer
                         );
                 }
                 else
                 {
-                    backpropagators[layerIndex] = new GPUHiddenLayerBackpropagator(
-                        _clProvider,
+                    backpropagators[layerIndex] = new CSharpHiddenLayerBackpropagator(
                         mlp,
                         config,
                         layerIndex,
-                        containers[layerIndex - 1] as IMemLayerContainer,
-                        containers[layerIndex] as IMemLayerContainer,
-                        containers[layerIndex + 1] as IMemLayerContainer,
-                        kernelTextProvider,
+                        containers[layerIndex - 1] as ICSharpLayerContainer,
+                        containers[layerIndex] as ICSharpLayerContainer,
+                        containers[layerIndex + 1] as ICSharpLayerContainer,
                         backpropagators[layerIndex + 1].DeDz
                         );
                 }
@@ -138,7 +125,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
                     containers,
                     desiredValuesContainer,
                     backpropagators,
-                    () => _clProvider.QueueFinish(),
+                    () => { },
                     forwardPropagation
                     ),
                 _mlpContainerHelper,

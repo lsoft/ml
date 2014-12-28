@@ -17,7 +17,6 @@ namespace MyNN.MLP.BackpropagationFactory
         /// Factory method
         /// </summary>
         /// <param name="randomizer">Random number provider</param>
-        /// <param name="clProvider">OpenCL provider</param>
         /// <param name="artifactContainer">Container that stores MLP and other related data</param>
         /// <param name="mlp">Trained MLP</param>
         /// <param name="validationDataProvider">Validation provider</param>
@@ -25,7 +24,6 @@ namespace MyNN.MLP.BackpropagationFactory
         /// <returns>Backpropagation algorithm</returns>
         IBackpropagation CreateBackpropagation(
             IRandomizer randomizer,
-            CLProvider clProvider,
             IArtifactContainer artifactContainer,
             IMLP mlp,
             IValidation validationDataProvider,

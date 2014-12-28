@@ -50,6 +50,7 @@
     <Compile Include="BackpropagationFactory\IBackpropagationFactory.cs" />
     <Compile Include="Backpropagation\Backpropagation.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\Factory\IMemLayerBackpropagatorFactory.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\ICSharpLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\ILayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\IMemLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\IEpocheTrainer.cs" />
@@ -79,6 +80,8 @@
     <Compile Include="DBNInfo\WeightLoader\IWeightLoader.cs" />
     <Compile Include="DBNInfo\WeightLoader\RBMAutoencoderWeightLoader.cs" />
     <Compile Include="DBNInfo\WeightLoader\RBMWeightLoader.cs" />
+    <Compile Include="DesiredValues\CSharpDesiredValuesContainer.cs" />
+    <Compile Include="DesiredValues\ICSharpDesiredValuesContainer.cs" />
     <Compile Include="DesiredValues\IDesiredValuesContainer.cs" />
     <Compile Include="DesiredValues\IMemDesiredValuesContainer.cs" />
     <Compile Include="DesiredValues\MemDesiredValuesContainer.cs" />

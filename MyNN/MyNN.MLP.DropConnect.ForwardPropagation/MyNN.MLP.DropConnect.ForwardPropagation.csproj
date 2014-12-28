@@ -42,9 +42,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Inference\OpenCL\CPU\KernelSource.cs" />
-    <Compile Include="Inference\OpenCL\CPU\LayerPropagator.cs" />
-    <Compile Include="Inference\OpenCL\CPU\PropagatorComponentConstructor.cs" />
     <Compile Include="Inference\OpenCL\GPU\KernelSource.cs" />
     <Compile Include="Inference\OpenCL\GPU\LayerPropagator.cs" />
     <Compile Include="Inference\OpenCL\GPU\PropagatorComponentConstructor.cs" />

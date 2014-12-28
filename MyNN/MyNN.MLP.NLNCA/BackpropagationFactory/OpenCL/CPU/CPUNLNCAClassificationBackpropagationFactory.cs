@@ -27,6 +27,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
     /// </summary>
     public class CPUNLNCAClassificationBackpropagationFactory : IBackpropagationFactory
     {
+        private readonly CLProvider _clProvider;
         private readonly IMLPContainerHelper _mlpContainerHelper;
         private readonly Func<List<IDataItem>, IDodfCalculator> _dodfCalculatorFactory;
         private readonly int _ncaLayerIndex;
@@ -35,6 +36,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
         private readonly VectorizationSizeEnum _vse;
 
         public CPUNLNCAClassificationBackpropagationFactory(
+            CLProvider clProvider,
             IMLPContainerHelper mlpContainerHelper,
             Func<List<IDataItem>, IDodfCalculator> dodfCalculatorFactory,
             int ncaLayerIndex,
@@ -43,6 +45,10 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
             VectorizationSizeEnum vse
             )
         {
+            if (clProvider == null)
+            {
+                throw new ArgumentNullException("clProvider");
+            }
             if (mlpContainerHelper == null)
             {
                 throw new ArgumentNullException("mlpContainerHelper");
@@ -52,6 +58,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
                 throw new ArgumentNullException("dodfCalculatorFactory");
             }
 
+            _clProvider = clProvider;
             _mlpContainerHelper = mlpContainerHelper;
             _dodfCalculatorFactory = dodfCalculatorFactory;
             _ncaLayerIndex = ncaLayerIndex;
@@ -62,7 +69,6 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
 
         public IBackpropagation CreateBackpropagation(
             IRandomizer randomizer,
-            CLProvider clProvider,
             IArtifactContainer artifactContainer,
             IMLP mlp,
             IValidation validationDataProvider,
@@ -72,9 +78,9 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
             {
                 throw new ArgumentNullException("randomizer");
             }
-            if (clProvider == null)
+            if (_clProvider == null)
             {
-                throw new ArgumentNullException("clProvider");
+                throw new ArgumentNullException("_clProvider");
             }
             if (artifactContainer == null)
             {
@@ -94,7 +100,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
             }
 
             var cc = new MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU.CPUPropagatorComponentConstructor(
-                clProvider,
+                _clProvider,
                 VectorizationSizeEnum.VectorizationMode16
                 );
 
@@ -116,7 +122,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
                     _vse,
                     mlp,
                     config,
-                    clProvider,
+                    _clProvider,
                     _dodfCalculatorFactory,
                     forwardPropagation
                     ), 

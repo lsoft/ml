@@ -105,13 +105,13 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                 //    );
 
                 var algof = new CPUBackpropagationFactory(
+                    clProvider,
                     mlpContainer,
                     VectorizationSizeEnum.VectorizationMode16
                     );
 
                 var algo = algof.CreateBackpropagation(
                     randomizer,
-                    clProvider,
                     artifactContainer,
                     mlp,
                     validation,

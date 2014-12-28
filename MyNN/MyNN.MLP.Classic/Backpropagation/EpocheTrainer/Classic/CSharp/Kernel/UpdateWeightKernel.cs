@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,10 +24,13 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
                 throw new ArgumentNullException("nabla");
             }
 
-            for (var cc = 0; cc < currentLayerWeights.Length; cc++)
+            Parallel.For(0, currentLayerWeights.Length, cc =>
+            //for (var cc = 0; cc < currentLayerWeights.Length; cc++)
             {
                 currentLayerWeights[cc] += nabla[cc] / batchSize;
             }
+            ); //Parallel.For
+
         }
     }
 }

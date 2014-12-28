@@ -21,6 +21,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
+                CompareBP.DoCompare();
                 //CompareBPGPU.DoCompare();
 
 

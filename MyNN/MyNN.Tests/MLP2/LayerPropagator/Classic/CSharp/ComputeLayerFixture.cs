@@ -39,7 +39,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.CSharp
                 out clc,
                 out lp);
 
-            l.Neurons[0].Weights[0] = 0.5f;
+            clc.WeightMem[0] = 0.5f;
             plc.NetMem[0] = 1f;
             plc.StateMem[0] = 1f;
 
@@ -76,8 +76,8 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.CSharp
                 out clc,
                 out lp);
 
-            l.Neurons[0].Weights[0] = 0.5f;
-            l.Neurons[0].Weights[1] = -0.5f;
+            clc.WeightMem[0] = 0.5f;
+            clc.WeightMem[1] = -0.5f;
             
             plc.NetMem[0] = -2f;
             plc.StateMem[0] = -2f;
@@ -117,7 +117,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.CSharp
                 out clc,
                 out lp);
 
-            l.Neurons[0].Weights.Fill((a) => (float)a);
+            clc.WeightMem.Fill((a) => (float)a);
 
             plc.NetMem.Fill(1f);
             plc.StateMem.Fill(1f);
@@ -155,7 +155,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.CSharp
                 out clc,
                 out lp);
 
-            l.Neurons[0].Weights.Fill((a) => (float)a);
+            clc.WeightMem.Fill((a) => (float)a);
 
             plc.NetMem.Fill((a) => (float)a);
             plc.StateMem.Fill((a) => (float)a);
