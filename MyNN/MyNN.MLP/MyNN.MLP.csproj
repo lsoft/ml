@@ -100,6 +100,8 @@
     <Compile Include="LearningConfig\LearningAlgorithmConfig.cs" />
     <Compile Include="MLPContainer\IMLPContainerHelper.cs" />
     <Compile Include="MLPContainer\MLPContainerHelper.cs" />
+    <Compile Include="NextLayerAggregator\CLNextLayerAggregator.cs" />
+    <Compile Include="NextLayerAggregator\INextLayerAggregator.cs" />
     <Compile Include="SparseCalculator.cs" />
     <Compile Include="Structure\Factory\IMLPFactory.cs" />
     <Compile Include="Structure\Factory\MLPFactory.cs" />

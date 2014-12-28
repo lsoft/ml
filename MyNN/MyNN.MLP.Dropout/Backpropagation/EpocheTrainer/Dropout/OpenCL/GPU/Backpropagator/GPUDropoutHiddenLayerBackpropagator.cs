@@ -6,6 +6,7 @@ using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Dropout.ForwardPropagation.OpenCL;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
+using MyNN.MLP.NextLayerAggregator;
 using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
@@ -18,17 +19,12 @@ namespace MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
 {
     public class GPUDropoutHiddenLayerBackpropagator : IMemLayerBackpropagator
     {
-        private const int PreprocessGroupSize = 16;
-
         private readonly ILearningAlgorithmConfig _config;
         private readonly ILayer _previousLayer;
         private readonly ILayer _currentLayer;
-        private readonly ILayer _nextLayer;
-        
+
         private readonly IMemLayerContainer _previousLayerContainer;
         private readonly IMemLayerContainer _currentLayerContainer;
-        private readonly IMemLayerContainer _nextLayerContainer;
-        private readonly MemFloat _nextLayerDeDz;
         private readonly IDropoutLayerPropagator _currentLayerPropagator;
 
         private readonly Kernel _hiddenKernelOverwrite;
@@ -37,12 +33,8 @@ namespace MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
         private readonly MemFloat _nablaWeights;
         private readonly MemFloat _currentDeDz;
         
-        private readonly int _aggregationFactor;
-        private readonly MemFloat _preprocessCache;
-
-        private readonly Kernel _preprocessKernel0;
-        private readonly Kernel _preprocessKernel1;
         private readonly Kernel _updateWeightKernel;
+        private readonly INextLayerAggregator _aggregator;
 
         public MemFloat DeDz
         {
@@ -110,11 +102,8 @@ namespace MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
             _config = config;
             _previousLayer = previousLayer;
             _currentLayer = currentLayer;
-            _nextLayer = nextLayer;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
-            _nextLayerContainer = nextLayerContainer;
-            _nextLayerDeDz = nextLayerDeDz;
             _currentLayerPropagator = currentLayerPropagator;
 
             _nablaWeights = clProvider.CreateFloatMem(
@@ -125,29 +114,9 @@ namespace MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                 currentLayer.NonBiasNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
-            var aggregationFactor = Helper.UpTo(nextLayer.NonBiasNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
-
-            _aggregationFactor = aggregationFactor;
-
-            _preprocessCache = clProvider.CreateFloatMem(
-                currentLayer.NonBiasNeuronCount * aggregationFactor,
-                MemFlags.CopyHostPtr | MemFlags.ReadWrite
-                );
-
-
             _updateWeightKernel = clProvider.CreateKernel(
                 kernelTextProvider.UpdateWeightKernelSource,
                 "UpdateWeightKernel");
-
-            _preprocessKernel0 = clProvider.CreateKernel(
-                kernelTextProvider.GetPreprocessHiddenKernelZeroSource(PreprocessGroupSize),
-                "PreprocessKernel0"
-                );
-
-            _preprocessKernel1 = clProvider.CreateKernel(
-                kernelTextProvider.GetPreprocessHiddenKernelOneSource(),
-                "PreprocessKernel1"
-                );
 
             _hiddenKernelIncrement = clProvider.CreateKernel(
                 kernelTextProvider.GetIncrementCalculationKernelsSource(layerIndex),
@@ -157,14 +126,21 @@ namespace MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                 kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
                 "HiddenLayerTrain");
 
+            _aggregator = new CLNextLayerAggregator(
+                clProvider,
+                currentLayer.GetConfiguration(),
+                nextLayer.GetConfiguration(),
+                kernelTextProvider,
+                nextLayerDeDz,
+                nextLayerContainer
+                );
         }
 
         public void Prepare()
         {
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
 
-            _preprocessCache.Array.Clear();
-            _preprocessCache.Write(BlockModeEnum.NonBlocking);
+            _aggregator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -173,72 +149,8 @@ namespace MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
             bool firstItemInBatch
             )
         {
-            {
-                _preprocessKernel0
-                    .SetKernelArgMem(0, this._nextLayerDeDz)
-                    .SetKernelArgMem(1, _nextLayerContainer.WeightMem)
-                    .SetKernelArgMem(2, _preprocessCache)
-                    .SetKernelArg(3, sizeof(int), _currentLayer.NonBiasNeuronCount)
-                    .SetKernelArg(4, sizeof(int), _nextLayer.NonBiasNeuronCount)
-                    .EnqueueNDRangeKernel(
-                        new[]
-                        {
-                            Helper.UpTo(_currentLayer.NonBiasNeuronCount, PreprocessGroupSize),
-                            Helper.UpTo(_nextLayer.NonBiasNeuronCount, PreprocessGroupSize)
-                        },
-                        new[]
-                        {
-                            PreprocessGroupSize,
-                            PreprocessGroupSize,
-                        })
-                    ;
+            _aggregator.Aggregate();
 
-                var aggregationFactor = _aggregationFactor;
-
-                for (; ; )
-                {
-                    if (aggregationFactor == 1)
-                    {
-                        break;
-                    }
-
-                    int currentLocalGroupSize;
-                    if (aggregationFactor < PreprocessGroupSize)
-                    {
-                        currentLocalGroupSize = aggregationFactor;
-                    }
-                    else
-                    {
-                        currentLocalGroupSize = PreprocessGroupSize;
-                    }
-
-                    var globalx = Helper.UpTo(_currentLayer.NonBiasNeuronCount, currentLocalGroupSize);
-                    var globaly = Helper.UpTo(aggregationFactor, currentLocalGroupSize);
-
-                    _preprocessKernel1
-                        .SetKernelArgMem(0, _preprocessCache)
-                        .SetKernelArg(1, sizeof(int), _currentLayer.NonBiasNeuronCount)
-                        .SetKernelArg(2, sizeof(int), aggregationFactor)
-                        .SetKernelArg(3, sizeof(int), currentLocalGroupSize)
-                        .SetKernelArg(4, sizeof(int), currentLocalGroupSize)
-                        .SetKernelArgLocalMem(5, sizeof(float) * currentLocalGroupSize * currentLocalGroupSize)
-                        .EnqueueNDRangeKernel(
-                            new[]
-                            {
-                                globalx,
-                                globaly
-                            },
-                            new[]
-                            {
-                                currentLocalGroupSize,
-                                currentLocalGroupSize,
-                            })
-                            ;
-
-                    aggregationFactor = Helper.UpTo(aggregationFactor, currentLocalGroupSize) / currentLocalGroupSize;
-
-                }
-            }
             const uint HiddenLocalGroupSize = 64;
             uint HiddenGlobalGroupSize =
                 (uint)_currentLayer.NonBiasNeuronCount * HiddenLocalGroupSize
@@ -264,7 +176,7 @@ namespace MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                     .SetKernelArg(11, 4, _config.RegularizationFactor)
                     .SetKernelArg(12, 4, (float)(dataCount))
                     .SetKernelArgLocalMem(13, sizeof(float) * HiddenLocalGroupSize)
-                    .SetKernelArgMem(14, _preprocessCache)
+                    .SetKernelArgMem(14, _aggregator.PreprocessCache)
                     .EnqueueNDRangeKernel(
                         new[]
                         {
@@ -296,7 +208,7 @@ namespace MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                     .SetKernelArg(11, 4, _config.RegularizationFactor)
                     .SetKernelArg(12, 4, (float)(dataCount))
                     .SetKernelArgLocalMem(13, sizeof(float) * HiddenLocalGroupSize)
-                    .SetKernelArgMem(14, _preprocessCache)
+                    .SetKernelArgMem(14, _aggregator.PreprocessCache)
                     .EnqueueNDRangeKernel(
                         new[]
                         {
