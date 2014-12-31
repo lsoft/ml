@@ -15,17 +15,17 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.NLNCA
     {
         private readonly IArtifactContainer _bitmapContainer;
         private readonly IDataSet _validationData;
-        private readonly int? _epocheNumber;
+        private readonly int? _epochNumber;
 
         private readonly Color[] _colors;
 
-        private readonly List<float[]> _grid; 
+        private readonly List<float[]> _grid;
 
         public NLNCADrawer(
             IDataSet validationData,
             IArtifactContainer artifactContainer,
             IColorProvider colorProvider,
-            int? epocheNumber
+            int? epochNumber
             )
         {
             if (validationData == null)
@@ -38,13 +38,14 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.NLNCA
             }
 
             _validationData = validationData;
-            _epocheNumber = epocheNumber;
+            _epochNumber = epochNumber;
 
             _bitmapContainer = artifactContainer.GetChildContainer("bitmaps");
             _colors = colorProvider.GetColors();
 
             _grid = new List<float[]>();
-        }
+
+       }
 
         public void SetSize(int netResultCount)
         {
@@ -76,69 +77,72 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.NLNCA
 
         public void Save()
         {
-            //рисуем на картинке
-            var maxx = _grid.Max(j => j[0]);
-            var minx = _grid.Min(j => j[0]);
-            var maxy = _grid.Max(j => j[1]);
-            var miny = _grid.Min(j => j[1]);
-
-            const int imageWidth = 500;
-            const int imageHeight = 500;
-
-            var bitmap = new Bitmap(imageWidth, imageHeight);
-            var ii = 0;
-
-            using (var g = Graphics.FromImage(bitmap))
+            if (_grid.Count > 0)
             {
-                g.Clear(Color.White);
+                //рисуем на картинке
+                var maxx = _grid.Max(j => j[0]);
+                var minx = _grid.Min(j => j[0]);
+                var maxy = _grid.Max(j => j[1]);
+                var miny = _grid.Min(j => j[1]);
 
-                g.DrawString(
-                    minx.ToString() + ";" + miny.ToString(),
-                    new Font("Tahoma", 12),
-                    Brushes.Black,
-                    0, 0);
+                const int imageWidth = 500;
+                const int imageHeight = 500;
 
-                g.DrawString(
-                    maxx.ToString() + ";" + maxy.ToString(),
-                    new Font("Tahoma", 12),
-                    Brushes.Black,
-                    300, 450);
+                var bitmap = new Bitmap(imageWidth, imageHeight);
+                var ii = 0;
 
-                foreach (var pair in _grid.ZipEqualLength(_validationData))
+                using (var g = Graphics.FromImage(bitmap))
                 {
-                    var netResult = pair.Value1;
-                    var testItem = pair.Value2;
+                    g.Clear(Color.White);
 
-                    var ox = netResult[0];
-                    var oy = netResult[1];
+                    g.DrawString(
+                        minx.ToString() + ";" + miny.ToString(),
+                        new Font("Tahoma", 12),
+                        Brushes.Black,
+                        0, 0);
 
-                    var x = (ox - minx) * (imageWidth - 1) / (maxx - minx);
-                    var y = (oy - miny) * (imageHeight - 1) / (maxy - miny);
+                    g.DrawString(
+                        maxx.ToString() + ";" + maxy.ToString(),
+                        new Font("Tahoma", 12),
+                        Brushes.Black,
+                        300, 450);
 
-                    g.DrawRectangle(
-                        new Pen(_colors[testItem.OutputIndex]),
-                        (int)x, (int)y, 1, 1
-                        );
-                    g.DrawRectangle(
-                        new Pen(_colors[testItem.OutputIndex]),
-                        (int)x, (int)y, 2, 2
-                        );
-                    g.DrawRectangle(
-                        new Pen(_colors[testItem.OutputIndex]),
-                        (int)x, (int)y, 3, 3
-                        );
-                    ii++;
+                    foreach (var pair in _grid.ZipEqualLength(_validationData))
+                    {
+                        var netResult = pair.Value1;
+                        var testItem = pair.Value2;
+
+                        var ox = netResult[0];
+                        var oy = netResult[1];
+
+                        var x = (ox - minx)*(imageWidth - 1)/(maxx - minx);
+                        var y = (oy - miny)*(imageHeight - 1)/(maxy - miny);
+
+                        g.DrawRectangle(
+                            new Pen(_colors[testItem.OutputIndex]),
+                            (int) x, (int) y, 1, 1
+                            );
+                        g.DrawRectangle(
+                            new Pen(_colors[testItem.OutputIndex]),
+                            (int) x, (int) y, 2, 2
+                            );
+                        g.DrawRectangle(
+                            new Pen(_colors[testItem.OutputIndex]),
+                            (int) x, (int) y, 3, 3
+                            );
+                        ii++;
+                    }
                 }
-            } 
-            
-            using (var s = _bitmapContainer.GetWriteStreamForResource(
-                string.Format(
-                    "{0}.bmp",
-                    _epocheNumber != null ? _epocheNumber.Value.ToString() : "_pretrain")))
-            {
-                bitmap.Save(s, System.Drawing.Imaging.ImageFormat.Bmp);
 
-                s.Flush();
+                using (var s = _bitmapContainer.GetWriteStreamForResource(
+                    string.Format(
+                        "{0}.bmp",
+                        _epochNumber != null ? _epochNumber.Value.ToString() : "_pretrain")))
+                {
+                    bitmap.Save(s, System.Drawing.Imaging.ImageFormat.Bmp);
+
+                    s.Flush();
+                }
             }
         }
     }

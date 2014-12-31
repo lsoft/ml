@@ -6,6 +6,9 @@ namespace MyNN.Boltzmann.BeliefNetwork.FreeEnergyCalculator
     {
         double CalculateFreeEnergy(
             float[] weights,
-            IDataSet data);
+            float[] visibleBiases,
+            float[] hiddenBiases,
+            IDataSet data
+            );
     }
 }

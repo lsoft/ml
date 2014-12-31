@@ -11,7 +11,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
 
         public string GetKernelSource(
             IFunction function,
-            int currentLayerNonBiasNeuronCount,
+            int currentLayerTotalNeuronCount,
             int previousLayerTotalNeuronCount,
             out string kernelName
             )
@@ -38,7 +38,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
 
             result = result.Replace(
                 "{CURRENT_LAYER_NEURON_COUNT}",
-                currentLayerNonBiasNeuronCount.ToString(CultureInfo.InvariantCulture));
+                currentLayerTotalNeuronCount.ToString(CultureInfo.InvariantCulture));
 
             result = result.Replace(
                 "{PREVIOUS_LAYER_NEURON_COUNT}",
@@ -70,7 +70,9 @@ __kernel void ComputeLayerKernel(
     const __global float* weights,
     const __global uint * mask,
     uint bitmask,
-    __local float* partialDotProduct
+    __local float* partialDotProduct,
+    __global float * biases
+
     )
 {
     const uint width = {PREVIOUS_LAYER_NEURON_COUNT};
@@ -102,7 +104,7 @@ __kernel void ComputeLayerKernel(
       // Write the result of the reduction to global memory
       if (get_local_id(0) == 0)
       {
-         float lastNET = partialDotProduct[0];
+         float lastNET = partialDotProduct[0] + biases[y];
          currentLayerLastNET[y] = lastNET;
 
          //compute last state

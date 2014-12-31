@@ -57,10 +57,6 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
             {
                 throw new ArgumentNullException("randomizer");
             }
-            if (_clProvider == null)
-            {
-                throw new ArgumentNullException("_clProvider");
-            }
             if (artifactContainer == null)
             {
                 throw new ArgumentNullException("artifactContainer");

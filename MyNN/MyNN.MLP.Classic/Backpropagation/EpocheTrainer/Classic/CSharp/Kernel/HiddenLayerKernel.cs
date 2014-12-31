@@ -51,7 +51,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
             float learningRate,
             float regularizationFactor,
-            float dataCount
+            float dataCount,
+
+            float[] currentLayerBias,
+            float[] nablaBias
             )
         {
             for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount; neuronIndex++)
@@ -63,7 +66,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
                 var accDeDz = new KahanAlgorithm.Accumulator();
                 for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
                 {
-                    int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex; //не векторизуется:(
+                    int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount, nextNeuronIndex) + neuronIndex; //не векторизуется:(
 
                     float nextWeight = nextLayerWeights[nextWeightIndex];
                     float nextNabla = nextLayerDeDz[nextNeuronIndex];
@@ -88,10 +91,17 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
                     float regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount;
                     float coef = prevOut + regularizationCoef;
-                    float n = learningRate * currentDeDz * coef;
+                    float deltaWeight = learningRate * currentDeDz * coef;
 
-                    nabla[currentNablaIndex + currentWeightIndex] = n;
+                    nabla[currentNablaIndex + currentWeightIndex] = deltaWeight;
                 }
+
+                float deltaBias =
+                    learningRate *
+                    currentDeDz *
+                    (1 + regularizationFactor * currentLayerBias[neuronIndex] / dataCount);
+
+                nablaBias[neuronIndex] = deltaBias;
 
             }
 
@@ -116,7 +126,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
             float learningRate,
             float regularizationFactor,
-            float dataCount
+            float dataCount,
+
+            float[] currentLayerBias,
+            float[] nablaBias
             )
         {
             for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount; neuronIndex++)
@@ -128,7 +141,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
                 var accDeDz = new KahanAlgorithm.Accumulator();
                 for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
                 {
-                    int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex; //не векторизуется:(
+                    int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount, nextNeuronIndex) + neuronIndex; //не векторизуется:(
 
                     float nextWeight = nextLayerWeights[nextWeightIndex];
                     float nextNabla = nextLayerDeDz[nextNeuronIndex];
@@ -153,10 +166,17 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
                     float regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount;
                     float coef = prevOut + regularizationCoef;
-                    float n = learningRate * currentDeDz * coef;
+                    float deltaWeight = learningRate * currentDeDz * coef;
 
-                    nabla[currentNablaIndex + currentWeightIndex] += n;
+                    nabla[currentNablaIndex + currentWeightIndex] += deltaWeight;
                 }
+
+                float deltaBias =
+                    learningRate *
+                    currentDeDz *
+                    (1 + regularizationFactor * currentLayerBias[neuronIndex] / dataCount);
+
+                nablaBias[neuronIndex] += deltaBias;
 
             }
         }

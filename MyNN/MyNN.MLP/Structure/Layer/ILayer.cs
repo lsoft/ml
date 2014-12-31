@@ -5,12 +5,7 @@ namespace MyNN.MLP.Structure.Layer
 {
     public interface ILayer
     {
-        bool IsBiasNeuronExists
-        {
-            get;
-        }
-
-        int NonBiasNeuronCount
+        int TotalNeuronCount
         {
             get;
         }
@@ -24,10 +19,6 @@ namespace MyNN.MLP.Structure.Layer
         {
             get;
         }
-
-        void AddBiasNeuron();
-
-        void RemoveBiasNeuron();
 
         string GetLayerInformation();
 

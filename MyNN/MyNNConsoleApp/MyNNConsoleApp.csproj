@@ -83,31 +83,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Castle.Core.3.3.1\lib\net45\Castle.Core.dll</HintPath>
-    </Reference>
     <Reference Include="MathNet.Numerics, Version=2.6.1.30, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics.IO">
       <HintPath>..\packages\MathNet.Numerics.2.6.2\lib\net40\MathNet.Numerics.IO.dll</HintPath>
-    </Reference>
-    <Reference Include="Ninject">
-      <HintPath>..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
-    </Reference>
-    <Reference Include="Ninject.Extensions.ChildKernel">
-      <HintPath>..\packages\Ninject.Extensions.ChildKernel.3.2.0.0\lib\net45-full\Ninject.Extensions.ChildKernel.dll</HintPath>
-    </Reference>
-    <Reference Include="Ninject.Extensions.Conventions">
-      <HintPath>..\packages\Ninject.Extensions.Conventions.3.2.0.0\lib\net45-full\Ninject.Extensions.Conventions.dll</HintPath>
-    </Reference>
-    <Reference Include="Ninject.Extensions.Factory">
-      <HintPath>..\packages\Ninject.Extensions.Factory.3.2.1.0\lib\net45-full\Ninject.Extensions.Factory.dll</HintPath>
-    </Reference>
-    <Reference Include="Ninject.Extensions.NamedScope">
-      <HintPath>..\packages\Ninject.Extensions.NamedScope.3.2.0.0\lib\net45-full\Ninject.Extensions.NamedScope.dll</HintPath>
     </Reference>
     <Reference Include="OpenCL.Net, Version=2.2.9.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -144,14 +125,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CalculateBackprop.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CalculateRBM.cs" />
     <Compile Include="CombinedConsole.cs" />
-    <Compile Include="CompareBP.cs" />
-    <Compile Include="FeatureAndMetricsAccuracyCalculator.cs" />
-    <Compile Include="DBN\TrainDBN.cs" />
-    <Compile Include="RBM\TrainRBM.cs" />
-    <Compile Include="RefactoredForDI\TrainMLPOnSDAE.cs" />
-    <Compile Include="RefactoredForDI\TrainSDAE.cs" />
-    <Compile Include="RefactoredForDI\TuneSDAE.cs" />
+    <Compile Include="FeatureAndMetricsAccuracyCalculator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RefactoredForDI\TrainMLPOnSDAE.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RefactoredForDI\TrainSDAE.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RefactoredForDI\TuneSDAE.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TfidfCalculator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -196,6 +186,10 @@
     <ProjectReference Include="..\MyNN.MLP.DropConnect\MyNN.MLP.DropConnect.csproj">
       <Project>{6B97FBA5-C72D-4BEA-88FB-D2C2C115E470}</Project>
       <Name>MyNN.MLP.DropConnect</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MyNN.MLP.Dropout\MyNN.MLP.Dropout.csproj">
+      <Project>{1C8AF3A1-E95B-43A2-AF1E-6238A89AB53C}</Project>
+      <Name>MyNN.MLP.Dropout</Name>
     </ProjectReference>
     <ProjectReference Include="..\MyNN.MLP.NLNCA\MyNN.MLP.NLNCA.csproj">
       <Project>{5A82E05A-C2DA-42F4-A5F7-C79355E48E5F}</Project>
@@ -348,11 +342,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DropConnect\" />
-    <Folder Include="Dropout\" />
-    <Folder Include="NLNCA\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

@@ -31,6 +31,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly Kernel _hiddenKernelIncrement;
 
         private readonly MemFloat _nablaWeights;
+        private readonly MemFloat _nablaBias;
+
         private readonly MemFloat _currentDeDz;
 
         private readonly Kernel _updateWeightKernel;
@@ -107,11 +109,14 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _currentLayerPropagator = currentLayerPropagator;
 
             _nablaWeights = clProvider.CreateFloatMem(
-                currentLayer.NonBiasNeuronCount * currentLayer.Neurons[0].Weights.Length,
+                currentLayer.TotalNeuronCount * previousLayer.TotalNeuronCount, //currentLayer.Neurons[0].Weights.Length,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            _nablaBias = clProvider.CreateFloatMem(
+                currentLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             _currentDeDz = clProvider.CreateFloatMem(
-                currentLayer.NonBiasNeuronCount,
+                currentLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
 
@@ -131,7 +136,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                 clProvider,
                 currentLayer.GetConfiguration(),
                 nextLayer.GetConfiguration(),
-                kernelTextProvider,
                 nextLayerDeDz,
                 nextLayerContainer
                 );
@@ -140,6 +144,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         public void Prepare()
         {
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
+            _nablaBias.Write(BlockModeEnum.NonBlocking);
 
             _aggregator.ClearAndWrite();
         }
@@ -156,7 +161,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                 const uint hiddenLocalSize = 256;
                 uint hiddenGlobalSize =
                     hiddenLocalSize*
-                    (uint) _currentLayer.NonBiasNeuronCount;
+                    (uint)_currentLayer.TotalNeuronCount;
 
                 if (firstItemInBatch)
                 {
@@ -171,8 +176,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                         .SetKernelArgMem(5, _currentLayerPropagator.MaskContainer.MaskMem)
 
-                        .SetKernelArg(6, 4, _previousLayer.Neurons.Length)
-                        .SetKernelArg(7, 4, _currentLayer.NonBiasNeuronCount)
+                        .SetKernelArg(6, 4, _previousLayer.TotalNeuronCount)
+                        .SetKernelArg(7, 4, _currentLayer.TotalNeuronCount)
 
                         .SetKernelArg(8, 4, learningRate)
                         .SetKernelArg(9, 4, _config.RegularizationFactor)
@@ -183,6 +188,9 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                         .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
 
                         .SetKernelArgMem(13, _aggregator.PreprocessCache)
+
+                        .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
+                        .SetKernelArgMem(15, _nablaBias)
 
                         .EnqueueNDRangeKernel(
                             new uint[]
@@ -208,8 +216,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                         .SetKernelArgMem(5, _currentLayerPropagator.MaskContainer.MaskMem)
 
-                        .SetKernelArg(6, 4, _previousLayer.Neurons.Length)
-                        .SetKernelArg(7, 4, _currentLayer.NonBiasNeuronCount)
+                        .SetKernelArg(6, 4, _previousLayer.TotalNeuronCount)
+                        .SetKernelArg(7, 4, _currentLayer.TotalNeuronCount)
 
                         .SetKernelArg(8, 4, learningRate)
                         .SetKernelArg(9, 4, _config.RegularizationFactor)
@@ -220,6 +228,9 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                         .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
 
                         .SetKernelArgMem(13, _aggregator.PreprocessCache)
+
+                        .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
+                        .SetKernelArgMem(15, _nablaBias)
 
                         .EnqueueNDRangeKernel(
                             new uint[]
@@ -240,11 +251,17 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             var weightMem = _currentLayerContainer.WeightMem;
             var nablaMem = _nablaWeights;
 
+            var biasMem = _currentLayerContainer.BiasMem;
+            var nablaBias = _nablaBias;
+
             _updateWeightKernel
                 .SetKernelArgMem(0, weightMem)
                 .SetKernelArgMem(1, nablaMem)
                 .SetKernelArg(2, 4, (float)(_config.BatchSize))
                 .SetKernelArg(3, 4, weightMem.Array.Length)
+                .SetKernelArgMem(4, biasMem)
+                .SetKernelArgMem(5, nablaBias)
+                .SetKernelArg(6, sizeof(int), biasMem.Array.Length)
                 .EnqueueNDRangeKernel(weightMem.Array.Length)
                 ;
         }

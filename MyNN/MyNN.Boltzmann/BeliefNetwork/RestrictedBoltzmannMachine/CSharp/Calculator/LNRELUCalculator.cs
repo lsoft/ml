@@ -36,13 +36,14 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
             )
         {
 
-            _visibleNeuronCount = visibleNeuronCount + 1; //bias neuron
-            _hiddenNeuronCount = hiddenNeuronCount + 1; //bias neuron
+            _visibleNeuronCount = visibleNeuronCount;
+            _hiddenNeuronCount = hiddenNeuronCount;
         }
 
 
         public void CalculateVisible(
             float[] weights,
+            float[] visibleBiases,
             float[] targetVisible,
             float[] fromHidden
             )
@@ -50,6 +51,10 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
             if (weights == null)
             {
                 throw new ArgumentNullException("weights");
+            }
+            if (visibleBiases == null)
+            {
+                throw new ArgumentNullException("visibleBiases");
             }
             if (targetVisible == null)
             {
@@ -60,8 +65,8 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
                 throw new ArgumentNullException("fromHidden");
             }
 
-            Parallel.For(0, _visibleNeuronCount - 1, visibleIndex => 
-            //for (var visibleIndex = 0; visibleIndex < _visibleNeuronCount - 1; visibleIndex++)
+            Parallel.For(0, _visibleNeuronCount, visibleIndex => 
+            //for (var visibleIndex = 0; visibleIndex < _visibleNeuronCount; visibleIndex++)
             {
                 //высчитываем состояние скрытого нейрона
                 float sum = 0f;
@@ -71,6 +76,8 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
                         weights[CalculateWeightIndex(hiddenIndex, visibleIndex)]
                         * fromHidden[hiddenIndex];
                 }
+
+                sum += visibleBiases[visibleIndex];
 
                 targetVisible[visibleIndex] = sum;
             }
@@ -78,7 +85,8 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
         }
 
         public void SampleVisible(
-            float[] weights, 
+            float[] weights,
+            float[] visibleBiases,
             float[] targetVisible,
             float[] fromHidden
             )
@@ -86,6 +94,10 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
             if (weights == null)
             {
                 throw new ArgumentNullException("weights");
+            }
+            if (visibleBiases == null)
+            {
+                throw new ArgumentNullException("visibleBiases");
             }
             if (targetVisible == null)
             {
@@ -96,8 +108,8 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
                 throw new ArgumentNullException("fromHidden");
             }
 
-            Parallel.For(0, _visibleNeuronCount - 1, visibleIndex => 
-            //for (var visibleIndex = 0; visibleIndex < _visibleNeuronCount - 1; visibleIndex++)
+            Parallel.For(0, _visibleNeuronCount, visibleIndex => 
+            //for (var visibleIndex = 0; visibleIndex < _visibleNeuronCount; visibleIndex++)
             {
                 //высчитываем состояние скрытого нейрона
                 float sum = 0f;
@@ -107,6 +119,8 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
                         weights[CalculateWeightIndex(hiddenIndex, visibleIndex)]
                         * fromHidden[hiddenIndex];
                 }
+
+                sum += visibleBiases[visibleIndex];
 
                 targetVisible[visibleIndex] = sum;
             }
@@ -116,6 +130,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
 
         public void CalculateHidden(
             float[] weights,
+            float[] hiddenBiases,
             float[] targetHidden,
             float[] fromVisible
             )
@@ -123,6 +138,10 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
             if (weights == null)
             {
                 throw new ArgumentNullException("weights");
+            }
+            if (hiddenBiases == null)
+            {
+                throw new ArgumentNullException("hiddenBiases");
             }
             if (targetHidden == null)
             {
@@ -133,8 +152,8 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
                 throw new ArgumentNullException("fromVisible");
             }
 
-            Parallel.For(0, _hiddenNeuronCount - 1, hiddenIndex => 
-            //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount - 1; hiddenIndex++)
+            Parallel.For(0, _hiddenNeuronCount, hiddenIndex => 
+            //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount; hiddenIndex++)
             {
                 //высчитываем состояние скрытого нейрона
                 float sum = 0f;
@@ -143,6 +162,8 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
                     sum += weights[CalculateWeightIndex(hiddenIndex, visibleIndex)] * fromVisible[visibleIndex];
                 }
 
+                sum += hiddenBiases[hiddenIndex];
+
                 targetHidden[hiddenIndex] = sum;
             }
             );//Parallel.For
@@ -150,6 +171,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
 
         public void SampleHidden(
             float[] weights,
+            float[] hiddenBiases,
             float[] targetHidden,
             float[] fromVisible
             )
@@ -167,8 +189,8 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
                 throw new ArgumentNullException("fromVisible");
             }
 
-            Parallel.For(0, _hiddenNeuronCount - 1, hiddenIndex => 
-            //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount - 1; hiddenIndex++)
+            Parallel.For(0, _hiddenNeuronCount, hiddenIndex => 
+            //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount; hiddenIndex++)
             {
                 //высчитываем состояние скрытого нейрона
                 float sum = 0f;
@@ -176,6 +198,8 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
                 {
                     sum += weights[CalculateWeightIndex(hiddenIndex, visibleIndex)]*fromVisible[visibleIndex];
                 }
+
+                sum += hiddenBiases[hiddenIndex];
                 
                 var sampled = SampleHiddenNeuronWithNRelu(sum);
                 targetHidden[hiddenIndex] = sampled;

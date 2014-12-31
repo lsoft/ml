@@ -97,7 +97,7 @@ namespace MyNN.Mask
             }
 
             MaskMem = clProvider.CreateUintMem(
-                arraySize, //currentLayerConfiguration.NonBiasNeuronCount * previousLayerConfiguration.Neurons.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                arraySize,
                 MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
             InternalRegenerateArray();
@@ -179,8 +179,10 @@ namespace MyNN.Mask
         /// </summary>
         private void InternalRegenerateArray()
         {
+            //var brnd = GetBernoulliRandom();
+
             Parallel.For(0, _array.Length, () => GetBernoulliRandom(), (i, loop, brnd) =>
-            //for (var i = 0; i < _arraySize; i++)
+            //for (var i = 0; i < _array.Length; i++)
             {
                 uint ci = 0;
 
@@ -198,6 +200,7 @@ namespace MyNN.Mask
             },
             (brnd) => { }
             );//Parallel.For
+            //}
         }
 
         private Bernoulli GetBernoulliRandom()

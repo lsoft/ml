@@ -25,7 +25,7 @@ namespace MyNN.MLP.Structure
 
         void AddLayer(
             IFunction activationFunction,
-            int nonBiasNeuronCount,
+            int TotalNeuronCount,
             bool isNeedBiasNeuron);
 
         IMLPConfiguration GetConfiguration();

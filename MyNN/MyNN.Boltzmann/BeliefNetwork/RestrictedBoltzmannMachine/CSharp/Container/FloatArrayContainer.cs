@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using MyNN.Boltzmann.BeliefNetwork.FreeEnergyCalculator;
 using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.Container;
 using MyNN.Common.ArtifactContainer;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.Other;
+using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
 
 namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Container
@@ -12,6 +14,10 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Contain
     public class FloatArrayContainer : IContainer
     {
         private readonly IFreeEnergyCalculator _freeEnergyCalculator;
+
+        private readonly float[] _nablaWeights;
+        private readonly float[] _nablaVisibleBiases;
+        private readonly float[] _nablaHiddenBiases;
 
         public float[] Input
         {
@@ -43,8 +49,18 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Contain
             private set;
         }
 
-        private readonly float[] _nabla;
+        public float[] VisibleBiases
+        {
+            get;
+            private set;
+        }
 
+        public float[] HiddenBiases
+        {
+            get;
+            private set;
+        }
+        
         public int VisibleNeuronCount
         {
             get;
@@ -56,9 +72,6 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Contain
             get;
             private set;
         }
-
-        private readonly int _visibleNeuronCountWithBias;
-        private readonly int _hiddenNeuronCountWithBias;
 
         public FloatArrayContainer(
             IRandomizer randomizer,
@@ -81,27 +94,24 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Contain
             VisibleNeuronCount = visibleNeuronCount;
             HiddenNeuronCount = hiddenNeuronCount;
 
-            _visibleNeuronCountWithBias = visibleNeuronCount + 1; //bias neuron
-            _hiddenNeuronCountWithBias = hiddenNeuronCount + 1; //bias neuron
-
             //создаем массивы
-            Input = new float[_visibleNeuronCountWithBias];
-            Visible = new float[_visibleNeuronCountWithBias];
-            Hidden0 = new float[_hiddenNeuronCountWithBias];
-            Hidden1 = new float[_hiddenNeuronCountWithBias];
-            Weights = new float[_visibleNeuronCountWithBias * _hiddenNeuronCountWithBias];
-            _nabla = new float[_visibleNeuronCountWithBias * _hiddenNeuronCountWithBias];
+            Input = new float[VisibleNeuronCount];
+            Visible = new float[VisibleNeuronCount];
+            Hidden0 = new float[HiddenNeuronCount];
+            Hidden1 = new float[HiddenNeuronCount];
+
+            Weights = new float[VisibleNeuronCount * HiddenNeuronCount];
+            VisibleBiases = new float[VisibleNeuronCount];
+            HiddenBiases = new float[HiddenNeuronCount];
+
+            _nablaWeights = new float[VisibleNeuronCount * HiddenNeuronCount];
+            _nablaVisibleBiases = new float[VisibleNeuronCount];
+            _nablaHiddenBiases = new float[HiddenNeuronCount];
 
             //инициализируем веса
             Weights.Fill(() => (randomizer.Next() * 0.02f - 0.01f));
-
-            //заполняем bias входных объектов
-            Input[VisibleNeuronCount ] = 1f;
-            Visible[VisibleNeuronCount] = 1f;
-
-            //заполняем bias выходных объектов
-            Hidden0[HiddenNeuronCount] = 1f;
-            Hidden1[HiddenNeuronCount] = 1f;
+            VisibleBiases.Fill(() => (randomizer.Next() * 0.02f - 0.01f));
+            HiddenBiases.Fill(() => (randomizer.Next() * 0.02f - 0.01f));
         }
 
         public void SetInput(float[] input)
@@ -126,13 +136,15 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Contain
 
         public void ClearNabla()
         {
-            _nabla.Clear();
+            _nablaWeights.Clear();
+            _nablaVisibleBiases.Clear();
+            _nablaHiddenBiases.Clear();
         }
 
         public void CalculateNabla()
         {
             Parallel.For(0, HiddenNeuronCount, hiddenIndex =>
-                //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount - 1; hiddenIndex++)
+            //for (var hiddenIndex = 0; hiddenIndex < _hiddenNeuronCount; hiddenIndex++)
             {
                 //задаем отрицательную часть изменения весов
                 for (var visibleIndex = 0; visibleIndex < VisibleNeuronCount; visibleIndex++)
@@ -142,20 +154,43 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Contain
                         -
                         Visible[visibleIndex] * Hidden1[hiddenIndex];
 
-                    _nabla[CalculateWeightIndex(hiddenIndex, visibleIndex)] += error;
+                    _nablaWeights[CalculateWeightIndex(hiddenIndex, visibleIndex)] += error;
                 }
             }
-                ); //Parallel.For
+            ); //Parallel.For
+
+            for (var visibleIndex = 0; visibleIndex < VisibleNeuronCount; visibleIndex++)
+            {
+                var error = Input[visibleIndex] - Visible[visibleIndex];
+
+                _nablaVisibleBiases[visibleIndex] += error;
+            }
+
+            for (var hiddenIndex = 0; hiddenIndex < HiddenNeuronCount; hiddenIndex++)
+            {
+                var error = Hidden0[hiddenIndex] - Hidden1[hiddenIndex];
+
+                _nablaHiddenBiases[hiddenIndex] += error;
+            }
         }
 
         public void UpdateWeights(
             int batchSize,
             float learningRate)
         {
-            for (var cc = 0; cc < _nabla.Length; cc++)
+            for (var cc = 0; cc < _nablaWeights.Length; cc++)
             {
-                Weights[cc] += learningRate * _nabla[cc] / batchSize;
+                Weights[cc] += learningRate * _nablaWeights[cc] / batchSize;
             }
+            for (var cc = 0; cc < _nablaVisibleBiases.Length; cc++)
+            {
+                VisibleBiases[cc] += learningRate * _nablaVisibleBiases[cc] / batchSize;
+            }
+            for (var cc = 0; cc < _nablaHiddenBiases.Length; cc++)
+            {
+                HiddenBiases[cc] += learningRate * _nablaHiddenBiases[cc] / batchSize;
+            }
+
         }
 
         public float GetError()
@@ -180,8 +215,14 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Contain
                 throw new ArgumentNullException("container");
             }
 
-            container.SaveSerialized(
+            var saveableContainer = new SaveableContainer(
                 this.Weights,
+                this.VisibleBiases,
+                this.HiddenBiases
+                );
+
+            container.SaveSerialized(
+                saveableContainer,
                 "weights.bin"
                 );
         }
@@ -194,9 +235,24 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Contain
                 throw new ArgumentNullException("data");
             }
 
+            //ConsoleAmbientContext.Console.WriteWarning(
+            //    "Avg weights {0}",
+            //    this.Weights.Average()
+            //    );
+            //ConsoleAmbientContext.Console.WriteWarning(
+            //    "Avg visible biases {0}",
+            //    this.VisibleBiases.Average()
+            //    );
+            //ConsoleAmbientContext.Console.WriteWarning(
+            //    "Avg hidden biases {0}",
+            //    this.HiddenBiases.Average()
+            //    );
+
             return 
                 _freeEnergyCalculator.CalculateFreeEnergy(
                     this.Weights,
+                    this.VisibleBiases,
+                    this.HiddenBiases,
                     data);
         }
 
@@ -206,7 +262,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Contain
             )
         {
             return
-                hiddenIndex * _visibleNeuronCountWithBias + visibleIndex;
+                hiddenIndex * VisibleNeuronCount + visibleIndex;
         }
     }
 }

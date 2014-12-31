@@ -9,12 +9,7 @@ namespace MyNN.MLP.Structure.Layer
             get;
         }
 
-        bool IsBiasNeuronExists
-        {
-            get;
-        }
-
-        int NonBiasNeuronCount
+        int TotalNeuronCount
         {
             get;
         }

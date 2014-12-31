@@ -161,11 +161,15 @@ __kernel void DistanceKernel(
 }
 ";
 
-#if DODF_DISABLE_EXP
-                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", "#define DODF_DISABLE_EXP");
-#else
-                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", string.Empty);
-#endif
+                if (DoDfAmbientContext.DisableExponential)
+                {
+                    kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", "#define DODF_DISABLE_EXP");
+                }
+                else
+                {
+                    kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", string.Empty);
+                }
+
 
                 var distanceKernel = clProvider.CreateKernel(kernelText, "DistanceKernel");
 

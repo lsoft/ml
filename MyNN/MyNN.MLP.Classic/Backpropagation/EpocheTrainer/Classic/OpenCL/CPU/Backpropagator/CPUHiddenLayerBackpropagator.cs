@@ -31,8 +31,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Back
         private readonly Kernel _hiddenKernelIncrement;
 
         private readonly MemFloat _nablaWeights;
+        private readonly MemFloat _nablaBias;
+
         private readonly MemFloat _currentDeDz;
-        
+
         private readonly Kernel _updateWeightKernel;
 
         public MemFloat DeDz
@@ -103,11 +105,14 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Back
             _nextLayerDeDz = nextLayerDeDz;
 
             _nablaWeights = clProvider.CreateFloatMem(
-                currentLayer.NonBiasNeuronCount * currentLayer.Neurons[0].Weights.Length,
+                currentLayer.TotalNeuronCount * previousLayer.TotalNeuronCount, //currentLayer.Neurons[0].Weights.Length,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            _nablaBias = clProvider.CreateFloatMem(
+                currentLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             _currentDeDz = clProvider.CreateFloatMem(
-                currentLayer.NonBiasNeuronCount,
+                currentLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             _updateWeightKernel = clProvider.CreateKernel(
@@ -146,15 +151,17 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Back
                     .SetKernelArgMem(5, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(6, _nextLayerContainer.WeightMem)
                     .SetKernelArgMem(7, _nablaWeights)
-                    .SetKernelArg(8, 4, _previousLayer.Neurons.Length / 4)
-                    .SetKernelArg(9, 4, _previousLayer.Neurons.Length - (_previousLayer.Neurons.Length % 4))
-                    .SetKernelArg(10, 4, _previousLayer.Neurons.Length)
-                    .SetKernelArg(11, 4, _currentLayer.NonBiasNeuronCount)
-                    .SetKernelArg(12, 4, _nextLayer.NonBiasNeuronCount)
+                    .SetKernelArg(8, 4, _previousLayer.TotalNeuronCount / 4)
+                    .SetKernelArg(9, 4, _previousLayer.TotalNeuronCount - (_previousLayer.TotalNeuronCount % 4))
+                    .SetKernelArg(10, 4, _previousLayer.TotalNeuronCount)
+                    .SetKernelArg(11, 4, _currentLayer.TotalNeuronCount)
+                    .SetKernelArg(12, 4, _nextLayer.TotalNeuronCount)
                     .SetKernelArg(13, 4, learningRate)
                     .SetKernelArg(14, 4, _config.RegularizationFactor)
                     .SetKernelArg(15, 4, (float)(dataCount))
-                    .EnqueueNDRangeKernel(_currentLayer.NonBiasNeuronCount);
+                    .SetKernelArgMem(16, _currentLayerContainer.BiasMem)
+                    .SetKernelArgMem(17, _nablaBias)
+                    .EnqueueNDRangeKernel(_currentLayer.TotalNeuronCount);
             }
             else
             {
@@ -167,15 +174,17 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Back
                     .SetKernelArgMem(5, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(6, _nextLayerContainer.WeightMem)
                     .SetKernelArgMem(7, _nablaWeights)
-                    .SetKernelArg(8, 4, _previousLayer.Neurons.Length / 4)
-                    .SetKernelArg(9, 4, _previousLayer.Neurons.Length - (_previousLayer.Neurons.Length % 4))
-                    .SetKernelArg(10, 4, _previousLayer.Neurons.Length)
-                    .SetKernelArg(11, 4, _currentLayer.NonBiasNeuronCount)
-                    .SetKernelArg(12, 4, _nextLayer.NonBiasNeuronCount)
+                    .SetKernelArg(8, 4, _previousLayer.TotalNeuronCount / 4)
+                    .SetKernelArg(9, 4, _previousLayer.TotalNeuronCount - (_previousLayer.TotalNeuronCount % 4))
+                    .SetKernelArg(10, 4, _previousLayer.TotalNeuronCount)
+                    .SetKernelArg(11, 4, _currentLayer.TotalNeuronCount)
+                    .SetKernelArg(12, 4, _nextLayer.TotalNeuronCount)
                     .SetKernelArg(13, 4, learningRate)
                     .SetKernelArg(14, 4, _config.RegularizationFactor)
                     .SetKernelArg(15, 4, (float)(dataCount))
-                    .EnqueueNDRangeKernel(_currentLayer.NonBiasNeuronCount);
+                    .SetKernelArgMem(16, _currentLayerContainer.BiasMem)
+                    .SetKernelArgMem(17, _nablaBias)
+                    .EnqueueNDRangeKernel(_currentLayer.TotalNeuronCount);
             }
         }
 
@@ -186,6 +195,9 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Back
             var weightMem = _currentLayerContainer.WeightMem;
             var nablaMem = _nablaWeights;
 
+            var biasMem = _currentLayerContainer.BiasMem;
+            var nablaBias = _nablaBias;
+
             var kernelCount = weightMem.Array.Length / perKernelFloats;
             if (weightMem.Array.Length % perKernelFloats > 0)
             {
@@ -195,9 +207,12 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Back
             _updateWeightKernel
                 .SetKernelArgMem(0, weightMem)
                 .SetKernelArgMem(1, nablaMem)
-                .SetKernelArg(2, 4, weightMem.Array.Length)
-                .SetKernelArg(3, 4, perKernelFloats)
-                .SetKernelArg(4, 4, (float)(_config.BatchSize))
+                .SetKernelArg(2, sizeof(int), weightMem.Array.Length)
+                .SetKernelArg(3, sizeof(int), perKernelFloats)
+                .SetKernelArg(4, sizeof(float), (float)(_config.BatchSize))
+                .SetKernelArgMem(5, biasMem)
+                .SetKernelArgMem(6, nablaBias)
+                .SetKernelArg(7, sizeof(int), biasMem.Array.Length)
                 .EnqueueNDRangeKernel(kernelCount);
         }
 

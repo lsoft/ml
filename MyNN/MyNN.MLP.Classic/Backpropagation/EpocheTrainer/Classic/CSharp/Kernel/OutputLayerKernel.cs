@@ -51,7 +51,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
             float learningRate,
             float regularizationFactor,
-            float dataCount
+            float dataCount,
+
+            float[] currentLayerBias,
+            float[] nablaBias
             )
         {
             for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount ; neuronIndex++)
@@ -65,9 +68,9 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
                     neuronIndex
                     );
 
-                float n = deri*metric;
+                float dedz = deri*metric;
 
-                currentLayerDeDz[neuronIndex] = n;
+                currentLayerDeDz[neuronIndex] = dedz;
 
                 int nablaNeuronShift = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
 
@@ -78,11 +81,18 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
                 {
                     float deltaWeight =
                         learningRate *
-                        n *
+                        dedz *
                         (previousLayerLastState[weightIndex] + regularizationFactor * currentLayerWeights[nablaNeuronShift + weightIndex] / dataCount);
 
                     nabla[nablaNeuronShift + weightIndex] = deltaWeight;
                 }
+
+                float deltaBias =
+                    learningRate *
+                    dedz *
+                    (1 + regularizationFactor * currentLayerBias[neuronIndex] / dataCount);
+
+                nablaBias[neuronIndex] = deltaBias;
             }
         }
 
@@ -104,7 +114,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
             float learningRate,
             float regularizationFactor,
-            float dataCount
+            float dataCount,
+
+            float[] currentLayerBias,
+            float[] nablaBias
             )
         {
             for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount; neuronIndex++)
@@ -118,9 +131,9 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
                     neuronIndex
                     );
 
-                float n = deri * metric;
+                float dedz = deri * metric;
 
-                currentLayerDeDz[neuronIndex] = n;
+                currentLayerDeDz[neuronIndex] = dedz;
 
                 int nablaNeuronShift = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
 
@@ -131,11 +144,18 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
                 {
                     float deltaWeight =
                         learningRate *
-                        n *
+                        dedz *
                         (previousLayerLastState[weightIndex] + regularizationFactor * currentLayerWeights[nablaNeuronShift + weightIndex] / dataCount);
 
                     nabla[nablaNeuronShift + weightIndex] += deltaWeight;
                 }
+
+                float deltaBias =
+                    learningRate *
+                    dedz *
+                    (1 + regularizationFactor * currentLayerBias[neuronIndex] / dataCount);
+
+                nablaBias[neuronIndex] += deltaBias;
             }
         }
 

@@ -8,18 +8,11 @@
             private set;
         }
 
-        public bool IsBiasNeuron
-        {
-            get;
-            private set;
-        }
-
         public NeuronConfiguration(
-            int weightsCount, 
-            bool isBiasNeuron)
+            int weightsCount
+            )
         {
             WeightsCount = weightsCount;
-            IsBiasNeuron = isBiasNeuron;
         }
     }
 }

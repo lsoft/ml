@@ -7,6 +7,11 @@
             get;
         }
 
+        float[] BiasMem
+        {
+            get;
+        }
+
         float[] NetMem
         {
             get;

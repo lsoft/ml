@@ -93,7 +93,7 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
 
                 var currentLayerConfiguration = mlp.Layers[layerIndex].GetConfiguration();
 
-                var arraySize = (long)currentLayerConfiguration.NonBiasNeuronCount * Coef;
+                var arraySize = (long)currentLayerConfiguration.TotalNeuronCount * Coef;
 
                 var maskContainer = _maskContainerFactory.CreateContainer(
                     arraySize,
@@ -156,8 +156,8 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
                     containers[layerIndex - 1],
                     containers[layerIndex],
                     mlp.Layers[layerIndex].LayerActivationFunction,
-                    mlp.Layers[layerIndex - 1].Neurons.Length,
-                    mlp.Layers[layerIndex].NonBiasNeuronCount,
+                    mlp.Layers[layerIndex - 1].TotalNeuronCount,
+                    mlp.Layers[layerIndex].TotalNeuronCount,
                     zeroValue0,
                     oneValue0,
                     zeroValue1,
@@ -195,18 +195,16 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
 
             for (var layerIndex = 0; layerIndex < layerCount; layerIndex++)
             {
-                var currentLayerNonBiasNeuronCount = mlp.Layers[layerIndex].NonBiasNeuronCount;
-                var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].Neurons.Length;
+                var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].TotalNeuronCount;
 
                 IMemLayerContainer mc;
                 if (layerIndex > 0)
                 {
-                    var previousLayerTotalNeuronCount = mlp.Layers[layerIndex - 1].Neurons.Length;
+                    var previousLayerTotalNeuronCount = mlp.Layers[layerIndex - 1].TotalNeuronCount;
 
                     mc = new MemLayerContainer(
                         _clProvider,
                         previousLayerTotalNeuronCount,
-                        currentLayerNonBiasNeuronCount,
                         currentLayerTotalNeuronCount
                         );
                 }
@@ -214,7 +212,6 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
                 {
                     mc = new MemLayerContainer(
                         _clProvider,
-                        currentLayerNonBiasNeuronCount,
                         currentLayerTotalNeuronCount
                         );
                 }

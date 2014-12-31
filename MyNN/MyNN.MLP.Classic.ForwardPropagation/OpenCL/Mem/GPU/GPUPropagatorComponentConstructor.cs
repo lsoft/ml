@@ -70,8 +70,8 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
                     containers[layerIndex - 1],
                     containers[layerIndex],
                     mlp.Layers[layerIndex].LayerActivationFunction,
-                    mlp.Layers[layerIndex - 1].Neurons.Length,
-                    mlp.Layers[layerIndex].NonBiasNeuronCount
+                    mlp.Layers[layerIndex - 1].TotalNeuronCount,
+                    mlp.Layers[layerIndex].TotalNeuronCount
                     );
 
                 result.Add(p);
@@ -96,18 +96,16 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
 
             for (var layerIndex = 0; layerIndex < layerCount; layerIndex++)
             {
-                var currentLayerNonBiasNeuronCount = mlp.Layers[layerIndex].NonBiasNeuronCount;
-                var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].Neurons.Length;
+                var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].TotalNeuronCount;
 
                 IMemLayerContainer mc;
                 if (layerIndex > 0)
                 {
-                    var previousLayerTotalNeuronCount = mlp.Layers[layerIndex - 1].Neurons.Length;
+                    var previousLayerTotalNeuronCount = mlp.Layers[layerIndex - 1].TotalNeuronCount;
 
                     mc = new MemLayerContainer(
                         _clProvider,
                         previousLayerTotalNeuronCount,
-                        currentLayerNonBiasNeuronCount,
                         currentLayerTotalNeuronCount
                         );
                 }
@@ -115,7 +113,6 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
                 {
                     mc = new MemLayerContainer(
                         _clProvider,
-                        currentLayerNonBiasNeuronCount,
                         currentLayerTotalNeuronCount
                         );
                 }

@@ -68,7 +68,9 @@ __kernel void ComputeLayerKernel(
     __global float* currentLayerLastNET,
     __global float * currentLayerLastState,
     const __global float* weights,
-    __local float* partialDotProduct
+    __local float* partialDotProduct,
+    __global float * biases
+
     )
 {
     const uint width = {PREVIOUS_LAYER_NEURON_COUNT};
@@ -96,7 +98,7 @@ __kernel void ComputeLayerKernel(
       // Write the result of the reduction to global memory
       if (get_local_id(0) == 0)
       {
-         float lastNET = partialDotProduct[0];
+         float lastNET = partialDotProduct[0] + biases[y];
          currentLayerLastNET[y] = lastNET;
 
          //compute last state

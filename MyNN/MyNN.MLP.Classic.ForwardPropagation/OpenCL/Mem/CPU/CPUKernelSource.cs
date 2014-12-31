@@ -75,7 +75,9 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCountTotal)
+            int previousLayerNeuronCountTotal,
+            __global float * biases
+            )
 {
     int neuronIndex = get_global_id(0);
 
@@ -93,7 +95,7 @@ __kernel void
         KahanAddElement(&acc, lastNETIncrement);
     }
 
-    float lastNET = acc.Sum;
+    float lastNET = acc.Sum + biases[neuronIndex];
 
 
 
@@ -115,7 +117,9 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCountTotal)
+            int previousLayerNeuronCountTotal,
+            __global float * biases
+            )
 {
     int previousLayerNeuronCount4 = previousLayerNeuronCountTotal / 4;
     int previousLayerNeuronCount4M4 = previousLayerNeuronCountTotal - previousLayerNeuronCountTotal % 4;
@@ -164,7 +168,7 @@ __kernel void
         KahanAddElement(&acc, lastNETIncrement);
     }
 
-    float lastNET = acc.Sum;
+    float lastNET = acc.Sum + biases[neuronIndex];
 
 
 
@@ -186,7 +190,9 @@ __kernel void
             __global float * currentLayerLastNET,
             __global float * currentLayerLastState,
             __global float * weights,
-            int previousLayerNeuronCountTotal)
+            int previousLayerNeuronCountTotal,
+            __global float * biases
+            )
 {
     int previousLayerNeuronCount16 = previousLayerNeuronCountTotal / 16;
     int previousLayerNeuronCount16M16 = previousLayerNeuronCountTotal - previousLayerNeuronCountTotal % 16;
@@ -234,7 +240,7 @@ __kernel void
         KahanAddElement(&acc, lastNETIncrement);
     }
 
-    float lastNET = acc.Sum;
+    float lastNET = acc.Sum + biases[neuronIndex];
 
 
 

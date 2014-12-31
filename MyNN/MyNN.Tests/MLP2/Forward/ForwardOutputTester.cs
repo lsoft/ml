@@ -16,8 +16,8 @@ namespace MyNN.Tests.MLP2.Forward
 
         public float ExecuteTestWith_1_1_MLP(
             IDataSet dataset,
-            float weight0,
-            float weight1,
+            float weight,
+            float bias,
             Func<IFunction> functionFactory,
             Func<IMLP, IForwardPropagation> forwardFactory)
         {
@@ -54,8 +54,8 @@ namespace MyNN.Tests.MLP2.Forward
                     1
                 });
 
-            mlp.Layers[1].Neurons[0].Weights[0] = weight0;
-            mlp.Layers[1].Neurons[0].Weights[1] = weight1;
+            mlp.Layers[1].Neurons[0].Weights[0] = weight;
+            mlp.Layers[1].Neurons[0].Bias = bias;
             
             var forward = forwardFactory(mlp);
 

@@ -7,10 +7,5 @@
             get;
         }
 
-        bool IsBiasNeuron
-        {
-            get;
-        }
-
     }
 }

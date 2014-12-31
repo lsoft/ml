@@ -39,7 +39,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.OpenCL.CPU.MaskContainer
             this.BitMask = bitMask;
 
             this.MaskMem = clProvider.CreateUintMem(
-                currentLayerConfiguration.NonBiasNeuronCount * previousLayerConfiguration.Neurons.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                currentLayerConfiguration.TotalNeuronCount * previousLayerConfiguration.TotalNeuronCount, //without bias neuron at current layer, but include bias neuron at previous layer
                 MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
             this.MaskMem.Array.Fill(layerMasks);
@@ -71,7 +71,7 @@ namespace MyNN.Tests.MLP2.Forward.DropConnect.OpenCL.CPU.MaskContainer
             this.BitMask = bitMask;
 
             this.MaskMem = clProvider.CreateUintMem(
-                currentLayerConfiguration.NonBiasNeuronCount * previousLayerConfiguration.Neurons.Length, //without bias neuron at current layer, but include bias neuron at previous layer
+                currentLayerConfiguration.TotalNeuronCount * previousLayerConfiguration.TotalNeuronCount, //without bias neuron at current layer, but include bias neuron at previous layer
                 MemFlags.CopyHostPtr | MemFlags.ReadOnly);
 
             this.MaskMem.Array.Fill(mask);

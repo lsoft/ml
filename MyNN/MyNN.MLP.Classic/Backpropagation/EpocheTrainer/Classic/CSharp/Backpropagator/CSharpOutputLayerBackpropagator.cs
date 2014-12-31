@@ -4,7 +4,6 @@ using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
-using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Layer;
@@ -26,6 +25,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
         private readonly ILayer _preOutputLayer;
         
         private readonly float[] _nablaWeights;
+        private readonly float[] _nablaBias;
+
         private readonly OutputLayerKernel _outputLayerKernel;
         private readonly UpdateWeightKernel _updateWeightKernel;
 
@@ -76,10 +77,11 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             _preOutputLayer = mlp.Layers[layerIndex - 1];
 
             _nablaWeights = new float[
-                (_outputLayer.NonBiasNeuronCount)*_outputLayer.Neurons[0].Weights.Length
+                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount //_outputLayer.Neurons[0].Weights.Length
                 ];
+            _nablaBias = new float[_outputLayer.TotalNeuronCount];
 
-            DeDz = new float[_outputLayer.NonBiasNeuronCount];
+            DeDz = new float[_outputLayer.TotalNeuronCount];
 
             _outputLayerKernel = new OutputLayerKernel(
                 _outputLayer,
@@ -111,11 +113,13 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _desiredValuesContainer.DesiredOutput,
                     _currentLayerContainer.WeightMem,
                     _nablaWeights,
-                    _preOutputLayer.Neurons.Length,
-                    _outputLayer.NonBiasNeuronCount,
+                    _preOutputLayer.TotalNeuronCount,
+                    _outputLayer.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
-                    (float)(dataCount)
+                    (float)(dataCount),
+                    _currentLayerContainer.BiasMem,
+                    _nablaBias
                     );
             }
             else
@@ -128,11 +132,13 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _desiredValuesContainer.DesiredOutput,
                     _currentLayerContainer.WeightMem,
                     _nablaWeights,
-                    _preOutputLayer.Neurons.Length,
-                    _outputLayer.NonBiasNeuronCount,
+                    _preOutputLayer.TotalNeuronCount,
+                    _outputLayer.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
-                    (float)(dataCount)
+                    (float)(dataCount),
+                    _currentLayerContainer.BiasMem,
+                    _nablaBias
                     );
             }
         }
@@ -140,12 +146,17 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
         public void UpdateWeights()
         {
             var weightMem = _currentLayerContainer.WeightMem;
-            var nablaMem = _nablaWeights;
+            var nablaWeights = _nablaWeights;
+
+            var biasMem = _currentLayerContainer.BiasMem;
+            var nablaBias = _nablaBias;
 
             _updateWeightKernel.UpdateWeigths(
                 weightMem,
-                nablaMem,
-                (float)(_config.BatchSize)
+                nablaWeights,
+                (float)(_config.BatchSize),
+                biasMem,
+                nablaBias
                 );
         }
 

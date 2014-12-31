@@ -189,9 +189,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.CSharp
                 nf,
                 new LinearFunction(1f),
                 currentLayerNeuronCount,
-                previousLayerNeuronCount,
-                false,
-                false
+                previousLayerNeuronCount
                 );
 
             plc = new CSharpLayerContainer(
@@ -201,7 +199,6 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.CSharp
 
             clc = new CSharpLayerContainer(
                 previousLayerNeuronCount,
-                currentLayerNeuronCount,
                 currentLayerNeuronCount
                 );
 

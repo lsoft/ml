@@ -57,6 +57,7 @@
     <Compile Include="LearningRateController\ConstLearningRate.cs" />
     <Compile Include="LearningRateController\ILearningRate.cs" />
     <Compile Include="LearningRateController\LinearLearningRate.cs" />
+    <Compile Include="NewData\DataSetProvider\SmallDataSetProvider.cs" />
     <Compile Include="NewData\DataSet\DataSetFactory.cs" />
     <Compile Include="NewData\DataSet\IDataSetFactory.cs" />
     <Compile Include="NewData\DataSet\ItemLoader\FromArrayDataItemLoader.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="NewData\DataSet\IDataTransformProperties.cs" />
     <Compile Include="NewData\DataSet\ItemLoader\KaggleMNISTDataItemLoader.cs" />
     <Compile Include="NewData\DataSet\Iterator\IDataIteratorFactory.cs" />
+    <Compile Include="NewData\DataSet\SmallDataSet.cs" />
     <Compile Include="NewData\Item\DataItem.cs" />
     <Compile Include="NewData\Item\DataItemFactory.cs" />
     <Compile Include="NewData\Item\IDataItem.cs" />

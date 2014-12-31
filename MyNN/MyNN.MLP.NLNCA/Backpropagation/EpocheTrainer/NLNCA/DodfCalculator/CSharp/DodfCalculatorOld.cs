@@ -185,11 +185,16 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
         {
             var distance = GetDab(fxwList, a, b);
 
-#if DODF_DISABLE_EXP
-            var result = -(distance.Sum(j => j * j));
-#else
-            var result = (float)Math.Exp(-(distance.Sum(j => j * j)));
-#endif
+            float result;
+            if (DoDfAmbientContext.DisableExponential)
+            {
+                result = -(distance.Sum(j => j*j));
+            }
+            else
+            {
+                result = (float) Math.Exp(-(distance.Sum(j => j*j)));
+            }
+
             return result;
         }
 

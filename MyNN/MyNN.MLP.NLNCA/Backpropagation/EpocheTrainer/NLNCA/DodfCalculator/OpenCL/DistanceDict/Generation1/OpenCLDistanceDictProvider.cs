@@ -76,7 +76,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
             {
                 foreach (var i in fxwi.Input)
                 {
-                    FxwMem.Array[fxwIndex++] = new System.Half(i);
+                    FxwMem.Array[fxwIndex++] = i;
                 }
             }
 

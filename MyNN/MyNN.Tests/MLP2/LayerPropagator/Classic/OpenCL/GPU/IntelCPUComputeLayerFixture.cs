@@ -243,21 +243,17 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
                 nf,
                 function,
                 currentLayerNeuronCount,
-                previousLayerNeuronCount,
-                false,
-                false
+                previousLayerNeuronCount
                 );
 
             plc = new MemLayerContainer(
                 clProvider,
-                previousLayerNeuronCount,
                 previousLayerNeuronCount
                 );
 
             clc = new MemLayerContainer(
                 clProvider,
                 previousLayerNeuronCount,
-                currentLayerNeuronCount,
                 currentLayerNeuronCount
                 );
 

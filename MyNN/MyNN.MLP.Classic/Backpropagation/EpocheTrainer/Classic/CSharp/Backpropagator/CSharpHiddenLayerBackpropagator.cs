@@ -3,16 +3,9 @@ using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
-using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
-using MyNN.MLP.NextLayerAggregator;
 using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Layer;
-using OpenCL.Net;
-using OpenCL.Net.Wrapper;
-using OpenCL.Net.Wrapper.Mem;
-using OpenCL.Net.Wrapper.Mem.Data;
-using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backpropagator
 {
@@ -29,6 +22,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
         private readonly float[] _nextLayerDeDz;
 
         private readonly float[] _nablaWeights;
+        private readonly float[] _nablaBias;
+
         private readonly float[] _currentDeDz;
         private readonly HiddenLayerKernel _hiddenLayerKernel;
         private readonly UpdateWeightKernel _updateWeightKernel;
@@ -92,10 +87,11 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             _nextLayerDeDz = nextLayerDeDz;
 
             _nablaWeights = new float[
-                currentLayer.NonBiasNeuronCount*currentLayer.Neurons[0].Weights.Length
+                currentLayer.TotalNeuronCount * _previousLayer.TotalNeuronCount //currentLayer.Neurons[0].Weights.Length
                 ];
+            _nablaBias = new float[currentLayer.TotalNeuronCount];
 
-            _currentDeDz = new float[currentLayer.NonBiasNeuronCount];
+            _currentDeDz = new float[currentLayer.TotalNeuronCount];
 
             _hiddenLayerKernel = new HiddenLayerKernel(
                 currentLayer,
@@ -127,12 +123,14 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _currentLayerContainer.WeightMem,
                     _nextLayerContainer.WeightMem,
                     _nablaWeights,
-                    _previousLayer.Neurons.Length,
-                    _currentLayer.NonBiasNeuronCount,
-                    _nextLayer.NonBiasNeuronCount,
+                    _previousLayer.TotalNeuronCount,
+                    _currentLayer.TotalNeuronCount,
+                    _nextLayer.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
-                    (float)(dataCount)
+                    (float)(dataCount),
+                    _currentLayerContainer.BiasMem,
+                    _nablaBias
                     );
             }
             else
@@ -146,12 +144,14 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _currentLayerContainer.WeightMem,
                     _nextLayerContainer.WeightMem,
                     _nablaWeights,
-                    _previousLayer.Neurons.Length,
-                    _currentLayer.NonBiasNeuronCount,
-                    _nextLayer.NonBiasNeuronCount,
+                    _previousLayer.TotalNeuronCount,
+                    _currentLayer.TotalNeuronCount,
+                    _nextLayer.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
-                    (float) (dataCount)
+                    (float) (dataCount),
+                    _currentLayerContainer.BiasMem,
+                    _nablaBias
                     );
             }
         }
@@ -159,12 +159,17 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
         public void UpdateWeights()
         {
             var weightMem = _currentLayerContainer.WeightMem;
-            var nablaMem = _nablaWeights;
+            var nablaWeights = _nablaWeights;
+
+            var biasMem = _currentLayerContainer.BiasMem;
+            var nablaBias = _nablaBias;
 
             _updateWeightKernel.UpdateWeigths(
                 weightMem,
-                nablaMem,
-                (float)(_config.BatchSize)
+                nablaWeights,
+                (float)(_config.BatchSize),
+                biasMem,
+                nablaBias
                 );
         }
 

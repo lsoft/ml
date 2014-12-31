@@ -82,23 +82,20 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
             {
                 ICSharpLayerContainer mc = null;
 
-                var currentLayerNonBiasNeuronCount = mlp.Layers[layerIndex].NonBiasNeuronCount;
-                var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].Neurons.Length;
+                var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].TotalNeuronCount;
 
                 if (layerIndex > 0)
                 {
-                    var previousLayerTotalNeuronCount = mlp.Layers[layerIndex - 1].Neurons.Length;
+                    var previousLayerTotalNeuronCount = mlp.Layers[layerIndex - 1].TotalNeuronCount;
 
                     mc = new CSharpLayerContainer(
                         previousLayerTotalNeuronCount,
-                        currentLayerNonBiasNeuronCount,
                         currentLayerTotalNeuronCount
                         );
                 }
                 else
                 {
                     mc = new CSharpLayerContainer(
-                        currentLayerNonBiasNeuronCount,
                         currentLayerTotalNeuronCount
                         );
                 }

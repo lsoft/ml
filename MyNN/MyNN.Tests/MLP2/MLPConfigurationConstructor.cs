@@ -24,28 +24,24 @@ namespace MyNN.Tests.MLP2
             for (var li = 0; li < layerSizes.Length; li++)
             {
                 var firstLayer = li == 0;
-                var lastLayer = li == layerSizes.Length - 1;
 
-                var prevLayerNonBiasNeuron = firstLayer ? 0 : layerSizes[li - 1] + 1;
-                var prevLayerTotalNeuron = firstLayer ? 0 : layerSizes[li - 1] + 1;
-                var currentLauerTotalNeuron = layerSizes[li] + (lastLayer ? 0 : 1);
+                var prevLayerTotalNeuron = firstLayer ? 0 : layerSizes[li - 1];
+                var currentLayerTotalNeuron = layerSizes[li];
 
                 var ncl = new List<INeuronConfiguration>();
-                for (var ni = 0; ni < currentLauerTotalNeuron; ni++)
+                for (var ni = 0; ni < currentLayerTotalNeuron; ni++)
                 {
-                    var isBiasNeuron = !lastLayer && ni == (currentLauerTotalNeuron - 1);
-                    var weightsCount = isBiasNeuron ? 0 : prevLayerTotalNeuron;
+                    var weightsCount = prevLayerTotalNeuron;
 
                     var nc = new NeuronConfiguration(
-                        weightsCount,
-                        isBiasNeuron);
+                        weightsCount
+                        );
 
                     ncl.Add(nc);
                 }
 
                 var lc = new LayerConfiguration(
                     ncl.ToArray(),
-                    !lastLayer,
                     layerSizes[li]
                     );
 

@@ -141,9 +141,9 @@ namespace MyNN.MLP.DropConnect.Inferencer.OpenCL.CPU.Naive
                 .SetKernelArg(4, 4, this._p)
                 .SetKernelArg(5, 4, startRandomIndex)
                 .SetKernelArg(6, 4, RandomCount)
-                .SetKernelArg(7, 4, this._previousLayer.Neurons.Length)
+                .SetKernelArg(7, 4, this._previousLayer.TotalNeuronCount)
                 .SetKernelArg(8, 4, _sampleCount)
-                .EnqueueNDRangeKernel(_currentLayer.NonBiasNeuronCount);
+                .EnqueueNDRangeKernel(_currentLayer.TotalNeuronCount);
 
             // Make sure we're done with everything that's been requested before
             _clProvider.QueueFinish();

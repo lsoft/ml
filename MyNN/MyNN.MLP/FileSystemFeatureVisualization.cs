@@ -82,7 +82,7 @@ namespace MyNN.MLP
                 _randomizer,
                 _mlp);
 
-            var inputLayerSize = _mlp.Layers.First().NonBiasNeuronCount;
+            var inputLayerSize = _mlp.Layers.First().TotalNeuronCount;
 
             var diList = new List<IDataItem>();
             for (var cc = 0; cc < inputLayerSize; cc++)

@@ -11,10 +11,15 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
     {
         private readonly CLProvider _clProvider;
         private readonly int _previousLayerTotalNeuronCount;
-        private readonly int _currentLayerNonBiasNeuronCount;
         private readonly int _currentLayerTotalNeuronCount;
 
         public MemFloat WeightMem
+        {
+            get;
+            private set;
+        }
+
+        public MemFloat BiasMem
         {
             get;
             private set;
@@ -34,7 +39,6 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
         public MemLayerContainer(
             CLProvider clProvider,
-            int currentLayerNonBiasNeuronCount,
             int currentLayerTotalNeuronCount
             )
         {
@@ -45,7 +49,6 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
             _clProvider = clProvider;
             _previousLayerTotalNeuronCount = 0;
-            _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
             _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
 
             //нейроны
@@ -67,7 +70,6 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
         public MemLayerContainer(
             CLProvider clProvider,
             int previousLayerTotalNeuronCount,
-            int currentLayerNonBiasNeuronCount,
             int currentLayerTotalNeuronCount
             )
         {
@@ -82,7 +84,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
             _clProvider = clProvider;
             _previousLayerTotalNeuronCount = previousLayerTotalNeuronCount;
-            _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
+            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
             _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
 
             //нейроны
@@ -102,11 +104,19 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
             //веса
             var weightMem = clProvider.CreateFloatMem(
-                currentLayerNonBiasNeuronCount*previousLayerTotalNeuronCount,
+                currentLayerTotalNeuronCount*previousLayerTotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             weightMem.Write(BlockModeEnum.Blocking);
 
             WeightMem = weightMem;
+
+            //биасы
+            var biasMem = clProvider.CreateFloatMem(
+                currentLayerTotalNeuronCount,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            biasMem.Write(BlockModeEnum.Blocking);
+
+            BiasMem = biasMem;
         }
 
         public void ClearAndPushNetAndState()
@@ -120,11 +130,9 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
         {
             var nml = this.NetMem.Array.Length;
             Array.Clear(this.NetMem.Array, 0, nml);
-            this.NetMem.Array[nml - 1] = 1f;
 
             var sml = this.StateMem.Array.Length;
             Array.Clear(this.StateMem.Array, 0, sml);
-            this.StateMem.Array[sml - 1] = 1f;
         }
 
 
@@ -141,21 +149,16 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             {
                 throw new ArgumentNullException("data");
             }
-            if (data.Length != _currentLayerNonBiasNeuronCount)
+            if (data.Length != _currentLayerTotalNeuronCount)
             {
-                throw new ArgumentException("data.Length != _currentLayerNonBiasNeuronCount");
+                throw new ArgumentException("data.Length != _currentLayerTotalNeuronCount");
             }
 
             //записываем значения из сети в объекты OpenCL
             for (var neuronIndex = 0; neuronIndex < _currentLayerTotalNeuronCount; neuronIndex++)
             {
-                var isBiasNeuron = neuronIndex == _currentLayerNonBiasNeuronCount;
-
                 this.NetMem.Array[neuronIndex] = 0; //LastNET
-                this.StateMem.Array[neuronIndex] =
-                    isBiasNeuron
-                        ? 1.0f
-                        : data[neuronIndex];
+                this.StateMem.Array[neuronIndex] = data[neuronIndex];
             }
 
             this.NetMem.Write(BlockModeEnum.NonBlocking);
@@ -174,23 +177,24 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
             var weightShift = 0;
 
-            var weightMem = this.WeightMem;
-            for (var neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; neuronIndex++)
+            for (var neuronIndex = 0; neuronIndex < layer.TotalNeuronCount; neuronIndex++)
             {
                 var neuron = layer.Neurons[neuronIndex];
 
                 Array.Copy(
                     neuron.Weights,
                     0,
-                    weightMem.Array,
+                    WeightMem.Array,
                     weightShift,
                     neuron.Weights.Length);
 
                 weightShift += neuron.Weights.Length;
+
+                this.BiasMem.Array[neuronIndex] = neuron.Bias;
             }
 
-            weightMem.Write(BlockModeEnum.NonBlocking);
-            
+            WeightMem.Write(BlockModeEnum.NonBlocking);
+            BiasMem.Write(BlockModeEnum.NonBlocking);
         }
 
         public void PopWeights()
@@ -198,6 +202,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             if (this.WeightMem != null)
             {
                 this.WeightMem.Read(BlockModeEnum.Blocking);
+                this.BiasMem.Read(BlockModeEnum.Blocking);
             }
         }
 
@@ -206,7 +211,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             var weightLayer = this.WeightMem;
 
             var weightShiftIndex = 0;
-            for (var neuronIndex = 0; neuronIndex < layer.NonBiasNeuronCount; ++neuronIndex)
+            for (var neuronIndex = 0; neuronIndex < layer.TotalNeuronCount; ++neuronIndex)
             {
                 var neuron = layer.Neurons[neuronIndex];
 
@@ -214,6 +219,8 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
                 Array.Copy(weightLayer.Array, weightShiftIndex, neuron.Weights, 0, weightCount);
                 weightShiftIndex += weightCount;
+
+                neuron.Bias = this.BiasMem.Array[neuronIndex];
             }
         }
 
@@ -228,7 +235,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
         {
             var ls = new LayerState(
                 this.StateMem.Array,
-                _currentLayerNonBiasNeuronCount);
+                _currentLayerTotalNeuronCount);
 
             return ls;
         }

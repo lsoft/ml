@@ -11,13 +11,7 @@ namespace MyNN.MLP.Structure.Layer
             private set;
         }
 
-        public bool IsBiasNeuronExists
-        {
-            get;
-            private set;
-        }
-
-        public int NonBiasNeuronCount
+        public int TotalNeuronCount
         {
             get;
             private set;
@@ -25,8 +19,8 @@ namespace MyNN.MLP.Structure.Layer
 
         public LayerConfiguration(
             INeuronConfiguration[] neurons, 
-            bool isBiasNeuronExists, 
-            int nonBiasNeuronCount)
+            int totalNeuronCount
+            )
         {
             if (neurons == null)
             {
@@ -34,8 +28,7 @@ namespace MyNN.MLP.Structure.Layer
             }
 
             Neurons = neurons;
-            IsBiasNeuronExists = isBiasNeuronExists;
-            NonBiasNeuronCount = nonBiasNeuronCount;
+            TotalNeuronCount = totalNeuronCount;
         }
     }
 }

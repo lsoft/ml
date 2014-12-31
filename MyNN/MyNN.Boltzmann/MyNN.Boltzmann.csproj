@@ -64,6 +64,7 @@
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\CSharp\FreeEnergyCalculator\FloatArrayFreeEnergyCalculator.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\IRBM.cs" />
     <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\RBM.cs" />
+    <Compile Include="BeliefNetwork\RestrictedBoltzmannMachine\SaveableContainer.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IFeatureExtractor.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Feature\IsolatedFeatureExtractor.cs" />
     <Compile Include="BoltzmannMachines\BinaryBinary\DBN\RBM\Reconstructor\IsolatedImageReconstructor.cs" />

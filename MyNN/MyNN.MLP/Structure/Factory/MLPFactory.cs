@@ -51,20 +51,13 @@ namespace MyNN.MLP.Structure.Factory
             layerList[0] = _layerFactory.CreateInputLayer(neuronCountList[0]);
 
             //создаем скрытые слои и выходной слой
-            var isPreviousLayerHadBiasNeuron = true;
             for (var cc = 1; cc < neuronCountList.Length; cc++)
             {
-                var isLayerHasBiasNeuron = cc != (neuronCountList.Length - 1);
-
                 layerList[cc] = _layerFactory.CreateLayer(
                     activationFunction[cc],
                     neuronCountList[cc],
-                    neuronCountList[cc - 1],
-                    isLayerHasBiasNeuron,
-                    isPreviousLayerHadBiasNeuron
+                    neuronCountList[cc - 1]
                     );
-
-                isPreviousLayerHadBiasNeuron = isLayerHasBiasNeuron;
             }
 
             return
@@ -149,9 +142,7 @@ namespace MyNN.MLP.Structure.Factory
                 var layer = _layerFactory.CreateLayer(
                     activationFunction[layerIndex],
                     neuronCountList[layerIndex],
-                    neuronCountList[layerIndex - 1],
-                    isLayerHasBiasNeuron,
-                    isPreviousLayerHadBiasNeuron
+                    neuronCountList[layerIndex - 1]
                     );
 
                 if (layerIndex < dbnInformation.LayerCount)
@@ -215,15 +206,11 @@ namespace MyNN.MLP.Structure.Factory
 
             for (var layerIndex = 1; layerIndex <= Math.Min(layerList.Length, dbnInformation.LayerCount); layerIndex++)
             {
-                var isLayerHasBiasNeuron = layerIndex != (dbnInformation.LayerCount - 1);
-
                 //создаем слой
                 var layer = _layerFactory.CreateLayer(
                     activationFunction[layerIndex],
                     dbnInformation.LayerSizes[layerIndex],
-                    layerList[layerIndex - 1].NonBiasNeuronCount,
-                    isLayerHasBiasNeuron,
-                    layerList[layerIndex - 1].IsBiasNeuronExists
+                    layerList[layerIndex - 1].TotalNeuronCount
                     );
 
                 if (dbnInformation.LayerCount < layerIndex)
@@ -305,9 +292,7 @@ namespace MyNN.MLP.Structure.Factory
                     var encoderLayer = _layerFactory.CreateLayer(
                         activationFunction[layerIndex],
                         dbnInformation.LayerSizes[layerIndex],
-                        layerList[layerIndex - 1].NonBiasNeuronCount,
-                        true,
-                        layerList[layerIndex - 1].IsBiasNeuronExists
+                        layerList[layerIndex - 1].TotalNeuronCount
                         );
 
                     //загружаем веса
@@ -319,14 +304,11 @@ namespace MyNN.MLP.Structure.Factory
                 //создаем слой декодирования
                 {
                     var decoderLayerIndex = mlpLayersCount - layerIndex;
-                    var isDecoderLayerHasBiasNeuron = decoderLayerIndex != (activationFunction.Length - 1);
 
                     var decoderLayer = _layerFactory.CreateLayer(
                         activationFunction[decoderLayerIndex],
-                        layerList[layerIndex - 1].NonBiasNeuronCount,
-                        layerList[layerIndex].NonBiasNeuronCount,
-                        isDecoderLayerHasBiasNeuron,
-                        true
+                        layerList[layerIndex - 1].TotalNeuronCount,
+                        layerList[layerIndex].TotalNeuronCount
                         );
 
                     //загружаем веса

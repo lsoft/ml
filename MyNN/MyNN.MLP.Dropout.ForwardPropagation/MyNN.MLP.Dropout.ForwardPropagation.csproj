@@ -44,11 +44,6 @@
     <Compile Include="OpenCL\GPU\GPULayerPropagator.cs" />
     <Compile Include="OpenCL\GPU\GPUMaskForwardPropagatorComponentConstructor.cs" />
     <Compile Include="OpenCL\GPU\GPUPropagatorComponentConstructor.cs" />
-    <Compile Include="OpenCL\CPU\CPUInferencePropagatorComponentConstructor.cs" />
-    <Compile Include="OpenCL\CPU\CPUKernelSource.cs" />
-    <Compile Include="OpenCL\CPU\CPULayerPropagator.cs" />
-    <Compile Include="OpenCL\CPU\CPUMaskForwardPropagatorComponentConstructor.cs" />
-    <Compile Include="OpenCL\CPU\CPUPropagatorComponentConstructor.cs" />
     <Compile Include="OpenCL\IDropoutLayerPropagator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

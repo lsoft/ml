@@ -13,7 +13,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
         private readonly int _prevLayerNeuronTotalCount;
-        private readonly int _currentLayerNonBiasNeuronCount;
+        private readonly int _currentLayerTotalNeuronCount;
 
         private readonly Kernel _kernel;
 
@@ -34,7 +34,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
             IMemLayerContainer currentMemLayerContainer,
             IFunction activationFunction,
             int prevLayerNeuronTotalCount,
-            int currentLayerNonBiasNeuronCount
+            int currentLayerTotalNeuronCount
             )
         {
             if (clProvider == null)
@@ -67,12 +67,12 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
             _previousMemLayerContainer = previousMemLayerContainer;
             _currentMemLayerContainer = currentMemLayerContainer;
             _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
-            _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
+            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
 
             string kernelName;
             var kernelSource = ks.GetKernelSource(
                 activationFunction,
-                currentLayerNonBiasNeuronCount,
+                currentLayerTotalNeuronCount,
                 prevLayerNeuronTotalCount,
                 out kernelName
                 );
@@ -98,6 +98,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
                 .SetKernelArgMem(4, _maskContainer.MaskMem)
                 .SetKernelArg(5, 4, _maskContainer.BitMask)
                 .SetKernelArgLocalMem(6, 4 * szLocalWorkSize)
+                .SetKernelArgMem(7, _currentMemLayerContainer.BiasMem)
                 .EnqueueNDRangeKernel(
                     new[]
                         {

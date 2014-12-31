@@ -28,6 +28,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly Kernel _outputKernelOverwrite;
         
         private readonly MemFloat _nablaWeights;
+        private readonly MemFloat _nablaBias;
+
         private readonly Kernel _updateWeightKernel;
 
         public MemFloat DeDz
@@ -93,11 +95,14 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _preOutputLayer = mlp.Layers[layerIndex - 1];
 
             _nablaWeights = clProvider.CreateFloatMem(
-                (_outputLayer.NonBiasNeuronCount) * _outputLayer.Neurons[0].Weights.Length,
+                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount, //_outputLayer.Neurons[0].Weights.Length,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+            _nablaBias = clProvider.CreateFloatMem(
+                _outputLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             DeDz = clProvider.CreateFloatMem(
-                _outputLayer.NonBiasNeuronCount,
+                _outputLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
 
@@ -118,6 +123,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         public void Prepare()
         {
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
+            _nablaBias.Write(BlockModeEnum.NonBlocking);
         }
 
         public void Backpropagate(
@@ -127,7 +133,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             )
         {
             const int outputLocalSize = 128;
-            uint outputGlobalSize = outputLocalSize * (uint)_outputLayer.NonBiasNeuronCount;
+            uint outputGlobalSize = outputLocalSize * (uint)_outputLayer.TotalNeuronCount;
 
             if (firstItemInBatch)
             {
@@ -146,14 +152,17 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                     .SetKernelArgMem(7, _currentLayerPropagator.MaskContainer.MaskMem)
 
-                    .SetKernelArg(8, 4, _preOutputLayer.Neurons.Length)
-                    .SetKernelArg(9, 4, _outputLayer.NonBiasNeuronCount)
+                    .SetKernelArg(8, 4, _preOutputLayer.TotalNeuronCount)
+                    .SetKernelArg(9, 4, _outputLayer.TotalNeuronCount)
 
                     .SetKernelArg(10, 4, learningRate)
                     .SetKernelArg(11, 4, _config.RegularizationFactor)
                     .SetKernelArg(12, 4, (float)(dataCount))
 
                     .SetKernelArg(13, 4, _currentLayerPropagator.MaskContainer.BitMask)
+
+                    .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
+                    .SetKernelArgMem(15, _nablaBias)
 
                     .EnqueueNDRangeKernel(
                         new uint[]
@@ -183,14 +192,17 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                     .SetKernelArgMem(7, _currentLayerPropagator.MaskContainer.MaskMem)
 
-                    .SetKernelArg(8, 4, _preOutputLayer.Neurons.Length)
-                    .SetKernelArg(9, 4, _outputLayer.NonBiasNeuronCount)
+                    .SetKernelArg(8, 4, _preOutputLayer.TotalNeuronCount)
+                    .SetKernelArg(9, 4, _outputLayer.TotalNeuronCount)
 
                     .SetKernelArg(10, 4, learningRate)
                     .SetKernelArg(11, 4, _config.RegularizationFactor)
                     .SetKernelArg(12, 4, (float)(dataCount))
 
                     .SetKernelArg(13, 4, _currentLayerPropagator.MaskContainer.BitMask)
+
+                    .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
+                    .SetKernelArgMem(15, _nablaBias)
 
                     .EnqueueNDRangeKernel(
                         new uint[]
@@ -210,11 +222,17 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             var weightMem = _currentLayerContainer.WeightMem;
             var nablaMem = _nablaWeights;
 
+            var biasMem = _currentLayerContainer.BiasMem;
+            var nablaBias = _nablaBias;
+
             _updateWeightKernel
                 .SetKernelArgMem(0, weightMem)
                 .SetKernelArgMem(1, nablaMem)
                 .SetKernelArg(2, 4, (float)(_config.BatchSize))
                 .SetKernelArg(3, 4, weightMem.Array.Length)
+                .SetKernelArgMem(4, biasMem)
+                .SetKernelArgMem(5, nablaBias)
+                .SetKernelArg(6, sizeof(int), biasMem.Array.Length)
                 .EnqueueNDRangeKernel(weightMem.Array.Length)
                 ;
         }

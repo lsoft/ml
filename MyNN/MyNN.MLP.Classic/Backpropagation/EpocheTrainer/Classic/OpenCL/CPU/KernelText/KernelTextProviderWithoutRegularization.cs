@@ -38,16 +38,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
 
         #region calculation kernels source
 
-        public string GetPreprocessHiddenKernelZeroSource(int groupSize)
-        {
-            throw new NotSupportedException();
-        }
-
-        public string GetPreprocessHiddenKernelOneSource()
-        {
-            throw new NotSupportedException();
-        }
-
         public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
@@ -59,7 +49,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
                     MetricMethodName,
                     VectorizationSizeEnum.NoVectorization,
                     MemModifierEnum.Global,
-                    _mlp.Layers.Last().NonBiasNeuronCount
+                    _mlp.Layers.Last().TotalNeuronCount
                     )
                 );
 
@@ -84,6 +74,11 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
         nabla[nablaNeuronShift + weightIndex] = deltaWeight;
 ");
 
+            result =
+                result.Replace("<bias_update>", @"
+        nablaBias[neuronIndex] = deltaBias;
+");
+
             return result;
         }
 
@@ -98,7 +93,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
                     MetricMethodName,
                     VectorizationSizeEnum.NoVectorization,
                     MemModifierEnum.Global,
-                    _mlp.Layers.Last().NonBiasNeuronCount
+                    _mlp.Layers.Last().TotalNeuronCount
                     )
                 );
 
@@ -129,6 +124,11 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
             result =
                 result.Replace("<weight_update>", @"
         nabla[nablaNeuronShift + weightIndex] += deltaWeight;
+");
+
+            result =
+                result.Replace("<bias_update>", @"
+        nablaBias[neuronIndex] += deltaBias;
 ");
 
             return result;
@@ -169,7 +169,11 @@ __kernel void HiddenLayerTrain(
 
     float learningRate,
     float regularizationFactor,
-    float dataCount)
+    float dataCount,
+
+    __global float* currentLayerBias,
+    __global float* nablaBias
+    )
 {
     int neuronIndex = get_global_id(0);
 
@@ -180,7 +184,7 @@ __kernel void HiddenLayerTrain(
     KahanAccumulator accDeDz = GetEmptyKahanAcc();
     for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
     {
-        int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount + 1, nextNeuronIndex) + neuronIndex; //не векторизуется:(
+        int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount, nextNeuronIndex) + neuronIndex; //не векторизуется:(
 
         float nextWeight = nextLayerWeights[nextWeightIndex];
         float nextNabla = nextLayerDeDz[nextNeuronIndex];
@@ -231,6 +235,11 @@ __kernel void HiddenLayerTrain(
 
         <nabla_update>
     }
+
+    float deltaBias = learningRate * currentDeDz;
+
+    <bias_update>
+
 }
 
 __kernel void OutputLayerTrain(
@@ -253,7 +262,11 @@ __kernel void OutputLayerTrain(
 
     float learningRate,
     float regularizationFactor,
-    float dataCount)
+    float dataCount,
+
+    __global float* currentLayerBias,
+    __global float* nablaBias
+    )
 {
     int neuronIndex = get_global_id(0);
 
@@ -282,7 +295,7 @@ __kernel void OutputLayerTrain(
     {
         float4 previousLayerLastState4 = vload4(weightIndex4, previousLayerLastState);
         float4 currentLayerWeights4 = vload4(nablaNeuronShift4 + weightIndex4, currentLayerWeights + nablaNeuronShift4Shift);
-        
+
         float4 deltaWeight4 =  learningRate * n * previousLayerLastState4;
 
         <vectorized_weight_update>
@@ -303,6 +316,10 @@ __kernel void OutputLayerTrain(
 
         <weight_update>
     }
+
+    float deltaBias = learningRate * n;
+
+    <bias_update>
 }
 ";
 
@@ -314,43 +331,7 @@ __kernel void OutputLayerTrain(
         {
             get
             {
-                return @"
-__kernel void UpdateWeightKernel(
-    __global float * currentLayerWeights,
-    __global float * nabla,
-    int count, //общее количество флоатов для обработки (для всех кернелов, длина currentLayerWeights, длина nabla)
-    int kernelDataCount, //количество флоатов для обработки ОДНИМ кернелом (должно быть кратно 4м!!!)
-    float batchSize)
-{
-    int kernelIndex = get_global_id(0);
-    
-    int d1StartIndex = kernelIndex * kernelDataCount;
-    int d1Count = min(kernelDataCount, count - d1StartIndex);
-
-    int d4StartIndex = d1StartIndex / 4;
-    int d4Count = d1Count / 4;
-    
-    int d1StartRemainder = d1StartIndex + d4Count * 4;
-
-    for(int cc = d4StartIndex; cc < d4StartIndex + d4Count; cc++)
-    {
-        float4 currentLayerWeights4 = vload4(cc, currentLayerWeights);
-        float4 nabla4 = vload4(cc, nabla);
-
-        float4 result = currentLayerWeights4 + nabla4 / batchSize;
-
-        vstore4(
-            result,
-            cc,
-            currentLayerWeights);
-    }
-
-    for(int cc = d1StartRemainder; cc < d1StartIndex + d1Count; cc++)
-    {
-        currentLayerWeights[cc] += nabla[cc] / batchSize;
-    }
-}
-";
+                throw new NotSupportedException("Реализовано в кернел провайдере более высокого уровня");
             }
         }
 

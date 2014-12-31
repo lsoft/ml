@@ -49,10 +49,14 @@
     </Compile>
     <Compile Include="BackpropagationFactory\IBackpropagationFactory.cs" />
     <Compile Include="Backpropagation\Backpropagation.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\Factory\IMemLayerBackpropagatorFactory.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\Factory\IMemLayerBackpropagatorFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\ICSharpLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\ILayerBackpropagator.cs" />
-    <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\IMemLayerBackpropagator.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Backpropagator\IMemLayerBackpropagator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Backpropagation\EpocheTrainer\IEpocheTrainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\IKernelTextProvider.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\EpocheTrainer.cs" />
@@ -75,11 +79,12 @@
     <Compile Include="Backpropagation\Validation\Drawer\IDrawer.cs" />
     <Compile Include="Backpropagation\Validation\IValidation.cs" />
     <Compile Include="Backpropagation\Validation\Validation.cs" />
-    <Compile Include="DBNInfo\FileDBNInformation.cs" />
-    <Compile Include="DBNInfo\IDBNInformation.cs" />
-    <Compile Include="DBNInfo\WeightLoader\IWeightLoader.cs" />
-    <Compile Include="DBNInfo\WeightLoader\RBMAutoencoderWeightLoader.cs" />
-    <Compile Include="DBNInfo\WeightLoader\RBMWeightLoader.cs" />
+    <Compile Include="DBNInfo\IDBNInformation.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DBNInfo\WeightLoader\IWeightLoader.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DesiredValues\CSharpDesiredValuesContainer.cs" />
     <Compile Include="DesiredValues\ICSharpDesiredValuesContainer.cs" />
     <Compile Include="DesiredValues\IDesiredValuesContainer.cs" />
@@ -95,16 +100,22 @@
     <Compile Include="ForwardPropagation\IPropagatorComponentConstructor.cs" />
     <Compile Include="ForwardPropagation\LayerContainer\CSharp\CSharpLayerContainer.cs" />
     <Compile Include="ForwardPropagation\LayerContainer\CSharp\ICSharpLayerContainer.cs" />
-    <Compile Include="ForwardPropagation\LayerContainer\OpenCL\Img\IImgLayerContainer.cs" />
-    <Compile Include="ForwardPropagation\LayerContainer\OpenCL\Img\ImgLayerContainer.cs" />
-    <Compile Include="ForwardPropagation\LayerContainer\OpenCL\Mem\IMemLayerContainer.cs" />
-    <Compile Include="ForwardPropagation\LayerContainer\OpenCL\Mem\MemLayerContainer.cs" />
+    <Compile Include="ForwardPropagation\LayerContainer\OpenCL\Mem\IMemLayerContainer.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ForwardPropagation\LayerContainer\OpenCL\Mem\MemLayerContainer.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="LearningConfig\ILearningAlgorithmConfig.cs" />
     <Compile Include="LearningConfig\LearningAlgorithmConfig.cs" />
     <Compile Include="MLPContainer\IMLPContainerHelper.cs" />
     <Compile Include="MLPContainer\MLPContainerHelper.cs" />
-    <Compile Include="NextLayerAggregator\CLNextLayerAggregator.cs" />
-    <Compile Include="NextLayerAggregator\INextLayerAggregator.cs" />
+    <Compile Include="NextLayerAggregator\CLNextLayerAggregator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NextLayerAggregator\INextLayerAggregator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SparseCalculator.cs" />
     <Compile Include="Structure\Factory\IMLPFactory.cs" />
     <Compile Include="Structure\Factory\MLPFactory.cs" />
@@ -124,7 +135,6 @@
     <Compile Include="Structure\MLPConfiguration.cs" />
     <Compile Include="Structure\MLPState.cs" />
     <Compile Include="Structure\MLPVisualizer.cs" />
-    <Compile Include="Structure\Neuron\BiasNeuron.cs" />
     <Compile Include="Structure\Neuron\Factory\INeuronFactory.cs" />
     <Compile Include="Structure\Neuron\Factory\NeuronFactory.cs" />
     <Compile Include="Structure\Neuron\Function\DRLUFunction.cs" />

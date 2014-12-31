@@ -226,7 +226,7 @@ namespace MyNN.MLP.ForwardPropagation
             var layerCount = _mlp.Layers.Length;
 
             //пишем результат обратно в сеть
-            for (var layerIndex = 1; layerIndex < layerCount - 1; layerIndex++)
+            for (var layerIndex = 1; layerIndex < layerCount - 1; layerIndex++) //!!! похоже захватывается еще последний контейнер! не соответствует названию метода!
             {
                 //читаем его из opencl
                 _containers[layerIndex].PopNetAndState();

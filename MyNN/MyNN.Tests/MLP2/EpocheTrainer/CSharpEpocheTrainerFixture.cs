@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
@@ -12,12 +13,14 @@ using MyNN.MLP.Structure.Neuron.Function;
 namespace MyNN.Tests.MLP2.EpocheTrainer
 {
     /// <summary>
-    /// Summary description for OpenCLEpocheTrainerFixture
+    /// Summary description for CSharpEpocheTrainerFixture
     /// </summary>
     [TestClass]
-    public class OpenCLEpocheTrainerFixture
+    public class CSharpEpocheTrainerFixture
     {
-        public OpenCLEpocheTrainerFixture()
+        public const double Epsilon = 1e-12;
+
+        public CSharpEpocheTrainerFixture()
         {
             //
             // TODO: Add constructor logic here
@@ -75,21 +78,43 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
         [TestMethod]
         public void TestMethod1()
         {
-            var trainer = new EpocheTrainer_1_1_Test();
+            const int InputLength = 100;
+            const int OutputLength = 2;
 
-            var dataset = new TestDataSet(
-                new List<IDataItem>
-                {
-                    new DataItem(
-                        new[] {0.5f},
-                        new[] {2f})
-                });
+            var dil = new List<IDataItem>();
 
-            trainer.ExecuteTest(
+            for (var cc = 0; cc < 100; cc++)
+            {
+                var input = new float[InputLength];
+                input[cc % InputLength] = 1f;
+
+                var output = new float[OutputLength];
+                output[cc % OutputLength] = 1f;
+
+                var di = new DataItem(input, output);
+                dil.Add(di);
+            }
+
+            var dataset = new TestDataSet(dil);
+
+            var trainer = new CSharpTestHelper();
+            var acc = trainer.ExecuteTest(
                 dataset,
-                1f,
-                1f,
                 () => new LinearFunction(1f));
+
+            var correctResult = 0.463309943675995;
+            var result = (double) acc.PerItemError;
+
+            ConsoleAmbientContext.Console.WriteLine(
+                string.Format(
+                    "correct = {0}, result = {1}",
+                    correctResult,
+                    result));
+
+            Assert.IsTrue(Math.Abs(result - correctResult) < Epsilon);
+
+
         }
+
     }
 }

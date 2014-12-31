@@ -5,6 +5,7 @@ using MyNN.Common.ArtifactContainer;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.Item;
 using MyNN.Common.OpenCLHelper;
+using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Validation;
@@ -32,6 +33,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
         private readonly int _ncaLayerIndex;
         private readonly float _lambda;
         private readonly float _partOfTakeIntoAccount;
+        private readonly VectorizationSizeEnum _vse;
 
         public CPUNLNCAAuthencoderBackpropagationFactory(
             CLProvider clProvider,
@@ -39,7 +41,9 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
             Func<List<IDataItem>, IDodfCalculator> dodfCalculatorFactory,
             int ncaLayerIndex,
             float lambda,
-            float partOfTakeIntoAccount)
+            float partOfTakeIntoAccount,
+            VectorizationSizeEnum vse
+            )
         {
             if (clProvider == null)
             {
@@ -60,6 +64,7 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
             _ncaLayerIndex = ncaLayerIndex;
             _lambda = lambda;
             _partOfTakeIntoAccount = partOfTakeIntoAccount;
+            _vse = vse;
         }
 
         public IBackpropagation CreateBackpropagation(
@@ -72,10 +77,6 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
             if (randomizer == null)
             {
                 throw new ArgumentNullException("randomizer");
-            }
-            if (_clProvider == null)
-            {
-                throw new ArgumentNullException("_clProvider");
             }
             if (artifactContainer == null)
             {
@@ -94,11 +95,11 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
                 throw new ArgumentNullException("config");
             }
 
-            var takeIntoAccount = (int)(mlp.Layers[_ncaLayerIndex].NonBiasNeuronCount*_partOfTakeIntoAccount);
+            var takeIntoAccount = (int)(mlp.Layers[_ncaLayerIndex].TotalNeuronCount * _partOfTakeIntoAccount);
 
             var cc = new CPUPropagatorComponentConstructor(
                 _clProvider,
-                VectorizationSizeEnum.VectorizationMode16
+                _vse
                 );
 
             ILayerContainer[] containers;
@@ -123,7 +124,8 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
                     _ncaLayerIndex,
                     _lambda,
                     takeIntoAccount,
-                    forwardPropagation
+                    forwardPropagation,
+                    containers.ConvertAll(j => j as IMemLayerContainer)
                     ), 
                 _mlpContainerHelper,
                 artifactContainer,

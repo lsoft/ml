@@ -165,11 +165,16 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
                 sum += diff * diff;
             }
 
-#if DODF_DISABLE_EXP
-            var result = -sum;
-#else
-            var result = (float)(Math.Exp(-sum));
-#endif
+            float result;
+            if (DoDfAmbientContext.DisableExponential)
+            {
+                result = -sum;
+            }
+            else
+            {
+                result = (float) (Math.Exp(-sum));
+            }
+
             return result;
         }
 

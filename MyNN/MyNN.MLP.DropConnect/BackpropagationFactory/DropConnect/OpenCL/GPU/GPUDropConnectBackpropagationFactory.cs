@@ -76,10 +76,6 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
             {
                 throw new ArgumentNullException("randomizer");
             }
-            if (_clProvider == null)
-            {
-                throw new ArgumentNullException("_clProvider");
-            }
             if (artifactContainer == null)
             {
                 throw new ArgumentNullException("artifactContainer");
@@ -97,12 +93,6 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
                 throw new ArgumentNullException("config");
             }
 
-            var propagatorComponentConstructor = new MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.PropagatorComponentConstructor(
-                _clProvider,
-                _maskContainerFactory,
-                _p
-                );
-
             var kernelTextProvider = new MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.GPU.KernelText.KernelTextProvider(mlp, config);
             var desiredValuesContainer = new MemDesiredValuesContainer(_clProvider, mlp);
             var backpropagators = new IMemLayerBackpropagator[mlp.Layers.Length];
@@ -110,6 +100,12 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
             IForwardPropagation trainForwardPropagation;
             ILayerContainer[] trainContainers;
             {
+                var propagatorComponentConstructor = new MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU.PropagatorComponentConstructor(
+                    _clProvider,
+                    _maskContainerFactory,
+                    _p
+                    );
+
                 ILayerContainer[] containers;
                 ILayerPropagator[] propagators;
                 propagatorComponentConstructor.CreateComponents(
@@ -163,14 +159,14 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
 
             IForwardPropagation inferenceForwardPropagation;
             {
-                var cc = new MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU.PropagatorComponentConstructor(
+                var propagatorComponentConstructor = new MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU.PropagatorComponentConstructor(
                     _clProvider,
                     _layerInferencerFactory
                     );
 
                 ILayerContainer[] containers;
                 ILayerPropagator[] propagators;
-                cc.CreateComponents(
+                propagatorComponentConstructor.CreateComponents(
                     mlp,
                     out containers,
                     out propagators);

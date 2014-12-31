@@ -36,7 +36,8 @@ __kernel void DistanceKernel(
     __global int * indexes,
             
     int inputLength,
-    int count)
+    int count
+    )
 {
     int cc = get_global_id(0);
 
@@ -44,13 +45,17 @@ __kernel void DistanceKernel(
     {
         //GetExpDistanceDab
         float result = 0;
-            
+        //KahanAccumulator acc = GetEmptyKahanAcc();
+
         for (int uu = 0; uu < inputLength; uu++)
         {
             float diff = fxwList[cc * inputLength + uu] - fxwList[dd * inputLength + uu];
             result += diff * diff;
+            //KahanAddElement(&acc, diff * diff);
         }
-            
+
+        //float result = acc.Sum;
+
 #ifdef DODF_DISABLE_EXP
         float write_result = -result;
 #else
@@ -62,11 +67,14 @@ __kernel void DistanceKernel(
 }
 ";
 
-#if DODF_DISABLE_EXP
-                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", "#define DODF_DISABLE_EXP");
-#else
-                kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", string.Empty);
-#endif
+                if (DoDfAmbientContext.DisableExponential)
+                {
+                    kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", "#define DODF_DISABLE_EXP");
+                }
+                else
+                {
+                    kernelText = kernelText.Replace("{DODF_DISABLE_EXP_DEFINE_CLAUSE}", string.Empty);
+                }
 
                 var distanceKernel = clProvider.CreateKernel(kernelText, "DistanceKernel");
 

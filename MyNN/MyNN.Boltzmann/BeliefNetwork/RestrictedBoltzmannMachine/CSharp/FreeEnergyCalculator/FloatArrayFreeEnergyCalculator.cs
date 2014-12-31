@@ -11,8 +11,6 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
     {
         private readonly int _visibleNeuronCount;
         private readonly int _hiddenNeuronCount;
-        private readonly int _visibleNeuronCountWithBias;
-        private readonly int _hiddenNeuronCountWithBias;
 
         public FloatArrayFreeEnergyCalculator(
             int visibleNeuronCount,
@@ -21,18 +19,26 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
         {
             _visibleNeuronCount = visibleNeuronCount;
             _hiddenNeuronCount = hiddenNeuronCount;
-            _visibleNeuronCountWithBias = visibleNeuronCount + 1; //bias neuron
-            _hiddenNeuronCountWithBias = hiddenNeuronCount + 1; //bias neuron
-
         }
 
         public double CalculateFreeEnergy(
             float[] weights,
-            IDataSet data)
+            float[] visibleBiases,
+            float[] hiddenBiases,
+            IDataSet data
+            )
         {
             if (weights == null)
             {
                 throw new ArgumentNullException("weights");
+            }
+            if (visibleBiases == null)
+            {
+                throw new ArgumentNullException("visibleBiases");
+            }
+            if (hiddenBiases == null)
+            {
+                throw new ArgumentNullException("hiddenBiases");
             }
             if (data == null)
             {
@@ -51,7 +57,12 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
 
             Parallel.ForEach(data, parallelOptions, (vd, pls, vii) =>
             {
-                var freeEnergy = CalculateForDataItem(weights, vd);
+                var freeEnergy = CalculateForDataItem(
+                    weights,
+                    visibleBiases,
+                    hiddenBiases,
+                    vd
+                    );
 
                 freeEnergyArray[vii] = freeEnergy;
             });
@@ -70,12 +81,23 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
         }
 
         private float CalculateForDataItem(
-            float[] weights, 
-            IDataItem vd)
+            float[] weights,
+            float[] visibleBiases,
+            float[] hiddenBiases,
+            IDataItem vd
+            )
         {
             if (weights == null)
             {
                 throw new ArgumentNullException("weights");
+            }
+            if (visibleBiases == null)
+            {
+                throw new ArgumentNullException("visibleBiases");
+            }
+            if (hiddenBiases == null)
+            {
+                throw new ArgumentNullException("hiddenBiases");
             }
             if (vd == null)
             {
@@ -86,7 +108,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
             for (var i = 0; i < _visibleNeuronCount; i++)
             {
                 var vi = vd.Input[i];
-                var ai = weights[CalculateWeightIndex(_hiddenNeuronCount, i)];
+                var ai = visibleBiases[i];
 
                 var visPart = vi*ai;
                 vis += visPart;
@@ -95,7 +117,12 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
             var hid = 0f;
             for (var j = 0; j < _hiddenNeuronCount; j++)
             {
-                var xj = CalculateXj(weights, vd, j);
+                var xj = CalculateXj(
+                    weights,
+                    hiddenBiases,
+                    vd,
+                    j
+                    );
 
                 var expxj = Math.Exp(xj);
                 var hidPart = Math.Log(1 + expxj);
@@ -109,20 +136,35 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
 
         private float CalculateXj(
             float[] weights, 
+            float[] hiddenBiases,
             IDataItem vd, 
-            int j)
+            int j
+            )
         {
-            var xj = 0f;
-            for (var i = 0; i < _visibleNeuronCountWithBias; i++)
+            if (weights == null)
             {
-                var vi =
-                    i < _visibleNeuronCount
-                        ? vd.Input[i]
-                        : 1f;
+                throw new ArgumentNullException("weights");
+            }
+            if (hiddenBiases == null)
+            {
+                throw new ArgumentNullException("hiddenBiases");
+            }
+            if (vd == null)
+            {
+                throw new ArgumentNullException("vd");
+            }
+
+            var xj = 0f;
+            for (var i = 0; i < _visibleNeuronCount; i++)
+            {
+                var vi = vd.Input[i];
                 var wij = weights[CalculateWeightIndex(j, i)];
 
                 xj += vi*wij;
             }
+
+            xj += hiddenBiases[j];
+
             return xj;
         }
 
@@ -132,7 +174,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.FreeEne
             )
         {
             return
-                hiddenIndex * _visibleNeuronCountWithBias + visibleIndex;
+                hiddenIndex * _visibleNeuronCount + visibleIndex;
         }
     }
 }

@@ -75,7 +75,9 @@ __kernel void ComputeLayerKernel(
     const float oneValue0,
     const float zeroValue1,
     const float oneValue1,
-    __local float* partialDotProduct
+    __local float* partialDotProduct,
+    __global float * biases
+
     )
 {
     const uint width = {PREVIOUS_LAYER_NEURON_COUNT};
@@ -109,7 +111,7 @@ __kernel void ComputeLayerKernel(
          float mask1 = ((maski & bitmask) > 0) ? oneValue1 : zeroValue1;
 
          //применяем маску
-         float lastNET = partialDotProduct[0] * mask0;
+         float lastNET = (partialDotProduct[0] + biases[y]) * mask0;
          currentLayerLastNET[y] = lastNET;
 
          //compute last state

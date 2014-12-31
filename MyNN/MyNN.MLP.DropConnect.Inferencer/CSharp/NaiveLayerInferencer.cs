@@ -107,9 +107,9 @@ namespace MyNN.MLP.DropConnect.Inferencer.CSharp
 
             //calculate inference
 
-            var previousLayerNeuronCountTotal = this._previousLayer.Neurons.Length;
+            var previousLayerNeuronCountTotal = this._previousLayer.TotalNeuronCount;
 
-            Parallel.For(0, _currentLayer.NonBiasNeuronCount, neuronIndex =>
+            Parallel.For(0, _currentLayer.TotalNeuronCount, neuronIndex =>
             //for (var neuronIndex = 0; neuronIndex < _currentLayer.NonBiasNeuronCount; neuronIndex++)
             {
                 var normal = new Normal(0, 1);

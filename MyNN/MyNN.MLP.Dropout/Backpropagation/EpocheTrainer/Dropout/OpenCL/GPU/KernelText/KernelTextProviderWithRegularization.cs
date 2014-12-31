@@ -41,16 +41,6 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Kern
 
         #region calculation kernels source
 
-        public string GetPreprocessHiddenKernelZeroSource(int groupSize)
-        {
-            throw new NotSupportedException();
-        }
-
-        public string GetPreprocessHiddenKernelOneSource()
-        {
-            throw new NotSupportedException();
-        }
-
         public string GetOverwriteCalculationKernelsSource(int layerIndex)
         {
             var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
@@ -62,7 +52,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Kern
                     MetricMethodName,
                     VectorizationSizeEnum.NoVectorization,
                     MemModifierEnum.Global,
-                    _mlp.Layers.Last().NonBiasNeuronCount
+                    _mlp.Layers.Last().TotalNeuronCount
                     )
                 );
 
@@ -83,6 +73,11 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Kern
         nabla[nablaNeuronShift + weightIndex] = deltaWeight;
 ");
 
+            result =
+                result.Replace("<bias_update>", @"
+        nablaBias[neuronIndex] = deltaBias;
+");
+
             return result;
         }
 
@@ -97,7 +92,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Kern
                     MetricMethodName,
                     VectorizationSizeEnum.NoVectorization,
                     MemModifierEnum.Global,
-                    _mlp.Layers.Last().NonBiasNeuronCount
+                    _mlp.Layers.Last().TotalNeuronCount
                     )
                 );
 
@@ -116,6 +111,11 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Kern
             result =
                 result.Replace("<weight_update>", @"
         nabla[nablaNeuronShift + weightIndex] += deltaWeight;
+");
+
+            result =
+                result.Replace("<bias_update>", @"
+        nablaBias[neuronIndex] += deltaBias;
 ");
 
             return result;
@@ -157,7 +157,10 @@ __kernel void HiddenLayerTrain(
 
     __local float * local_accum,
 
-    __global float * preprocessed
+    __global float * preprocessed,
+
+    __global float* currentLayerBias,
+    __global float* nablaBias
     )
 {
     int neuronIndex = get_group_id(0);
@@ -183,10 +186,6 @@ __kernel void HiddenLayerTrain(
             currentWeightIndex < previousLayerNeuronCount; 
             currentWeightIndex += get_local_size(0)
             )
-//        for (
-//            int currentWeightIndex = 0; 
-//            currentWeightIndex < previousLayerNeuronCount; 
-//            ++currentWeightIndex)
         {
             float prevOut = previousLayerLastState[currentWeightIndex];
 
@@ -198,6 +197,17 @@ __kernel void HiddenLayerTrain(
 
             <nabla_update>
         }
+
+        if(get_local_id(0) == 0)
+        {
+            float deltaBias =
+                learningRate *
+                currentDeDz *
+                (1 + regularizationFactor * currentLayerBias[neuronIndex] / dataCount);
+
+            <bias_update>
+        }
+        barrier(CLK_LOCAL_MEM_FENCE);
 
     }
 }
@@ -220,8 +230,10 @@ __kernel void OutputLayerTrain(
 
     float learningRate,
     float regularizationFactor,
-    float dataCount
+    float dataCount,
 
+    __global float* currentLayerBias,
+    __global float* nablaBias
     )
 {
     int neuronIndex = get_group_id(0);
@@ -242,8 +254,8 @@ __kernel void OutputLayerTrain(
         currentLayerDeDz[neuronIndex] = n;
 
         int nablaNeuronShift = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
-        int nablaNeuronShift4 = nablaNeuronShift / 4;
-        int nablaNeuronShift4Shift = nablaNeuronShift - nablaNeuronShift4 * 4;
+        //int nablaNeuronShift4 = nablaNeuronShift / 4;
+        //int nablaNeuronShift4Shift = nablaNeuronShift - nablaNeuronShift4 * 4;
 
         //невекторизованная часть
         for (
@@ -251,10 +263,6 @@ __kernel void OutputLayerTrain(
             weightIndex < previousLayerNeuronCountTotal; 
             weightIndex += get_local_size(0)
             )
-//        for (
-//            int weightIndex = 0; 
-//            weightIndex < previousLayerNeuronCountTotal; 
-//            ++weightIndex)
         {
             float deltaWeight =
                 learningRate *
@@ -263,6 +271,18 @@ __kernel void OutputLayerTrain(
 
             <weight_update>
         }
+
+        if(get_local_id(0) == 0)
+        {
+            float deltaBias =
+                learningRate *
+                n *
+                (1 + regularizationFactor * currentLayerBias[neuronIndex] / dataCount);
+
+            <bias_update>
+        }
+        barrier(CLK_LOCAL_MEM_FENCE);
+
     }
 }
 ";
@@ -275,20 +295,7 @@ __kernel void OutputLayerTrain(
         {
             get
             {
-                return @"
-__kernel void UpdateWeightKernel(
-    __global float * currentLayerWeights,
-    const __global float * nabla,
-    const float batchSize,
-    const int totalCount
-    )
-{
-    int gi = get_global_id(0);
-
-    float shift = nabla[gi] / batchSize;
-    currentLayerWeights[gi] += shift;
-}
-";
+                throw new NotSupportedException("Реализовано в кернел провайдере более высокого уровня");
             }
         }
 

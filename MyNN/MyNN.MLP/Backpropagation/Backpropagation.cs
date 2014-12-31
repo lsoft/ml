@@ -108,13 +108,13 @@ namespace MyNN.MLP.Backpropagation
             //запрашиваем данные (уже перемешанные)
             var trainData = dataSetProvider.GetDataSet(epochNumber);
 
-            if (trainData.OutputLength != _mlp.Layers.Last().NonBiasNeuronCount)
+            if (trainData.OutputLength != _mlp.Layers.Last().TotalNeuronCount)
             {
-                throw new Exception(
+                ConsoleAmbientContext.Console.WriteWarning(
                     string.Format(
                         "На последнем слое сети {1} нейронов, а у датасета OutputLength = {0}",
                         trainData.OutputLength,
-                        _mlp.Layers.Last().NonBiasNeuronCount));
+                        _mlp.Layers.Last().TotalNeuronCount));
             }
 
 
@@ -177,19 +177,19 @@ namespace MyNN.MLP.Backpropagation
 
                 #endregion
 
-                #region correct error with regularization
+                //#region correct error with regularization
 
-                //regularization term (не оптимизировано, малый эффект)
-                if (Math.Abs(_config.RegularizationFactor) > float.Epsilon)
-                {
-                    var reg = _mlp.Layers.Sum(layer => layer.Neurons.Sum(neuron => neuron.Weights.Sum(weight => weight*weight)));
-                    currentError += _config.RegularizationFactor * reg / (2.0f * trainData.Count);
-                }
+                ////regularization term (не оптимизировано, малый эффект)
+                //if (Math.Abs(_config.RegularizationFactor) > float.Epsilon)
+                //{
+                //    var reg = _mlp.Layers.Sum(layer => layer.Neurons.Sum(neuron => neuron.Weights.Sum(weight => weight*weight)));
+                //    currentError += _config.RegularizationFactor * reg / (2.0f * trainData.Count);
+                //}
 
-                //сколько времени заняла эпоха обучения
-                var errorRecalculationTimeEnd = DateTime.Now;
+                ////сколько времени заняла эпоха обучения
+                //var errorRecalculationTimeEnd = DateTime.Now;
 
-                #endregion
+                //#endregion
 
                 epochNumber++;
 
@@ -218,7 +218,7 @@ namespace MyNN.MLP.Backpropagation
                     "   "
                     + "Total: " + (int)((dtFinish - dtStart).TotalMilliseconds)
                     + "  Train: " + (int)((trainTimeEnd - dtStart).TotalMilliseconds)
-                    + "  ErrRecalc: " + (int)((errorRecalculationTimeEnd - cvFinish).TotalMilliseconds)
+                    //+ "  ErrRecalc: " + (int)((errorRecalculationTimeEnd - cvFinish).TotalMilliseconds)
                     + "  Validation: " + (int)((cvFinish - trainTimeEnd).TotalMilliseconds)
                     + "  Deform: " + (int)((dtFinish - deformStart).TotalMilliseconds));
 

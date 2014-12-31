@@ -140,15 +140,16 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
                 .SetKernelArg(9, 4, _zeroValue1)
                 .SetKernelArg(10, 4, _oneValue1)
                 .SetKernelArgLocalMem(11, 4 * szLocalWorkSize)
+                .SetKernelArgMem(12, _currentMemLayerContainer.BiasMem)
                 .EnqueueNDRangeKernel(
                     new[]
-                        {
-                            szGlobalWorkSize
-                        }
+                    {
+                        szGlobalWorkSize
+                    }
                     , new[]
-                        {
-                            szLocalWorkSize
-                        }
+                    {
+                        szLocalWorkSize
+                    }
                     );
         }
 

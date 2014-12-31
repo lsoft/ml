@@ -135,11 +135,15 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.CSha
                 distance = _distanceDict[b][a];
             }
 
-#if DODF_DISABLE_EXP
-            var result = -distance;
-#else
-            var result = (float)Math.Exp(-distance);
-#endif
+            float result;
+            if (DoDfAmbientContext.DisableExponential)
+            {
+                result = -distance;
+            }
+            else
+            {
+                result = (float)Math.Exp(-distance);
+            }
 
             return result;
         }

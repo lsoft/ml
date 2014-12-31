@@ -70,7 +70,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.Validation.AccuracyCalculator
             var correct = 0;
             _knnTester.Test(
                 forwardPropagation,
-                forwardPropagation.MLP.Layers.Last().NonBiasNeuronCount, //без отдельных нейронов дл€ кодировани€ нерелевантных дл€ рассто€ни€ между классами фич
+                forwardPropagation.MLP.Layers.Last().TotalNeuronCount, //без отдельных нейронов дл€ кодировани€ нерелевантных дл€ рассто€ни€ между классами фич
                 out total,
                 out correct
                 );

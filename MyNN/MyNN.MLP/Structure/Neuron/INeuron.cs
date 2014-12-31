@@ -9,14 +9,10 @@ namespace MyNN.MLP.Structure.Neuron
             get;
         }
 
-        IFunction ActivationFunction
+        float Bias
         {
             get;
-        }
-
-        bool IsBiasNeuron
-        {
-            get;
+            set;
         }
 
         INeuronConfiguration GetConfiguration();

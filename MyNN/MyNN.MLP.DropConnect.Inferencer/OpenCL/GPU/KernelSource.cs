@@ -109,7 +109,7 @@ __kernel void
     float wv_sigma = sqrt(wv_sigmasq);
 
     //начинаем семплировать из гауссианы и гнать через функцию активации
-    int workStartRandomIndex = (startRandomIndex + neuronIndex * previousLayerNeuronCountTotal) % randomSize;
+    int workStartRandomIndex = (startRandomIndex + neuronIndex * previousLayerNeuronCountTotal + get_local_id(0)) % randomSize;
 
     if((workStartRandomIndex + sampleCount) >= randomSize)
     {

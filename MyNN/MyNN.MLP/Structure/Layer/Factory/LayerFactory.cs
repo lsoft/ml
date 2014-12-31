@@ -21,29 +21,28 @@ namespace MyNN.MLP.Structure.Layer.Factory
         }
 
         public ILayer CreateInputLayer(
-            int withoutBiasNeuronCount)
+            int totalNeuronCount
+            )
         {
             return
                 new Layer(
                     _neuronFactory,
-                    withoutBiasNeuronCount);
+                    totalNeuronCount
+                    );
         }
 
         public ILayer CreateLayer(
             IFunction activationFunction,
             int currentLayerNeuronCount,
-            int previousLayerNeuronCount,
-            bool isNeedBiasNeuron,
-            bool isPreviousLayerHadBiasNeuron
+            int previousLayerNeuronCount
             )
         {
             var result = new Layer(
                 _neuronFactory,
                 activationFunction,
                 currentLayerNeuronCount,
-                previousLayerNeuronCount,
-                isNeedBiasNeuron,
-                isPreviousLayerHadBiasNeuron);
+                previousLayerNeuronCount
+                );
 
             return result;
         }

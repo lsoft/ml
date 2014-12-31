@@ -55,15 +55,13 @@ namespace MyNN.Tests.MLP2.Inferencer
                     nf,
                     activationFunction,
                     currentLayerNeuronCount,
-                    previousLayerNeuronCount,
-                    true,
-                    true
+                    previousLayerNeuronCount
                     );
 
                 var previousContainer = new MemLayerContainer(
                     clProvider,
-                    layer0.NonBiasNeuronCount,
-                    layer1.Neurons.Length
+                    layer0.TotalNeuronCount,
+                    layer1.TotalNeuronCount
                     );
 
                 previousContainer.StateMem.Array.Fill(j => structureRandomizer.Next());
@@ -71,9 +69,8 @@ namespace MyNN.Tests.MLP2.Inferencer
 
                 var currentContainer = new MemLayerContainer(
                     clProvider,
-                    layer0.Neurons.Length,
-                    layer1.NonBiasNeuronCount,
-                    layer1.Neurons.Length
+                    layer0.TotalNeuronCount,
+                    layer1.TotalNeuronCount
                     );
 
                 currentContainer.WeightMem.Array.Fill(j => structureRandomizer.Next());

@@ -11,26 +11,34 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
     {
         public void UpdateWeigths(
             float[] currentLayerWeights,
-            float[] nabla,
-            float batchSize
+            float[] nablaWeights,
+            float batchSize,
+            float[] currentLayerBias,
+            float[] nablaBias
             )
         {
             if (currentLayerWeights == null)
             {
                 throw new ArgumentNullException("currentLayerWeights");
             }
-            if (nabla == null)
+            if (nablaWeights == null)
             {
-                throw new ArgumentNullException("nabla");
+                throw new ArgumentNullException("nablaWeights");
             }
 
             Parallel.For(0, currentLayerWeights.Length, cc =>
             //for (var cc = 0; cc < currentLayerWeights.Length; cc++)
             {
-                currentLayerWeights[cc] += nabla[cc] / batchSize;
+                currentLayerWeights[cc] += nablaWeights[cc] / batchSize;
             }
             ); //Parallel.For
 
+            Parallel.For(0, currentLayerBias.Length, cc =>
+            //for (var cc = 0; cc < currentLayerBias.Length; cc++)
+            {
+                currentLayerBias[cc] += nablaBias[cc] / batchSize;
+            }
+            ); //Parallel.For
         }
     }
 }

@@ -10,30 +10,12 @@ namespace MyNN.MLP.Structure.Layer
     [Serializable]
     public class Layer : ILayer
     {
-        private readonly INeuronFactory _neuronFactory;
-        private bool _isNeedBiasNeuron;
-
-        public bool IsBiasNeuronExists
+        public int TotalNeuronCount
         {
             get
             {
                 return
-                    _isNeedBiasNeuron;
-            }
-        }
-
-        public int NonBiasNeuronCount
-        {
-            get
-            {
-                var result = this.Neurons.Length;
-
-                if (_isNeedBiasNeuron)
-                {
-                    result--;
-                }
-
-                return result;
+                    this.Neurons.Length;
             }
         }
 
@@ -54,29 +36,19 @@ namespace MyNN.MLP.Structure.Layer
         /// </summary>
         public Layer(
             INeuronFactory neuronFactory,
-            int withoutBiasNeuronCount)
+            int totalNeuronCount
+            )
         {
             if (neuronFactory == null)
             {
                 throw new ArgumentNullException("neuronFactory");
             }
 
-            _neuronFactory = neuronFactory;
-            
-            _isNeedBiasNeuron = true;
-
-            var totalNeuronCount = withoutBiasNeuronCount + 1;
-
             this.Neurons = new INeuron[totalNeuronCount];
 
-            for (var cc = 0; cc < this.Neurons.Length; cc++)
+            for (var cc = 0; cc < this.TotalNeuronCount; cc++)
             {
                 this.Neurons[cc] = neuronFactory.CreateInputNeuron(cc);
-
-                if (cc == this.Neurons.Length - 1)
-                {
-                    this.Neurons[cc] = neuronFactory.CreateBiasNeuron();
-                }
             }
         }
 
@@ -87,9 +59,8 @@ namespace MyNN.MLP.Structure.Layer
             INeuronFactory neuronFactory,
             IFunction activationFunction,
             int currentLayerNeuronCount,
-            int previousLayerNeuronCount,
-            bool isNeedBiasNeuron,
-            bool isPreviousLayerHadBiasNeuron)
+            int previousLayerNeuronCount
+            )
         {
             if (neuronFactory == null)
             {
@@ -100,68 +71,24 @@ namespace MyNN.MLP.Structure.Layer
                 throw new ArgumentNullException("activationFunction");
             }
 
-            _neuronFactory = neuronFactory;
-            _isNeedBiasNeuron = isNeedBiasNeuron;
             LayerActivationFunction = activationFunction;
 
-            var totalNeuronCount = currentLayerNeuronCount + (isNeedBiasNeuron ? 1 : 0);
+            this.Neurons = new INeuron[currentLayerNeuronCount];
 
-            this.Neurons = new INeuron[totalNeuronCount];
-
-            for (var cc = 0; cc < this.Neurons.Length; cc++)
+            for (var cc = 0; cc < this.TotalNeuronCount; cc++)
             {
-                this.Neurons[cc] = neuronFactory.CreateTrainableNeuron(
-                    activationFunction,
-                    previousLayerNeuronCount + (isPreviousLayerHadBiasNeuron ? 1 : 0));
-
-                if (isNeedBiasNeuron && (cc == this.Neurons.Length - 1))
-                {
-                    this.Neurons[cc] = neuronFactory.CreateBiasNeuron();
-                }
-            }
-        }
-
-        public void AddBiasNeuron()
-        {
-            var nln = this.Neurons.Last();
-            if (nln.IsBiasNeuron)
-            {
-                throw new Exception("Уже добавлен биас нейрон");
-            }
-
-            var na = new INeuron[this.NonBiasNeuronCount + 1];
-            Array.Copy(this.Neurons, na, this.NonBiasNeuronCount);
-            na[na.Length - 1] = _neuronFactory.CreateBiasNeuron();
-
-            this.Neurons = na;
-            this._isNeedBiasNeuron = true;
-        }
-
-        public void RemoveBiasNeuron()
-        {
-            var nln = this.Neurons.Last();
-            if (nln.IsBiasNeuron)
-            {
-                var na = new INeuron[this.NonBiasNeuronCount];
-                Array.Copy(this.Neurons, na, this.NonBiasNeuronCount);
-
-                this.Neurons = na;
-                this._isNeedBiasNeuron = false;
+                this.Neurons[cc] = neuronFactory.CreateTrainableNeuron(previousLayerNeuronCount);
             }
         }
 
         public string GetLayerInformation()
         {
-            var neuronCount = this.Neurons.Length;
-            var nonbiasNeuronCount = this.NonBiasNeuronCount;
-            var biasNeuronCount = neuronCount - nonbiasNeuronCount;
+            var neuronCount = this.TotalNeuronCount;
 
             return
                 string.Format(
-                    "{0}({1}+{2}){3}",
+                    "{0}{1}",
                     neuronCount,
-                    nonbiasNeuronCount,
-                    biasNeuronCount,
                     this.LayerActivationFunction != null
                         ? this.LayerActivationFunction.ShortName
                         : "Input");
@@ -172,8 +99,7 @@ namespace MyNN.MLP.Structure.Layer
             return 
                 new LayerConfiguration(
                     this.Neurons.ConvertAll(j => j.GetConfiguration()),
-                    this.IsBiasNeuronExists,
-                    this.NonBiasNeuronCount
+                    this.TotalNeuronCount
                     );
         }
     }

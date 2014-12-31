@@ -36,15 +36,12 @@
   <ItemGroup>
     <Compile Include="CSharp\CSharpLayerPropagator.cs" />
     <Compile Include="CSharp\CSharpPropagatorComponentConstructor.cs" />
-    <Compile Include="OpenCL\Img\GPU\KernelSource.cs" />
-    <Compile Include="OpenCL\Img\GPU\LayerPropagator.cs" />
-    <Compile Include="OpenCL\Img\GPU\PropagatorComponentConstructor.cs" />
     <Compile Include="OpenCL\Mem\CPU\CPUKernelSource.cs" />
     <Compile Include="OpenCL\Mem\CPU\CPULayerPropagator.cs" />
     <Compile Include="OpenCL\Mem\CPU\CPUPropagatorComponentConstructor.cs" />
+    <Compile Include="OpenCL\Mem\GPU\GPUPropagatorComponentConstructor.cs" />
     <Compile Include="OpenCL\Mem\GPU\KernelSource.cs" />
     <Compile Include="OpenCL\Mem\GPU\LayerPropagator.cs" />
-    <Compile Include="OpenCL\Mem\GPU\GPUPropagatorComponentConstructor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

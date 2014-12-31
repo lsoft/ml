@@ -9,6 +9,11 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             get;
         }
 
+        MemFloat BiasMem
+        {
+            get;
+        }
+
         MemFloat NetMem
         {
             get;

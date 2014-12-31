@@ -14,24 +14,28 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Calcula
 
         void SampleHidden(
             float[] weights,
+            float[] hiddenBiases,
             float[] targetHidden,
             float[] fromVisible
             );
 
         void CalculateHidden(
-            float[] weights, 
+            float[] weights,
+            float[] hiddenBiases,
             float[] targetHidden,
             float[] fromVisible
             );
 
         void SampleVisible(
-            float[] weights, 
+            float[] weights,
+            float[] visibleBiases,
             float[] targetVisible,
             float[] fromHidden
             );
 
         void CalculateVisible(
-            float[] weights, 
+            float[] weights,
+            float[] visibleBiases,
             float[] targetVisible,
             float[] fromHidden
             );

@@ -31,12 +31,15 @@ namespace MyNN.Boltzmann.BoltzmannMachines.BinaryBinary.DBN.RBM.Feature
 
         public void AddFeature(float[] data)
         {
-            CreateContrastEnhancedBitmapFromLayer(
-                (_currentIndex % _q) * _imageWidth,
-                ((int)(_currentIndex / _q)) * _imageHeight,
-                data);
+            if (_currentIndex < _featureCount)
+            {
+                CreateContrastEnhancedBitmapFromLayer(
+                    (_currentIndex%_q)*_imageWidth,
+                    ((int) (_currentIndex/_q))*_imageHeight,
+                    data);
 
-            _currentIndex++;
+                _currentIndex++;
+            }
         }
 
         public Bitmap GetFeatureBitmap()

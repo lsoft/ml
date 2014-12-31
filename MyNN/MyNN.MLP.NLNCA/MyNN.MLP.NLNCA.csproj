@@ -53,6 +53,7 @@
     <Compile Include="Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculatorVectorized.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\CSharp\PabCalculatorVectorizedDebug.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\DoDfAmbientContext.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\IDodfCalculator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\DodfDistanceContainer.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\NLNCA\DodfCalculator\OpenCL\DistanceDict\Generation1\CpuDistanceDictCalculator.cs" />

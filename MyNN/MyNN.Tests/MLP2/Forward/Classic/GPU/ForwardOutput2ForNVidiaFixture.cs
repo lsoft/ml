@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.Item;
+using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
 using MyNN.MLP.ForwardPropagation;
@@ -264,8 +265,8 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
                 ConsoleAmbientContext.Console.WriteLine(
                     string.Format(
                         "correct = {0}, result = {1}",
-                        correctResult,
-                        result));
+                        DoubleConverter.ToExactString(correctResult),
+                        DoubleConverter.ToExactString(result)));
 
                 Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
             }

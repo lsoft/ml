@@ -20,12 +20,6 @@ namespace MyNN.MLP.Structure.Neuron.Factory
             _randomizer = randomizer;
         }
 
-        public INeuron CreateBiasNeuron()
-        {
-            return 
-                new BiasNeuron();
-        }
-
         public INeuron CreateInputNeuron(int thisIndex)
         {
             return
@@ -33,17 +27,11 @@ namespace MyNN.MLP.Structure.Neuron.Factory
         }
 
         public INeuron CreateTrainableNeuron(
-            IFunction activationFunction,
-            int weightCount)
+            int weightCount
+            )
         {
-            if (activationFunction == null)
-            {
-                throw new ArgumentNullException("activationFunction");
-            }
-
             return
                 new HiddeonOutputMLPNeuron(
-                    activationFunction,
                     weightCount,
                     _randomizer);
         }

@@ -1,5 +1,7 @@
 using System;
+using MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine;
 using MyNN.Common.Other;
+using MyNN.Common.OutputConsole;
 using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Neuron;
 
@@ -39,9 +41,13 @@ namespace MyNN.MLP.DBNInfo.WeightLoader
                 throw new ArgumentNullException("layer");
             }
 
-            var weightFile = _serializationHelper.LoadFromFile<float[]>(_pathToWeightsFile);
+            ConsoleAmbientContext.Console.WriteWarning(
+                "Не проверено! Проверить! Причем не используются HiddenBias - выяснить нормально ли это."
+                );
 
-            for (var neuronIndex = 0; neuronIndex < layer.Neurons.Length; neuronIndex++)
+            var sc = _serializationHelper.LoadFromFile<SaveableContainer>(_pathToWeightsFile);
+
+            for (var neuronIndex = 0; neuronIndex < layer.TotalNeuronCount; neuronIndex++)
             {
                 var neuron = layer.Neurons[neuronIndex];
 
@@ -49,9 +55,11 @@ namespace MyNN.MLP.DBNInfo.WeightLoader
                 {
                     for (var weightIndex = 0; weightIndex < neuron.Weights.Length; weightIndex++)
                     {
-                        var weight = weightFile[weightIndex * (layer.NonBiasNeuronCount + 1) + neuronIndex];
+                        var weight = sc.Weights[weightIndex * layer.TotalNeuronCount + neuronIndex];
                         neuron.Weights[weightIndex] = weight;
                     }
+
+                    neuron.Bias = sc.VisibleBiases[neuronIndex];
                 }
             }
         }

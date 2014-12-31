@@ -62,7 +62,7 @@ namespace MyNN.MLP.Backpropagation.Validation
                 );
 
             ConsoleAmbientContext.Console.WriteLine(
-                "Per item error (before regularization) = {0}",
+                "Per item error = {0}",
                 accuracyRecord.PerItemError);
 
             return

@@ -36,7 +36,7 @@ namespace MyNN.MLP.Structure
 
                 g.Clear(Color.LightGreen);
 
-                if (_mlp.Layers.Length <= 5 && _mlp.Layers.All(j => j.Neurons.Length < 50))
+                if (_mlp.Layers.Length <= 5 && _mlp.Layers.All(j => j.TotalNeuronCount < 50))
                 {
                     // ------------------------- DRAW NEURONS -------------------------
                     using (var neuronFont = new Font("Times New Roman", 12, FontStyle.Regular))
@@ -45,7 +45,7 @@ namespace MyNN.MLP.Structure
                         {
                             var l = _mlp.Layers[layerIndex];
 
-                            for (int neuronIndex = 0, neuronCount = l.Neurons.Length; neuronIndex < neuronCount; neuronIndex++)
+                            for (int neuronIndex = 0, neuronCount = l.TotalNeuronCount; neuronIndex < neuronCount; neuronIndex++)
                             {
                                 var n = l.Neurons[neuronIndex];
 
@@ -73,7 +73,7 @@ namespace MyNN.MLP.Structure
                                         neuronDiameter);
 
                                     g.DrawString(
-                                        GetNeuronActivationFunctionName(n),
+                                        l.LayerActivationFunction.ShortName,
                                         neuronFont,
                                         neuronColor.Brush,
                                         x - (neuronDiameter * 0.4f),
@@ -90,7 +90,7 @@ namespace MyNN.MLP.Structure
                         {
                             var l = _mlp.Layers[layerIndex];
 
-                            for (int neuronIndex = 0, neuronCount = l.Neurons.Length; neuronIndex < neuronCount; neuronIndex++)
+                            for (int neuronIndex = 0, neuronCount = l.TotalNeuronCount; neuronIndex < neuronCount; neuronIndex++)
                             {
                                 var n = l.Neurons[neuronIndex];
 
@@ -106,7 +106,7 @@ namespace MyNN.MLP.Structure
                                             imageHeight,
                                             _mlp.Layers.Length,
                                             layerIndex - 1,
-                                            _mlp.Layers[layerIndex - 1].Neurons.Length,
+                                            _mlp.Layers[layerIndex - 1].TotalNeuronCount,
                                             weightIndex,
                                             neuronRadius,
                                             out xleft,
@@ -164,30 +164,6 @@ namespace MyNN.MLP.Structure
             return result;
         }
 
-        private string GetNeuronActivationFunctionName(
-            INeuron neuron)
-        {
-            var result = string.Empty;
-
-            if (neuron.IsBiasNeuron)
-            {
-                result = "Bias";
-            }
-            else
-            {
-                if (neuron.ActivationFunction != null)
-                {
-                    result = neuron.ActivationFunction.ShortName;
-                }
-                else
-                {
-                    result = "Input";
-                }
-            }
-
-            return result;
-        }
-
         private Pen GetWeightColor(
             )
         {
@@ -202,18 +178,10 @@ namespace MyNN.MLP.Structure
             int layerIndex,
             int neuronCount,
             int neuronIndex,
-            INeuron neuron)
+            INeuron neuron
+            )
         {
-            Pen result = null;
-
-            if (neuronIndex == neuronCount - 1 && neuron.IsBiasNeuron)
-            {
-                result = new Pen(Brushes.Black);
-            }
-            else
-            {
-                result = layerIndex == 0 ? new Pen(Brushes.Red) : new Pen(Brushes.Green);
-            }
+            var result = layerIndex == 0 ? new Pen(Brushes.Red) : new Pen(Brushes.Green);
 
             return result;
         }

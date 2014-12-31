@@ -13,7 +13,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
         private readonly int _prevLayerNeuronTotalCount;
-        private readonly int _currentLayerNonBiasNeuronCount;
+        private readonly int _currentLayerTotalNeuronCount;
         
         private readonly Kernel _kernel;
 
@@ -25,7 +25,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
             IFunction activationFunction,
             VectorizationSizeEnum vse,
             int prevLayerNeuronTotalCount,
-            int currentLayerNonBiasNeuronCount
+            int currentLayerTotalNeuronCount
             )
         {
             if (clProvider == null)
@@ -53,7 +53,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
             _previousMemLayerContainer = previousMemLayerContainer;
             _currentMemLayerContainer = currentMemLayerContainer;
             _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
-            _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
+            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
 
             string kernelName;
             var kernelSource = ks.GetKernelSource(
@@ -76,7 +76,8 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
                 .SetKernelArgMem(2, _currentMemLayerContainer.StateMem)
                 .SetKernelArgMem(3, _currentMemLayerContainer.WeightMem)
                 .SetKernelArg(4, 4, _prevLayerNeuronTotalCount)
-                .EnqueueNDRangeKernel(_currentLayerNonBiasNeuronCount);
+                .SetKernelArgMem(5, _currentMemLayerContainer.BiasMem)
+                .EnqueueNDRangeKernel(_currentLayerTotalNeuronCount);
         }
 
         public void WaitForCalculationFinished()

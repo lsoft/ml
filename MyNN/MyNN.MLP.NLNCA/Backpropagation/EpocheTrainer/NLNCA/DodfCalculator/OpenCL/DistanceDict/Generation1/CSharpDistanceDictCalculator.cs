@@ -39,9 +39,6 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
             }
             ); //Parallel.For
 
-
-            throw new Exception("Этот код не проверен, необходимо убрать этот ексцепшен и проверить, что он корректен");
-
             //колбасим в диктионари
             var resultD = new DodfDistanceContainer(fxwList.Count);
 
@@ -75,14 +72,17 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.DodfCalculator.Open
                 sum += diff * diff;
             }
 
-#if DODF_DISABLE_EXP
-            var result = -sum;
-#else
-            var result = (float)(Math.Exp(-sum));
-#endif
+            float result;
+            if (DoDfAmbientContext.DisableExponential)
+            {
+                result = -sum;
+            }
+            else
+            {
+                result = (float)(Math.Exp(-sum));
+            }
 
             return result;
-
         }
 
     }

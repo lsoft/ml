@@ -221,6 +221,7 @@ namespace MyNN.MLP.Backpropagation.EpocheTrainer
                 }
             }
 
+            //записываем их в сеть
             for (var layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
             {
                 var layer = _mlp.Layers[layerIndex];

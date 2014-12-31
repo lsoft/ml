@@ -7,7 +7,6 @@ using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
 using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Neuron;
-using OpenCL.Net.Wrapper.DeviceChooser;
 
 namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 {
@@ -44,8 +43,8 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 
         public void ComputeLayer()
         {
-            Parallel.For(0, _currentLayer.NonBiasNeuronCount, neuronIndex =>
-            //for (var neuronIndex = 0; neuronIndex < _currentLayer.NonBiasNeuronCount; neuronIndex++)
+            Parallel.For(0, _currentLayer.TotalNeuronCount, neuronIndex =>
+            //for (var neuronIndex = 0; neuronIndex < _currentLayer.TotalNeuronCount; neuronIndex++)
             {
                 var previousLayerNeuronCountTotal = _previousLayerMemContainer.StateMem.Length;
 
@@ -58,19 +57,19 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 
                 for (var plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
                 {
-                    var lastNETIncrement = 
+                    var increment = 
                         _currentLayerMemContainer.WeightMem[weightIndex++]
                         * _previousLayerMemContainer.StateMem[plnIndex];
 
-                    KahanAlgorithm.AddElement(ref acc, lastNETIncrement);
+                    KahanAlgorithm.AddElement(ref acc, increment);
                 }
 
-                var lastNET = acc.Sum;
+                var lastNET = acc.Sum + _currentLayerMemContainer.BiasMem[neuronIndex];
 
                 _currentLayerMemContainer.NetMem[neuronIndex] = lastNET;
 
                 //compute last state
-                var lastState = _currentLayer.Neurons[neuronIndex].ActivationFunction.Compute(lastNET);
+                var lastState = _currentLayer.LayerActivationFunction.Compute(lastNET);
                 _currentLayerMemContainer.StateMem[neuronIndex] = lastState;
             }
             ); //Parallel.For
@@ -83,7 +82,8 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 
         private int ComputeWeightIndex(
            int previousLayerNeuronCount,
-           int neuronIndex)
+           int neuronIndex
+            )
         {
             return
                 previousLayerNeuronCount * neuronIndex;

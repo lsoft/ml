@@ -21,7 +21,7 @@ namespace MyNN.MLP.DesiredValues
                 throw new ArgumentNullException("mlp");
             }
 
-            var outputLength = mlp.Layers.Last().NonBiasNeuronCount;
+            var outputLength = mlp.Layers.Last().TotalNeuronCount;
 
             this.DesiredOutput = new float[outputLength];
         }

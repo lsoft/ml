@@ -70,6 +70,8 @@ namespace MyNN.MLP.Backpropagation.Validation.Drawer
                     _visualizeCount,
                     netResultCount
             ));
+
+            _validationDataIterator.MoveNext();
         }
 
         public void DrawItem(

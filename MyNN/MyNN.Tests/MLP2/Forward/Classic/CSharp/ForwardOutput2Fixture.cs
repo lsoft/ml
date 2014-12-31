@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.Item;
+using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Classic.ForwardPropagation.CSharp;
 using MyNN.MLP.ForwardPropagation;
@@ -243,8 +244,8 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CSharp
             ConsoleAmbientContext.Console.WriteLine(
                 string.Format(
                     "correct = {0}, result = {1}",
-                    correctResult,
-                    result));
+                    DoubleConverter.ToExactString(correctResult),
+                    DoubleConverter.ToExactString(result)));
 
             Assert.IsTrue(Math.Abs(result - correctResult) < ForwardEpsilon);
         }

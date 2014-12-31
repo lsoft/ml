@@ -11,7 +11,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
 
         public string GetKernelSource(
             IFunction function,
-            int currentLayerNonBiasNeuronCount,
+            int currentLayerTotalNeuronCount,
             int previousLayerTotalNeuronCount,
             out string kernelName
             )
@@ -38,7 +38,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
 
             result = result.Replace(
                 "{CURRENT_LAYER_NEURON_COUNT}",
-                currentLayerNonBiasNeuronCount.ToString(CultureInfo.InvariantCulture));
+                currentLayerTotalNeuronCount.ToString(CultureInfo.InvariantCulture));
 
             result = result.Replace(
                 "{PREVIOUS_LAYER_NEURON_COUNT}",
@@ -68,7 +68,8 @@ __kernel void ComputeLayerKernel(
     __global float* currentLayerLastNET,
     __global float * currentLayerLastState,
     const __global float* weights,
-    __local float* partialDotProduct
+    __local float* partialDotProduct,
+    __global float * biases
     )
 {
     const uint width = {PREVIOUS_LAYER_NEURON_COUNT};
@@ -86,6 +87,14 @@ __kernel void ComputeLayerKernel(
            sum += row[x] * previousLayerLastState[x];
       }
 
+//      KahanAccumulator acc = GetEmptyKahanAcc();
+//      for (uint x = get_local_id(0); x < width; x += get_local_size(0))
+//      {
+//           float part = row[x] * previousLayerLastState[x];
+//           KahanAddElement(&acc, part);
+//      }
+//      float sum = acc.Sum;
+
       // Each partial dot product is stored in shared memory
       partialDotProduct[get_local_id(0)] = sum;
 
@@ -96,7 +105,7 @@ __kernel void ComputeLayerKernel(
       // Write the result of the reduction to global memory
       if (get_local_id(0) == 0)
       {
-         float lastNET = partialDotProduct[0];
+         float lastNET = partialDotProduct[0] + biases[y];
          currentLayerLastNET[y] = lastNET;
 
          //compute last state

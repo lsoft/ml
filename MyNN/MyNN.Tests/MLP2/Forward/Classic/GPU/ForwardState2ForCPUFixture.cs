@@ -85,8 +85,10 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
             {
                 var result = test.ExecuteTestWith_1_1_1_MLP(
                     dataset,
-                    new List<float> {1f, 1f},
-                    new List<float> {1f, 1f},
+                    1f,
+                    1f,
+                    1f,
+                    1f,
                     () => new LinearFunction(1f),
                     (mlp) =>
                     {

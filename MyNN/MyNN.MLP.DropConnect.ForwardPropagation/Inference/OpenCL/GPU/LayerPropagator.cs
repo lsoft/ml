@@ -13,7 +13,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
         private readonly int _prevLayerNeuronTotalCount;
-        private readonly int _currentLayerNonBiasNeuronCount;
+        private readonly int _currentLayerTotalNeuronCount;
         private readonly ILayerInferencer _inferencer;
 
         private readonly Kernel _kernel;
@@ -25,7 +25,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
             IMemLayerContainer currentMemLayerContainer,
             IFunction activationFunction,
             int prevLayerNeuronTotalCount,
-            int currentLayerNonBiasNeuronCount,
+            int currentLayerTotalNeuronCount,
             ILayerInferencer inferencer
             )
         {
@@ -58,13 +58,13 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
             _previousMemLayerContainer = previousMemLayerContainer;
             _currentMemLayerContainer = currentMemLayerContainer;
             _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
-            _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
+            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
             _inferencer = inferencer;
 
             string kernelName;
             var kernelSource = ks.GetKernelSource(
                 activationFunction,
-                currentLayerNonBiasNeuronCount,
+                currentLayerTotalNeuronCount,
                 prevLayerNeuronTotalCount,
                 out kernelName
                 );
@@ -86,6 +86,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
                 .SetKernelArgMem(2, _currentMemLayerContainer.StateMem)
                 .SetKernelArgMem(3, _currentMemLayerContainer.WeightMem)
                 .SetKernelArgLocalMem(4, 4 * szLocalWorkSize)
+                .SetKernelArgMem(5, _currentMemLayerContainer.BiasMem)
                 .EnqueueNDRangeKernel(
                     new[]
                         {

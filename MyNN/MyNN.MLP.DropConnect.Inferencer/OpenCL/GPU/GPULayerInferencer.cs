@@ -148,12 +148,12 @@ namespace MyNN.MLP.DropConnect.Inferencer.OpenCL.GPU
                 .SetKernelArg(5, 4, this._p)
                 .SetKernelArg(6, 4, startRandomIndex)
                 .SetKernelArg(7, 4, _randomCount)
-                .SetKernelArg(8, 4, this._previousLayer.Neurons.Length)
+                .SetKernelArg(8, 4, this._previousLayer.TotalNeuronCount)
                 .SetKernelArg(9, 4, _sampleCount)
                 .EnqueueNDRangeKernel(
                     new[]
                     {
-                        _currentLayer.NonBiasNeuronCount * localSize
+                        _currentLayer.TotalNeuronCount * localSize
                     },
                     new[]
                     {

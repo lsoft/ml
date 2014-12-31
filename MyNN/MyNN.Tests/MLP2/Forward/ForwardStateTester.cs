@@ -109,22 +109,16 @@ namespace MyNN.Tests.MLP2.Forward
 
         public Pair<float, float> ExecuteTestWith_1_1_1_MLP(
             IDataSet dataset,
-            List<float> hiddenWeights,
-            List<float> outputWeights, 
+            float hiddenWeight,
+            float hiddenBias,
+            float outputWeight,
+            float outputBias,
             Func<IFunction> functionFactory,
             Func<IMLP, IForwardPropagation> forwardFactory)
         {
             if (dataset == null)
             {
                 throw new ArgumentNullException("dataset");
-            }
-            if (hiddenWeights == null)
-            {
-                throw new ArgumentNullException("hiddenWeights");
-            }
-            if (outputWeights == null)
-            {
-                throw new ArgumentNullException("outputWeights");
             }
             if (functionFactory == null)
             {
@@ -133,14 +127,6 @@ namespace MyNN.Tests.MLP2.Forward
             if (forwardFactory == null)
             {
                 throw new ArgumentNullException("forwardFactory");
-            }
-            if (hiddenWeights.Count != 2)
-            {
-                throw new ArgumentException("hiddenWeights.Count != 2");
-            }
-            if (outputWeights.Count != 2)
-            {
-                throw new ArgumentException("outputWeights.Count != 2");
             }
 
             var randomizer = new ConstRandomizer(0.5f);
@@ -165,11 +151,11 @@ namespace MyNN.Tests.MLP2.Forward
                     1
                 });
 
-            mlp.Layers[1].Neurons[0].Weights[0] = hiddenWeights[0];
-            mlp.Layers[1].Neurons[0].Weights[1] = hiddenWeights[1];
+            mlp.Layers[1].Neurons[0].Weights[0] = hiddenWeight;
+            mlp.Layers[1].Neurons[0].Bias = hiddenBias;
 
-            mlp.Layers[2].Neurons[0].Weights[0] = outputWeights[0];
-            mlp.Layers[2].Neurons[0].Weights[1] = outputWeights[1];
+            mlp.Layers[2].Neurons[0].Weights[0] = outputWeight;
+            mlp.Layers[2].Neurons[0].Bias = outputBias;
 
             var forward = forwardFactory(mlp);
 

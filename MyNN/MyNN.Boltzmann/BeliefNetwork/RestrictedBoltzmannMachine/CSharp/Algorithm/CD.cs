@@ -59,6 +59,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorit
             //sample hidden
             _calculator.SampleHidden(
                 _container.Weights,
+                _container.HiddenBiases,
                 _container.Hidden0,
                 _container.Input
                 );
@@ -69,10 +70,12 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorit
                 var ifLast = cdi == (maxGibbsChainLength - 1);
 
                 //compute visible
+                var mem = ifFirst ? _container.Hidden0 : _container.Hidden1;
                 _calculator.CalculateVisible(
                     _container.Weights,
+                    _container.VisibleBiases,
                     _container.Visible,
-                    ifFirst ? _container.Hidden0 : _container.Hidden1
+                    mem
                     );
 
                 if (ifLast)
@@ -80,6 +83,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorit
                     //compute hidden
                     _calculator.CalculateHidden(
                         _container.Weights,
+                        _container.HiddenBiases,
                         _container.Hidden1,
                         _container.Visible);
                 }
@@ -88,6 +92,7 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorit
                     //sample hidden
                     _calculator.SampleHidden(
                         _container.Weights,
+                        _container.HiddenBiases,
                         _container.Hidden1,
                         _container.Visible
                         );
@@ -104,10 +109,11 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorit
         {
             _calculator.CalculateVisible(
                 _container.Weights,
+                _container.VisibleBiases,
                 _container.Input,
                 _container.Hidden0);
 
-            var result = _container.Input.RemoveLastElement();
+            var result = _container.Input.CloneArray();
 
             return result;
         }
@@ -116,10 +122,11 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorit
         {
             _calculator.CalculateHidden(
                 _container.Weights,
+                _container.HiddenBiases,
                 _container.Hidden0,
                 _container.Input);
 
-            var result = _container.Hidden0.RemoveLastElement();
+            var result = _container.Hidden0.CloneArray();
 
             return result;
         }
@@ -128,15 +135,17 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorit
         {
             _calculator.CalculateHidden(
                 _container.Weights,
+                _container.HiddenBiases,
                 _container.Hidden0,
                 _container.Input);
 
             _calculator.CalculateVisible(
                 _container.Weights,
+                _container.VisibleBiases,
                 _container.Visible,
                 _container.Hidden0);
 
-            var result = _container.Visible.RemoveLastElement();
+            var result = _container.Visible.CloneArray();
 
             return result;
         }
@@ -146,21 +155,21 @@ namespace MyNN.Boltzmann.BeliefNetwork.RestrictedBoltzmannMachine.CSharp.Algorit
             var result = new List<float[]>();
 
             var h = new float[_container.Hidden0.Length];
-            h[_container.Hidden0.Length - 1] = 1f; //set bias
 
             for (var cc = 0; cc < _container.HiddenNeuronCount; cc++)
             {
                 h[cc] = 1;
 
-                var feature = new float[_container.VisibleNeuronCount + 1]; //with bias
+                var feature = new float[_container.VisibleNeuronCount];
 
                 _calculator.CalculateVisible(
                     _container.Weights,
+                    _container.VisibleBiases,
                     feature,
                     h
                     );
 
-                result.Add(feature.GetSubArray(0, _container.VisibleNeuronCount));
+                result.Add(feature.CloneArray());
 
                 h[cc] = 0;
             }

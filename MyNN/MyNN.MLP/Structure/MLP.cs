@@ -85,10 +85,6 @@ namespace MyNN.MLP.Structure
             Array.Copy(this.Layers, 0, lls, 0, lls.Length);
 
             this._layers = lls;
-
-            //у последнего слоя убираем Bias нейрон
-            var nll = this.Layers.Last();
-            nll.RemoveBiasNeuron();
         }
 
         /// <summary>
@@ -116,7 +112,7 @@ namespace MyNN.MLP.Structure
 
         public void AddLayer(
             IFunction activationFunction,
-            int nonBiasNeuronCount,
+            int totalNeuronCount,
             bool isNeedBiasNeuron)
         {
             if (activationFunction == null)
@@ -124,21 +120,15 @@ namespace MyNN.MLP.Structure
                 throw new ArgumentNullException("activationFunction");
             }
 
-            var lastl = this._layers[this._layers.Length - 1];
-            if (!lastl.IsBiasNeuronExists)
-            {
-                lastl.AddBiasNeuron();
-            }
+            var lastl = this._layers.Last();
 
             var newl = new ILayer[this._layers.Length + 1];
             this._layers.CopyTo(newl, 0);
 
             var bornLayer = _layerFactory.CreateLayer(
                 activationFunction,
-                nonBiasNeuronCount,
-                lastl.NonBiasNeuronCount,
-                isNeedBiasNeuron,
-                true
+                totalNeuronCount,
+                lastl.TotalNeuronCount
                 );
             newl[this._layers.Length] = bornLayer;
 

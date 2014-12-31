@@ -13,30 +13,21 @@ namespace MyNN.MLP.Structure.Neuron
             private set;
         }
 
-        public IFunction ActivationFunction
+        public float Bias
         {
             get;
-            private set;
-        }
-
-        public bool IsBiasNeuron
-        {
-            get
-            {
-                return false;
-            }
+            set;
         }
 
         public INeuronConfiguration GetConfiguration()
         {
             return
                 new NeuronConfiguration(
-                    this.Weights.Length,
-                    this.IsBiasNeuron);
+                    this.Weights.Length
+                    );
         }
 
         public HiddeonOutputMLPNeuron(
-            IFunction activationFunction,
             int weightCount,
             IRandomizer randomizer)
         {
@@ -45,14 +36,14 @@ namespace MyNN.MLP.Structure.Neuron
                 throw new ArgumentNullException("randomizer");
             }
 
-            this.ActivationFunction = activationFunction;
-
             //случайные веса
             this.Weights = new float[weightCount];
             for (var cc = 0; cc < weightCount; cc++)
             {
                 this.Weights[cc] = randomizer.Next() * .2f - .1f;
             }
+
+            this.Bias = randomizer.Next() * .2f - .1f;
         }
     }
 }

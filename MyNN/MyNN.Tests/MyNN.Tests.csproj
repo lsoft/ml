@@ -79,8 +79,8 @@
     <Compile Include="MLP2\ActivationFunction\CSharp\Derivative\SigmoidFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\CSharp\Derivative\SparsifierFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\ActivationFunctionDerivativeTests.cs" />
-    <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\LinearOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\HyperbolicTangensOpenCLFixture.cs" />
+    <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\LinearOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\RLUOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\SigmoidOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Derivative\SparsifierOpenCLFixture.cs" />
@@ -90,22 +90,25 @@
     <Compile Include="MLP2\ActivationFunction\OpenCL\Value\RLUOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Value\SigmoidOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Value\SparsifierOpenCLFixture.cs" />
+    <Compile Include="MLP2\Dodf\Generation1\DoDfFixture.cs" />
+    <Compile Include="MLP2\Dodf\DodfTester.cs" />
+    <Compile Include="MLP2\EpocheTrainer\GPUEpocheTrainerFixture.cs" />
+    <Compile Include="MLP2\EpocheTrainer\GPUTestHelper.cs" />
+    <Compile Include="MLP2\EpocheTrainer\CSharpEpocheTrainerFixture.cs" />
+    <Compile Include="MLP2\EpocheTrainer\CSharpTestHelper.cs" />
     <Compile Include="MLP2\EpocheTrainer\EpocheTrainerValidation.cs" />
-    <Compile Include="MLP2\EpocheTrainer\EpocheTrainer_1_1_Test.cs" />
-    <Compile Include="MLP2\EpocheTrainer\OpenCLEpocheTrainerFixture.cs" />
+    <Compile Include="MLP2\EpocheTrainer\CPUTestHelper.cs" />
+    <Compile Include="MLP2\EpocheTrainer\CPUEpocheTrainerFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\CPU\ForwardOutput2Fixture.cs" />
     <Compile Include="MLP2\Forward\Classic\CPU\ForwardState2Fixture.cs" />
     <Compile Include="MLP2\Forward\Classic\CSharp\ForwardState2Fixture.cs" />
     <Compile Include="MLP2\Forward\Classic\CSharp\ForwardOutput2Fixture.cs" />
-    <Compile Include="MLP2\Forward\Classic\GPUIMG\ForwardOutput2ForNVidiaFixture.cs" />
-    <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForNVidiaFixture.cs" />
-    <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForIntelGPUFixture.cs" />
-    <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForNVidiaFixture.cs" />
-    <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForIntelGPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForCPUFixture.cs" />
+    <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForIntelGPUFixture.cs" />
+    <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForNVidiaFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForCPUFixture.cs" />
-    <Compile Include="MLP2\Inferencer\InferencerTester.cs" />
-    <Compile Include="MLP2\Inferencer\InferenceFixture.cs" />
+    <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForIntelGPUFixture.cs" />
+    <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForNVidiaFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardOutputFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardStateDisableMaskFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardStateDisableOutputLayerFixture.cs" />
@@ -114,13 +117,17 @@
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\MaskContainer\MockMaskContainer.cs" />
     <Compile Include="MLP2\Forward\ForwardOutputTester.cs" />
     <Compile Include="MLP2\Forward\ForwardStateTester.cs" />
+    <Compile Include="MLP2\Inferencer\InferenceFixture.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MLP2\Inferencer\InferencerTester.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MLP2\LayerPropagator\Classic\CSharp\ComputeLayerFixture.cs" />
     <Compile Include="MLP2\LayerPropagator\Classic\OpenCL\CPU\ComputeLayerFixture.cs" />
-    <Compile Include="MLP2\LayerPropagator\Classic\OpenCL\GPU\NVidiaComputeLayerFixture.cs" />
-    <Compile Include="MLP2\LayerPropagator\Classic\OpenCL\GPU\IntelGPUComputeLayerFixture.cs" />
     <Compile Include="MLP2\LayerPropagator\Classic\OpenCL\GPU\IntelCPUComputeLayerFixture.cs" />
-    <Compile Include="MLP2\LayerPropagator\DropConnect\OpenCL\GPU2\IntelCPUComputeLayerFixture.cs" />
-    <Compile Include="MLP2\LayerPropagator\DropConnect\OpenCL\GPU2\TestPurposeMaskContainer.cs" />
+    <Compile Include="MLP2\LayerPropagator\Classic\OpenCL\GPU\IntelGPUComputeLayerFixture.cs" />
+    <Compile Include="MLP2\LayerPropagator\Classic\OpenCL\GPU\NVidiaComputeLayerFixture.cs" />
     <Compile Include="MLP2\MaskContainers\BigArrayFixture.cs" />
     <Compile Include="MLP2\MaskContainers\MaskContainerTester.cs" />
     <Compile Include="MLP2\Metrics\HalfSquaredEuclidianDistanceFixture.cs" />

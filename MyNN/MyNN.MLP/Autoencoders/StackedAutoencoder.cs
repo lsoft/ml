@@ -284,12 +284,6 @@ namespace MyNN.MLP.Autoencoders
                 }
             }
 
-            //приделываем биас-нейроны
-            for (var cc = (layerListCount + 1)/2; cc < layerListCount - 1; cc++)
-            {
-                layerList[cc].AddBiasNeuron();
-            }
-
             //собираем итоговый автоенкодер
             var combinedNet = _mlpFactory.CreateMLP(
                 sdaeName,

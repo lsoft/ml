@@ -460,9 +460,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 nf,
                 function,
                 currentLayerNeuronCount,
-                previousLayerNeuronCount,
-                false,
-                false
+                previousLayerNeuronCount
                 );
 
             plc = new MemLayerContainer(
@@ -474,7 +472,6 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
             clc = new MemLayerContainer(
                 clProvider,
                 previousLayerNeuronCount,
-                currentLayerNeuronCount,
                 currentLayerNeuronCount
                 );
 
