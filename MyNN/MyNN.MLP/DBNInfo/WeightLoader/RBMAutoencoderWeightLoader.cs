@@ -50,17 +50,14 @@ namespace MyNN.MLP.DBNInfo.WeightLoader
             for (var neuronIndex = 0; neuronIndex < layer.TotalNeuronCount; neuronIndex++)
             {
                 var neuron = layer.Neurons[neuronIndex];
-
-                if (neuron is HiddeonOutputMLPNeuron)
+                
+                for (var weightIndex = 0; weightIndex < neuron.Weights.Length; weightIndex++)
                 {
-                    for (var weightIndex = 0; weightIndex < neuron.Weights.Length; weightIndex++)
-                    {
-                        var weight = sc.Weights[weightIndex * layer.TotalNeuronCount + neuronIndex];
-                        neuron.Weights[weightIndex] = weight;
-                    }
-
-                    neuron.Bias = sc.VisibleBiases[neuronIndex];
+                    var weight = sc.Weights[weightIndex*layer.TotalNeuronCount + neuronIndex];
+                    neuron.Weights[weightIndex] = weight;
                 }
+
+                neuron.Bias = sc.VisibleBiases[neuronIndex];
             }
         }
     }
