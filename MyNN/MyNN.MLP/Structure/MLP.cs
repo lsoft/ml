@@ -127,7 +127,7 @@ namespace MyNN.MLP.Structure
 
             var bornLayer = _layerFactory.CreateLayer(
                 activationFunction,
-                totalNeuronCount,
+                new Dimension(1, totalNeuronCount),
                 lastl.TotalNeuronCount
                 );
             newl[this._layers.Length] = bornLayer;

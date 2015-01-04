@@ -188,7 +188,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.CSharp
             l = new Layer(
                 nf,
                 new LinearFunction(1f),
-                currentLayerNeuronCount,
+                new Dimension(1, currentLayerNeuronCount),
                 previousLayerNeuronCount
                 );
 

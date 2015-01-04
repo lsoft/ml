@@ -10,12 +10,18 @@ namespace MyNN.MLP.Structure.Layer
     [Serializable]
     public class Layer : ILayer
     {
+        public IDimension SpatialDimension
+        {
+            get;
+            private set;
+        }
+
         public int TotalNeuronCount
         {
             get
             {
                 return
-                    this.Neurons.Length;
+                    this.SpatialDimension.TotalNeuronCount;
             }
         }
 
@@ -36,15 +42,21 @@ namespace MyNN.MLP.Structure.Layer
         /// </summary>
         public Layer(
             INeuronFactory neuronFactory,
-            int totalNeuronCount
+            IDimension spatialDimension
             )
         {
             if (neuronFactory == null)
             {
                 throw new ArgumentNullException("neuronFactory");
             }
+            if (spatialDimension == null)
+            {
+                throw new ArgumentNullException("spatialDimension");
+            }
 
-            this.Neurons = new INeuron[totalNeuronCount];
+            SpatialDimension = spatialDimension;
+
+            this.Neurons = new INeuron[TotalNeuronCount];
 
             for (var cc = 0; cc < this.TotalNeuronCount; cc++)
             {
@@ -58,7 +70,7 @@ namespace MyNN.MLP.Structure.Layer
         public Layer(
             INeuronFactory neuronFactory,
             IFunction activationFunction,
-            int currentLayerNeuronCount,
+            IDimension spatialDimension,
             int previousLayerNeuronCount
             )
         {
@@ -70,10 +82,15 @@ namespace MyNN.MLP.Structure.Layer
             {
                 throw new ArgumentNullException("activationFunction");
             }
+            if (spatialDimension == null)
+            {
+                throw new ArgumentNullException("spatialDimension");
+            }
 
             LayerActivationFunction = activationFunction;
+            SpatialDimension = spatialDimension;
 
-            this.Neurons = new INeuron[currentLayerNeuronCount];
+            this.Neurons = new INeuron[this.TotalNeuronCount];
 
             for (var cc = 0; cc < this.TotalNeuronCount; cc++)
             {
@@ -83,12 +100,10 @@ namespace MyNN.MLP.Structure.Layer
 
         public string GetLayerInformation()
         {
-            var neuronCount = this.TotalNeuronCount;
-
             return
                 string.Format(
                     "{0}{1}",
-                    neuronCount,
+                    this.SpatialDimension.GetDimensionInformation(),
                     this.LayerActivationFunction != null
                         ? this.LayerActivationFunction.ShortName
                         : "Input");
@@ -98,8 +113,8 @@ namespace MyNN.MLP.Structure.Layer
         {
             return 
                 new LayerConfiguration(
-                    this.Neurons.ConvertAll(j => j.GetConfiguration()),
-                    this.TotalNeuronCount
+                    this.SpatialDimension,
+                    this.Neurons.ConvertAll(j => j.GetConfiguration())
                     );
         }
     }

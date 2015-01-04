@@ -242,7 +242,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
             l = new Layer(
                 nf,
                 function,
-                currentLayerNeuronCount,
+                new Dimension(1, currentLayerNeuronCount),
                 previousLayerNeuronCount
                 );
 

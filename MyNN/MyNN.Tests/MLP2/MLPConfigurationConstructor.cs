@@ -41,8 +41,8 @@ namespace MyNN.Tests.MLP2
                 }
 
                 var lc = new LayerConfiguration(
-                    ncl.ToArray(),
-                    layerSizes[li]
+                    new Dimension(1, layerSizes[li]), 
+                    ncl.ToArray()
                     );
 
                 lcl.Add(lc);

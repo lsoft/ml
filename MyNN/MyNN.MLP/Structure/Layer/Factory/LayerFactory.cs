@@ -21,26 +21,40 @@ namespace MyNN.MLP.Structure.Layer.Factory
         }
 
         public ILayer CreateInputLayer(
-            int totalNeuronCount
+            IDimension dimension
             )
         {
+            if (dimension == null)
+            {
+                throw new ArgumentNullException("dimension");
+            }
+
             return
                 new Layer(
                     _neuronFactory,
-                    totalNeuronCount
+                    dimension
                     );
         }
 
         public ILayer CreateLayer(
             IFunction activationFunction,
-            int currentLayerNeuronCount,
+            IDimension dimension,
             int previousLayerNeuronCount
             )
         {
+            if (activationFunction == null)
+            {
+                throw new ArgumentNullException("activationFunction");
+            }
+            if (dimension == null)
+            {
+                throw new ArgumentNullException("dimension");
+            }
+
             var result = new Layer(
                 _neuronFactory,
                 activationFunction,
-                currentLayerNeuronCount,
+                dimension,
                 previousLayerNeuronCount
                 );
 

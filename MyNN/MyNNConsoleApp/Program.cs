@@ -9,7 +9,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                CalculateRBM.Do();
+                
 
 
                 Console.WriteLine(".......... press any key to exit");

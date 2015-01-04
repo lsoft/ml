@@ -48,14 +48,16 @@ namespace MyNN.MLP.Structure.Factory
             var layerList = new ILayer[neuronCountList.Length];
 
             //создаем входной слой
-            layerList[0] = _layerFactory.CreateInputLayer(neuronCountList[0]);
+            layerList[0] = _layerFactory.CreateInputLayer(
+                new Dimension(1, neuronCountList[0])
+                );
 
             //создаем скрытые слои и выходной слой
             for (var cc = 1; cc < neuronCountList.Length; cc++)
             {
                 layerList[cc] = _layerFactory.CreateLayer(
                     activationFunction[cc],
-                    neuronCountList[cc],
+                    new Dimension(1, neuronCountList[cc]),
                     neuronCountList[cc - 1]
                     );
             }
@@ -131,7 +133,9 @@ namespace MyNN.MLP.Structure.Factory
             var layerList = new ILayer[neuronCountList.Length];
 
             //создаем входной слой
-            layerList[0] = _layerFactory.CreateInputLayer(neuronCountList[0]);
+            layerList[0] = _layerFactory.CreateInputLayer(
+                new Dimension(1, neuronCountList[0])
+                );
 
             //создаем скрытые слои и выходной слой
             var isPreviousLayerHadBiasNeuron = true;
@@ -141,7 +145,7 @@ namespace MyNN.MLP.Structure.Factory
 
                 var layer = _layerFactory.CreateLayer(
                     activationFunction[layerIndex],
-                    neuronCountList[layerIndex],
+                    new Dimension(1, neuronCountList[layerIndex]),
                     neuronCountList[layerIndex - 1]
                     );
 
@@ -202,14 +206,16 @@ namespace MyNN.MLP.Structure.Factory
 
             var layerList = new ILayer[activationFunction.Length];
 
-            layerList[0] = _layerFactory.CreateInputLayer(dbnInformation.LayerSizes[0]);
+            layerList[0] = _layerFactory.CreateInputLayer(
+                new Dimension(1, dbnInformation.LayerSizes[0])
+                );
 
             for (var layerIndex = 1; layerIndex <= Math.Min(layerList.Length, dbnInformation.LayerCount); layerIndex++)
             {
                 //создаем слой
                 var layer = _layerFactory.CreateLayer(
                     activationFunction[layerIndex],
-                    dbnInformation.LayerSizes[layerIndex],
+                    new Dimension(1, dbnInformation.LayerSizes[layerIndex]),
                     layerList[layerIndex - 1].TotalNeuronCount
                     );
 
@@ -276,7 +282,9 @@ namespace MyNN.MLP.Structure.Factory
 
             var layerList = new ILayer[activationFunction.Length];
 
-            layerList[0] = _layerFactory.CreateInputLayer(dbnInformation.LayerSizes[0]);
+            layerList[0] = _layerFactory.CreateInputLayer(
+                new Dimension(1, dbnInformation.LayerSizes[0])
+                );
 
             for (var layerIndex = 1; layerIndex <= Math.Min(autoencoderLayers, dbnInformation.LayerCount); layerIndex++)
             {
@@ -291,7 +299,7 @@ namespace MyNN.MLP.Structure.Factory
                 {
                     var encoderLayer = _layerFactory.CreateLayer(
                         activationFunction[layerIndex],
-                        dbnInformation.LayerSizes[layerIndex],
+                        new Dimension(1, dbnInformation.LayerSizes[layerIndex]),
                         layerList[layerIndex - 1].TotalNeuronCount
                         );
 
@@ -307,7 +315,7 @@ namespace MyNN.MLP.Structure.Factory
 
                     var decoderLayer = _layerFactory.CreateLayer(
                         activationFunction[decoderLayerIndex],
-                        layerList[layerIndex - 1].TotalNeuronCount,
+                        new Dimension(1, layerList[layerIndex - 1].TotalNeuronCount),
                         layerList[layerIndex].TotalNeuronCount
                         );
 

@@ -5,12 +5,12 @@ namespace MyNN.MLP.Structure.Layer.Factory
     public interface ILayerFactory
     {
         ILayer CreateInputLayer(
-            int totalNeuronCount
+            IDimension dimension
             );
 
         ILayer CreateLayer(
             IFunction activationFunction,
-            int currentLayerNeuronCount,
+            IDimension dimension,
             int previousLayerNeuronCount
             );
     }

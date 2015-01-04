@@ -48,13 +48,13 @@ namespace MyNN.Tests.MLP2.Inferencer
 
                 var layer0 = new Layer(
                     nf,
-                    previousLayerNeuronCount
+                    new Dimension(1, previousLayerNeuronCount)
                     );
 
                 var layer1 = new Layer(
                     nf,
                     activationFunction,
-                    currentLayerNeuronCount,
+                    new Dimension(1, currentLayerNeuronCount),
                     previousLayerNeuronCount
                     );
 

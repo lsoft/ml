@@ -5,6 +5,11 @@ namespace MyNN.MLP.Structure.Layer
 {
     public interface ILayer
     {
+        IDimension SpatialDimension
+        {
+            get;
+        }
+
         int TotalNeuronCount
         {
             get;

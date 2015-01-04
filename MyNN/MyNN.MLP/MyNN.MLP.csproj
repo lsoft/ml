@@ -122,8 +122,10 @@
     <Compile Include="Structure\IMLP.cs" />
     <Compile Include="Structure\IMLPConfiguration.cs" />
     <Compile Include="Structure\IMLPState.cs" />
+    <Compile Include="Structure\Layer\Dimension.cs" />
     <Compile Include="Structure\Layer\Factory\ILayerFactory.cs" />
     <Compile Include="Structure\Layer\Factory\LayerFactory.cs" />
+    <Compile Include="Structure\Layer\IDimension.cs" />
     <Compile Include="Structure\Layer\ILayer.cs" />
     <Compile Include="Structure\Layer\ILayerConfiguration.cs" />
     <Compile Include="Structure\Layer\ILayerState.cs" />

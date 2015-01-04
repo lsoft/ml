@@ -125,10 +125,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CalculateBackprop.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="CalculateRBM.cs" />
     <Compile Include="CombinedConsole.cs" />
     <Compile Include="FeatureAndMetricsAccuracyCalculator.cs">
       <SubType>Code</SubType>

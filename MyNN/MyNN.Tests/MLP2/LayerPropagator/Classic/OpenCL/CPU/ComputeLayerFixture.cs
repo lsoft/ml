@@ -459,7 +459,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
             l = new Layer(
                 nf,
                 function,
-                currentLayerNeuronCount,
+                new Dimension(1, currentLayerNeuronCount),
                 previousLayerNeuronCount
                 );
 
