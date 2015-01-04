@@ -8,7 +8,7 @@ namespace MyNN.MLP.Structure.Layer.Factory
             IDimension dimension
             );
 
-        ILayer CreateLayer(
+        ILayer CreateFullConnectedLayer(
             IFunction activationFunction,
             IDimension dimension,
             int previousLayerNeuronCount

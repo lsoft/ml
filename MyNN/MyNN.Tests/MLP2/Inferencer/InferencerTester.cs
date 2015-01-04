@@ -46,12 +46,12 @@ namespace MyNN.Tests.MLP2.Inferencer
                 var nf = new NeuronFactory(
                     structureRandomizer);
 
-                var layer0 = new Layer(
+                var layer0 = new FullConnectedLayer(
                     nf,
                     new Dimension(1, previousLayerNeuronCount)
                     );
 
-                var layer1 = new Layer(
+                var layer1 = new FullConnectedLayer(
                     nf,
                     activationFunction,
                     new Dimension(1, currentLayerNeuronCount),
@@ -61,7 +61,8 @@ namespace MyNN.Tests.MLP2.Inferencer
                 var previousContainer = new MemLayerContainer(
                     clProvider,
                     layer0.TotalNeuronCount,
-                    layer1.TotalNeuronCount
+                    0,
+                    0
                     );
 
                 previousContainer.StateMem.Array.Fill(j => structureRandomizer.Next());
@@ -69,7 +70,8 @@ namespace MyNN.Tests.MLP2.Inferencer
 
                 var currentContainer = new MemLayerContainer(
                     clProvider,
-                    layer0.TotalNeuronCount,
+                    layer1.TotalNeuronCount,
+                    layer0.TotalNeuronCount * layer1.TotalNeuronCount,
                     layer1.TotalNeuronCount
                     );
 

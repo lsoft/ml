@@ -13,5 +13,15 @@ namespace MyNN.MLP.Structure.Layer
         {
             get;
         }
+
+        int WeightCount
+        {
+            get;
+        }
+
+        int BiasCount
+        {
+            get;
+        }
     }
 }

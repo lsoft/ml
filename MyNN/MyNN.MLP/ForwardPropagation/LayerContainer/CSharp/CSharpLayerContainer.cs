@@ -5,7 +5,6 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
 {
     public class CSharpLayerContainer : ICSharpLayerContainer
     {
-        private readonly int _previousLayerTotalNeuronCount;
         private readonly int _currentLayerTotalNeuronCount;
 
         public float[] WeightMem
@@ -33,37 +32,20 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
         }
 
         public CSharpLayerContainer(
-            int currentLayerTotalNeuronCount
+            int totalNeuronCount,
+            int weightCount,
+            int biasCount
             )
         {
-            _previousLayerTotalNeuronCount = 0;
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
-
-            //нейроны
-            NetMem = new float[currentLayerTotalNeuronCount];
-            StateMem = new float[currentLayerTotalNeuronCount];
-        }
-
-        public CSharpLayerContainer(
-            int previousLayerTotalNeuronCount,
-            int currentLayerTotalNeuronCount
-            )
-        {
-            if (previousLayerTotalNeuronCount == 0)
-            {
-                throw new ArgumentException("For input layer use another constructor");
-            }
-
-            _previousLayerTotalNeuronCount = previousLayerTotalNeuronCount;
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
+            _currentLayerTotalNeuronCount = totalNeuronCount;
 
             //веса
-            WeightMem = new float[currentLayerTotalNeuronCount * previousLayerTotalNeuronCount];
-            BiasMem = new float[currentLayerTotalNeuronCount];
+            WeightMem = weightCount > 0 ? new float[weightCount] : null;
+            BiasMem = biasCount > 0 ? new float[biasCount] : null;
 
             //нейроны
-            NetMem = new float[currentLayerTotalNeuronCount];
-            StateMem = new float[currentLayerTotalNeuronCount];
+            NetMem = new float[totalNeuronCount];
+            StateMem = new float[totalNeuronCount];
         }
 
         public void ClearAndPushNetAndState()
@@ -97,24 +79,15 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
                 throw new ArgumentNullException("layer");
             }
 
-            var weightShift = 0;
+            float[] weightMem;
+            float[] biasMem;
+            layer.GetClonedWeights(
+                out weightMem,
+                out biasMem
+                );
 
-            var weightMem = this.WeightMem;
-            for (var neuronIndex = 0; neuronIndex < layer.TotalNeuronCount; neuronIndex++)
-            {
-                var neuron = layer.Neurons[neuronIndex];
-
-                Array.Copy(
-                    neuron.Weights,
-                    0,
-                    weightMem,
-                    weightShift,
-                    neuron.Weights.Length);
-
-                weightShift += neuron.Weights.Length;
-
-                this.BiasMem[neuronIndex] = neuron.Bias;
-            }
+            weightMem.CopyTo(this.WeightMem, 0);
+            biasMem.CopyTo(this.BiasMem, 0);
         }
 
         public void PopNetAndState()
@@ -129,20 +102,10 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
 
         public void WritebackWeightsToMLP(ILayer layer)
         {
-            var weightLayer = this.WeightMem;
-
-            var weightShiftIndex = 0;
-            for (var neuronIndex = 0; neuronIndex < layer.TotalNeuronCount; ++neuronIndex)
-            {
-                var neuron = layer.Neurons[neuronIndex];
-
-                var weightCount = neuron.Weights.Length;
-
-                Array.Copy(weightLayer, weightShiftIndex, neuron.Weights, 0, weightCount);
-                weightShiftIndex += weightCount;
-
-                neuron.Bias = this.BiasMem[neuronIndex];
-            }
+            layer.SetWeights(
+                this.WeightMem,
+                this.BiasMem
+                );
         }
 
         public ILayerState GetLayerState()

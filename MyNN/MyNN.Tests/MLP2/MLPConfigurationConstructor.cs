@@ -42,6 +42,8 @@ namespace MyNN.Tests.MLP2
 
                 var lc = new LayerConfiguration(
                     new Dimension(1, layerSizes[li]), 
+                    firstLayer ? 0 : prevLayerTotalNeuron * currentLayerTotalNeuron,
+                    firstLayer ? 0 : currentLayerTotalNeuron,
                     ncl.ToArray()
                     );
 

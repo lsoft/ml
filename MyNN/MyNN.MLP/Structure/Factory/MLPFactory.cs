@@ -55,7 +55,7 @@ namespace MyNN.MLP.Structure.Factory
             //создаем скрытые слои и выходной слой
             for (var cc = 1; cc < neuronCountList.Length; cc++)
             {
-                layerList[cc] = _layerFactory.CreateLayer(
+                layerList[cc] = _layerFactory.CreateFullConnectedLayer(
                     activationFunction[cc],
                     new Dimension(1, neuronCountList[cc]),
                     neuronCountList[cc - 1]
@@ -143,7 +143,7 @@ namespace MyNN.MLP.Structure.Factory
             {
                 var isLayerHasBiasNeuron = layerIndex != (neuronCountList.Length - 1);
 
-                var layer = _layerFactory.CreateLayer(
+                var layer = _layerFactory.CreateFullConnectedLayer(
                     activationFunction[layerIndex],
                     new Dimension(1, neuronCountList[layerIndex]),
                     neuronCountList[layerIndex - 1]
@@ -213,7 +213,7 @@ namespace MyNN.MLP.Structure.Factory
             for (var layerIndex = 1; layerIndex <= Math.Min(layerList.Length, dbnInformation.LayerCount); layerIndex++)
             {
                 //создаем слой
-                var layer = _layerFactory.CreateLayer(
+                var layer = _layerFactory.CreateFullConnectedLayer(
                     activationFunction[layerIndex],
                     new Dimension(1, dbnInformation.LayerSizes[layerIndex]),
                     layerList[layerIndex - 1].TotalNeuronCount
@@ -297,7 +297,7 @@ namespace MyNN.MLP.Structure.Factory
 
                 //создаем слой кодирования
                 {
-                    var encoderLayer = _layerFactory.CreateLayer(
+                    var encoderLayer = _layerFactory.CreateFullConnectedLayer(
                         activationFunction[layerIndex],
                         new Dimension(1, dbnInformation.LayerSizes[layerIndex]),
                         layerList[layerIndex - 1].TotalNeuronCount
@@ -313,7 +313,7 @@ namespace MyNN.MLP.Structure.Factory
                 {
                     var decoderLayerIndex = mlpLayersCount - layerIndex;
 
-                    var decoderLayer = _layerFactory.CreateLayer(
+                    var decoderLayer = _layerFactory.CreateFullConnectedLayer(
                         activationFunction[decoderLayerIndex],
                         new Dimension(1, layerList[layerIndex - 1].TotalNeuronCount),
                         layerList[layerIndex].TotalNeuronCount

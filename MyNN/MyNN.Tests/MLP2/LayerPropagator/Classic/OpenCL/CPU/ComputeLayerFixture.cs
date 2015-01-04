@@ -32,7 +32,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             using (var clProvider = new CLProvider())
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 CPULayerPropagator lp;
@@ -82,7 +82,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             using (var clProvider = new CLProvider())
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 CPULayerPropagator lp;
@@ -136,7 +136,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             using (var clProvider = new CLProvider())
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 CPULayerPropagator lp;
@@ -187,7 +187,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             using (var clProvider = new CLProvider())
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 CPULayerPropagator lp;
@@ -238,7 +238,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             using (var clProvider = new CLProvider())
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 CPULayerPropagator lp;
@@ -289,7 +289,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             using (var clProvider = new CLProvider())
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 CPULayerPropagator lp;
@@ -342,7 +342,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             using (var clProvider = new CLProvider())
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 CPULayerPropagator lp;
@@ -395,7 +395,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             using (var clProvider = new CLProvider())
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 CPULayerPropagator lp;
@@ -440,7 +440,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
             int previousLayerNeuronCount, 
             int currentLayerNeuronCount,
             VectorizationSizeEnum vse,
-            out Layer l, 
+            out FullConnectedLayer l, 
             out MemLayerContainer plc,
             out MemLayerContainer clc, 
             out CPULayerPropagator lp)
@@ -456,7 +456,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             var function = new LinearFunction(1f);
 
-            l = new Layer(
+            l = new FullConnectedLayer(
                 nf,
                 function,
                 new Dimension(1, currentLayerNeuronCount),
@@ -466,12 +466,14 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
             plc = new MemLayerContainer(
                 clProvider,
                 previousLayerNeuronCount,
-                previousLayerNeuronCount
+                0,
+                0
                 );
 
             clc = new MemLayerContainer(
                 clProvider,
-                previousLayerNeuronCount,
+                currentLayerNeuronCount,
+                currentLayerNeuronCount * previousLayerNeuronCount,
                 currentLayerNeuronCount
                 );
 

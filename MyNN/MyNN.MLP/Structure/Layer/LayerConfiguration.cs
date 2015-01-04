@@ -26,8 +26,22 @@ namespace MyNN.MLP.Structure.Layer
             }
         }
 
+        public int WeightCount
+        {
+            get;
+            private set;
+        }
+
+        public int BiasCount
+        {
+            get;
+            private set;
+        }
+
         public LayerConfiguration(
             IDimension spatialDimension,
+            int weightCount,
+            int biasCount,
             INeuronConfiguration[] neurons
             )
         {
@@ -41,6 +55,8 @@ namespace MyNN.MLP.Structure.Layer
             }
 
             SpatialDimension = spatialDimension;
+            WeightCount = weightCount;
+            BiasCount = biasCount;
             Neurons = neurons;
         }
     }

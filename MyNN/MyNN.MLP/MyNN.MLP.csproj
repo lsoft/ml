@@ -129,7 +129,7 @@
     <Compile Include="Structure\Layer\ILayer.cs" />
     <Compile Include="Structure\Layer\ILayerConfiguration.cs" />
     <Compile Include="Structure\Layer\ILayerState.cs" />
-    <Compile Include="Structure\Layer\Layer.cs" />
+    <Compile Include="Structure\Layer\FullConnectedLayer.cs" />
     <Compile Include="Structure\Layer\LayerConfiguration.cs" />
     <Compile Include="Structure\Layer\LayerInfo.cs" />
     <Compile Include="Structure\Layer\LayerState.cs" />

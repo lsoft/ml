@@ -113,26 +113,14 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
 
             for (var layerIndex = 0; layerIndex < layerCount; layerIndex++)
             {
-                var currentLayerTotalNeuronCount = mlp.Layers[layerIndex].TotalNeuronCount;
+                var currentLayerConfiguration = mlp.Layers[layerIndex].GetConfiguration();
 
-                IMemLayerContainer mc;
-                if (layerIndex > 0)
-                {
-                    var previousLayerTotalNeuronCount = mlp.Layers[layerIndex - 1].TotalNeuronCount;
-
-                    mc = new MemLayerContainer(
+                var mc = new MemLayerContainer(
                         _clProvider,
-                        previousLayerTotalNeuronCount,
-                        currentLayerTotalNeuronCount
+                        currentLayerConfiguration.TotalNeuronCount,
+                        currentLayerConfiguration.WeightCount,
+                        currentLayerConfiguration.BiasCount
                         );
-                }
-                else
-                {
-                    mc = new MemLayerContainer(
-                        _clProvider,
-                        currentLayerTotalNeuronCount
-                        );
-                }
 
                 result.Add(mc);
             }

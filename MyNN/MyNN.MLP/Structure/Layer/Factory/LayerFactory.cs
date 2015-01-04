@@ -30,13 +30,13 @@ namespace MyNN.MLP.Structure.Layer.Factory
             }
 
             return
-                new Layer(
+                new FullConnectedLayer(
                     _neuronFactory,
                     dimension
                     );
         }
 
-        public ILayer CreateLayer(
+        public ILayer CreateFullConnectedLayer(
             IFunction activationFunction,
             IDimension dimension,
             int previousLayerNeuronCount
@@ -51,7 +51,7 @@ namespace MyNN.MLP.Structure.Layer.Factory
                 throw new ArgumentNullException("dimension");
             }
 
-            var result = new Layer(
+            var result = new FullConnectedLayer(
                 _neuronFactory,
                 activationFunction,
                 dimension,

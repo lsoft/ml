@@ -10,7 +10,6 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
     public class MemLayerContainer : IMemLayerContainer
     {
         private readonly CLProvider _clProvider;
-        private readonly int _previousLayerTotalNeuronCount;
         private readonly int _currentLayerTotalNeuronCount;
 
         public MemFloat WeightMem
@@ -39,7 +38,9 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
         public MemLayerContainer(
             CLProvider clProvider,
-            int currentLayerTotalNeuronCount
+            int totalNeuronCount,
+            int weightCount,
+            int biasCount
             )
         {
             if (clProvider == null)
@@ -48,75 +49,44 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             }
 
             _clProvider = clProvider;
-            _previousLayerTotalNeuronCount = 0;
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
+            _currentLayerTotalNeuronCount = totalNeuronCount;
 
             //нейроны
             var netMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount,
+                totalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             netMem.Write(BlockModeEnum.Blocking);
 
             NetMem = netMem;
 
             var stateMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount,
-                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-            stateMem.Write(BlockModeEnum.Blocking);
-
-            StateMem = stateMem;
-        }
-
-        public MemLayerContainer(
-            CLProvider clProvider,
-            int previousLayerTotalNeuronCount,
-            int currentLayerTotalNeuronCount
-            )
-        {
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
-            }
-            if (previousLayerTotalNeuronCount == 0)
-            {
-                throw new ArgumentException("previousLayerTotalNeuronCount == 0");
-            }
-
-            _clProvider = clProvider;
-            _previousLayerTotalNeuronCount = previousLayerTotalNeuronCount;
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
-
-            //нейроны
-            var netMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount,
-                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-            netMem.Write(BlockModeEnum.Blocking);
-
-            NetMem = netMem;
-
-            var stateMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount,
+                totalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             stateMem.Write(BlockModeEnum.Blocking);
 
             StateMem = stateMem;
 
-            //веса
-            var weightMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount*previousLayerTotalNeuronCount,
-                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-            weightMem.Write(BlockModeEnum.Blocking);
+            if (weightCount > 0)
+            {
+                //веса
+                var weightMem = clProvider.CreateFloatMem(
+                    weightCount,
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+                weightMem.Write(BlockModeEnum.Blocking);
 
-            WeightMem = weightMem;
+                WeightMem = weightMem;
+            }
 
-            //биасы
-            var biasMem = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount,
-                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-            biasMem.Write(BlockModeEnum.Blocking);
+            if (biasCount > 0)
+            {
+                //биасы
+                var biasMem = clProvider.CreateFloatMem(
+                    biasCount,
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+                biasMem.Write(BlockModeEnum.Blocking);
 
-            BiasMem = biasMem;
+                BiasMem = biasMem;
+            }
         }
 
         public void ClearAndPushNetAndState()
@@ -175,23 +145,15 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
                 throw new ArgumentNullException("layer");
             }
 
-            var weightShift = 0;
+            float[] weightMem;
+            float[] biasMem;
+            layer.GetClonedWeights(
+                out weightMem,
+                out biasMem
+                );
 
-            for (var neuronIndex = 0; neuronIndex < layer.TotalNeuronCount; neuronIndex++)
-            {
-                var neuron = layer.Neurons[neuronIndex];
-
-                Array.Copy(
-                    neuron.Weights,
-                    0,
-                    WeightMem.Array,
-                    weightShift,
-                    neuron.Weights.Length);
-
-                weightShift += neuron.Weights.Length;
-
-                this.BiasMem.Array[neuronIndex] = neuron.Bias;
-            }
+            weightMem.CopyTo(this.WeightMem.Array, 0);
+            biasMem.CopyTo(this.BiasMem.Array, 0);
 
             WeightMem.Write(BlockModeEnum.NonBlocking);
             BiasMem.Write(BlockModeEnum.NonBlocking);
@@ -208,20 +170,10 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
         public void WritebackWeightsToMLP(ILayer layer)
         {
-            var weightLayer = this.WeightMem;
-
-            var weightShiftIndex = 0;
-            for (var neuronIndex = 0; neuronIndex < layer.TotalNeuronCount; ++neuronIndex)
-            {
-                var neuron = layer.Neurons[neuronIndex];
-
-                var weightCount = neuron.Weights.Length;
-
-                Array.Copy(weightLayer.Array, weightShiftIndex, neuron.Weights, 0, weightCount);
-                weightShiftIndex += weightCount;
-
-                neuron.Bias = this.BiasMem.Array[neuronIndex];
-            }
+            layer.SetWeights(
+                this.WeightMem.Array,
+                this.BiasMem.Array
+                );
         }
 
         public void PopNetAndState()

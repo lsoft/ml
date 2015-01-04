@@ -31,7 +31,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
 
             using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(false), false))
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU.LayerPropagator lp;
@@ -79,7 +79,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
 
             using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(false), false))
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU.LayerPropagator lp;
@@ -131,7 +131,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
 
             using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(false), false))
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU.LayerPropagator lp;
@@ -180,7 +180,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
 
             using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(false), false))
             {
-                Layer l;
+                FullConnectedLayer l;
                 MemLayerContainer plc;
                 MemLayerContainer clc;
                 MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU.LayerPropagator lp;
@@ -223,7 +223,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
             INeuronFactory nf, 
             int previousLayerNeuronCount, 
             int currentLayerNeuronCount,
-            out Layer l, 
+            out FullConnectedLayer l, 
             out MemLayerContainer plc,
             out MemLayerContainer clc, 
             out MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU.LayerPropagator lp)
@@ -239,7 +239,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
 
             var function = new LinearFunction(1f);
 
-            l = new Layer(
+            l = new FullConnectedLayer(
                 nf,
                 function,
                 new Dimension(1, currentLayerNeuronCount),
@@ -248,12 +248,15 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
 
             plc = new MemLayerContainer(
                 clProvider,
-                previousLayerNeuronCount
+                previousLayerNeuronCount,
+                0,
+                0
                 );
 
             clc = new MemLayerContainer(
                 clProvider,
-                previousLayerNeuronCount,
+                currentLayerNeuronCount,
+                currentLayerNeuronCount * previousLayerNeuronCount,
                 currentLayerNeuronCount
                 );
 

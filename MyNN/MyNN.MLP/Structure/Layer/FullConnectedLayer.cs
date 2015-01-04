@@ -8,14 +8,23 @@ using MyNN.MLP.Structure.Neuron.Function;
 namespace MyNN.MLP.Structure.Layer
 {
     [Serializable]
-    public class Layer : ILayer
+    public class FullConnectedLayer : ILayer
     {
+        public LayerTypeEnum Type
+        {
+            get;
+            private set;
+        }
+
         public IDimension SpatialDimension
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Всего нейронов в слое
+        /// </summary>
         public int TotalNeuronCount
         {
             get
@@ -40,7 +49,7 @@ namespace MyNN.MLP.Structure.Layer
         /// <summary>
         /// Конструктор входного слоя
         /// </summary>
-        public Layer(
+        public FullConnectedLayer(
             INeuronFactory neuronFactory,
             IDimension spatialDimension
             )
@@ -54,7 +63,8 @@ namespace MyNN.MLP.Structure.Layer
                 throw new ArgumentNullException("spatialDimension");
             }
 
-            SpatialDimension = spatialDimension;
+            this.Type = LayerTypeEnum.Input;
+            this.SpatialDimension = spatialDimension;
 
             this.Neurons = new INeuron[TotalNeuronCount];
 
@@ -67,7 +77,7 @@ namespace MyNN.MLP.Structure.Layer
         /// <summary>
         /// Конструктор скрытых и выходного слоя
         /// </summary>
-        public Layer(
+        public FullConnectedLayer(
             INeuronFactory neuronFactory,
             IFunction activationFunction,
             IDimension spatialDimension,
@@ -87,8 +97,9 @@ namespace MyNN.MLP.Structure.Layer
                 throw new ArgumentNullException("spatialDimension");
             }
 
-            LayerActivationFunction = activationFunction;
-            SpatialDimension = spatialDimension;
+            this.Type = LayerTypeEnum.FullConnected;
+            this.LayerActivationFunction = activationFunction;
+            this.SpatialDimension = spatialDimension;
 
             this.Neurons = new INeuron[this.TotalNeuronCount];
 
@@ -102,7 +113,7 @@ namespace MyNN.MLP.Structure.Layer
         {
             return
                 string.Format(
-                    "{0}{1}",
+                    "({0} {1})",
                     this.SpatialDimension.GetDimensionInformation(),
                     this.LayerActivationFunction != null
                         ? this.LayerActivationFunction.ShortName
@@ -114,8 +125,73 @@ namespace MyNN.MLP.Structure.Layer
             return 
                 new LayerConfiguration(
                     this.SpatialDimension,
+                    this.Neurons.Sum(j => j.Weights.Length),
+                    this.TotalNeuronCount,
                     this.Neurons.ConvertAll(j => j.GetConfiguration())
                     );
+        }
+
+        /// <summary>
+        /// Получить массив клонированных весов всех нейронов сети
+        /// </summary>
+        public void GetClonedWeights(
+            out float[] weights,
+            out float[] biases
+            )
+        {
+            weights = new float[this.Neurons.Sum(j => j.Weights.Length)];
+            biases = new float[this.TotalNeuronCount];
+
+            var weightShift = 0;
+
+            for (var neuronIndex = 0; neuronIndex < this.TotalNeuronCount; neuronIndex++)
+            {
+                var neuron = this.Neurons[neuronIndex];
+
+                Array.Copy(
+                    neuron.Weights,
+                    0,
+                    weights,
+                    weightShift,
+                    neuron.Weights.Length);
+
+                weightShift += neuron.Weights.Length;
+
+                biases[neuronIndex] = neuron.Bias;
+            }
+
+
+        }
+
+        /// <summary>
+        /// Записать веса в слой
+        /// </summary>
+        public void SetWeights(
+            float[] weights,
+            float[] biases
+            )
+        {
+            if (weights == null)
+            {
+                throw new ArgumentNullException("weights");
+            }
+            if (biases == null)
+            {
+                throw new ArgumentNullException("biases");
+            }
+
+            var weightShiftIndex = 0;
+            for (var neuronIndex = 0; neuronIndex < this.TotalNeuronCount; ++neuronIndex)
+            {
+                var neuron = this.Neurons[neuronIndex];
+
+                var weightCount = neuron.Weights.Length;
+
+                Array.Copy(weights, weightShiftIndex, neuron.Weights, 0, weightCount);
+                weightShiftIndex += weightCount;
+
+                neuron.Bias = biases[neuronIndex];
+            }
         }
     }
 }

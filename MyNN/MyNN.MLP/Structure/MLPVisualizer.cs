@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Neuron;
 
 namespace MyNN.MLP.Structure
@@ -84,11 +86,27 @@ namespace MyNN.MLP.Structure
                     }
 
                     // ------------------------- DRAW WEIGHTS -------------------------
+
                     using (var weightFont = new Font("Times New Roman", 12, FontStyle.Regular))
                     {
                         for (var layerIndex = 0; layerIndex < _mlp.Layers.Length; layerIndex++)
                         {
                             var l = _mlp.Layers[layerIndex];
+
+                            var allowedLayerTypes = new List<LayerTypeEnum>
+                            {
+                                LayerTypeEnum.Input,
+                                LayerTypeEnum.FullConnected
+                            };
+
+                            if (!allowedLayerTypes.Contains(l.Type))
+                            {
+                                throw new NotSupportedException(
+                                    string.Format(
+                                        "Данный визуалайзер поддержиает только слои типа: {0}",
+                                        string.Join(",", allowedLayerTypes)
+                                    ));
+                            }
 
                             for (int neuronIndex = 0, neuronCount = l.TotalNeuronCount; neuronIndex < neuronCount; neuronIndex++)
                             {

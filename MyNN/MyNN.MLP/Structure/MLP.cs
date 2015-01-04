@@ -125,7 +125,7 @@ namespace MyNN.MLP.Structure
             var newl = new ILayer[this._layers.Length + 1];
             this._layers.CopyTo(newl, 0);
 
-            var bornLayer = _layerFactory.CreateLayer(
+            var bornLayer = _layerFactory.CreateFullConnectedLayer(
                 activationFunction,
                 new Dimension(1, totalNeuronCount),
                 lastl.TotalNeuronCount
