@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using MyNN.Common.Other;
 
 namespace MyNN.MLP.Structure.Layer
 {
+    [Serializable]
     public class Dimension : IDimension
     {
         public int DimensionCount

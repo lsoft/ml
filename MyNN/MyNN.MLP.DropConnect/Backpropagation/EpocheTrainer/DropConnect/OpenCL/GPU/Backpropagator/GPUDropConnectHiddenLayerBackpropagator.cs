@@ -36,7 +36,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly MemFloat _currentDeDz;
 
         private readonly Kernel _updateWeightKernel;
-        private readonly IOpenCLDeDyCalculator _aggregator;
+        private readonly IOpenCLDeDyCalculator _dedyCalculator;
 
         public MemFloat DeDz
         {
@@ -132,7 +132,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                 kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
                 "HiddenLayerTrain");
 
-            _aggregator = new OpenCLDeDyCalculator(
+            _dedyCalculator = new OpenCLDeDyCalculator(
                 clProvider,
                 currentLayer.TotalNeuronCount,
                 nextLayer.TotalNeuronCount,
@@ -146,7 +146,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
             _nablaBias.Write(BlockModeEnum.NonBlocking);
 
-            _aggregator.ClearAndWrite();
+            _dedyCalculator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -155,7 +155,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             bool firstItemInBatch
             )
         {
-            _aggregator.Aggregate();
+            _dedyCalculator.Aggregate();
 
             {
                 const uint hiddenLocalSize = 256;
@@ -187,7 +187,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                         .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
 
-                        .SetKernelArgMem(13, _aggregator.DeDy)
+                        .SetKernelArgMem(13, _dedyCalculator.DeDy)
 
                         .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
                         .SetKernelArgMem(15, _nablaBias)
@@ -227,7 +227,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                         .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
 
-                        .SetKernelArgMem(13, _aggregator.DeDy)
+                        .SetKernelArgMem(13, _dedyCalculator.DeDy)
 
                         .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
                         .SetKernelArgMem(15, _nablaBias)

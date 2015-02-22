@@ -47,7 +47,7 @@ namespace MyNN.Tests.MLP2.DeDy
 
                 int maxDiffIndex;
                 float maxDiff;
-                if (!ArrayOperations.ValuesAreEqual(csharp, cl, 1e-6f, out maxDiff, out maxDiffIndex))
+                if (!ArrayOperations.ValuesAreEqual(csharp, cl, 1e-9f, out maxDiff, out maxDiffIndex))
                 {
                     Console.WriteLine(
                         "Diff {0} at index {1}",

@@ -32,7 +32,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
         private readonly MemFloat _currentDeDz;
         
         private readonly Kernel _updateWeightKernel;
-        private readonly IOpenCLDeDyCalculator _aggregator;
+        private readonly IOpenCLDeDyCalculator _dedyCalculator;
 
         public MemFloat DeDz
         {
@@ -121,7 +121,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                 kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
                 "HiddenLayerTrain");
 
-            _aggregator = new OpenCLDeDyCalculator(
+            _dedyCalculator = new OpenCLDeDyCalculator(
                 clProvider,
                 currentLayer.TotalNeuronCount,
                 nextLayer.TotalNeuronCount,
@@ -136,7 +136,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
             _nablaBias.Write(BlockModeEnum.NonBlocking);
 
-            _aggregator.ClearAndWrite();
+            _dedyCalculator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -145,7 +145,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
             bool firstItemInBatch
             )
         {
-            _aggregator.Aggregate();
+            _dedyCalculator.Aggregate();
 
             const uint HiddenLocalGroupSize = 64;
             uint HiddenGlobalGroupSize =
@@ -166,7 +166,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                     .SetKernelArg(8, 4, _config.RegularizationFactor)
                     .SetKernelArg(9, 4, (float) (dataCount))
                     .SetKernelArgLocalMem(10, sizeof (float)*HiddenLocalGroupSize)
-                    .SetKernelArgMem(11, _aggregator.DeDy)
+                    .SetKernelArgMem(11, _dedyCalculator.DeDy)
                     .SetKernelArgMem(12, _currentLayerContainer.BiasMem)
                     .SetKernelArgMem(13, _nablaBias)
                     .EnqueueNDRangeKernel(
@@ -194,7 +194,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                     .SetKernelArg(8, 4, _config.RegularizationFactor)
                     .SetKernelArg(9, 4, (float) (dataCount))
                     .SetKernelArgLocalMem(10, sizeof (float)*HiddenLocalGroupSize)
-                    .SetKernelArgMem(11, _aggregator.DeDy)
+                    .SetKernelArgMem(11, _dedyCalculator.DeDy)
                     .SetKernelArgMem(12, _currentLayerContainer.BiasMem)
                     .SetKernelArgMem(13, _nablaBias)
                     .EnqueueNDRangeKernel(

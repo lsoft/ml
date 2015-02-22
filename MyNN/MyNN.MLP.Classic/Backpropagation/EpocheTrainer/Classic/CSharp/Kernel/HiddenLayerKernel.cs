@@ -5,49 +5,48 @@ using System.Text;
 using System.Threading.Tasks;
 using MyNN.Common.Other;
 using MyNN.MLP.LearningConfig;
+using MyNN.MLP.NextLayerAggregator;
 using MyNN.MLP.Structure.Layer;
 
 namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 {
     internal class HiddenLayerKernel
     {
-        private readonly ILayer _layer;
+        private readonly ILayer _currentLayer;
         private readonly ILearningAlgorithmConfig _config;
 
         public HiddenLayerKernel(
-            ILayer layer,
+            ILayer currentLayer,
             ILearningAlgorithmConfig config
             )
         {
-            if (layer == null)
+            if (currentLayer == null)
             {
-                throw new ArgumentNullException("layer");
+                throw new ArgumentNullException("currentLayer");
             }
             if (config == null)
             {
                 throw new ArgumentNullException("config");
             }
 
-            _layer = layer;
+            _currentLayer = currentLayer;
             _config = config;
         }
 
         public void CalculateOverwrite(
-             float[] currentLayerNET,
+            float[] currentLayerNET,
 
-             float[] previousLayerLastState,
-             float[] currentLayerLastState,
-             float[] currentLayerDeDz,
-             float[] nextLayerDeDz,
+            float[] previousLayerLastState,
+            float[] currentLayerDeDz,
 
-             float[] currentLayerWeights,
-             float[] nextLayerWeights,
+            float[] currentLayerWeights,
             
-             float[] nabla,
+            float[] nabla,
+
+            float[] dedyMem,
 
             int previousLayerNeuronCount,
             int currentLayerNeuronCount,
-            int nextLayerNeuronCount,
 
             float learningRate,
             float regularizationFactor,
@@ -60,24 +59,25 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
             Parallel.For(0, currentLayerNeuronCount, neuronIndex =>
             //for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount; neuronIndex++)
             {
-                //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (with Kahan Algorithm)
-                var accDeDz = new KahanAlgorithm.Accumulator();
-                for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
-                {
-                    int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount, nextNeuronIndex) + neuronIndex; //не векторизуется:(
+            //    //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (with Kahan Algorithm)
+            //    var accDeDy = new KahanAlgorithm.Accumulator();
+            //    for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
+            //    {
+            //        int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount, nextNeuronIndex) + neuronIndex; //не векторизуется:(
 
-                    float nextWeight = nextLayerWeights[nextWeightIndex];
-                    float nextNabla = nextLayerDeDz[nextNeuronIndex];
-                    float multiplied = nextWeight * nextNabla;
+            //        float w = nextLayerWeights[nextWeightIndex];
+            //        float dedz = nextLayerDeDz[nextNeuronIndex];
+            //        float dedy = w * dedz;
 
-                    KahanAlgorithm.AddElement(ref accDeDz, multiplied);
-                }
+            //        KahanAlgorithm.AddElement(ref accDeDy, dedy);
+            //    }
 
-                float currentDeDz = accDeDz.Sum;
+            //    float currentDeDz = accDeDy.Sum;
 
+                float dedy = dedyMem[neuronIndex];
 
                 float nOut = currentLayerNET[neuronIndex];
-                currentDeDz *= _layer.LayerActivationFunction.ComputeFirstDerivative(nOut);
+                var currentDeDz = dedy * _currentLayer.LayerActivationFunction.ComputeFirstDerivative(nOut);
                 currentLayerDeDz[neuronIndex] = currentDeDz;
 
                 int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
@@ -108,21 +108,19 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
         }
 
         public void CalculateIncrement(
-             float[] currentLayerNET,
+            float[] currentLayerNET,
 
-             float[] previousLayerLastState,
-             float[] currentLayerLastState,
-             float[] currentLayerDeDz,
-             float[] nextLayerDeDz,
+            float[] previousLayerLastState,
+            float[] currentLayerDeDz,
 
-             float[] currentLayerWeights,
-             float[] nextLayerWeights,
+            float[] currentLayerWeights,
 
-             float[] nabla,
+            float[] nabla,
+
+            float[] dedyMem,
 
             int previousLayerNeuronCount,
             int currentLayerNeuronCount,
-            int nextLayerNeuronCount,
 
             float learningRate,
             float regularizationFactor,
@@ -135,28 +133,29 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
             Parallel.For(0, currentLayerNeuronCount, neuronIndex =>
             //for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount; neuronIndex++)
             {
-                int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
+                ////просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (with Kahan Algorithm)
+                //var accDeDy = new KahanAlgorithm.Accumulator();
+                //for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
+                //{
+                //    int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount, nextNeuronIndex) + neuronIndex; //не векторизуется:(
 
+                //    float w = nextLayerWeights[nextWeightIndex];
+                //    float dedz = nextLayerDeDz[nextNeuronIndex];
+                //    float dedy = w * dedz;
 
-                //просчет состояния нейронов текущего слоя, по состоянию нейронов последующего (with Kahan Algorithm)
-                var accDeDz = new KahanAlgorithm.Accumulator();
-                for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
-                {
-                    int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount, nextNeuronIndex) + neuronIndex; //не векторизуется:(
+                //    KahanAlgorithm.AddElement(ref accDeDy, dedy);
+                //}
 
-                    float nextWeight = nextLayerWeights[nextWeightIndex];
-                    float nextNabla = nextLayerDeDz[nextNeuronIndex];
-                    float multiplied = nextWeight * nextNabla;
+                //float currentDeDz = accDeDy.Sum;
 
-                    KahanAlgorithm.AddElement(ref accDeDz, multiplied);
-                }
-
-                float currentDeDz = accDeDz.Sum;
+                float dedy = dedyMem[neuronIndex];
 
 
                 float nOut = currentLayerNET[neuronIndex];
-                currentDeDz *= _layer.LayerActivationFunction.ComputeFirstDerivative(nOut);
+                var currentDeDz = dedy * _currentLayer.LayerActivationFunction.ComputeFirstDerivative(nOut);
                 currentLayerDeDz[neuronIndex] = currentDeDz;
+
+                int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
                 for (
                     int currentWeightIndex = 0;

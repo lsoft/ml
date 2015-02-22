@@ -4,6 +4,7 @@ using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
 using MyNN.MLP.LearningConfig;
+using MyNN.MLP.NextLayerAggregator;
 using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Layer;
 
@@ -27,7 +28,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
         private readonly float[] _currentDeDz;
         private readonly HiddenLayerKernel _hiddenLayerKernel;
         private readonly UpdateWeightKernel _updateWeightKernel;
-
+        private readonly CSharpDeDyCalculator _dedyCalculator;
 
         public float[] DeDz
         {
@@ -99,11 +100,19 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                 );
 
             _updateWeightKernel = new UpdateWeightKernel();
+
+            _dedyCalculator = new CSharpDeDyCalculator(
+                currentLayer.TotalNeuronCount,
+                nextLayer.TotalNeuronCount,
+                nextLayerDeDz,
+                nextLayerContainer.WeightMem
+                );
+
         }
 
         public void Prepare()
         {
-            //nothing to do
+            _dedyCalculator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -112,20 +121,19 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             bool firstItemInBatch
             )
         {
+            _dedyCalculator.Aggregate();
+
             if (firstItemInBatch)
             {
                 _hiddenLayerKernel.CalculateOverwrite(
                     _currentLayerContainer.NetMem,
                     _previousLayerContainer.StateMem,
-                    _currentLayerContainer.StateMem,
                     _currentDeDz,
-                    _nextLayerDeDz,
                     _currentLayerContainer.WeightMem,
-                    _nextLayerContainer.WeightMem,
                     _nablaWeights,
+                    _dedyCalculator.DeDy,
                     _previousLayer.TotalNeuronCount,
                     _currentLayer.TotalNeuronCount,
-                    _nextLayer.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
                     (float)(dataCount),
@@ -138,15 +146,12 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                 _hiddenLayerKernel.CalculateIncrement(
                     _currentLayerContainer.NetMem,
                     _previousLayerContainer.StateMem,
-                    _currentLayerContainer.StateMem,
                     _currentDeDz,
-                    _nextLayerDeDz,
                     _currentLayerContainer.WeightMem,
-                    _nextLayerContainer.WeightMem,
                     _nablaWeights,
+                    _dedyCalculator.DeDy,
                     _previousLayer.TotalNeuronCount,
                     _currentLayer.TotalNeuronCount,
-                    _nextLayer.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
                     (float) (dataCount),
