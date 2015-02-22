@@ -4,6 +4,31 @@ namespace MyNN.Common.Other
 {
     public static class ArrayOperations
     {
+        public static T[] CloneAndAppend<T>(this T[] a, T b)
+        {
+            var r = new T[a.Length + 1];
+            a.CopyTo(r, 0);
+            r[a.Length] = b;
+
+            return r;
+        }
+
+        public static void Clear<T>(this T[] a, int startIndex, int length)
+        {
+            for (var cc = startIndex; cc < startIndex + length; cc++)
+            {
+                a[cc] = default (T);
+            }
+        }
+
+        public static void Clear<T>(this T[] a)
+        {
+            for (var cc = 0; cc < a.Length; cc++)
+            {
+                a[cc] = default(T);
+            }
+        }
+
         public static T[] CloneArray<T>(this T[] a)
         {
             if (a == null)
@@ -19,14 +44,6 @@ namespace MyNN.Common.Other
             }
 
             return result;
-        }
-
-        public static void Clear<T>(this T[] a)
-        {
-            for (var cc = 0; cc < a.Length; cc++)
-            {
-                a[cc] = default(T);
-            }
         }
 
         public static void Fill<T>(this T[] a, T value)

@@ -145,18 +145,27 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
                 throw new ArgumentNullException("layer");
             }
 
-            float[] weightMem;
-            float[] biasMem;
-            layer.GetClonedWeights(
-                out weightMem,
-                out biasMem
-                );
+            if (this.WeightMem != null || this.BiasMem != null)
+            {
+                float[] weightMem;
+                float[] biasMem;
+                layer.GetClonedWeights(
+                    out weightMem,
+                    out biasMem
+                    );
 
-            weightMem.CopyTo(this.WeightMem.Array, 0);
-            biasMem.CopyTo(this.BiasMem.Array, 0);
+                if (this.WeightMem != null)
+                {
+                    weightMem.CopyTo(this.WeightMem.Array, 0);
+                    WeightMem.Write(BlockModeEnum.NonBlocking);
+                }
 
-            WeightMem.Write(BlockModeEnum.NonBlocking);
-            BiasMem.Write(BlockModeEnum.NonBlocking);
+                if (this.BiasMem != null)
+                {
+                    biasMem.CopyTo(this.BiasMem.Array, 0);
+                    BiasMem.Write(BlockModeEnum.NonBlocking);
+                }
+            }
         }
 
         public void PopWeights()
@@ -170,10 +179,13 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
         public void WritebackWeightsToMLP(ILayer layer)
         {
-            layer.SetWeights(
-                this.WeightMem.Array,
-                this.BiasMem.Array
-                );
+            if (this.WeightMem != null && this.BiasMem != null)
+            {
+                layer.SetWeights(
+                    this.WeightMem.Array,
+                    this.BiasMem.Array
+                    );
+            }
         }
 
         public void PopNetAndState()

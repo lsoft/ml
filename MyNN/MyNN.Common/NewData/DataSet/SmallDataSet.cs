@@ -124,6 +124,8 @@ namespace MyNN.Common.NewData.DataSet
                     throw new ArgumentNullException("dataList");
                 }
                 _dataList = dataList;
+                
+                this.Reset();
             }
 
 
@@ -142,7 +144,7 @@ namespace MyNN.Common.NewData.DataSet
 
             public void Reset()
             {
-                _currentIndex = 0;
+                _currentIndex = -1;
             }
 
             public void Dispose()

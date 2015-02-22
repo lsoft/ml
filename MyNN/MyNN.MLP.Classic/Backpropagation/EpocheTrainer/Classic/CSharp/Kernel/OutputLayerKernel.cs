@@ -57,7 +57,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
             float[] nablaBias
             )
         {
-            for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount ; neuronIndex++)
+            Parallel.For(0, currentLayerNeuronCount, neuronIndex =>
+            //for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount ; neuronIndex++)
             {
                 float nOut = currentLayerNET[neuronIndex];
                 float deri = _layer.LayerActivationFunction.ComputeFirstDerivative(nOut);
@@ -94,6 +95,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
                 nablaBias[neuronIndex] = deltaBias;
             }
+            ); //Parallel.For
         }
 
         public void CalculateIncrement(
@@ -120,7 +122,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
             float[] nablaBias
             )
         {
-            for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount; neuronIndex++)
+            Parallel.For(0, currentLayerNeuronCount, neuronIndex =>
+            //for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount ; neuronIndex++)
             {
                 float nOut = currentLayerNET[neuronIndex];
                 float deri = _layer.LayerActivationFunction.ComputeFirstDerivative(nOut);
@@ -157,6 +160,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
                 nablaBias[neuronIndex] += deltaBias;
             }
+            ); //Parallel.For
         }
 
         private static int ComputeWeightIndex(

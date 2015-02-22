@@ -7,8 +7,13 @@ using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.MLP.Structure.Layer
 {
+    public interface IFullConnectedLayer : ILayer
+    {
+        
+    }
+
     [Serializable]
-    public class FullConnectedLayer : ILayer
+    public class FullConnectedLayer : IFullConnectedLayer
     {
         public LayerTypeEnum Type
         {
@@ -30,7 +35,7 @@ namespace MyNN.MLP.Structure.Layer
             get
             {
                 return
-                    this.SpatialDimension.TotalNeuronCount;
+                    this.SpatialDimension.Multiplied;
             }
         }
 
@@ -113,7 +118,7 @@ namespace MyNN.MLP.Structure.Layer
         {
             return
                 string.Format(
-                    "({0} {1})",
+                    "FC({0} {1})",
                     this.SpatialDimension.GetDimensionInformation(),
                     this.LayerActivationFunction != null
                         ? this.LayerActivationFunction.ShortName

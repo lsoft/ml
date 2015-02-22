@@ -12,63 +12,60 @@ using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP.NextLayerAggregator
 {
-    public class CLNextLayerAggregator : INextLayerAggregator
+    public class OpenCLDeDyCalculator : IOpenCLDeDyCalculator
     {
         private const int PreprocessGroupSize = 16;
 
-        private readonly ILayerConfiguration _currentLayer;
-        private readonly ILayerConfiguration _nextLayer;
+        private readonly int _currentLayerTotalNeuronCount;
+        private readonly int _nextLayerTotalNeuronCount;
         private readonly MemFloat _nextLayerDeDz;
-        private readonly IMemLayerContainer _nextLayerContainer;
+        private readonly MemFloat _nextLayerWeights;
 
         private readonly int _aggregationFactor;
         private readonly Kernel _preprocessKernel0;
         private readonly Kernel _preprocessKernel1;
 
-        public MemFloat PreprocessCache
+        public MemFloat DeDy
         {
             get;
             private set;
         }
 
-        public CLNextLayerAggregator(
+        public OpenCLDeDyCalculator(
             CLProvider clProvider,
-            ILayerConfiguration currentLayer,
-            ILayerConfiguration nextLayer,
+            int currentLayerTotalNeuronCount,
+            int nextLayerTotalNeuronCount,
             MemFloat nextLayerDeDz,
-            IMemLayerContainer nextLayerContainer
+            MemFloat nextLayerWeights
             )
         {
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
             }
-            if (currentLayer == null)
-            {
-                throw new ArgumentNullException("currentLayer");
-            }
-            if (nextLayer == null)
-            {
-                throw new ArgumentNullException("nextLayer");
-            }
             if (nextLayerDeDz == null)
             {
                 throw new ArgumentNullException("nextLayerDeDz");
             }
-            if (nextLayerContainer == null)
+            if (nextLayerWeights == null)
             {
-                throw new ArgumentNullException("nextLayerContainer");
+                throw new ArgumentNullException("nextLayerWeights");
             }
 
-            _currentLayer = currentLayer;
-            _nextLayer = nextLayer;
+            if(clProvider.ChoosedDeviceType == DeviceType.Cpu)
+            {
+                throw new NotSupportedException("Intel CPU is not supported due to bugs in INTEL CPU OPENCL implementation: this aggregation does not work correctly SOMETIMES(!) on Intel CPU, but works fine at ALL THE TIME on INTEL GPU or NVIDIA/AMD GPU. There is some sort of synchronization bug in INTEL CPU OPENCL.");
+            }
+
+            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
+            _nextLayerTotalNeuronCount = nextLayerTotalNeuronCount;
             _nextLayerDeDz = nextLayerDeDz;
-            _nextLayerContainer = nextLayerContainer;
+            _nextLayerWeights = nextLayerWeights;
 
-            _aggregationFactor = Helper.UpTo(nextLayer.TotalNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
+            _aggregationFactor = Helper.UpTo(nextLayerTotalNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
 
-            this.PreprocessCache = clProvider.CreateFloatMem(
-                currentLayer.TotalNeuronCount * _aggregationFactor,
+            this.DeDy = clProvider.CreateFloatMem(
+                currentLayerTotalNeuronCount * _aggregationFactor,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite
                 );
 
@@ -90,15 +87,15 @@ namespace MyNN.MLP.NextLayerAggregator
         {
             _preprocessKernel0
                 .SetKernelArgMem(0, this._nextLayerDeDz)
-                .SetKernelArgMem(1, _nextLayerContainer.WeightMem)
-                .SetKernelArgMem(2, this.PreprocessCache)
-                .SetKernelArg(3, sizeof(int), _currentLayer.TotalNeuronCount)
-                .SetKernelArg(4, sizeof(int), _nextLayer.TotalNeuronCount)
+                .SetKernelArgMem(1, _nextLayerWeights)
+                .SetKernelArgMem(2, this.DeDy)
+                .SetKernelArg(3, sizeof(int), _currentLayerTotalNeuronCount)
+                .SetKernelArg(4, sizeof(int), _nextLayerTotalNeuronCount)
                 .EnqueueNDRangeKernel(
                     new[]
                     {
-                        Helper.UpTo(_currentLayer.TotalNeuronCount, PreprocessGroupSize),
-                        Helper.UpTo(_nextLayer.TotalNeuronCount, PreprocessGroupSize)
+                        Helper.UpTo(_currentLayerTotalNeuronCount, PreprocessGroupSize),
+                        Helper.UpTo(_nextLayerTotalNeuronCount, PreprocessGroupSize)
                     },
                     new[]
                     {
@@ -126,12 +123,12 @@ namespace MyNN.MLP.NextLayerAggregator
                     currentLocalGroupSize = PreprocessGroupSize;
                 }
 
-                var globalx = Helper.UpTo(_currentLayer.TotalNeuronCount, currentLocalGroupSize);
+                var globalx = Helper.UpTo(_currentLayerTotalNeuronCount, currentLocalGroupSize);
                 var globaly = Helper.UpTo(aggregationFactor, currentLocalGroupSize);
 
                 _preprocessKernel1
-                    .SetKernelArgMem(0, this.PreprocessCache)
-                    .SetKernelArg(1, sizeof(int), _currentLayer.TotalNeuronCount)
+                    .SetKernelArgMem(0, this.DeDy)
+                    .SetKernelArg(1, sizeof(int), _currentLayerTotalNeuronCount)
                     .SetKernelArg(2, sizeof(int), aggregationFactor)
                     .SetKernelArg(3, sizeof(int), currentLocalGroupSize)
                     .SetKernelArg(4, sizeof(int), currentLocalGroupSize)
@@ -155,8 +152,8 @@ namespace MyNN.MLP.NextLayerAggregator
 
         public void ClearAndWrite()
         {
-            this.PreprocessCache.Array.Clear();
-            this.PreprocessCache.Write(BlockModeEnum.NonBlocking);
+            this.DeDy.Array.Clear();
+            this.DeDy.Write(BlockModeEnum.NonBlocking);
         }
 
 

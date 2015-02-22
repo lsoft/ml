@@ -79,15 +79,25 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
                 throw new ArgumentNullException("layer");
             }
 
-            float[] weightMem;
-            float[] biasMem;
-            layer.GetClonedWeights(
-                out weightMem,
-                out biasMem
-                );
+            if (this.WeightMem != null || this.BiasMem != null)
+            {
+                float[] weightMem;
+                float[] biasMem;
+                layer.GetClonedWeights(
+                    out weightMem,
+                    out biasMem
+                    );
 
-            weightMem.CopyTo(this.WeightMem, 0);
-            biasMem.CopyTo(this.BiasMem, 0);
+                if (this.WeightMem != null)
+                {
+                    weightMem.CopyTo(this.WeightMem, 0);
+                }
+
+                if (this.BiasMem != null)
+                {
+                    biasMem.CopyTo(this.BiasMem, 0);
+                }
+            }
         }
 
         public void PopNetAndState()
@@ -102,17 +112,21 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
 
         public void WritebackWeightsToMLP(ILayer layer)
         {
-            layer.SetWeights(
-                this.WeightMem,
-                this.BiasMem
-                );
+            if (this.WeightMem != null && this.BiasMem != null)
+            {
+                layer.SetWeights(
+                    this.WeightMem,
+                    this.BiasMem
+                    );
+            }
         }
 
         public ILayerState GetLayerState()
         {
             var ls = new LayerState(
                 this.StateMem,
-                _currentLayerTotalNeuronCount);
+                _currentLayerTotalNeuronCount
+                );
 
             return ls;
         }

@@ -22,7 +22,7 @@ namespace MyNN.MLP.Structure.Layer
             get
             {
                 return
-                    SpatialDimension.TotalNeuronCount;
+                    SpatialDimension.Multiplied;
             }
         }
 

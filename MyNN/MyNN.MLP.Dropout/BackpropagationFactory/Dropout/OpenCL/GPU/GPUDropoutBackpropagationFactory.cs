@@ -10,7 +10,6 @@ using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.BackpropagationFactory;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU;
-using MyNN.MLP.DRopout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Backpropagator;
 using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Backpropagator;
 using MyNN.MLP.Dropout.ForwardPropagation.OpenCL;
 using MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU;

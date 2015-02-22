@@ -79,6 +79,24 @@
     <Compile Include="Backpropagation\Validation\Drawer\IDrawer.cs" />
     <Compile Include="Backpropagation\Validation\IValidation.cs" />
     <Compile Include="Backpropagation\Validation\Validation.cs" />
+    <Compile Include="Convolution\Activator\FunctionActivator.cs" />
+    <Compile Include="Convolution\Activator\IFunctionActivator.cs" />
+    <Compile Include="Convolution\Calculator\CSharp\ICSharpConvolutionCalculator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Convolution\KernelBiasContainer\IReferencedKernelBiasContainer.cs" />
+    <Compile Include="Convolution\ReferencedSquareFloat\IReferencedSquareFloat.cs" />
+    <Compile Include="Convolution\Calculator\CSharp\NaiveConvolutionCalculator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Convolution\KernelBiasContainer\ReferencedKernelBiasContainer.cs" />
+    <Compile Include="Convolution\ReferencedSquareFloat\ReferencedSquareFloat.cs" />
+    <Compile Include="Convolution\ErrorCalculator\CSharp\IErrorCalculator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Convolution\ErrorCalculator\CSharp\NaiveErrorCalculator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DBNInfo\IDBNInformation.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -110,10 +128,11 @@
     <Compile Include="LearningConfig\LearningAlgorithmConfig.cs" />
     <Compile Include="MLPContainer\IMLPContainerHelper.cs" />
     <Compile Include="MLPContainer\MLPContainerHelper.cs" />
-    <Compile Include="NextLayerAggregator\CLNextLayerAggregator.cs">
+    <Compile Include="NextLayerAggregator\OpenCLDeDyCalculator.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="NextLayerAggregator\INextLayerAggregator.cs">
+    <Compile Include="NextLayerAggregator\CSharpDeDyCalculator.cs" />
+    <Compile Include="NextLayerAggregator\IDeDyCalculator.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SparseCalculator.cs" />
@@ -122,9 +141,13 @@
     <Compile Include="Structure\IMLP.cs" />
     <Compile Include="Structure\IMLPConfiguration.cs" />
     <Compile Include="Structure\IMLPState.cs" />
+    <Compile Include="Structure\Layer\AvgPoolingLayer.cs" />
+    <Compile Include="Structure\Layer\ConvolutionLayer.cs" />
     <Compile Include="Structure\Layer\Dimension.cs" />
     <Compile Include="Structure\Layer\Factory\ILayerFactory.cs" />
     <Compile Include="Structure\Layer\Factory\LayerFactory.cs" />
+    <Compile Include="Structure\Layer\IAvgPoolingLayer.cs" />
+    <Compile Include="Structure\Layer\IConvolutionLayer.cs" />
     <Compile Include="Structure\Layer\IDimension.cs" />
     <Compile Include="Structure\Layer\ILayer.cs" />
     <Compile Include="Structure\Layer\ILayerConfiguration.cs" />
@@ -133,10 +156,12 @@
     <Compile Include="Structure\Layer\LayerConfiguration.cs" />
     <Compile Include="Structure\Layer\LayerInfo.cs" />
     <Compile Include="Structure\Layer\LayerState.cs" />
+    <Compile Include="Structure\Layer\LayerTypeEnum.cs" />
     <Compile Include="Structure\MLP.cs" />
     <Compile Include="Structure\MLPConfiguration.cs" />
     <Compile Include="Structure\MLPState.cs" />
     <Compile Include="Structure\MLPVisualizer.cs" />
+    <Compile Include="Structure\Neuron\PseudoNeuron.cs" />
     <Compile Include="Structure\Neuron\Factory\INeuronFactory.cs" />
     <Compile Include="Structure\Neuron\Factory\NeuronFactory.cs" />
     <Compile Include="Structure\Neuron\Function\DRLUFunction.cs" />

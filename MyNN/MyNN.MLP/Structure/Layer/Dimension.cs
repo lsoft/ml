@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using MyNN.Common.Other;
 
 namespace MyNN.MLP.Structure.Layer
 {
@@ -16,7 +17,25 @@ namespace MyNN.MLP.Structure.Layer
             private set;
         }
 
-        public int TotalNeuronCount
+        public int Width
+        {
+            get
+            {
+                return
+                    Sizes[0];
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                return
+                    Sizes[1];
+            }
+        }
+
+        public int Multiplied
         {
             get
             {
@@ -41,10 +60,39 @@ namespace MyNN.MLP.Structure.Layer
         {
             return
                 string.Join(
-                    ":",
+                    "x",
                     this.Sizes);
         }
 
+        public bool IsEqual(
+            IDimension dim
+            )
+        {
+            if (dim == null)
+            {
+                return false;
+            }
 
+            if(this.DimensionCount  != dim.DimensionCount)
+            {
+                return false;
+            }
+
+            if (!ArrayOperations.ValuesAreEqual(this.Sizes, dim.Sizes))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public IDimension Rescale(float scaleFactor)
+        {
+            return 
+                new Dimension(
+                    this.DimensionCount,
+                    this.Sizes.ConvertAll(j => (int)(j * scaleFactor))
+                    );
+        }
     }
 }

@@ -32,7 +32,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
         private readonly MemFloat _currentDeDz;
         
         private readonly Kernel _updateWeightKernel;
-        private readonly INextLayerAggregator _aggregator;
+        private readonly IOpenCLDeDyCalculator _aggregator;
 
         public MemFloat DeDz
         {
@@ -121,12 +121,12 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                 kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
                 "HiddenLayerTrain");
 
-            _aggregator = new CLNextLayerAggregator(
+            _aggregator = new OpenCLDeDyCalculator(
                 clProvider,
-                currentLayer.GetConfiguration(),
-                nextLayer.GetConfiguration(),
+                currentLayer.TotalNeuronCount,
+                nextLayer.TotalNeuronCount,
                 nextLayerDeDz,
-                nextLayerContainer
+                nextLayerContainer.WeightMem
                 );
 
         }
@@ -166,7 +166,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                     .SetKernelArg(8, 4, _config.RegularizationFactor)
                     .SetKernelArg(9, 4, (float) (dataCount))
                     .SetKernelArgLocalMem(10, sizeof (float)*HiddenLocalGroupSize)
-                    .SetKernelArgMem(11, _aggregator.PreprocessCache)
+                    .SetKernelArgMem(11, _aggregator.DeDy)
                     .SetKernelArgMem(12, _currentLayerContainer.BiasMem)
                     .SetKernelArgMem(13, _nablaBias)
                     .EnqueueNDRangeKernel(
@@ -194,7 +194,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                     .SetKernelArg(8, 4, _config.RegularizationFactor)
                     .SetKernelArg(9, 4, (float) (dataCount))
                     .SetKernelArgLocalMem(10, sizeof (float)*HiddenLocalGroupSize)
-                    .SetKernelArgMem(11, _aggregator.PreprocessCache)
+                    .SetKernelArgMem(11, _aggregator.DeDy)
                     .SetKernelArgMem(12, _currentLayerContainer.BiasMem)
                     .SetKernelArgMem(13, _nablaBias)
                     .EnqueueNDRangeKernel(

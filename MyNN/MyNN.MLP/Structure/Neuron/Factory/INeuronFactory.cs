@@ -6,6 +6,9 @@ namespace MyNN.MLP.Structure.Neuron.Factory
     {
         INeuron CreateInputNeuron(int thisIndex);
 
+        INeuron CreatePseudoNeuron(
+            );
+
         INeuron CreateTrainableNeuron(
             int weightCount
             );

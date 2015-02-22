@@ -59,7 +59,7 @@ namespace OpenCL.Net.Wrapper.DeviceChooser
                 }
             }
 
-            throw new InvalidOperationException("There is no NVIDIA/ATI/AMD GPU device");
+            throw new InvalidOperationException("There is no INTEL GPU device");
         }
     }
 }

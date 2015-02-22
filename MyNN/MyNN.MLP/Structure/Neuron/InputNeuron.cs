@@ -21,14 +21,6 @@ namespace MyNN.MLP.Structure.Neuron
             set;
         }
 
-        public INeuronConfiguration GetConfiguration()
-        {
-            return 
-                new NeuronConfiguration(
-                    this.Weights.Length
-                    );
-        }
-
         public InputNeuron(
             int thisIndex)
         {
@@ -37,5 +29,14 @@ namespace MyNN.MLP.Structure.Neuron
             this.Bias = 0f;
             this.Weights = new float[0];
         }
+
+        public INeuronConfiguration GetConfiguration()
+        {
+            return
+                new NeuronConfiguration(
+                    this.Weights.Length
+                    );
+        }
+
     }
 }
