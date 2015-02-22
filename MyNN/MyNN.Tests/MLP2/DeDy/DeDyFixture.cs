@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
-using MyNN.MLP.NextLayerAggregator;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Neuron;
 using OpenCL.Net;
@@ -23,8 +23,8 @@ namespace MyNN.Tests.MLP2.DeDy
 
             for (var seed = 0; seed < 1000; seed+=rnd.Next(25))
             {
-                int previousLayerNeuronCount = 315 + rnd.Next(1500);
-                int aggregateLayerNeuronCount = 315 + rnd.Next(1500);
+                int previousLayerNeuronCount = 7 + rnd.Next(1500);
+                int aggregateLayerNeuronCount = 3 + rnd.Next(1500);
 
                 Console.WriteLine(
                     "seed = {0}, previousLayerNeuronCount = {1}, aggregateLayerNeuronCount = {2}",
@@ -68,20 +68,20 @@ namespace MyNN.Tests.MLP2.DeDy
         {
             var randomizer = new DefaultRandomizer(seed);
 
-            var dedz = new float[aggregateLayerNeuronCount];
             var weights = new float[previousLayerNeuronCount * aggregateLayerNeuronCount];
 
-            dedz.Fill((index) => randomizer.Next(5));
             weights.Fill((index) => randomizer.Next(5));
 
-            var csharp = new CSharpDeDyCalculator(
+            var csharp = new CSharpDeDyAggregator(
                 previousLayerNeuronCount,
                 aggregateLayerNeuronCount,
-                dedz,
                 weights
                 );
 
             csharp.ClearAndWrite();
+
+            csharp.DeDz.Fill((index) => randomizer.Next(5));
+
             csharp.Aggregate();
 
             var csharpResults = csharp.DeDy.CloneArray();
@@ -111,13 +111,13 @@ namespace MyNN.Tests.MLP2.DeDy
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite
                     );
 
-                dedz.Array.Fill((index) => randomizer.Next(5));
                 weights.Array.Fill((index) => randomizer.Next(5));
+                dedz.Array.Fill((index) => randomizer.Next(5));
 
                 dedz.Write(BlockModeEnum.Blocking);
                 weights.Write(BlockModeEnum.Blocking);
 
-                var cl = new OpenCLDeDyCalculator(
+                var cl = new OpenCLDeDyAggregator(
                     clProvider,
                     previousLayerNeuronCount,
                     aggregateLayerNeuronCount,

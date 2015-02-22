@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
 using MyNN.MLP.Structure;
@@ -16,7 +17,8 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
         public void CreateComponents(
             IMLP mlp,
             out ILayerContainer[] containers,
-            out ILayerPropagator[] propagators
+            out ILayerPropagator[] propagators,
+            out IDeDyAggregator[] dedyAggregators
             )
         {
             if (mlp == null)
@@ -26,9 +28,48 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 
             var c = this.CreateMemsByMLP(mlp);
             var p = this.CreatePropagatorsByMLP(mlp, c);
+            var a = this.CreateAggregators(mlp, c);
 
             containers = c;
             propagators = p;
+            dedyAggregators = a;
+        }
+
+        private ICSharpDeDyAggregator[] CreateAggregators(
+            IMLP mlp,
+            ICSharpLayerContainer[] containers
+            )
+        {
+            if (mlp == null)
+            {
+                throw new ArgumentNullException("mlp");
+            }
+            if (containers == null)
+            {
+                throw new ArgumentNullException("containers");
+            }
+
+            var layerCount = mlp.Layers.Length;
+
+            var result = new ICSharpDeDyAggregator[layerCount];
+            result[0] = null; //для первого слоя нет пропагатора
+
+            for (var layerIndex = layerCount - 1; layerIndex > 0; layerIndex--)
+            {
+                var previousLayer = mlp.Layers[layerIndex - 1];
+                var aggregateLayer = mlp.Layers[layerIndex];
+
+                var p = new CSharpDeDyAggregator(
+                    previousLayer.TotalNeuronCount,
+                    aggregateLayer.TotalNeuronCount,
+                    containers[layerIndex].WeightMem
+                    );
+
+                result[layerIndex] = p;
+            }
+
+            return
+                result;
         }
 
         private ILayerPropagator[] CreatePropagatorsByMLP(

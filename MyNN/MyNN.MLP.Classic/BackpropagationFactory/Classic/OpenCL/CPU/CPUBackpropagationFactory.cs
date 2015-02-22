@@ -9,6 +9,7 @@ using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.BackpropagationFactory;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Backpropagator;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
@@ -84,10 +85,13 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
 
             ILayerContainer[] containers;
             ILayerPropagator[] propagators;
+            IDeDyAggregator[] dedyAggregators;
             propagatorComponentConstructor.CreateComponents(
                 mlp,
                 out containers,
-                out propagators);
+                out propagators,
+                out dedyAggregators
+                );
 
             var kernelTextProvider = new MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText.KernelTextProvider(mlp, config);
 

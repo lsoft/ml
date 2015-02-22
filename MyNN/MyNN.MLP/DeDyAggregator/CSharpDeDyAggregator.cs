@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MyNN.Common.Other;
-using MyNN.MLP.Structure.Layer;
 
-namespace MyNN.MLP.NextLayerAggregator
+namespace MyNN.MLP.DeDyAggregator
 {
-    public class CSharpDeDyCalculator : ICSharpDeDyCalculator
+    public class CSharpDeDyAggregator : ICSharpDeDyAggregator
     {
         private readonly int _previousLayerNeuronCount;
         private readonly int _aggregateLayerNeuronCount;
-        private readonly float[] _aggregateLayerDeDz;
         private readonly float[] _aggregateLayerWeights;
+
+        public float[] DeDz
+        {
+            get;
+            private set;
+        }
 
         public float[] DeDy
         {
@@ -21,24 +22,15 @@ namespace MyNN.MLP.NextLayerAggregator
             private set;
         }
 
-        public CSharpDeDyCalculator(
+        public CSharpDeDyAggregator(
             int previousLayerNeuronCount,
             int aggregateLayerNeuronCount,
-            float[] aggregateLayerDeDz,
             float[] aggregateLayerWeights
             )
         {
-            if (aggregateLayerDeDz == null)
-            {
-                throw new ArgumentNullException("aggregateLayerDeDz");
-            }
             if (aggregateLayerWeights == null)
             {
                 throw new ArgumentNullException("aggregateLayerWeights");
-            }
-            if (aggregateLayerNeuronCount != aggregateLayerDeDz.Length)
-            {
-                throw new ArgumentException("aggregateLayerNeuronCount != aggregateLayerDeDz.Length");
             }
             if ((previousLayerNeuronCount * aggregateLayerNeuronCount) != aggregateLayerWeights.Length)
             {
@@ -47,9 +39,9 @@ namespace MyNN.MLP.NextLayerAggregator
 
             _previousLayerNeuronCount = previousLayerNeuronCount;
             _aggregateLayerNeuronCount = aggregateLayerNeuronCount;
-            _aggregateLayerDeDz = aggregateLayerDeDz;
             _aggregateLayerWeights = aggregateLayerWeights;
 
+            this.DeDz = new float[aggregateLayerNeuronCount];
             this.DeDy = new float[_previousLayerNeuronCount];
         }
 
@@ -69,8 +61,8 @@ namespace MyNN.MLP.NextLayerAggregator
                     + previousLayerNeuronIndex; //не векторизуется:(
 
                     float w = _aggregateLayerWeights[nextWeightIndex]; //w is a dz/dy
-                    float dedz = _aggregateLayerDeDz[aggregateNeuronIndex];
-                    float dedy = w*dedz;
+                    float dedz = this.DeDz[aggregateNeuronIndex];
+                    float dedy = w * dedz;
 
                     KahanAlgorithm.AddElement(ref accDeDy, dedy);
                 }
@@ -84,6 +76,7 @@ namespace MyNN.MLP.NextLayerAggregator
             )
         {
             this.DeDy.Clear();
+            this.DeDz.Clear();
         }
 
         private static int ComputeWeightIndex(

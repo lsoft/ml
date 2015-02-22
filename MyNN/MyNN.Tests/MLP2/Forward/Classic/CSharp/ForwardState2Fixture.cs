@@ -6,6 +6,7 @@ using MyNN.Common.NewData.Item;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Classic.ForwardPropagation.CSharp;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure.Neuron.Function;
 
@@ -93,10 +94,13 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CSharp
 
                     ILayerContainer[] containers;
                     ILayerPropagator[] propagators;
+                    IDeDyAggregator[] dedyAggregators;
                     pcc.CreateComponents(
                         mlp,
                         out containers,
-                        out propagators);
+                        out propagators,
+                        out dedyAggregators
+                        );
 
                     return
                         new ForwardPropagation(

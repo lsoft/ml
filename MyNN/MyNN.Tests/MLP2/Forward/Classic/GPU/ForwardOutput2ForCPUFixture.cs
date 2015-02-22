@@ -5,6 +5,7 @@ using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.Item;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
@@ -96,10 +97,13 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
 
                         ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
+                        IDeDyAggregator[] dedyAggregators;
                         pcc.CreateComponents(
                             mlp,
                             out containers,
-                            out propagators);
+                            out propagators,
+                            out dedyAggregators
+                            );
 
                         return
                             new ForwardPropagation(
@@ -142,10 +146,13 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
 
                         ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
+                        IDeDyAggregator[] dedyAggregators;
                         pcc.CreateComponents(
                             mlp,
                             out containers,
-                            out propagators);
+                            out propagators,
+                            out dedyAggregators
+                            );
 
                         return
                             new ForwardPropagation(
@@ -186,10 +193,13 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
 
                         ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
+                        IDeDyAggregator[] dedyAggregators;
                         pcc.CreateComponents(
                             mlp,
                             out containers,
-                            out propagators);
+                            out propagators,
+                            out dedyAggregators
+                            );
 
                         return
                             new ForwardPropagation(
@@ -238,10 +248,13 @@ namespace MyNN.Tests.MLP2.Forward.Classic.GPU
 
                         ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
+                        IDeDyAggregator[] dedyAggregators;
                         pcc.CreateComponents(
                             mlp,
                             out containers,
-                            out propagators);
+                            out propagators,
+                            out dedyAggregators
+                            );
 
                         return
                             new ForwardPropagation(

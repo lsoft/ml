@@ -8,6 +8,7 @@ using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.BackpropagationFactory;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU;
 using MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Backpropagator;
@@ -106,10 +107,13 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
             {
                 ILayerContainer[] containers;
                 ILayerPropagator[] propagators;
+                IDeDyAggregator[] dedyAggregators;
                 propagatorComponentConstructor.CreateComponents(
                     mlp,
                     out containers,
-                    out propagators);
+                    out propagators,
+                    out dedyAggregators
+                    );
 
                 trainContainers = containers;
 
@@ -165,10 +169,13 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
 
                 ILayerContainer[] containers;
                 ILayerPropagator[] propagators;
+                IDeDyAggregator[] dedyAggregators;
                 cc.CreateComponents(
                     mlp,
                     out containers,
-                    out propagators);
+                    out propagators,
+                    out dedyAggregators
+                    );
 
                 inferenceForwardPropagation = new MLP.ForwardPropagation.ForwardPropagation(
                     containers,

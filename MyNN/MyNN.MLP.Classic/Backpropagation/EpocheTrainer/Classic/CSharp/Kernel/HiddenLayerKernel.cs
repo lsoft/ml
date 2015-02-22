@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MyNN.Common.Other;
 using MyNN.MLP.LearningConfig;
-using MyNN.MLP.NextLayerAggregator;
 using MyNN.MLP.Structure.Layer;
 
 namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel

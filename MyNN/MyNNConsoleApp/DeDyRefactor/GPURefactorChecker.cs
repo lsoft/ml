@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using MyNN;
 using MyNN.Common.ArtifactContainer;
-using MyNN.Common.NewData.DataSet;
 using MyNN.Common.LearningRateController;
+using MyNN.Common.NewData.DataSet;
 using MyNN.Common.NewData.DataSet.ItemLoader;
 using MyNN.Common.NewData.DataSet.ItemTransformation;
 using MyNN.Common.NewData.DataSet.Iterator;
@@ -18,40 +9,26 @@ using MyNN.Common.NewData.DataSetProvider;
 using MyNN.Common.NewData.Item;
 using MyNN.Common.NewData.MNIST;
 using MyNN.Common.NewData.Normalizer;
-using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
-using MyNN.MLP.Backpropagation;
-using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
-using MyNN.MLP.Backpropagation.Validation.Drawer;
 using MyNN.MLP.Backpropagation.Validation.Drawer.Factory;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU;
-using MyNN.MLP.Classic.BackpropagationFactory.Classic.CSharp;
 using MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU;
-using MyNN.MLP.Classic.ForwardPropagation.CSharp;
-using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU;
-using MyNN.MLP.DesiredValues;
-using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.MLPContainer;
-using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Factory;
-using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Layer.Factory;
 using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
 
-namespace MyNNConsoleApp.CSharpRefactor
+namespace MyNNConsoleApp.DeDyRefactor
 {
-    public class CSharpRefactorChecker
+    public class GPURefactorChecker
     {
         public static void DoTrain()
         {
@@ -130,40 +107,44 @@ namespace MyNNConsoleApp.CSharpRefactor
 
             var mlpContainerHelper = new MLPContainerHelper();
 
-            var backpropagationFactory = new CSharpBackpropagationFactory(
-                mlpContainerHelper
-                );
-
-            var algo = backpropagationFactory.CreateBackpropagation(
-                randomizer,
-                mlpContainer,
-                mlp,
-                validation,
-                config
-                );
-
-            var r = algo.Train(
-                trainDataSetProvider
-                );
-
-            var ce = r.PerItemError;
-            var de = 0.2993497550487518310546875;
-
-            var diff = de - ce;
-
-            if (Math.Abs(diff) > 1e-9f)
+            using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(true), true))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-            }
+                var backpropagationFactory = new GPUBackpropagationFactory(
+                    clProvider,
+                    mlpContainerHelper
+                    );
 
-            Console.WriteLine(
-                "Diff {0}",
-                diff
-                );
+                var algo = backpropagationFactory.CreateBackpropagation(
+                    randomizer,
+                    mlpContainer,
+                    mlp,
+                    validation,
+                    config
+                    );
+
+                var r = algo.Train(
+                    trainDataSetProvider
+                    );
+
+                var ce = r.PerItemError;
+                var de = 0.2993497550487518310546875;
+
+                var diff = de - ce;
+
+                if (Math.Abs(diff) > 1e-9f)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+
+                Console.WriteLine(
+                    "Diff {0}",
+                    diff
+                    );
+            }
         }
 
         private static IDataSetProvider GetTrainProvider(

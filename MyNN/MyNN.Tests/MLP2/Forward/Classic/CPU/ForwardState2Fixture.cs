@@ -7,6 +7,7 @@ using MyNN.Common.OpenCLHelper;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
@@ -99,10 +100,13 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
 
                         ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
+                        IDeDyAggregator[] dedyAggregators;
                         pcc.CreateComponents(
                             mlp,
                             out containers,
-                            out propagators);
+                            out propagators,
+                            out dedyAggregators
+                            );
 
                         return
                             new ForwardPropagation(
@@ -159,10 +163,13 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
 
                         ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
+                        IDeDyAggregator[] dedyAggregators;
                         pcc.CreateComponents(
                             mlp,
                             out containers,
-                            out propagators);
+                            out propagators,
+                            out dedyAggregators
+                            );
 
                         return
                             new ForwardPropagation(
@@ -219,10 +226,13 @@ namespace MyNN.Tests.MLP2.Forward.Classic.CPU
 
                         ILayerContainer[] containers;
                         ILayerPropagator[] propagators;
+                        IDeDyAggregator[] dedyAggregators;
                         pcc.CreateComponents(
                             mlp,
                             out containers,
-                            out propagators);
+                            out propagators,
+                            out dedyAggregators
+                            );
 
                         return
                             new ForwardPropagation(

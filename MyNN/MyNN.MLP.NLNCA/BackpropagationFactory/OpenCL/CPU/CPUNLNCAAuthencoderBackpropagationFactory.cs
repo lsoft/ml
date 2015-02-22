@@ -11,6 +11,7 @@ using MyNN.MLP.Backpropagation;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.BackpropagationFactory;
 using MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
@@ -104,10 +105,13 @@ namespace MyNN.MLP.NLNCA.BackpropagationFactory.OpenCL.CPU
 
             ILayerContainer[] containers;
             ILayerPropagator[] propagators;
+            IDeDyAggregator[] dedyAggregators;
             cc.CreateComponents(
                 mlp,
                 out containers,
-                out propagators);
+                out propagators,
+                out dedyAggregators
+                );
 
             var forwardPropagation = new ForwardPropagation.ForwardPropagation(
                 containers,

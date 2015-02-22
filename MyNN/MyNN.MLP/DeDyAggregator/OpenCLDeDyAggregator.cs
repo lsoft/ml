@@ -1,18 +1,15 @@
 using System;
 using MyNN.Common;
 using MyNN.Common.Other;
-using MyNN.MLP.Backpropagation.EpocheTrainer;
-using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
-using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.Mem;
 using OpenCL.Net.Wrapper.Mem.Data;
 using Kernel = OpenCL.Net.Wrapper.Kernel;
 
-namespace MyNN.MLP.NextLayerAggregator
+namespace MyNN.MLP.DeDyAggregator
 {
-    public class OpenCLDeDyCalculator : IOpenCLDeDyCalculator
+    public class OpenCLDeDyAggregator : IOpenCLDeDyAggregator
     {
         private const int PreprocessGroupSize = 16;
 
@@ -31,7 +28,7 @@ namespace MyNN.MLP.NextLayerAggregator
             private set;
         }
 
-        public OpenCLDeDyCalculator(
+        public OpenCLDeDyAggregator(
             CLProvider clProvider,
             int previousLayerTotalNeuronCount,
             int aggregateLayerTotalNeuronCount,

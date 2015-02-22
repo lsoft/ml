@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.DropConnect.Inferencer;
 using MyNN.MLP.DropConnect.Inferencer.Factory;
 using MyNN.MLP.ForwardPropagation;
@@ -35,7 +36,8 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
         public void CreateComponents(
             IMLP mlp,
             out ILayerContainer[] containers,
-            out ILayerPropagator[] propagators
+            out ILayerPropagator[] propagators,
+            out IDeDyAggregator[] dedyAggregators
             )
         {
             if (mlp == null)
@@ -48,6 +50,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
 
             containers = c;
             propagators = p;
+            dedyAggregators = null;
         }
 
         private ILayerPropagator[] CreatePropagatorsByMLP(

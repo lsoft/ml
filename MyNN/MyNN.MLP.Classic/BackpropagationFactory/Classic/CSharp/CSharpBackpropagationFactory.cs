@@ -9,6 +9,7 @@ using MyNN.MLP.BackpropagationFactory;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backpropagator;
 using MyNN.MLP.Classic.ForwardPropagation.CSharp;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
@@ -71,10 +72,13 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.CSharp
 
             ILayerContainer[] containers;
             ILayerPropagator[] propagators;
+            IDeDyAggregator[] dedyAggregators;
             propagatorComponentConstructor.CreateComponents(
                 mlp,
                 out containers,
-                out propagators);
+                out propagators,
+                out dedyAggregators
+                );
 
             var desiredValuesContainer = new CSharpDesiredValuesContainer(mlp);
 
@@ -91,7 +95,8 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.CSharp
                         config,
                         containers[layerIndex - 1] as ICSharpLayerContainer,
                         containers[layerIndex] as ICSharpLayerContainer,
-                        desiredValuesContainer
+                        desiredValuesContainer,
+                        dedyAggregators[layerIndex] as ICSharpDeDyAggregator
                         );
                 }
                 else
@@ -103,7 +108,8 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.CSharp
                         containers[layerIndex - 1] as ICSharpLayerContainer,
                         containers[layerIndex] as ICSharpLayerContainer,
                         containers[layerIndex + 1] as ICSharpLayerContainer,
-                        backpropagators[layerIndex + 1].DeDz
+                        dedyAggregators[layerIndex + 1] as ICSharpDeDyAggregator,
+                        dedyAggregators[layerIndex] as ICSharpDeDyAggregator
                         );
                 }
             }

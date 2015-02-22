@@ -2,6 +2,7 @@ using System;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
 using MyNN.MLP.LearningConfig;
@@ -21,28 +22,23 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
         private readonly ICSharpLayerContainer _previousLayerContainer;
         private readonly ICSharpLayerContainer _currentLayerContainer;
         private readonly ICSharpDesiredValuesContainer _desiredValuesContainer;
+        private readonly ICSharpDeDyAggregator _deDyAggregator;
         private readonly ILayer _outputLayer;
         private readonly ILayer _preOutputLayer;
-        
+
         private readonly float[] _nablaWeights;
         private readonly float[] _nablaBias;
 
         private readonly OutputLayerKernel _outputLayerKernel;
         private readonly UpdateWeightKernel _updateWeightKernel;
 
-        public float[] DeDz
-        {
-            get;
-            private set;
-        }
-
-
         public CSharpOutputLayerBackpropagator(
             IMLP mlp,
             ILearningAlgorithmConfig config,
             ICSharpLayerContainer previousLayerContainer,
             ICSharpLayerContainer currentLayerContainer,
-            ICSharpDesiredValuesContainer desiredValuesContainer
+            ICSharpDesiredValuesContainer desiredValuesContainer,
+            ICSharpDeDyAggregator deDyAggregator
             )
         {
             if (mlp == null)
@@ -65,11 +61,16 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             {
                 throw new ArgumentNullException("desiredValuesContainer");
             }
+            if (deDyAggregator == null)
+            {
+                throw new ArgumentNullException("deDyAggregator");
+            }
 
             _config = config;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _desiredValuesContainer = desiredValuesContainer;
+            _deDyAggregator = deDyAggregator;
 
             var layerIndex = mlp.Layers.Length - 1;
 
@@ -77,11 +78,9 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             _preOutputLayer = mlp.Layers[layerIndex - 1];
 
             _nablaWeights = new float[
-                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount //_outputLayer.Neurons[0].Weights.Length
+                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount
                 ];
             _nablaBias = new float[_outputLayer.TotalNeuronCount];
-
-            DeDz = new float[_outputLayer.TotalNeuronCount];
 
             _outputLayerKernel = new OutputLayerKernel(
                 _outputLayer,
@@ -94,7 +93,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
 
         public void Prepare()
         {
-            //nothing to do
+            this._deDyAggregator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -109,7 +108,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _currentLayerContainer.NetMem,
                     _previousLayerContainer.StateMem,
                     _currentLayerContainer.StateMem,
-                    this.DeDz,
+                    this._deDyAggregator.DeDz,
                     _desiredValuesContainer.DesiredOutput,
                     _currentLayerContainer.WeightMem,
                     _nablaWeights,
@@ -128,7 +127,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _currentLayerContainer.NetMem,
                     _previousLayerContainer.StateMem,
                     _currentLayerContainer.StateMem,
-                    this.DeDz,
+                    this._deDyAggregator.DeDz,
                     _desiredValuesContainer.DesiredOutput,
                     _currentLayerContainer.WeightMem,
                     _nablaWeights,
@@ -141,6 +140,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _nablaBias
                     );
             }
+
+            this._deDyAggregator.Aggregate();
         }
 
         public void UpdateWeights()

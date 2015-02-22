@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyNN.Common.OpenCLHelper;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.Structure;
@@ -30,7 +31,8 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
         public void CreateComponents(
             IMLP mlp,
             out ILayerContainer[] containers,
-            out ILayerPropagator[] propagators
+            out ILayerPropagator[] propagators,
+            out IDeDyAggregator[] dedyAggregators
             )
         {
             if (mlp == null)
@@ -46,6 +48,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
 
             containers = c;
             propagators = p;
+            dedyAggregators = null;
         }
 
         private ILayerPropagator[] CreatePropagatorsByMLP(

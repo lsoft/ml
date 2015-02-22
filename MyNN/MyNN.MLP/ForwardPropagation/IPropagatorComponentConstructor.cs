@@ -1,3 +1,4 @@
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.Structure;
 
 namespace MyNN.MLP.ForwardPropagation
@@ -7,7 +8,8 @@ namespace MyNN.MLP.ForwardPropagation
         void CreateComponents(
             IMLP mlp,
             out ILayerContainer[] containers,
-            out ILayerPropagator[] propagators
+            out ILayerPropagator[] propagators,
+            out IDeDyAggregator[] dedyAggregators
             );
     }
 }

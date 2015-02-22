@@ -2,6 +2,7 @@
 using System.Linq;
 using MyNN.Common.NewData.DataSet;
 using MyNN.Common.OutputConsole;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure;
 using OpenCL.Net.Wrapper;
@@ -66,10 +67,13 @@ namespace MyNN.MLP
 
                 ILayerContainer[] containers;
                 ILayerPropagator[] propagators;
+                IDeDyAggregator[] dedyAggregators;
                 cc.CreateComponents(
                     _mlp,
                     out containers,
-                    out propagators);
+                    out propagators,
+                    out dedyAggregators
+                    );
 
                 var forward = new ForwardPropagation.ForwardPropagation(
                     containers,

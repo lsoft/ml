@@ -1,5 +1,5 @@
 ﻿using System;
-using MyNNConsoleApp.CSharpRefactor;
+using MyNNConsoleApp.DeDyRefactor;
 
 namespace MyNNConsoleApp
 {
@@ -13,6 +13,7 @@ namespace MyNNConsoleApp
                 //Convolute2.Do();
 
                 CSharpRefactorChecker.DoTrain();
+                //GPURefactorChecker.DoTrain();
 
                 Console.WriteLine(".......... press any key to exit");
                 Console.ReadLine();

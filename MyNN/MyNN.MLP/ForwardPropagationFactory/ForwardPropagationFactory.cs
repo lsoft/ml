@@ -1,5 +1,6 @@
 using System;
 using MyNN.Common.Randomizer;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.Structure;
 
@@ -48,10 +49,13 @@ namespace MyNN.MLP.ForwardPropagationFactory
 
             ILayerContainer[] containers;
             ILayerPropagator[] propagators;
+            IDeDyAggregator[] dedyAggregators;
             _componentConstructor.CreateComponents(
                 mlp,
                 out containers,
-                out propagators);
+                out propagators,
+                out dedyAggregators
+                );
 
             return
                 new ForwardPropagation.ForwardPropagation(

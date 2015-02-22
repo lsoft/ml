@@ -3,10 +3,10 @@ using MyNN.Common;
 using MyNN.Common.Other;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
-using MyNN.MLP.NextLayerAggregator;
 using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
@@ -36,7 +36,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly MemFloat _currentDeDz;
 
         private readonly Kernel _updateWeightKernel;
-        private readonly IOpenCLDeDyCalculator _dedyCalculator;
+        private readonly IOpenCLDeDyAggregator _dedyAggregator;
 
         public MemFloat DeDz
         {
@@ -132,7 +132,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                 kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
                 "HiddenLayerTrain");
 
-            _dedyCalculator = new OpenCLDeDyCalculator(
+            _dedyAggregator = new OpenCLDeDyAggregator(
                 clProvider,
                 currentLayer.TotalNeuronCount,
                 nextLayer.TotalNeuronCount,
@@ -146,7 +146,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
             _nablaBias.Write(BlockModeEnum.NonBlocking);
 
-            _dedyCalculator.ClearAndWrite();
+            _dedyAggregator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -155,7 +155,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             bool firstItemInBatch
             )
         {
-            _dedyCalculator.Aggregate();
+            _dedyAggregator.Aggregate();
 
             {
                 const uint hiddenLocalSize = 256;
@@ -187,7 +187,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                         .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
 
-                        .SetKernelArgMem(13, _dedyCalculator.DeDy)
+                        .SetKernelArgMem(13, _dedyAggregator.DeDy)
 
                         .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
                         .SetKernelArgMem(15, _nablaBias)
@@ -227,7 +227,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                         .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
 
-                        .SetKernelArgMem(13, _dedyCalculator.DeDy)
+                        .SetKernelArgMem(13, _dedyAggregator.DeDy)
 
                         .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
                         .SetKernelArgMem(15, _nablaBias)
