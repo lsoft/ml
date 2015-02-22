@@ -197,10 +197,10 @@ __kernel void PreprocessKernel0(
         int aggregateWeightIndex = aggregateNeuronIndex * previousNeuronCount + globalx;
 
         float w = aggregateLayerWeights[aggregateWeightIndex];
-        float dedy = aggregateLayerDeDz[aggregateNeuronIndex];
-        float multiplied = w * dedy;
+        float dedz = aggregateLayerDeDz[aggregateNeuronIndex];
+        float dedy = w * dedz;
 
-        cache[inCacheIndex] = multiplied;
+        cache[inCacheIndex] = dedy;
     }
 
     barrier(CLK_LOCAL_MEM_FENCE);
