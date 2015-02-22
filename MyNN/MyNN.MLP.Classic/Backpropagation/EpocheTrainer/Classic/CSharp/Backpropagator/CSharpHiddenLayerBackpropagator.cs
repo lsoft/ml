@@ -15,12 +15,9 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
         private readonly ILearningAlgorithmConfig _config;
         private readonly ILayer _previousLayer;
         private readonly ILayer _currentLayer;
-        private readonly ILayer _nextLayer;
 
         private readonly ICSharpLayerContainer _previousLayerContainer;
         private readonly ICSharpLayerContainer _currentLayerContainer;
-        private readonly ICSharpLayerContainer _nextLayerContainer;
-        private readonly float[] _nextLayerDeDz;
 
         private readonly float[] _nablaWeights;
         private readonly float[] _nablaBias;
@@ -81,11 +78,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             _config = config;
             _previousLayer = previousLayer;
             _currentLayer = currentLayer;
-            _nextLayer = nextLayer;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
-            _nextLayerContainer = nextLayerContainer;
-            _nextLayerDeDz = nextLayerDeDz;
 
             _nablaWeights = new float[
                 currentLayer.TotalNeuronCount * _previousLayer.TotalNeuronCount //currentLayer.Neurons[0].Weights.Length
