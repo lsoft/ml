@@ -16,10 +16,10 @@ namespace MyNN.MLP.NextLayerAggregator
     {
         private const int PreprocessGroupSize = 16;
 
-        private readonly int _currentLayerTotalNeuronCount;
-        private readonly int _nextLayerTotalNeuronCount;
-        private readonly MemFloat _nextLayerDeDz;
-        private readonly MemFloat _nextLayerWeights;
+        private readonly int _previousLayerTotalNeuronCount;
+        private readonly int _aggregateLayerTotalNeuronCount;
+        private readonly MemFloat _aggregateLayerDeDz;
+        private readonly MemFloat _aggregateLayerWeights;
 
         private readonly int _aggregationFactor;
         private readonly Kernel _preprocessKernel0;
@@ -33,23 +33,23 @@ namespace MyNN.MLP.NextLayerAggregator
 
         public OpenCLDeDyCalculator(
             CLProvider clProvider,
-            int currentLayerTotalNeuronCount,
-            int nextLayerTotalNeuronCount,
-            MemFloat nextLayerDeDz,
-            MemFloat nextLayerWeights
+            int previousLayerTotalNeuronCount,
+            int aggregateLayerTotalNeuronCount,
+            MemFloat aggregateLayerDeDz,
+            MemFloat aggregateLayerWeights
             )
         {
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
             }
-            if (nextLayerDeDz == null)
+            if (aggregateLayerDeDz == null)
             {
-                throw new ArgumentNullException("nextLayerDeDz");
+                throw new ArgumentNullException("aggregateLayerDeDz");
             }
-            if (nextLayerWeights == null)
+            if (aggregateLayerWeights == null)
             {
-                throw new ArgumentNullException("nextLayerWeights");
+                throw new ArgumentNullException("aggregateLayerWeights");
             }
 
             if(clProvider.ChoosedDeviceType == DeviceType.Cpu)
@@ -57,15 +57,15 @@ namespace MyNN.MLP.NextLayerAggregator
                 throw new NotSupportedException("Intel CPU is not supported due to bugs in INTEL CPU OPENCL implementation: this aggregation does not work correctly SOMETIMES(!) on Intel CPU, but works fine at ALL THE TIME on INTEL GPU or NVIDIA/AMD GPU. There is some sort of synchronization bug in INTEL CPU OPENCL.");
             }
 
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
-            _nextLayerTotalNeuronCount = nextLayerTotalNeuronCount;
-            _nextLayerDeDz = nextLayerDeDz;
-            _nextLayerWeights = nextLayerWeights;
+            _previousLayerTotalNeuronCount = previousLayerTotalNeuronCount;
+            _aggregateLayerTotalNeuronCount = aggregateLayerTotalNeuronCount;
+            _aggregateLayerDeDz = aggregateLayerDeDz;
+            _aggregateLayerWeights = aggregateLayerWeights;
 
-            _aggregationFactor = Helper.UpTo(nextLayerTotalNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
+            _aggregationFactor = Helper.UpTo(aggregateLayerTotalNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
 
             this.DeDy = clProvider.CreateFloatMem(
-                currentLayerTotalNeuronCount * _aggregationFactor,
+                previousLayerTotalNeuronCount * _aggregationFactor,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite
                 );
 
@@ -86,16 +86,16 @@ namespace MyNN.MLP.NextLayerAggregator
             )
         {
             _preprocessKernel0
-                .SetKernelArgMem(0, this._nextLayerDeDz)
-                .SetKernelArgMem(1, _nextLayerWeights)
+                .SetKernelArgMem(0, this._aggregateLayerDeDz)
+                .SetKernelArgMem(1, _aggregateLayerWeights)
                 .SetKernelArgMem(2, this.DeDy)
-                .SetKernelArg(3, sizeof(int), _currentLayerTotalNeuronCount)
-                .SetKernelArg(4, sizeof(int), _nextLayerTotalNeuronCount)
+                .SetKernelArg(3, sizeof(int), _previousLayerTotalNeuronCount)
+                .SetKernelArg(4, sizeof(int), _aggregateLayerTotalNeuronCount)
                 .EnqueueNDRangeKernel(
                     new[]
                     {
-                        Helper.UpTo(_currentLayerTotalNeuronCount, PreprocessGroupSize),
-                        Helper.UpTo(_nextLayerTotalNeuronCount, PreprocessGroupSize)
+                        Helper.UpTo(_previousLayerTotalNeuronCount, PreprocessGroupSize),
+                        Helper.UpTo(_aggregateLayerTotalNeuronCount, PreprocessGroupSize)
                     },
                     new[]
                     {
@@ -123,12 +123,12 @@ namespace MyNN.MLP.NextLayerAggregator
                     currentLocalGroupSize = PreprocessGroupSize;
                 }
 
-                var globalx = Helper.UpTo(_currentLayerTotalNeuronCount, currentLocalGroupSize);
+                var globalx = Helper.UpTo(_previousLayerTotalNeuronCount, currentLocalGroupSize);
                 var globaly = Helper.UpTo(aggregationFactor, currentLocalGroupSize);
 
                 _preprocessKernel1
                     .SetKernelArgMem(0, this.DeDy)
-                    .SetKernelArg(1, sizeof(int), _currentLayerTotalNeuronCount)
+                    .SetKernelArg(1, sizeof(int), _previousLayerTotalNeuronCount)
                     .SetKernelArg(2, sizeof(int), aggregationFactor)
                     .SetKernelArg(3, sizeof(int), currentLocalGroupSize)
                     .SetKernelArg(4, sizeof(int), currentLocalGroupSize)
@@ -165,12 +165,12 @@ namespace MyNN.MLP.NextLayerAggregator
         {
             var kernelText = @"
 __kernel void PreprocessKernel0(
-    __global read_only float * nextLayerDeDz,
-    __global read_only float * nextLayerWeights,
+    __global read_only float * aggregateLayerDeDz,
+    __global read_only float * aggregateLayerWeights,
     __global write_only float * gcache,
 
-    int currentNeuronCount,
-    int nextLayerNeuronCount
+    int previousNeuronCount,
+    int aggregateLayerNeuronCount
     )
 {
     const int groupsizex = <GROUP_SIZE>;
@@ -191,14 +191,14 @@ __kernel void PreprocessKernel0(
     cache[inCacheIndex] = 0;
 
     //если группа не вылазит за пределы MLP
-    if(globalx < currentNeuronCount && globaly < nextLayerNeuronCount)
+    if(globalx < previousNeuronCount && globaly < aggregateLayerNeuronCount)
     {
-        int nextNeuronIndex = globaly;
-        int nextWeightIndex = nextNeuronIndex * currentNeuronCount + globalx;
+        int aggregateNeuronIndex = globaly;
+        int aggregateWeightIndex = aggregateNeuronIndex * previousNeuronCount + globalx;
 
-        float nextWeight = nextLayerWeights[nextWeightIndex];
-        float nextNabla = nextLayerDeDz[nextNeuronIndex];
-        float multiplied = nextWeight * nextNabla;
+        float w = aggregateLayerWeights[aggregateWeightIndex];
+        float dedy = aggregateLayerDeDz[aggregateNeuronIndex];
+        float multiplied = w * dedy;
 
         cache[inCacheIndex] = multiplied;
     }
@@ -230,10 +230,10 @@ __kernel void PreprocessKernel0(
     barrier(CLK_LOCAL_MEM_FENCE);
 
     //если группа не вылазит за пределы MLP
-    if(globalx < currentNeuronCount)
+    if(globalx < previousNeuronCount)
     {
         //пишем в глобальный кеш
-        gcache[groupy * currentNeuronCount + globalx] = cache[ingrx];
+        gcache[groupy * previousNeuronCount + globalx] = cache[ingrx];
     }
 
     barrier(CLK_LOCAL_MEM_FENCE);
@@ -254,8 +254,8 @@ __kernel void PreprocessKernel0(
 __kernel void PreprocessKernel1(
     __global float * gcache,
 
-    int currentNeuronCount,
-    int nextLayerNeuronCount,
+    int previousNeuronCount,
+    int aggregateLayerNeuronCount,
     int groupsizex,
     int groupsizey,
 
@@ -275,18 +275,18 @@ __kernel void PreprocessKernel1(
     cache[inCacheIndex] = 0;
 
     //если группа не вылазит за пределы MLP
-    if(globalx < currentNeuronCount && globaly < nextLayerNeuronCount)
+    if(globalx < previousNeuronCount && globaly < aggregateLayerNeuronCount)
     {
-        int nextNeuronIndex = globaly;
-        int nextWeightIndex = nextNeuronIndex * currentNeuronCount + globalx;
+        int aggregateNeuronIndex = globaly;
+        int aggregateWeightIndex = aggregateNeuronIndex * previousNeuronCount + globalx;
 
-//        float gvalue = gcache[nextWeightIndex];
-//        gcache[nextWeightIndex] = 0;
+//        float gvalue = gcache[aggregateWeightIndex];
+//        gcache[aggregateWeightIndex] = 0;
 //        cache[inCacheIndex] = gvalue;
 
          // 3 lines up is equivalent with one line below:
 
-        cache[inCacheIndex] = atomic_xchg(gcache + nextWeightIndex, 0);
+        cache[inCacheIndex] = atomic_xchg(gcache + aggregateWeightIndex, 0);
     }
 
     barrier(CLK_LOCAL_MEM_FENCE);
@@ -316,10 +316,10 @@ __kernel void PreprocessKernel1(
     barrier(CLK_LOCAL_MEM_FENCE);
 
     //если группа не вылазит за пределы MLP
-    if(globalx < currentNeuronCount)
+    if(globalx < previousNeuronCount)
     {
         //пишем в глобальный кеш
-        gcache[groupy * currentNeuronCount + globalx] = cache[ingrx];
+        gcache[groupy * previousNeuronCount + globalx] = cache[ingrx];
     }
 
     barrier(CLK_LOCAL_MEM_FENCE);
