@@ -69,7 +69,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
                 var previousLayer = mlp.Layers[layerIndex - 1];
                 var aggregateLayer = mlp.Layers[layerIndex];
 
-                var p = new OpenCLDeDyAggregator(
+                var p = new GPUDeDyAggregator(
                     _clProvider,
                     previousLayer.TotalNeuronCount,
                     aggregateLayer.TotalNeuronCount,

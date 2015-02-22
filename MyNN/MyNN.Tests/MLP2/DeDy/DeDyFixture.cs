@@ -17,7 +17,51 @@ namespace MyNN.Tests.MLP2.DeDy
     public class DeDyFixture
     {
         [TestMethod]
-        public void Test0()
+        public void TestCPU()
+        {
+            var rnd = new DefaultRandomizer(56);
+
+            for (var seed = 0; seed < 1000; seed += rnd.Next(25))
+            {
+                int previousLayerNeuronCount = 7 + rnd.Next(1500);
+                int aggregateLayerNeuronCount = 3 + rnd.Next(1500);
+
+                Console.WriteLine(
+                    "seed = {0}, previousLayerNeuronCount = {1}, aggregateLayerNeuronCount = {2}",
+                    seed,
+                    previousLayerNeuronCount,
+                    aggregateLayerNeuronCount
+                    );
+
+                var csharp = CalculateCSharp(
+                    seed,
+                    previousLayerNeuronCount,
+                    aggregateLayerNeuronCount
+                    );
+
+                var cl = CalculateCPU(
+                    seed,
+                    previousLayerNeuronCount,
+                    aggregateLayerNeuronCount
+                    );
+
+                int maxDiffIndex;
+                float maxDiff;
+                if (!ArrayOperations.ValuesAreEqual(csharp, cl, 1e-9f, out maxDiff, out maxDiffIndex))
+                {
+                    Console.WriteLine(
+                        "Diff {0} at index {1}",
+                        maxDiffIndex,
+                        maxDiff
+                        );
+
+                    Assert.Fail();
+                }
+            }
+        }
+
+        [TestMethod]
+        public void TestGPU()
         {
             var rnd = new DefaultRandomizer(56);
 
@@ -39,7 +83,7 @@ namespace MyNN.Tests.MLP2.DeDy
                     aggregateLayerNeuronCount
                     );
 
-                var cl = CalculateOpenCL(
+                var cl = CalculateGPU(
                     seed,
                     previousLayerNeuronCount,
                     aggregateLayerNeuronCount
@@ -91,7 +135,50 @@ namespace MyNN.Tests.MLP2.DeDy
         }
 
 
-        private float[] CalculateOpenCL(
+        private float[] CalculateCPU(
+            int seed,
+            int previousLayerNeuronCount,
+            int aggregateLayerNeuronCount
+            )
+        {
+            var randomizer = new DefaultRandomizer(seed);
+
+            using (var clProvider = new CLProvider(new IntelCPUDeviceChooser(false), true))
+            {
+                var weights = clProvider.CreateFloatMem(
+                    previousLayerNeuronCount * aggregateLayerNeuronCount,
+                    MemFlags.CopyHostPtr | MemFlags.ReadWrite
+                    );
+
+                var cpuAggregator = new CPUDeDyAggregator(
+                    clProvider,
+                    previousLayerNeuronCount,
+                    aggregateLayerNeuronCount,
+                    weights
+                    );
+
+                cpuAggregator.ClearAndWrite();
+
+                weights.Array.Fill((index) => randomizer.Next(5));
+                cpuAggregator.DeDz.Array.Fill((index) => randomizer.Next(5));
+
+                cpuAggregator.DeDz.Write(BlockModeEnum.Blocking);
+                weights.Write(BlockModeEnum.Blocking);
+
+                cpuAggregator.Aggregate();
+
+                clProvider.QueueFinish();
+
+                cpuAggregator.DeDy.Read(BlockModeEnum.Blocking);
+
+                var clResults = cpuAggregator.DeDy.Array.GetSubArray(0, previousLayerNeuronCount);
+
+                return
+                    clResults;
+            }
+        }
+
+        private float[] CalculateGPU(
             int seed,
             int previousLayerNeuronCount,
             int aggregateLayerNeuronCount
@@ -101,38 +188,33 @@ namespace MyNN.Tests.MLP2.DeDy
 
             using (var clProvider = new CLProvider(new NvidiaOrAmdGPUDeviceChooser(false), true))
             {
-                var dedz = clProvider.CreateFloatMem(
-                    aggregateLayerNeuronCount,
-                    MemFlags.CopyHostPtr | MemFlags.ReadWrite
-                    );
-
                 var weights = clProvider.CreateFloatMem(
                     previousLayerNeuronCount * aggregateLayerNeuronCount,
                     MemFlags.CopyHostPtr | MemFlags.ReadWrite
                     );
 
-                weights.Array.Fill((index) => randomizer.Next(5));
-                dedz.Array.Fill((index) => randomizer.Next(5));
-
-                dedz.Write(BlockModeEnum.Blocking);
-                weights.Write(BlockModeEnum.Blocking);
-
-                var cl = new OpenCLDeDyAggregator(
+                var gpuAggregator = new GPUDeDyAggregator(
                     clProvider,
                     previousLayerNeuronCount,
                     aggregateLayerNeuronCount,
-                    dedz,
                     weights
                     );
 
-                cl.ClearAndWrite();
-                cl.Aggregate();
+                gpuAggregator.ClearAndWrite();
+
+                weights.Array.Fill((index) => randomizer.Next(5));
+                gpuAggregator.DeDz.Array.Fill((index) => randomizer.Next(5));
+
+                gpuAggregator.DeDz.Write(BlockModeEnum.Blocking);
+                weights.Write(BlockModeEnum.Blocking);
+                
+                gpuAggregator.Aggregate();
 
                 clProvider.QueueFinish();
 
-                cl.DeDy.Read(BlockModeEnum.Blocking);
+                gpuAggregator.DeDy.Read(BlockModeEnum.Blocking);
 
-                var clResults = cl.DeDy.Array.GetSubArray(0, previousLayerNeuronCount);
+                var clResults = gpuAggregator.DeDy.Array.GetSubArray(0, previousLayerNeuronCount);
 
                 return
                     clResults;

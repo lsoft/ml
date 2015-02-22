@@ -137,7 +137,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                 kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
                 "HiddenLayerTrain");
 
-            _dedyAggregator = new OpenCLDeDyAggregator(
+            _dedyAggregator = new GPUDeDyAggregator(
                 clProvider,
                 currentLayer.TotalNeuronCount,
                 nextLayer.TotalNeuronCount,

@@ -126,6 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
+    <Compile Include="DeDyRefactor\CPURefactorChecker.cs" />
     <Compile Include="DeDyRefactor\GPURefactorChecker.cs" />
     <Compile Include="DeDyRefactor\CSharpRefactorChecker.cs" />
     <Compile Include="FeatureAndMetricsAccuracyCalculator.cs">

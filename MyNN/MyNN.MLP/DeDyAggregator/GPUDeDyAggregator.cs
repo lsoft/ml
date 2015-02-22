@@ -9,7 +9,7 @@ using Kernel = OpenCL.Net.Wrapper.Kernel;
 
 namespace MyNN.MLP.DeDyAggregator
 {
-    public class OpenCLDeDyAggregator : IOpenCLDeDyAggregator
+    public class GPUDeDyAggregator : IOpenCLDeDyAggregator
     {
         private const int PreprocessGroupSize = 16;
 
@@ -33,7 +33,7 @@ namespace MyNN.MLP.DeDyAggregator
             private set;
         }
 
-        public OpenCLDeDyAggregator(
+        public GPUDeDyAggregator(
             CLProvider clProvider,
             int previousLayerNeuronCount,
             int aggregateLayerNeuronCount,
@@ -44,7 +44,7 @@ namespace MyNN.MLP.DeDyAggregator
             throw new InvalidOperationException();
         }
 
-        public OpenCLDeDyAggregator(
+        public GPUDeDyAggregator(
             CLProvider clProvider,
             int previousLayerNeuronCount,
             int aggregateLayerNeuronCount,
@@ -82,12 +82,12 @@ namespace MyNN.MLP.DeDyAggregator
                 );
 
             _preprocessKernel0 = clProvider.CreateKernel(
-                this.GetPreprocessHiddenKernelZeroSource(PreprocessGroupSize),
+                this.GetAggregationKernel0(PreprocessGroupSize),
                 "PreprocessKernel0"
                 );
 
             _preprocessKernel1 = clProvider.CreateKernel(
-                this.GetPreprocessHiddenKernelOneSource(),
+                this.GetAggregationKernel1(),
                 "PreprocessKernel1"
                 );
 
@@ -174,7 +174,7 @@ namespace MyNN.MLP.DeDyAggregator
 
         #region private code
 
-        private string GetPreprocessHiddenKernelZeroSource(
+        private string GetAggregationKernel0(
             int groupSize
             )
         {
@@ -262,7 +262,7 @@ __kernel void PreprocessKernel0(
                 kernelText;
         }
 
-        private string GetPreprocessHiddenKernelOneSource(
+        private string GetAggregationKernel1(
             )
         {
             var kernelText = @"

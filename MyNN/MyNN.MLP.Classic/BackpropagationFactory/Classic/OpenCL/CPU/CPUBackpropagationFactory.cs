@@ -112,7 +112,8 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
                         containers[layerIndex - 1] as IMemLayerContainer,
                         containers[layerIndex] as IMemLayerContainer,
                         kernelTextProvider,
-                        desiredValuesContainer
+                        desiredValuesContainer,
+                        dedyAggregators[layerIndex] as IOpenCLDeDyAggregator
                         );
                 }
                 else
@@ -124,9 +125,9 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
                         layerIndex,
                         containers[layerIndex - 1] as IMemLayerContainer,
                         containers[layerIndex] as IMemLayerContainer,
-                        containers[layerIndex + 1] as IMemLayerContainer,
                         kernelTextProvider,
-                        backpropagators[layerIndex + 1].DeDz
+                        dedyAggregators[layerIndex + 1] as IOpenCLDeDyAggregator,
+                        dedyAggregators[layerIndex] as IOpenCLDeDyAggregator
                         );
                 }
             }

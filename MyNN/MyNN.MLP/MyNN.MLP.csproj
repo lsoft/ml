@@ -103,6 +103,7 @@
     <Compile Include="DBNInfo\WeightLoader\IWeightLoader.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DeDyAggregator\CPUDeDyAggregator.cs" />
     <Compile Include="DeDyAggregator\ICSharpDeDyAggregator.cs" />
     <Compile Include="DeDyAggregator\IOpenCLDeDyAggregator.cs" />
     <Compile Include="DesiredValues\CSharpDesiredValuesContainer.cs" />
@@ -130,7 +131,7 @@
     <Compile Include="LearningConfig\LearningAlgorithmConfig.cs" />
     <Compile Include="MLPContainer\IMLPContainerHelper.cs" />
     <Compile Include="MLPContainer\MLPContainerHelper.cs" />
-    <Compile Include="DeDyAggregator\OpenCLDeDyAggregator.cs">
+    <Compile Include="DeDyAggregator\GPUDeDyAggregator.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DeDyAggregator\CSharpDeDyAggregator.cs" />

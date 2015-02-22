@@ -154,10 +154,9 @@ __kernel void HiddenLayerTrain(
     __global float * previousLayerLastState,
     __global float * currentLayerLastState,
     __global float * currentLayerDeDz,
-    __global float * nextLayerDeDz,
 
     __global float * currentLayerWeights,
-    __global float * nextLayerWeights,
+    __global float * dedys,
             
     __global float * nabla,
 
@@ -180,25 +179,11 @@ __kernel void HiddenLayerTrain(
     int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
 
-    //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего (with Kahan Algorithm)
-    KahanAccumulator accDeDz = GetEmptyKahanAcc();
-    for (int nextNeuronIndex = 0; nextNeuronIndex < nextLayerNeuronCount; ++nextNeuronIndex)
-    {
-        int nextWeightIndex = ComputeWeightIndex(currentLayerNeuronCount, nextNeuronIndex) + neuronIndex; //не векторизуетс€:(
-
-        float nextWeight = nextLayerWeights[nextWeightIndex];
-        float nextNabla = nextLayerDeDz[nextNeuronIndex];
-        float multiplied = nextWeight * nextNabla;
-
-        KahanAddElement(&accDeDz, multiplied);
-    }
-
-    float currentDeDz = accDeDz.Sum;
-
-
-
+    //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего уже выполнен
+    float dedy = dedys[neuronIndex];
     float nOut = currentLayerNET[neuronIndex];
-    currentDeDz *= <DerivativeMethodCall>(nOut);
+
+    float currentDeDz = dedy * <DerivativeMethodCall>(nOut);
     currentLayerDeDz[neuronIndex] = currentDeDz;
 
     int currentNablaIndex4 = currentNablaIndex / 4;
