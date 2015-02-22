@@ -1,6 +1,7 @@
 using System;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
@@ -20,11 +21,12 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
         private readonly IMemLayerContainer _previousLayerContainer;
         private readonly IMemLayerContainer _currentLayerContainer;
         private readonly IMemDesiredValuesContainer _desiredValuesContainer;
+        private readonly IOpenCLDeDyAggregator _deDyAggregator;
         private readonly ILayer _outputLayer;
         private readonly ILayer _preOutputLayer;
         private readonly Kernel _outputKernelIncrement;
         private readonly Kernel _outputKernelOverwrite;
-        
+
         private readonly MemFloat _nablaWeights;
         private readonly MemFloat _nablaBias;
 
@@ -32,8 +34,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
 
         public MemFloat DeDz
         {
-            get;
-            private set;
+            get
+            {
+                throw new InvalidOperationException();
+            }
         }
 
 
@@ -44,7 +48,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
             IMemLayerContainer previousLayerContainer,
             IMemLayerContainer currentLayerContainer,
             IKernelTextProvider kernelTextProvider,
-            IMemDesiredValuesContainer desiredValuesContainer
+            IMemDesiredValuesContainer desiredValuesContainer,
+            IOpenCLDeDyAggregator deDyAggregator
             )
         {
             if (clProvider == null)
@@ -75,11 +80,16 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
             {
                 throw new ArgumentNullException("desiredValuesContainer");
             }
+            if (deDyAggregator == null)
+            {
+                throw new ArgumentNullException("deDyAggregator");
+            }
 
             _config = config;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _desiredValuesContainer = desiredValuesContainer;
+            _deDyAggregator = deDyAggregator;
 
             var layerIndex = mlp.Layers.Length - 1;
 
@@ -87,35 +97,34 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
             _preOutputLayer = mlp.Layers[layerIndex - 1];
 
             _nablaWeights = clProvider.CreateFloatMem(
-                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount, //_outputLayer.Neurons[0].Weights.Length,
+                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             _nablaBias = clProvider.CreateFloatMem(
                 _outputLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
-            DeDz = clProvider.CreateFloatMem(
-                _outputLayer.TotalNeuronCount,
-                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-
-
             _updateWeightKernel = clProvider.CreateKernel(
                 kernelTextProvider.UpdateWeightKernelSource,
-                "UpdateWeightKernel");
+                "UpdateWeightKernel"
+                );
 
             _outputKernelIncrement = clProvider.CreateKernel(
                 kernelTextProvider.GetIncrementCalculationKernelsSource(layerIndex),
-                "OutputLayerTrain");
+                "OutputLayerTrain"
+                );
 
             _outputKernelOverwrite = clProvider.CreateKernel(
                 kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
-                "OutputLayerTrain");
-
+                "OutputLayerTrain"
+                );
         }
 
         public void Prepare()
         {
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
             _nablaBias.Write(BlockModeEnum.NonBlocking);
+
+            this._deDyAggregator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -134,7 +143,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                     .SetKernelArgMem(0, _currentLayerContainer.NetMem)
                     .SetKernelArgMem(1, _previousLayerContainer.StateMem)
                     .SetKernelArgMem(2, _currentLayerContainer.StateMem)
-                    .SetKernelArgMem(3, this.DeDz)
+                    .SetKernelArgMem(3, this._deDyAggregator.DeDz)
                     .SetKernelArgMem(4, _desiredValuesContainer.DesiredOutput)
                     .SetKernelArgMem(5, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(6, _nablaWeights)
@@ -162,7 +171,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                     .SetKernelArgMem(0, _currentLayerContainer.NetMem)
                     .SetKernelArgMem(1, _previousLayerContainer.StateMem)
                     .SetKernelArgMem(2, _currentLayerContainer.StateMem)
-                    .SetKernelArgMem(3, this.DeDz)
+                    .SetKernelArgMem(3, this._deDyAggregator.DeDz)
                     .SetKernelArgMem(4, _desiredValuesContainer.DesiredOutput)
                     .SetKernelArgMem(5, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(6, _nablaWeights)
@@ -184,6 +193,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                         })
                     ;
             }
+
+            this._deDyAggregator.Aggregate();
         }
 
         public void UpdateWeights()

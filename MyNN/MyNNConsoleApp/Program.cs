@@ -12,8 +12,8 @@ namespace MyNNConsoleApp
             {
                 //Convolute2.Do();
 
-                CSharpRefactorChecker.DoTrain();
-                //GPURefactorChecker.DoTrain();
+                //CSharpRefactorChecker.DoTrain();
+                GPURefactorChecker.DoTrain();
 
                 Console.WriteLine(".......... press any key to exit");
                 Console.ReadLine();

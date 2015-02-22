@@ -1,3 +1,4 @@
+using MyNN.MLP.DeDyAggregator;
 using OpenCL.Net.Wrapper.Mem.Data;
 
 namespace MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator

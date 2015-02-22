@@ -3,6 +3,7 @@ using MyNN.Common;
 using MyNN.Common.Other;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
@@ -36,6 +37,14 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Back
         private readonly MemFloat _currentDeDz;
 
         private readonly Kernel _updateWeightKernel;
+
+        public IOpenCLDeDyAggregator DeDyAggregator
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public MemFloat DeDz
         {

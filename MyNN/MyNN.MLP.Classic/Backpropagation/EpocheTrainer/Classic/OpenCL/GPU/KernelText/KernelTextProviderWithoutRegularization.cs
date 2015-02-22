@@ -164,10 +164,10 @@ __kernel void HiddenLayerTrain(
         int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
         //просчет состо€ни€ нейронов текущего сло€, по состо€нию нейронов последующего уже выполнен
-        float currentDeDz = preprocessed[neuronIndex];
-
+        float dedy = preprocessed[neuronIndex];
         float nOut = currentLayerNET[neuronIndex];
-        currentDeDz *= <DerivativeMethodCall>(nOut);
+
+        float currentDeDz = dedy * <DerivativeMethodCall>(nOut);
         currentLayerDeDz[neuronIndex] = currentDeDz;
 
 

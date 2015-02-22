@@ -38,6 +38,14 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly Kernel _updateWeightKernel;
         private readonly IOpenCLDeDyAggregator _dedyAggregator;
 
+        public IOpenCLDeDyAggregator DeDyAggregator
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public MemFloat DeDz
         {
             get

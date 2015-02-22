@@ -4,6 +4,11 @@ namespace MyNN.MLP.DeDyAggregator
 {
     public interface IOpenCLDeDyAggregator : IDeDyAggregator
     {
+        MemFloat DeDz
+        {
+            get;
+        }
+
         MemFloat DeDy
         {
             get;

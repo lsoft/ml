@@ -1,6 +1,7 @@
 using System;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL;
 using MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem;
@@ -31,6 +32,14 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly MemFloat _nablaBias;
 
         private readonly Kernel _updateWeightKernel;
+
+        public IOpenCLDeDyAggregator DeDyAggregator
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public MemFloat DeDz
         {

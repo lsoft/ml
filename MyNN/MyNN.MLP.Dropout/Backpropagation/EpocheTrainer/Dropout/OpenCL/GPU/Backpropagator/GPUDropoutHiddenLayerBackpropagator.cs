@@ -36,6 +36,14 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
         private readonly Kernel _updateWeightKernel;
         private readonly IOpenCLDeDyAggregator _dedyAggregator;
 
+        public IOpenCLDeDyAggregator DeDyAggregator
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public MemFloat DeDz
         {
             get

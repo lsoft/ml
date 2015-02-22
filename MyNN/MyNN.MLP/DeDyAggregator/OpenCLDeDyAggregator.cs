@@ -13,14 +13,19 @@ namespace MyNN.MLP.DeDyAggregator
     {
         private const int PreprocessGroupSize = 16;
 
-        private readonly int _previousLayerTotalNeuronCount;
-        private readonly int _aggregateLayerTotalNeuronCount;
-        private readonly MemFloat _aggregateLayerDeDz;
+        private readonly int _previousLayerNeuronCount;
+        private readonly int _aggregateLayerNeuronCount;
         private readonly MemFloat _aggregateLayerWeights;
 
         private readonly int _aggregationFactor;
         private readonly Kernel _preprocessKernel0;
         private readonly Kernel _preprocessKernel1;
+
+        public MemFloat DeDz
+        {
+            get;
+            private set;
+        }
 
         public MemFloat DeDy
         {
@@ -30,19 +35,25 @@ namespace MyNN.MLP.DeDyAggregator
 
         public OpenCLDeDyAggregator(
             CLProvider clProvider,
-            int previousLayerTotalNeuronCount,
-            int aggregateLayerTotalNeuronCount,
+            int previousLayerNeuronCount,
+            int aggregateLayerNeuronCount,
             MemFloat aggregateLayerDeDz,
+            MemFloat aggregateLayerWeights
+            )
+        {
+            throw new InvalidOperationException();
+        }
+
+        public OpenCLDeDyAggregator(
+            CLProvider clProvider,
+            int previousLayerNeuronCount,
+            int aggregateLayerNeuronCount,
             MemFloat aggregateLayerWeights
             )
         {
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
-            }
-            if (aggregateLayerDeDz == null)
-            {
-                throw new ArgumentNullException("aggregateLayerDeDz");
             }
             if (aggregateLayerWeights == null)
             {
@@ -54,15 +65,19 @@ namespace MyNN.MLP.DeDyAggregator
                 throw new NotSupportedException("Intel CPU is not supported due to bugs in INTEL CPU OPENCL implementation: this aggregation does not work correctly SOMETIMES(!) on Intel CPU, but works fine at ALL THE TIME on INTEL GPU or NVIDIA/AMD GPU. There is some sort of synchronization bug in INTEL CPU OPENCL.");
             }
 
-            _previousLayerTotalNeuronCount = previousLayerTotalNeuronCount;
-            _aggregateLayerTotalNeuronCount = aggregateLayerTotalNeuronCount;
-            _aggregateLayerDeDz = aggregateLayerDeDz;
+            _previousLayerNeuronCount = previousLayerNeuronCount;
+            _aggregateLayerNeuronCount = aggregateLayerNeuronCount;
             _aggregateLayerWeights = aggregateLayerWeights;
 
-            _aggregationFactor = Helper.UpTo(aggregateLayerTotalNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
+            _aggregationFactor = Helper.UpTo(aggregateLayerNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
+
+            this.DeDz = clProvider.CreateFloatMem(
+                aggregateLayerNeuronCount,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite
+                );
 
             this.DeDy = clProvider.CreateFloatMem(
-                previousLayerTotalNeuronCount * _aggregationFactor,
+                previousLayerNeuronCount * _aggregationFactor,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite
                 );
 
@@ -83,16 +98,16 @@ namespace MyNN.MLP.DeDyAggregator
             )
         {
             _preprocessKernel0
-                .SetKernelArgMem(0, this._aggregateLayerDeDz)
+                .SetKernelArgMem(0, this.DeDz)
                 .SetKernelArgMem(1, _aggregateLayerWeights)
                 .SetKernelArgMem(2, this.DeDy)
-                .SetKernelArg(3, sizeof(int), _previousLayerTotalNeuronCount)
-                .SetKernelArg(4, sizeof(int), _aggregateLayerTotalNeuronCount)
+                .SetKernelArg(3, sizeof(int), _previousLayerNeuronCount)
+                .SetKernelArg(4, sizeof(int), _aggregateLayerNeuronCount)
                 .EnqueueNDRangeKernel(
                     new[]
                     {
-                        Helper.UpTo(_previousLayerTotalNeuronCount, PreprocessGroupSize),
-                        Helper.UpTo(_aggregateLayerTotalNeuronCount, PreprocessGroupSize)
+                        Helper.UpTo(_previousLayerNeuronCount, PreprocessGroupSize),
+                        Helper.UpTo(_aggregateLayerNeuronCount, PreprocessGroupSize)
                     },
                     new[]
                     {
@@ -120,12 +135,12 @@ namespace MyNN.MLP.DeDyAggregator
                     currentLocalGroupSize = PreprocessGroupSize;
                 }
 
-                var globalx = Helper.UpTo(_previousLayerTotalNeuronCount, currentLocalGroupSize);
+                var globalx = Helper.UpTo(_previousLayerNeuronCount, currentLocalGroupSize);
                 var globaly = Helper.UpTo(aggregationFactor, currentLocalGroupSize);
 
                 _preprocessKernel1
                     .SetKernelArgMem(0, this.DeDy)
-                    .SetKernelArg(1, sizeof(int), _previousLayerTotalNeuronCount)
+                    .SetKernelArg(1, sizeof(int), _previousLayerNeuronCount)
                     .SetKernelArg(2, sizeof(int), aggregationFactor)
                     .SetKernelArg(3, sizeof(int), currentLocalGroupSize)
                     .SetKernelArg(4, sizeof(int), currentLocalGroupSize)
@@ -149,6 +164,9 @@ namespace MyNN.MLP.DeDyAggregator
 
         public void ClearAndWrite()
         {
+            this.DeDz.Array.Clear();
+            this.DeDz.Write(BlockModeEnum.NonBlocking);
+
             this.DeDy.Array.Clear();
             this.DeDy.Write(BlockModeEnum.NonBlocking);
         }
