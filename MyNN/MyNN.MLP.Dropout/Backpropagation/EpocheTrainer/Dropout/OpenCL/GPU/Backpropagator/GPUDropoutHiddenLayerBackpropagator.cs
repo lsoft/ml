@@ -18,12 +18,15 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
     public class GPUDropoutHiddenLayerBackpropagator : IMemLayerBackpropagator
     {
         private readonly ILearningAlgorithmConfig _config;
+        private readonly int _layerIndex;
         private readonly ILayer _previousLayer;
         private readonly ILayer _currentLayer;
 
         private readonly IMemLayerContainer _previousLayerContainer;
         private readonly IMemLayerContainer _currentLayerContainer;
         private readonly IDropoutLayerPropagator _currentLayerPropagator;
+        private readonly IOpenCLDeDyAggregator _nextLayerDeDyAggregator;
+        private readonly IOpenCLDeDyAggregator _currentLayerDeDyAggregator;
 
         private readonly Kernel _hiddenKernelOverwrite;
         private readonly Kernel _hiddenKernelIncrement;
@@ -31,25 +34,13 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
         private readonly MemFloat _nablaWeights;
         private readonly MemFloat _nablaBias;
 
-        private readonly MemFloat _currentDeDz;
-        
         private readonly Kernel _updateWeightKernel;
-        private readonly IOpenCLDeDyAggregator _dedyAggregator;
-
-        public IOpenCLDeDyAggregator DeDyAggregator
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         public MemFloat DeDz
         {
             get
             {
-                return
-                    _currentDeDz;
+                throw new InvalidOperationException();
             }
         }
 
@@ -62,8 +53,9 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
             IMemLayerContainer currentLayerContainer,
             IMemLayerContainer nextLayerContainer,
             IKernelTextProvider kernelTextProvider,
-            MemFloat nextLayerDeDz,
-            IDropoutLayerPropagator currentLayerPropagator
+            IDropoutLayerPropagator currentLayerPropagator,
+            IOpenCLDeDyAggregator nextLayerDeDyAggregator,
+            IOpenCLDeDyAggregator currentLayerDeDyAggregator
             )
         {
             if (clProvider == null)
@@ -94,34 +86,36 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
             {
                 throw new ArgumentNullException("kernelTextProvider");
             }
-            if (nextLayerDeDz == null)
-            {
-                throw new ArgumentNullException("nextLayerDeDz");
-            }
             if (currentLayerPropagator == null)
             {
                 throw new ArgumentNullException("currentLayerPropagator");
             }
+            if (nextLayerDeDyAggregator == null)
+            {
+                throw new ArgumentNullException("nextLayerDeDyAggregator");
+            }
+            if (currentLayerDeDyAggregator == null)
+            {
+                throw new ArgumentNullException("currentLayerDeDyAggregator");
+            }
 
             var previousLayer = mlp.Layers[layerIndex - 1];
             var currentLayer = mlp.Layers[layerIndex];
-            var nextLayer = mlp.Layers[layerIndex + 1];
 
             _config = config;
+            _layerIndex = layerIndex;
             _previousLayer = previousLayer;
             _currentLayer = currentLayer;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _currentLayerPropagator = currentLayerPropagator;
+            _nextLayerDeDyAggregator = nextLayerDeDyAggregator;
+            _currentLayerDeDyAggregator = currentLayerDeDyAggregator;
 
             _nablaWeights = clProvider.CreateFloatMem(
-                currentLayer.TotalNeuronCount * previousLayer.TotalNeuronCount, //currentLayer.Neurons[0].Weights.Length,
+                currentLayer.TotalNeuronCount * previousLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             _nablaBias = clProvider.CreateFloatMem(
-                currentLayer.TotalNeuronCount,
-                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-
-            _currentDeDz = clProvider.CreateFloatMem(
                 currentLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
@@ -136,14 +130,6 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
             _hiddenKernelOverwrite = clProvider.CreateKernel(
                 kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
                 "HiddenLayerTrain");
-
-            _dedyAggregator = new GPUDeDyAggregator(
-                clProvider,
-                currentLayer.TotalNeuronCount,
-                nextLayer.TotalNeuronCount,
-                nextLayerDeDz,
-                nextLayerContainer.WeightMem
-                );
         }
 
         public void Prepare()
@@ -151,7 +137,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
             _nablaBias.Write(BlockModeEnum.NonBlocking);
 
-            _dedyAggregator.ClearAndWrite();
+            _currentLayerDeDyAggregator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -160,8 +146,6 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
             bool firstItemInBatch
             )
         {
-            _dedyAggregator.Aggregate();
-
             const uint HiddenLocalGroupSize = 64;
             uint HiddenGlobalGroupSize =
                 (uint)_currentLayer.TotalNeuronCount * HiddenLocalGroupSize
@@ -172,7 +156,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                 _hiddenKernelOverwrite
                     .SetKernelArgMem(0, _currentLayerContainer.NetMem)
                     .SetKernelArgMem(1, _previousLayerContainer.StateMem)
-                    .SetKernelArgMem(2, this.DeDz)
+                    .SetKernelArgMem(2, _currentLayerDeDyAggregator.DeDz)
                     .SetKernelArgMem(3, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(4, _nablaWeights)
 
@@ -187,7 +171,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                     .SetKernelArg(11, 4, _config.RegularizationFactor)
                     .SetKernelArg(12, 4, (float)(dataCount))
                     .SetKernelArgLocalMem(13, sizeof(float) * HiddenLocalGroupSize)
-                    .SetKernelArgMem(14, _dedyAggregator.DeDy)
+                    .SetKernelArgMem(14, _nextLayerDeDyAggregator.DeDy)
                     .SetKernelArgMem(15, _currentLayerContainer.BiasMem)
                     .SetKernelArgMem(16, _nablaBias)
                     .EnqueueNDRangeKernel(
@@ -206,7 +190,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                 _hiddenKernelIncrement
                     .SetKernelArgMem(0, _currentLayerContainer.NetMem)
                     .SetKernelArgMem(1, _previousLayerContainer.StateMem)
-                    .SetKernelArgMem(2, this.DeDz)
+                    .SetKernelArgMem(2, _currentLayerDeDyAggregator.DeDz)
                     .SetKernelArgMem(3, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(4, _nablaWeights)
 
@@ -221,7 +205,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                     .SetKernelArg(11, 4, _config.RegularizationFactor)
                     .SetKernelArg(12, 4, (float)(dataCount))
                     .SetKernelArgLocalMem(13, sizeof(float) * HiddenLocalGroupSize)
-                    .SetKernelArgMem(14, _dedyAggregator.DeDy)
+                    .SetKernelArgMem(14, _nextLayerDeDyAggregator.DeDy)
                     .SetKernelArgMem(15, _currentLayerContainer.BiasMem)
                     .SetKernelArgMem(16, _nablaBias)
                     .EnqueueNDRangeKernel(
@@ -234,6 +218,11 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                             HiddenLocalGroupSize
                         })
                     ;
+            }
+
+            if (_layerIndex > 1)
+            {
+                _currentLayerDeDyAggregator.Aggregate();
             }
         }
 

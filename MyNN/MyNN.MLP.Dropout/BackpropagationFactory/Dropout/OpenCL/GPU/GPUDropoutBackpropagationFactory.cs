@@ -70,10 +70,6 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
             {
                 throw new ArgumentNullException("randomizer");
             }
-            if (_clProvider == null)
-            {
-                throw new ArgumentNullException("_clProvider");
-            }
             if (artifactContainer == null)
             {
                 throw new ArgumentNullException("artifactContainer");
@@ -137,7 +133,8 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
                             containers[layerIndex - 1] as IMemLayerContainer,
                             containers[layerIndex] as IMemLayerContainer,
                             kernelTextProvider,
-                            desiredValuesContainer
+                            desiredValuesContainer,
+                            dedyAggregators[layerIndex] as IOpenCLDeDyAggregator
                             );
                     }
                     else
@@ -151,8 +148,9 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
                             containers[layerIndex] as IMemLayerContainer,
                             containers[layerIndex + 1] as IMemLayerContainer,
                             kernelTextProvider,
-                            backpropagators[layerIndex + 1].DeDz,
-                            propagators[layerIndex] as IDropoutLayerPropagator
+                            propagators[layerIndex] as IDropoutLayerPropagator,
+                            dedyAggregators[layerIndex + 1] as IOpenCLDeDyAggregator,
+                            dedyAggregators[layerIndex] as IOpenCLDeDyAggregator
                             );
                     }
                 }
