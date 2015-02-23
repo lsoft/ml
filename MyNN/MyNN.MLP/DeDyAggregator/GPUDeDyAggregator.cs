@@ -41,7 +41,28 @@ namespace MyNN.MLP.DeDyAggregator
             MemFloat aggregateLayerWeights
             )
         {
-            throw new InvalidOperationException();
+            _previousLayerNeuronCount = previousLayerNeuronCount;
+            _aggregateLayerNeuronCount = aggregateLayerNeuronCount;
+            _aggregateLayerWeights = aggregateLayerWeights;
+
+            _aggregationFactor = Helper.UpTo(aggregateLayerNeuronCount, PreprocessGroupSize) / PreprocessGroupSize;
+
+            this.DeDz = aggregateLayerDeDz;
+
+            this.DeDy = clProvider.CreateFloatMem(
+                previousLayerNeuronCount * _aggregationFactor,
+                MemFlags.CopyHostPtr | MemFlags.ReadWrite
+                );
+
+            _preprocessKernel0 = clProvider.CreateKernel(
+                this.GetAggregationKernel0(PreprocessGroupSize),
+                "PreprocessKernel0"
+                );
+
+            _preprocessKernel1 = clProvider.CreateKernel(
+                this.GetAggregationKernel1(),
+                "PreprocessKernel1"
+                );
         }
 
         public GPUDeDyAggregator(
