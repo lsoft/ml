@@ -15,7 +15,8 @@ namespace MyNNConsoleApp
                 //CSharpRefactorChecker.DoTrain();
                 //GPURefactorChecker.DoTrain();
                 //CPURefactorChecker.DoTrain();
-                GPUDropoutRefactorChecker.DoTrain();
+                //GPUDropoutRefactorChecker.DoTrain();
+                GPUDropconnectRefactorChecker.DoTrain();
 
                 Console.WriteLine(".......... press any key to exit");
                 Console.ReadLine();

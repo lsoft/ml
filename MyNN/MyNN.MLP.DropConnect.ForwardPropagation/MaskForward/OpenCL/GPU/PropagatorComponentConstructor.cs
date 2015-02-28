@@ -56,10 +56,49 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
             var mc = this.CreateMaskContainersByMLP(mlp);
             var c = this.CreateMemsByMLP(mlp);
             var p = this.CreatePropagatorsByMLP(mlp, c, mc);
+            var a = this.CreateAggregators(mlp, c);
 
             containers = c;
             propagators = p;
-            dedyAggregators = null;
+            dedyAggregators = a;
+        }
+
+        private IOpenCLDeDyAggregator[] CreateAggregators(
+            IMLP mlp,
+            IMemLayerContainer[] containers
+            )
+        {
+            if (mlp == null)
+            {
+                throw new ArgumentNullException("mlp");
+            }
+            if (containers == null)
+            {
+                throw new ArgumentNullException("containers");
+            }
+
+            var layerCount = mlp.Layers.Length;
+
+            var result = new IOpenCLDeDyAggregator[layerCount];
+            result[0] = null; //для первого слоя нет пропагатора
+
+            for (var layerIndex = layerCount - 1; layerIndex > 0; layerIndex--)
+            {
+                var previousLayer = mlp.Layers[layerIndex - 1];
+                var aggregateLayer = mlp.Layers[layerIndex];
+
+                var p = new GPUDeDyAggregator(
+                    _clProvider,
+                    previousLayer.TotalNeuronCount,
+                    aggregateLayer.TotalNeuronCount,
+                    containers[layerIndex].WeightMem
+                    );
+
+                result[layerIndex] = p;
+            }
+
+            return
+                result;
         }
 
         private IOpenCLMaskContainer[] CreateMaskContainersByMLP(

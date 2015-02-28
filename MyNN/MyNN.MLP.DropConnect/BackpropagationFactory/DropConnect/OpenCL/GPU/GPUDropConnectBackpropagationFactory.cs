@@ -140,7 +140,8 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
                             containers[layerIndex] as IMemLayerContainer,
                             kernelTextProvider,
                             desiredValuesContainer,
-                            propagators[layerIndex] as IDropConnectLayerPropagator
+                            propagators[layerIndex] as IDropConnectLayerPropagator,
+                            dedyAggregators[layerIndex] as IOpenCLDeDyAggregator
                             );
                     }
                     else
@@ -154,8 +155,9 @@ namespace MyNN.MLP.DropConnect.BackpropagationFactory.DropConnect.OpenCL.GPU
                             containers[layerIndex] as IMemLayerContainer,
                             containers[layerIndex + 1] as IMemLayerContainer,
                             kernelTextProvider,
-                            backpropagators[layerIndex + 1].DeDz,
-                            propagators[layerIndex] as IDropConnectLayerPropagator
+                            propagators[layerIndex] as IDropConnectLayerPropagator,
+                            dedyAggregators[layerIndex + 1] as IOpenCLDeDyAggregator,
+                            dedyAggregators[layerIndex] as IOpenCLDeDyAggregator
                             );
                     }
                 }

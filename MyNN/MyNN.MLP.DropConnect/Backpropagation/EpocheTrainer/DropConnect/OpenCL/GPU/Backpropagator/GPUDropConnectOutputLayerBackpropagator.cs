@@ -23,6 +23,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly IMemLayerContainer _currentLayerContainer;
         private readonly IMemDesiredValuesContainer _desiredValuesContainer;
         private readonly IDropConnectLayerPropagator _currentLayerPropagator;
+        private readonly IOpenCLDeDyAggregator _deDyAggregator;
         private readonly ILayer _outputLayer;
         private readonly ILayer _preOutputLayer;
         private readonly Kernel _outputKernelIncrement;
@@ -33,18 +34,12 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
         private readonly Kernel _updateWeightKernel;
 
-        public IOpenCLDeDyAggregator DeDyAggregator
+        public MemFloat DeDz
         {
             get
             {
-                throw new NotImplementedException();
+                throw new InvalidOperationException();
             }
-        }
-
-        public MemFloat DeDz
-        {
-            get;
-            private set;
         }
 
 
@@ -56,7 +51,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             IMemLayerContainer currentLayerContainer,
             IKernelTextProvider kernelTextProvider,
             IMemDesiredValuesContainer desiredValuesContainer,
-            IDropConnectLayerPropagator currentLayerPropagator
+            IDropConnectLayerPropagator currentLayerPropagator,
+            IOpenCLDeDyAggregator deDyAggregator
             )
         {
             if (clProvider == null)
@@ -91,12 +87,17 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             {
                 throw new ArgumentNullException("currentLayerPropagator");
             }
+            if (deDyAggregator == null)
+            {
+                throw new ArgumentNullException("deDyAggregator");
+            }
 
             _config = config;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _desiredValuesContainer = desiredValuesContainer;
             _currentLayerPropagator = currentLayerPropagator;
+            _deDyAggregator = deDyAggregator;
 
             var layerIndex = mlp.Layers.Length - 1;
 
@@ -104,13 +105,9 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _preOutputLayer = mlp.Layers[layerIndex - 1];
 
             _nablaWeights = clProvider.CreateFloatMem(
-                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount, //_outputLayer.Neurons[0].Weights.Length,
+                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             _nablaBias = clProvider.CreateFloatMem(
-                _outputLayer.TotalNeuronCount,
-                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-
-            DeDz = clProvider.CreateFloatMem(
                 _outputLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
@@ -133,6 +130,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         {
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
             _nablaBias.Write(BlockModeEnum.NonBlocking);
+
+            this._deDyAggregator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -151,7 +150,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                     .SetKernelArgMem(1, _previousLayerContainer.StateMem)
                     .SetKernelArgMem(2, _currentLayerContainer.StateMem)
-                    .SetKernelArgMem(3, this.DeDz)
+                    .SetKernelArgMem(3, this._deDyAggregator.DeDz)
 
                     .SetKernelArgMem(4, _desiredValuesContainer.DesiredOutput)
 
@@ -191,7 +190,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
                     .SetKernelArgMem(1, _previousLayerContainer.StateMem)
                     .SetKernelArgMem(2, _currentLayerContainer.StateMem)
-                    .SetKernelArgMem(3, this.DeDz)
+                    .SetKernelArgMem(3, this._deDyAggregator.DeDz)
 
                     .SetKernelArgMem(4, _desiredValuesContainer.DesiredOutput)
 
@@ -224,6 +223,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                         }
                     );
             }
+
+            this._deDyAggregator.Aggregate();
         }
 
         public void UpdateWeights()

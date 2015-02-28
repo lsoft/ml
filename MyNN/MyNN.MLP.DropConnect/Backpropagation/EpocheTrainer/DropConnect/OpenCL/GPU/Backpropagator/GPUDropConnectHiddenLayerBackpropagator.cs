@@ -20,12 +20,15 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
     public class GPUDropConnectHiddenLayerBackpropagator : IMemLayerBackpropagator
     {
         private readonly ILearningAlgorithmConfig _config;
+        private readonly int _layerIndex;
         private readonly ILayer _previousLayer;
         private readonly ILayer _currentLayer;
         
         private readonly IMemLayerContainer _previousLayerContainer;
         private readonly IMemLayerContainer _currentLayerContainer;
         private readonly IDropConnectLayerPropagator _currentLayerPropagator;
+        private readonly IOpenCLDeDyAggregator _nextLayerDeDyAggregator;
+        private readonly IOpenCLDeDyAggregator _currentLayerDeDyAggregator;
 
         private readonly Kernel _hiddenKernelOverwrite;
         private readonly Kernel _hiddenKernelIncrement;
@@ -33,25 +36,13 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly MemFloat _nablaWeights;
         private readonly MemFloat _nablaBias;
 
-        private readonly MemFloat _currentDeDz;
-
         private readonly Kernel _updateWeightKernel;
-        private readonly IOpenCLDeDyAggregator _dedyAggregator;
-
-        public IOpenCLDeDyAggregator DeDyAggregator
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         public MemFloat DeDz
         {
             get
             {
-                return
-                    _currentDeDz;
+                throw new InvalidOperationException();
             }
         }
 
@@ -64,8 +55,9 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             IMemLayerContainer currentLayerContainer,
             IMemLayerContainer nextLayerContainer,
             IKernelTextProvider kernelTextProvider,
-            MemFloat nextLayerDeDz,
-            IDropConnectLayerPropagator currentLayerPropagator
+            IDropConnectLayerPropagator currentLayerPropagator,
+            IOpenCLDeDyAggregator nextLayerDeDyAggregator,
+            IOpenCLDeDyAggregator currentLayerDeDyAggregator
             )
         {
             if (clProvider == null)
@@ -96,25 +88,31 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             {
                 throw new ArgumentNullException("kernelTextProvider");
             }
-            if (nextLayerDeDz == null)
-            {
-                throw new ArgumentNullException("nextLayerDeDz");
-            }
             if (currentLayerPropagator == null)
             {
                 throw new ArgumentNullException("currentLayerPropagator");
             }
+            if (nextLayerDeDyAggregator == null)
+            {
+                throw new ArgumentNullException("nextLayerDeDyAggregator");
+            }
+            if (currentLayerDeDyAggregator == null)
+            {
+                throw new ArgumentNullException("currentLayerDeDyAggregator");
+            }
 
             var previousLayer = mlp.Layers[layerIndex - 1];
             var currentLayer = mlp.Layers[layerIndex];
-            var nextLayer = mlp.Layers[layerIndex + 1];
 
             _config = config;
+            _layerIndex = layerIndex;
             _previousLayer = previousLayer;
             _currentLayer = currentLayer;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _currentLayerPropagator = currentLayerPropagator;
+            _nextLayerDeDyAggregator = nextLayerDeDyAggregator;
+            _currentLayerDeDyAggregator = currentLayerDeDyAggregator;
 
             _nablaWeights = clProvider.CreateFloatMem(
                 currentLayer.TotalNeuronCount * previousLayer.TotalNeuronCount, //currentLayer.Neurons[0].Weights.Length,
@@ -122,11 +120,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _nablaBias = clProvider.CreateFloatMem(
                 currentLayer.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-
-            _currentDeDz = clProvider.CreateFloatMem(
-                currentLayer.TotalNeuronCount,
-                MemFlags.CopyHostPtr | MemFlags.ReadWrite);
-
 
             _updateWeightKernel = clProvider.CreateKernel(
                 kernelTextProvider.UpdateWeightKernelSource,
@@ -139,14 +132,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _hiddenKernelOverwrite = clProvider.CreateKernel(
                 kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
                 "HiddenLayerTrain");
-
-            _dedyAggregator = new GPUDeDyAggregator(
-                clProvider,
-                currentLayer.TotalNeuronCount,
-                nextLayer.TotalNeuronCount,
-                nextLayerDeDz,
-                nextLayerContainer.WeightMem
-                );
         }
 
         public void Prepare()
@@ -154,7 +139,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _nablaWeights.Write(BlockModeEnum.NonBlocking);
             _nablaBias.Write(BlockModeEnum.NonBlocking);
 
-            _dedyAggregator.ClearAndWrite();
+            _currentLayerDeDyAggregator.ClearAndWrite();
         }
 
         public void Backpropagate(
@@ -163,94 +148,75 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             bool firstItemInBatch
             )
         {
-            _dedyAggregator.Aggregate();
+            const uint hiddenLocalSize = 256;
+            uint hiddenGlobalSize =
+                hiddenLocalSize*
+                (uint) _currentLayer.TotalNeuronCount;
 
+            if (firstItemInBatch)
             {
-                const uint hiddenLocalSize = 256;
-                uint hiddenGlobalSize =
-                    hiddenLocalSize*
-                    (uint)_currentLayer.TotalNeuronCount;
+                _hiddenKernelOverwrite
+                    .SetKernelArgMem(0, _currentLayerContainer.NetMem)
+                    .SetKernelArgMem(1, _previousLayerContainer.StateMem)
+                    .SetKernelArgMem(2, _currentLayerDeDyAggregator.DeDz)
+                    .SetKernelArgMem(3, _currentLayerContainer.WeightMem)
+                    .SetKernelArgMem(4, _nablaWeights)
+                    .SetKernelArgMem(5, _currentLayerPropagator.MaskContainer.MaskMem)
+                    .SetKernelArg(6, 4, _previousLayer.TotalNeuronCount)
+                    .SetKernelArg(7, 4, _currentLayer.TotalNeuronCount)
+                    .SetKernelArg(8, 4, learningRate)
+                    .SetKernelArg(9, 4, _config.RegularizationFactor)
+                    .SetKernelArg(10, 4, (float) (dataCount))
+                    .SetKernelArg(11, 4, _currentLayerPropagator.MaskContainer.BitMask)
+                    .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
+                    .SetKernelArgMem(13, _nextLayerDeDyAggregator.DeDy)
+                    .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
+                    .SetKernelArgMem(15, _nablaBias)
+                    .EnqueueNDRangeKernel(
+                        new uint[]
+                        {
+                            hiddenGlobalSize
+                        }
+                        , new uint[]
+                        {
+                            hiddenLocalSize
+                        }
+                    );
+            }
+            else
+            {
+                _hiddenKernelIncrement
+                    .SetKernelArgMem(0, _currentLayerContainer.NetMem)
+                    .SetKernelArgMem(1, _previousLayerContainer.StateMem)
+                    .SetKernelArgMem(2, _currentLayerDeDyAggregator.DeDz)
+                    .SetKernelArgMem(3, _currentLayerContainer.WeightMem)
+                    .SetKernelArgMem(4, _nablaWeights)
+                    .SetKernelArgMem(5, _currentLayerPropagator.MaskContainer.MaskMem)
+                    .SetKernelArg(6, 4, _previousLayer.TotalNeuronCount)
+                    .SetKernelArg(7, 4, _currentLayer.TotalNeuronCount)
+                    .SetKernelArg(8, 4, learningRate)
+                    .SetKernelArg(9, 4, _config.RegularizationFactor)
+                    .SetKernelArg(10, 4, (float) (dataCount))
+                    .SetKernelArg(11, 4, _currentLayerPropagator.MaskContainer.BitMask)
+                    .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
+                    .SetKernelArgMem(13, _nextLayerDeDyAggregator.DeDy)
+                    .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
+                    .SetKernelArgMem(15, _nablaBias)
+                    .EnqueueNDRangeKernel(
+                        new uint[]
+                        {
+                            hiddenGlobalSize
+                        }
+                        , new uint[]
+                        {
+                            hiddenLocalSize
+                        }
+                    );
+            }
 
-                if (firstItemInBatch)
-                {
-                    _hiddenKernelOverwrite
-                        .SetKernelArgMem(0, _currentLayerContainer.NetMem)
-
-                        .SetKernelArgMem(1, _previousLayerContainer.StateMem)
-                        .SetKernelArgMem(2, this.DeDz)
-                        .SetKernelArgMem(3, _currentLayerContainer.WeightMem)
-
-                        .SetKernelArgMem(4, _nablaWeights)
-
-                        .SetKernelArgMem(5, _currentLayerPropagator.MaskContainer.MaskMem)
-
-                        .SetKernelArg(6, 4, _previousLayer.TotalNeuronCount)
-                        .SetKernelArg(7, 4, _currentLayer.TotalNeuronCount)
-
-                        .SetKernelArg(8, 4, learningRate)
-                        .SetKernelArg(9, 4, _config.RegularizationFactor)
-                        .SetKernelArg(10, 4, (float) (dataCount))
-
-                        .SetKernelArg(11, 4, _currentLayerPropagator.MaskContainer.BitMask)
-
-                        .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
-
-                        .SetKernelArgMem(13, _dedyAggregator.DeDy)
-
-                        .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
-                        .SetKernelArgMem(15, _nablaBias)
-
-                        .EnqueueNDRangeKernel(
-                            new uint[]
-                            {
-                                hiddenGlobalSize
-                            }
-                            , new uint[]
-                            {
-                                hiddenLocalSize
-                            }
-                        );
-                }
-                else
-                {
-                    _hiddenKernelIncrement
-                        .SetKernelArgMem(0, _currentLayerContainer.NetMem)
-
-                        .SetKernelArgMem(1, _previousLayerContainer.StateMem)
-                        .SetKernelArgMem(2, this.DeDz)
-                        .SetKernelArgMem(3, _currentLayerContainer.WeightMem)
-
-                        .SetKernelArgMem(4, _nablaWeights)
-
-                        .SetKernelArgMem(5, _currentLayerPropagator.MaskContainer.MaskMem)
-
-                        .SetKernelArg(6, 4, _previousLayer.TotalNeuronCount)
-                        .SetKernelArg(7, 4, _currentLayer.TotalNeuronCount)
-
-                        .SetKernelArg(8, 4, learningRate)
-                        .SetKernelArg(9, 4, _config.RegularizationFactor)
-                        .SetKernelArg(10, 4, (float) (dataCount))
-
-                        .SetKernelArg(11, 4, _currentLayerPropagator.MaskContainer.BitMask)
-
-                        .SetKernelArgLocalMem(12, hiddenLocalSize*sizeof (float))
-
-                        .SetKernelArgMem(13, _dedyAggregator.DeDy)
-
-                        .SetKernelArgMem(14, _currentLayerContainer.BiasMem)
-                        .SetKernelArgMem(15, _nablaBias)
-
-                        .EnqueueNDRangeKernel(
-                            new uint[]
-                            {
-                                hiddenGlobalSize
-                            }
-                            , new uint[]
-                            {
-                                hiddenLocalSize
-                            }
-                        );
-                }
+            if (_layerIndex > 1)
+            {
+                _currentLayerDeDyAggregator.Aggregate();
             }
         }
 
