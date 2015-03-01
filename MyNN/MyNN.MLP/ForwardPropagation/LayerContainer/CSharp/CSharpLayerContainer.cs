@@ -6,8 +6,6 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
 {
     public class CSharpLayerContainer : ICSharpLayerContainer
     {
-        private readonly int _currentLayerTotalNeuronCount;
-
         public ILayerConfiguration Configuration
         {
             get;
@@ -47,11 +45,11 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
                 throw new ArgumentNullException("layerConfiguration");
             }
 
+            Configuration = layerConfiguration;
+
             var totalNeuronCount = layerConfiguration.TotalNeuronCount;
             var weightCount = layerConfiguration.WeightCount;
             var biasCount = layerConfiguration.BiasCount;
-
-            _currentLayerTotalNeuronCount = totalNeuronCount;
 
             //веса
             WeightMem = weightCount > 0 ? new float[weightCount] : null;
@@ -61,23 +59,6 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             NetMem = new float[totalNeuronCount];
             StateMem = new float[totalNeuronCount];
         }
-
-        //public CSharpLayerContainer(
-        //    int totalNeuronCount,
-        //    int weightCount,
-        //    int biasCount
-        //    )
-        //{
-        //    _currentLayerTotalNeuronCount = totalNeuronCount;
-
-        //    //веса
-        //    WeightMem = weightCount > 0 ? new float[weightCount] : null;
-        //    BiasMem = biasCount > 0 ? new float[biasCount] : null;
-
-        //    //нейроны
-        //    NetMem = new float[totalNeuronCount];
-        //    StateMem = new float[totalNeuronCount];
-        //}
 
         public void ClearAndPushNetAndState()
         {
@@ -106,13 +87,13 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             {
                 throw new ArgumentNullException("data");
             }
-            if (data.Length != _currentLayerTotalNeuronCount)
+            if (data.Length != Configuration.TotalNeuronCount)
             {
-                throw new ArgumentException("data.Length != _currentLayerTotalNeuronCount");
+                throw new ArgumentException("data.Length != Configuration.TotalNeuronCount");
             }
 
             //записываем значения из сети в объекты OpenCL
-            for (var neuronIndex = 0; neuronIndex < _currentLayerTotalNeuronCount; neuronIndex++)
+            for (var neuronIndex = 0; neuronIndex < Configuration.TotalNeuronCount; neuronIndex++)
             {
                 this.NetMem[neuronIndex] = 0; //LastNET
                 this.StateMem[neuronIndex] = data[neuronIndex];
@@ -172,7 +153,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
         {
             var ls = new LayerState(
                 this.StateMem.CloneArray(),
-                _currentLayerTotalNeuronCount
+                Configuration.TotalNeuronCount
                 );
 
             return ls;

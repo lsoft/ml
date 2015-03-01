@@ -23,8 +23,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
         private readonly ICSharpLayerContainer _currentLayerContainer;
         private readonly ICSharpDesiredValuesContainer _desiredValuesContainer;
         private readonly ICSharpDeDyAggregator _deDyAggregator;
-        private readonly ILayer _outputLayer;
-        private readonly ILayer _preOutputLayer;
 
         private readonly float[] _nablaWeights;
         private readonly float[] _nablaBias;
@@ -33,7 +31,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
         private readonly UpdateWeightKernel _updateWeightKernel;
 
         public CSharpOutputLayerBackpropagator(
-            IMLP mlp,
             ILearningAlgorithmConfig config,
             ICSharpLayerContainer previousLayerContainer,
             ICSharpLayerContainer currentLayerContainer,
@@ -41,10 +38,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             ICSharpDeDyAggregator deDyAggregator
             )
         {
-            if (mlp == null)
-            {
-                throw new ArgumentNullException("mlp");
-            }
             if (config == null)
             {
                 throw new ArgumentNullException("config");
@@ -72,18 +65,13 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             _desiredValuesContainer = desiredValuesContainer;
             _deDyAggregator = deDyAggregator;
 
-            var layerIndex = mlp.Layers.Length - 1;
-
-            _outputLayer = mlp.Layers[layerIndex];
-            _preOutputLayer = mlp.Layers[layerIndex - 1];
-
             _nablaWeights = new float[
-                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount
+                currentLayerContainer.Configuration.TotalNeuronCount * previousLayerContainer.Configuration.TotalNeuronCount
                 ];
-            _nablaBias = new float[_outputLayer.TotalNeuronCount];
+            _nablaBias = new float[currentLayerContainer.Configuration.TotalNeuronCount];
 
             _outputLayerKernel = new OutputLayerKernel(
-                _outputLayer,
+                currentLayerContainer.Configuration,
                 config
                 );
 
@@ -112,8 +100,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _desiredValuesContainer.DesiredOutput,
                     _currentLayerContainer.WeightMem,
                     _nablaWeights,
-                    _preOutputLayer.TotalNeuronCount,
-                    _outputLayer.TotalNeuronCount,
+                    _previousLayerContainer.Configuration.TotalNeuronCount,
+                    _currentLayerContainer.Configuration.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
                     (float)(dataCount),
@@ -131,8 +119,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _desiredValuesContainer.DesiredOutput,
                     _currentLayerContainer.WeightMem,
                     _nablaWeights,
-                    _preOutputLayer.TotalNeuronCount,
-                    _outputLayer.TotalNeuronCount,
+                    _previousLayerContainer.Configuration.TotalNeuronCount,
+                    _currentLayerContainer.Configuration.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
                     (float)(dataCount),

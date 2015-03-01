@@ -91,7 +91,6 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.CSharp
                 if (isLastLayer)
                 {
                     backpropagators[layerIndex] = new CSharpOutputLayerBackpropagator(
-                        mlp,
                         config,
                         containers[layerIndex - 1] as ICSharpLayerContainer,
                         containers[layerIndex] as ICSharpLayerContainer,
@@ -102,9 +101,8 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.CSharp
                 else
                 {
                     backpropagators[layerIndex] = new CSharpHiddenLayerBackpropagator(
-                        mlp,
                         config,
-                        layerIndex,
+                        layerIndex > 1,
                         containers[layerIndex - 1] as ICSharpLayerContainer,
                         containers[layerIndex] as ICSharpLayerContainer,
                         containers[layerIndex + 1] as ICSharpLayerContainer,

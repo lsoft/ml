@@ -11,24 +11,24 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 {
     internal class HiddenLayerKernel
     {
-        private readonly ILayer _currentLayer;
+        private readonly ILayerConfiguration _currentLayerConfiguration;
         private readonly ILearningAlgorithmConfig _config;
 
         public HiddenLayerKernel(
-            ILayer currentLayer,
+            ILayerConfiguration currentLayerConfiguration,
             ILearningAlgorithmConfig config
             )
         {
-            if (currentLayer == null)
+            if (currentLayerConfiguration == null)
             {
-                throw new ArgumentNullException("currentLayer");
+                throw new ArgumentNullException("currentLayerConfiguration");
             }
             if (config == null)
             {
                 throw new ArgumentNullException("config");
             }
 
-            _currentLayer = currentLayer;
+            _currentLayerConfiguration = currentLayerConfiguration;
             _config = config;
         }
 
@@ -76,7 +76,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
                 float dedy = dedyMem[neuronIndex];
 
                 float nOut = currentLayerNET[neuronIndex];
-                var currentDeDz = dedy * _currentLayer.LayerActivationFunction.ComputeFirstDerivative(nOut);
+                var currentDeDz = dedy * _currentLayerConfiguration.LayerActivationFunction.ComputeFirstDerivative(nOut);
                 currentLayerDeDz[neuronIndex] = currentDeDz;
 
                 int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
@@ -151,7 +151,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
 
                 float nOut = currentLayerNET[neuronIndex];
-                var currentDeDz = dedy * _currentLayer.LayerActivationFunction.ComputeFirstDerivative(nOut);
+                var currentDeDz = dedy * _currentLayerConfiguration.LayerActivationFunction.ComputeFirstDerivative(nOut);
                 currentLayerDeDz[neuronIndex] = currentDeDz;
 
                 int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);

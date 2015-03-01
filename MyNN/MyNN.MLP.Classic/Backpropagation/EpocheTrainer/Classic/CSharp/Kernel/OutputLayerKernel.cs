@@ -12,24 +12,24 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 {
     internal class OutputLayerKernel
     {
-        private readonly ILayer _layer;
+        private readonly ILayerConfiguration _layerConfiguration;
         private readonly ILearningAlgorithmConfig _config;
 
         public OutputLayerKernel(
-            ILayer layer,
+            ILayerConfiguration layerConfiguration,
             ILearningAlgorithmConfig config
             )
         {
-            if (layer == null)
+            if (layerConfiguration == null)
             {
-                throw new ArgumentNullException("layer");
+                throw new ArgumentNullException("layerConfiguration");
             }
             if (config == null)
             {
                 throw new ArgumentNullException("config");
             }
 
-            _layer = layer;
+            _layerConfiguration = layerConfiguration;
             _config = config;
         }
 
@@ -61,7 +61,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
             //for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount ; neuronIndex++)
             {
                 float nOut = currentLayerNET[neuronIndex];
-                float deri = _layer.LayerActivationFunction.ComputeFirstDerivative(nOut);
+                float deri = _layerConfiguration.LayerActivationFunction.ComputeFirstDerivative(nOut);
 
                 float metric = _config.TargetMetrics.CalculatePartialDerivativeByV2Index(
                     currentLayerLastState,
@@ -126,7 +126,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
             //for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount ; neuronIndex++)
             {
                 float nOut = currentLayerNET[neuronIndex];
-                float deri = _layer.LayerActivationFunction.ComputeFirstDerivative(nOut);
+                float deri = _layerConfiguration.LayerActivationFunction.ComputeFirstDerivative(nOut);
 
                 float metric = _config.TargetMetrics.CalculatePartialDerivativeByV2Index(
                     currentLayerLastState,

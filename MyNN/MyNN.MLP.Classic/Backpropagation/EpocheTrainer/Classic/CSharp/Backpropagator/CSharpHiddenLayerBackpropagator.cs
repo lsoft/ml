@@ -13,9 +13,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
     public class CSharpHiddenLayerBackpropagator : ICSharpLayerBackpropagator
     {
         private readonly ILearningAlgorithmConfig _config;
-        private readonly int _layerIndex;
-        private readonly ILayer _previousLayer;
-        private readonly ILayer _currentLayer;
+        private readonly bool _needToCalculateDeDy;
 
         private readonly ICSharpLayerContainer _previousLayerContainer;
         private readonly ICSharpLayerContainer _currentLayerContainer;
@@ -30,9 +28,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
 
 
         public CSharpHiddenLayerBackpropagator(
-            IMLP mlp,
             ILearningAlgorithmConfig config,
-            int layerIndex,
+            bool needToCalculateDeDy,
             ICSharpLayerContainer previousLayerContainer,
             ICSharpLayerContainer currentLayerContainer,
             ICSharpLayerContainer nextLayerContainer,
@@ -40,10 +37,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             ICSharpDeDyAggregator currentLayerDeDyAggregator
             )
         {
-            if (mlp == null)
-            {
-                throw new ArgumentNullException("mlp");
-            }
             if (config == null)
             {
                 throw new ArgumentNullException("config");
@@ -69,25 +62,21 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                 throw new ArgumentNullException("currentLayerDeDyAggregator");
             }
 
-            var previousLayer = mlp.Layers[layerIndex - 1];
-            var currentLayer = mlp.Layers[layerIndex];
 
             _config = config;
-            _layerIndex = layerIndex;
-            _previousLayer = previousLayer;
-            _currentLayer = currentLayer;
+            _needToCalculateDeDy = needToCalculateDeDy;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _nextLayerDeDyAggregator = nextLayerDeDyAggregator;
             _currentLayerDeDyAggregator = currentLayerDeDyAggregator;
 
             _nablaWeights = new float[
-                currentLayer.TotalNeuronCount*_previousLayer.TotalNeuronCount
+                currentLayerContainer.Configuration.TotalNeuronCount * previousLayerContainer.Configuration.TotalNeuronCount
                 ];
-            _nablaBias = new float[currentLayer.TotalNeuronCount];
+            _nablaBias = new float[currentLayerContainer.Configuration.TotalNeuronCount];
 
             _hiddenLayerKernel = new HiddenLayerKernel(
-                currentLayer,
+                currentLayerContainer.Configuration,
                 config
                 );
 
@@ -114,8 +103,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _currentLayerContainer.WeightMem,
                     _nablaWeights,
                     _nextLayerDeDyAggregator.DeDy,
-                    _previousLayer.TotalNeuronCount,
-                    _currentLayer.TotalNeuronCount,
+                    _previousLayerContainer.Configuration.TotalNeuronCount,
+                    _currentLayerContainer.Configuration.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
                     (float)(dataCount),
@@ -132,8 +121,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     _currentLayerContainer.WeightMem,
                     _nablaWeights,
                     _nextLayerDeDyAggregator.DeDy,
-                    _previousLayer.TotalNeuronCount,
-                    _currentLayer.TotalNeuronCount,
+                    _previousLayerContainer.Configuration.TotalNeuronCount,
+                    _currentLayerContainer.Configuration.TotalNeuronCount,
                     learningRate,
                     _config.RegularizationFactor,
                     (float) (dataCount),
@@ -142,7 +131,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
                     );
             }
 
-            if (_layerIndex > 1)
+            if (_needToCalculateDeDy)
             {
                 this._currentLayerDeDyAggregator.Aggregate();
             }
