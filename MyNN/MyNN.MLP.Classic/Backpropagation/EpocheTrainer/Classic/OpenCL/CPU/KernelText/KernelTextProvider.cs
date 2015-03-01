@@ -2,6 +2,7 @@ using System;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Layer;
 
 namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText
 {
@@ -13,13 +14,9 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
         private readonly IKernelTextProvider _kp;
         
         public KernelTextProvider(
-            IMLP mlp,
-            ILearningAlgorithmConfig config)
+            ILearningAlgorithmConfig config
+            )
         {
-            if (mlp == null)
-            {
-                throw new ArgumentNullException("mlp");
-            }
             if (config == null)
             {
                 throw new ArgumentNullException("config");
@@ -28,29 +25,33 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
             if (Math.Abs(config.RegularizationFactor) >= float.Epsilon)
             {
                 _kp = new KernelTextProviderWithRegularization(
-                    mlp,
-                    config);
+                    config
+                    );
             }
             else
             {
                 _kp = new KernelTextProviderWithoutRegularization(
-                    mlp,
-                    config);
+                    config
+                    );
             }
         }
 
         #region calculation kernels source
 
-        public string GetOverwriteCalculationKernelsSource(int layerIndex)
+        public string GetOverwriteCalculationKernelsSource(
+            ILayerConfiguration layerConfiguration
+            )
         {
             return
-                _kp.GetOverwriteCalculationKernelsSource(layerIndex);
+                _kp.GetOverwriteCalculationKernelsSource(layerConfiguration);
         }
 
-        public string GetIncrementCalculationKernelsSource(int layerIndex)
+        public string GetIncrementCalculationKernelsSource(
+            ILayerConfiguration layerConfiguration
+            )
         {
             return
-                _kp.GetIncrementCalculationKernelsSource(layerIndex);
+                _kp.GetIncrementCalculationKernelsSource(layerConfiguration);
         }
 
         #endregion

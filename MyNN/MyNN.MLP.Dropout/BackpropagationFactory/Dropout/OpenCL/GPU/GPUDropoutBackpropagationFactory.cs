@@ -128,7 +128,6 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
                     {
                         backpropagators[layerIndex] = new GPUDropoutOutputLayerBackpropagator(
                             _clProvider,
-                            mlp,
                             config,
                             containers[layerIndex - 1] as IMemLayerContainer,
                             containers[layerIndex] as IMemLayerContainer,
@@ -141,9 +140,8 @@ namespace MyNN.MLP.Dropout.BackpropagationFactory.Dropout.OpenCL.GPU
                     {
                         backpropagators[layerIndex] = new GPUDropoutHiddenLayerBackpropagator(
                             _clProvider,
-                            mlp,
                             config,
-                            layerIndex,
+                            layerIndex > 1,
                             containers[layerIndex - 1] as IMemLayerContainer,
                             containers[layerIndex] as IMemLayerContainer,
                             containers[layerIndex + 1] as IMemLayerContainer,

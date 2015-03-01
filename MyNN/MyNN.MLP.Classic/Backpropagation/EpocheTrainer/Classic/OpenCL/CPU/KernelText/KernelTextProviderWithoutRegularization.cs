@@ -4,6 +4,7 @@ using MyNN.Common.OpenCLHelper;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Layer;
 
 namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText
 {
@@ -12,17 +13,11 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
         private const string DerivativeMethodName = "Derivative";
         private const string MetricMethodName = "CalculateMetric";
 
-        private readonly IMLP _mlp;
         private readonly ILearningAlgorithmConfig _config;
 
         public KernelTextProviderWithoutRegularization(
-            IMLP mlp,
             ILearningAlgorithmConfig config)
         {
-            if (mlp == null)
-            {
-                throw new ArgumentNullException("mlp");
-            }
             if (config == null)
             {
                 throw new ArgumentNullException("config");
@@ -32,15 +27,21 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
                 throw new ArgumentException("Math.Abs(config.RegularizationFactor) >= float.Epsilon");
             }
 
-            _mlp = mlp;
             _config = config;
         }
 
         #region calculation kernels source
 
-        public string GetOverwriteCalculationKernelsSource(int layerIndex)
+        public string GetOverwriteCalculationKernelsSource(
+            ILayerConfiguration layerConfiguration
+            )
         {
-            var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
+            if (layerConfiguration == null)
+            {
+                throw new ArgumentNullException("layerConfiguration");
+            }
+
+            var fDerivative = layerConfiguration.LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
             var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
 
             result = result.Replace(
@@ -49,7 +50,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
                     MetricMethodName,
                     VectorizationSizeEnum.NoVectorization,
                     MemModifierEnum.Global,
-                    _mlp.Layers.Last().TotalNeuronCount
+                    layerConfiguration.TotalNeuronCount
                     )
                 );
 
@@ -82,9 +83,16 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
             return result;
         }
 
-        public string GetIncrementCalculationKernelsSource(int layerIndex)
+        public string GetIncrementCalculationKernelsSource(
+            ILayerConfiguration layerConfiguration
+            )
         {
-            var fDerivative = _mlp.Layers[layerIndex].LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
+            if (layerConfiguration == null)
+            {
+                throw new ArgumentNullException("layerConfiguration");
+            }
+
+            var fDerivative = layerConfiguration.LayerActivationFunction.GetOpenCLDerivativeMethod(DerivativeMethodName, VectorizationSizeEnum.NoVectorization);
             var result = CalculationKernelsSource.Replace("<DerivativeMethodBody>", fDerivative);
 
             result = result.Replace(
@@ -93,7 +101,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Kern
                     MetricMethodName,
                     VectorizationSizeEnum.NoVectorization,
                     MemModifierEnum.Global,
-                    _mlp.Layers.Last().TotalNeuronCount
+                    layerConfiguration.TotalNeuronCount
                     )
                 );
 
@@ -164,7 +172,6 @@ __kernel void HiddenLayerTrain(
     int previousLayerNeuronCount4M4,
     int previousLayerNeuronCount,
     int currentLayerNeuronCount,
-    int nextLayerNeuronCount,
 
     float learningRate,
     float regularizationFactor,

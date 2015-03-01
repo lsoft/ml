@@ -35,7 +35,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
         public GPUDropConnectOutputLayerBackpropagator(
             CLProvider clProvider,
-            IMLP mlp,
             ILearningAlgorithmConfig config,
             IMemLayerContainer previousLayerContainer,
             IMemLayerContainer currentLayerContainer,
@@ -48,10 +47,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
-            }
-            if (mlp == null)
-            {
-                throw new ArgumentNullException("mlp");
             }
             if (config == null)
             {
@@ -89,8 +84,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _currentLayerPropagator = currentLayerPropagator;
             _deDyAggregator = deDyAggregator;
 
-            var layerIndex = mlp.Layers.Length - 1;
-
             _nablaWeights = clProvider.CreateFloatMem(
                 _currentLayerContainer.Configuration.TotalNeuronCount * _previousLayerContainer.Configuration.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
@@ -104,11 +97,15 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                 "UpdateWeightKernel");
 
             _outputKernelIncrement = clProvider.CreateKernel(
-                kernelTextProvider.GetIncrementCalculationKernelsSource(layerIndex),
+                kernelTextProvider.GetIncrementCalculationKernelsSource(
+                    currentLayerContainer.Configuration
+                    ),
                 "OutputLayerTrain");
 
             _outputKernelOverwrite = clProvider.CreateKernel(
-                kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
+                kernelTextProvider.GetOverwriteCalculationKernelsSource(
+                    currentLayerContainer.Configuration
+                    ),
                 "OutputLayerTrain");
 
         }

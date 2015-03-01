@@ -18,7 +18,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
     public class GPUDropoutHiddenLayerBackpropagator : IMemLayerBackpropagator
     {
         private readonly ILearningAlgorithmConfig _config;
-        private readonly int _layerIndex;
+        private readonly bool _needToCalculateDeDy;
 
         private readonly IMemLayerContainer _previousLayerContainer;
         private readonly IMemLayerContainer _currentLayerContainer;
@@ -36,9 +36,8 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
 
         public GPUDropoutHiddenLayerBackpropagator(
             CLProvider clProvider,
-            IMLP mlp,
             ILearningAlgorithmConfig config,
-            int layerIndex,
+            bool needToCalculateDeDy,
             IMemLayerContainer previousLayerContainer,
             IMemLayerContainer currentLayerContainer,
             IMemLayerContainer nextLayerContainer,
@@ -51,10 +50,6 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
-            }
-            if (mlp == null)
-            {
-                throw new ArgumentNullException("mlp");
             }
             if (config == null)
             {
@@ -89,11 +84,8 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                 throw new ArgumentNullException("currentLayerDeDyAggregator");
             }
 
-            var previousLayer = mlp.Layers[layerIndex - 1];
-            var currentLayer = mlp.Layers[layerIndex];
-
             _config = config;
-            _layerIndex = layerIndex;
+            _needToCalculateDeDy = needToCalculateDeDy;
 
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
@@ -102,10 +94,10 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
             _currentLayerDeDyAggregator = currentLayerDeDyAggregator;
 
             _nablaWeights = clProvider.CreateFloatMem(
-                currentLayer.TotalNeuronCount * previousLayer.TotalNeuronCount,
+                currentLayerContainer.Configuration.TotalNeuronCount * previousLayerContainer.Configuration.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             _nablaBias = clProvider.CreateFloatMem(
-                currentLayer.TotalNeuronCount,
+                currentLayerContainer.Configuration.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             _updateWeightKernel = clProvider.CreateKernel(
@@ -113,11 +105,15 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                 "UpdateWeightKernel");
 
             _hiddenKernelIncrement = clProvider.CreateKernel(
-                kernelTextProvider.GetIncrementCalculationKernelsSource(layerIndex),
+                kernelTextProvider.GetIncrementCalculationKernelsSource(
+                    currentLayerContainer.Configuration
+                    ),
                 "HiddenLayerTrain");
 
             _hiddenKernelOverwrite = clProvider.CreateKernel(
-                kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
+                kernelTextProvider.GetOverwriteCalculationKernelsSource(
+                    currentLayerContainer.Configuration
+                    ),
                 "HiddenLayerTrain");
         }
 
@@ -209,7 +205,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                     ;
             }
 
-            if (_layerIndex > 1)
+            if (_needToCalculateDeDy)
             {
                 _currentLayerDeDyAggregator.Aggregate();
             }

@@ -20,8 +20,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
     public class GPUDropConnectHiddenLayerBackpropagator : IMemLayerBackpropagator
     {
         private readonly ILearningAlgorithmConfig _config;
-        private readonly int _layerIndex;
-        
+        private readonly bool _needToCalculateDeDy;
+
         private readonly IMemLayerContainer _previousLayerContainer;
         private readonly IMemLayerContainer _currentLayerContainer;
         private readonly IDropConnectLayerPropagator _currentLayerPropagator;
@@ -38,9 +38,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
 
         public GPUDropConnectHiddenLayerBackpropagator(
             CLProvider clProvider,
-            IMLP mlp,
             ILearningAlgorithmConfig config,
-            int layerIndex,
+            bool needToCalculateDeDy,
             IMemLayerContainer previousLayerContainer,
             IMemLayerContainer currentLayerContainer,
             IMemLayerContainer nextLayerContainer,
@@ -53,10 +52,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
-            }
-            if (mlp == null)
-            {
-                throw new ArgumentNullException("mlp");
             }
             if (config == null)
             {
@@ -92,7 +87,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             }
 
             _config = config;
-            _layerIndex = layerIndex;
+            _needToCalculateDeDy = needToCalculateDeDy;
 
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
@@ -112,11 +107,15 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                 "UpdateWeightKernel");
 
             _hiddenKernelIncrement = clProvider.CreateKernel(
-                kernelTextProvider.GetIncrementCalculationKernelsSource(layerIndex),
+                kernelTextProvider.GetIncrementCalculationKernelsSource(
+                    currentLayerContainer.Configuration
+                    ),
                 "HiddenLayerTrain");
 
             _hiddenKernelOverwrite = clProvider.CreateKernel(
-                kernelTextProvider.GetOverwriteCalculationKernelsSource(layerIndex),
+                kernelTextProvider.GetOverwriteCalculationKernelsSource(
+                    currentLayerContainer.Configuration
+                    ),
                 "HiddenLayerTrain");
         }
 
@@ -199,7 +198,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                     );
             }
 
-            if (_layerIndex > 1)
+            if (_needToCalculateDeDy)
             {
                 _currentLayerDeDyAggregator.Aggregate();
             }

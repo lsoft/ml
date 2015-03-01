@@ -101,7 +101,6 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
                 {
                     backpropagators[layerIndex] = new GPUOutputLayerBackpropagator(
                         _clProvider,
-                        mlp,
                         config,
                         containers[layerIndex - 1] as IMemLayerContainer,
                         containers[layerIndex] as IMemLayerContainer,
@@ -114,9 +113,8 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.GPU
                 {
                     backpropagators[layerIndex] = new GPUHiddenLayerBackpropagator(
                         _clProvider,
-                        mlp,
                         config,
-                        layerIndex,
+                        layerIndex > 1,
                         containers[layerIndex - 1] as IMemLayerContainer,
                         containers[layerIndex] as IMemLayerContainer,
                         containers[layerIndex + 1] as IMemLayerContainer,

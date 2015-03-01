@@ -2,6 +2,7 @@ using System;
 using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
+using MyNN.MLP.Structure.Layer;
 
 namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.KernelText
 {
@@ -28,29 +29,33 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Kern
             if (Math.Abs(config.RegularizationFactor) >= float.Epsilon)
             {
                 _kp = new KernelTextProviderWithRegularization(
-                    mlp,
-                    config);
+                    config
+                    );
             }
             else
             {
                 _kp = new KernelTextProviderWithoutRegularization(
-                    mlp,
-                    config);
+                    config
+                    );
             }
         }
 
         #region calculation kernels source
 
-        public string GetOverwriteCalculationKernelsSource(int layerIndex)
+        public string GetOverwriteCalculationKernelsSource(
+            ILayerConfiguration layerConfiguration
+            )
         {
             return
-                _kp.GetOverwriteCalculationKernelsSource(layerIndex);
+                _kp.GetOverwriteCalculationKernelsSource(layerConfiguration);
         }
 
-        public string GetIncrementCalculationKernelsSource(int layerIndex)
+        public string GetIncrementCalculationKernelsSource(
+            ILayerConfiguration layerConfiguration
+            )
         {
             return
-                _kp.GetIncrementCalculationKernelsSource(layerIndex);
+                _kp.GetIncrementCalculationKernelsSource(layerConfiguration);
         }
 
         #endregion

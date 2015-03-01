@@ -27,6 +27,15 @@ namespace MyNN.MLP.DeDyAggregator
             private set;
         }
 
+        public int TotalNeuronCount
+        {
+            get
+            {
+                return
+                    _aggregateLayerNeuronCount;
+            }
+        }
+
         public CPUDeDyAggregator(
             CLProvider clProvider,
             int previousLayerNeuronCount,

@@ -1,10 +1,16 @@
+using MyNN.MLP.Structure.Layer;
+
 namespace MyNN.MLP.Backpropagation.EpocheTrainer
 {
     public interface IKernelTextProvider
     {
-        string GetOverwriteCalculationKernelsSource(int layerIndex);
+        string GetOverwriteCalculationKernelsSource(
+            ILayerConfiguration layerConfiguration
+            );
         
-        string GetIncrementCalculationKernelsSource(int layerIndex);
+        string GetIncrementCalculationKernelsSource(
+            ILayerConfiguration layerConfiguration
+            );
 
         string UpdateWeightKernelSource
         {

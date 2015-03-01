@@ -93,7 +93,7 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
                 out dedyAggregators
                 );
 
-            var kernelTextProvider = new MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText.KernelTextProvider(mlp, config);
+            var kernelTextProvider = new MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.KernelText.KernelTextProvider(config);
 
             var desiredValuesContainer = new MemDesiredValuesContainer(_clProvider, mlp);
 
@@ -107,7 +107,6 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
                 {
                     backpropagators[layerIndex] = new CPUOutputLayerBackpropagator(
                         _clProvider,
-                        mlp,
                         config,
                         containers[layerIndex - 1] as IMemLayerContainer,
                         containers[layerIndex] as IMemLayerContainer,
@@ -120,9 +119,8 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.OpenCL.CPU
                 {
                     backpropagators[layerIndex] = new CPUHiddenLayerBackpropagator(
                         _clProvider,
-                        mlp,
                         config,
-                        layerIndex,
+                        layerIndex > 1,
                         containers[layerIndex - 1] as IMemLayerContainer,
                         containers[layerIndex] as IMemLayerContainer,
                         kernelTextProvider,
