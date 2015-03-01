@@ -129,6 +129,7 @@ namespace MyNN.MLP.Structure.Layer
         {
             return 
                 new LayerConfiguration(
+                    this.LayerActivationFunction,
                     this.SpatialDimension,
                     this.Neurons.Sum(j => j.Weights.Length),
                     this.TotalNeuronCount,

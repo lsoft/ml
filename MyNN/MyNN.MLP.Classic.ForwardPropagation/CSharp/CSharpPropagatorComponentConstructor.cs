@@ -52,7 +52,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
             var layerCount = mlp.Layers.Length;
 
             var result = new ICSharpDeDyAggregator[layerCount];
-            result[0] = null; //для первого слоя нет пропагатора
+            result[0] = null; //для первого слоя нет аггрегатора
 
             for (var layerIndex = layerCount - 1; layerIndex > 0; layerIndex--)
             {
@@ -124,9 +124,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
                 var currentLayerConfiguration = mlp.Layers[layerIndex].GetConfiguration();
 
                 var mc = new CSharpLayerContainer(
-                    currentLayerConfiguration.TotalNeuronCount,
-                    currentLayerConfiguration.WeightCount,
-                    currentLayerConfiguration.BiasCount
+                    currentLayerConfiguration
                     );
 
                 result.Add(mc);

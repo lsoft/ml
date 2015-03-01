@@ -39,14 +39,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.CPU.Back
         private readonly Kernel _updateWeightKernel;
 
 
-        public MemFloat DeDz
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
-
         public CPUHiddenLayerBackpropagator(
             CLProvider clProvider,
             IMLP mlp,

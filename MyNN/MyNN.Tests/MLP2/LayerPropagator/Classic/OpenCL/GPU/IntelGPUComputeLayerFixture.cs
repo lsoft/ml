@@ -52,7 +52,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -104,7 +104,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -153,7 +153,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -202,7 +202,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -248,28 +248,25 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.GPU
 
             plc = new MemLayerContainer(
                 clProvider,
-                previousLayerNeuronCount,
-                0,
-                0
-                );
+                new TestLayerConfiguration(
+                    previousLayerNeuronCount,
+                    0,
+                    0
+                    ));
 
             clc = new MemLayerContainer(
                 clProvider,
-                currentLayerNeuronCount,
-                currentLayerNeuronCount * previousLayerNeuronCount,
-                currentLayerNeuronCount
-                );
-
-            var ks = new KernelSource();
+                new TestLayerConfiguration(
+                    currentLayerNeuronCount,
+                    currentLayerNeuronCount * previousLayerNeuronCount,
+                    currentLayerNeuronCount
+                    ));
 
             lp = new MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU.LayerPropagator(
                 clProvider,
-                ks,
                 plc,
                 clc,
-                function,
-                previousLayerNeuronCount,
-                currentLayerNeuronCount
+                function
                 );
         }
     }

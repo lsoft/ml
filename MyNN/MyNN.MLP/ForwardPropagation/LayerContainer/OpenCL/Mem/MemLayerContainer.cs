@@ -1,4 +1,5 @@
 ﻿using System;
+using MyNN.Common.Other;
 using MyNN.MLP.Structure.Layer;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
@@ -11,6 +12,12 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
     {
         private readonly CLProvider _clProvider;
         private readonly int _currentLayerTotalNeuronCount;
+
+        public ILayerConfiguration Configuration
+        {
+            get;
+            private set;
+        }
 
         public MemFloat WeightMem
         {
@@ -38,17 +45,16 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
 
         public MemLayerContainer(
             CLProvider clProvider,
-            int totalNeuronCount,
-            int weightCount,
-            int biasCount
+            ILayerConfiguration layerConfiguration
             )
         {
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
-            }
-
             _clProvider = clProvider;
+            Configuration = layerConfiguration;
+
+            var totalNeuronCount = layerConfiguration.TotalNeuronCount;
+            var weightCount = layerConfiguration.WeightCount;
+            var biasCount = layerConfiguration.BiasCount;
+
             _currentLayerTotalNeuronCount = totalNeuronCount;
 
             //нейроны
@@ -88,6 +94,60 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
                 BiasMem = biasMem;
             }
         }
+
+
+        //public MemLayerContainer(
+        //    CLProvider clProvider,
+        //    int totalNeuronCount,
+        //    int weightCount,
+        //    int biasCount
+        //    )
+        //{
+        //    if (clProvider == null)
+        //    {
+        //        throw new ArgumentNullException("clProvider");
+        //    }
+
+        //    _clProvider = clProvider;
+        //    _currentLayerTotalNeuronCount = totalNeuronCount;
+
+        //    //нейроны
+        //    var netMem = clProvider.CreateFloatMem(
+        //        totalNeuronCount,
+        //        MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+        //    netMem.Write(BlockModeEnum.Blocking);
+
+        //    NetMem = netMem;
+
+        //    var stateMem = clProvider.CreateFloatMem(
+        //        totalNeuronCount,
+        //        MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+        //    stateMem.Write(BlockModeEnum.Blocking);
+
+        //    StateMem = stateMem;
+
+        //    if (weightCount > 0)
+        //    {
+        //        //веса
+        //        var weightMem = clProvider.CreateFloatMem(
+        //            weightCount,
+        //            MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+        //        weightMem.Write(BlockModeEnum.Blocking);
+
+        //        WeightMem = weightMem;
+        //    }
+
+        //    if (biasCount > 0)
+        //    {
+        //        //биасы
+        //        var biasMem = clProvider.CreateFloatMem(
+        //            biasCount,
+        //            MemFlags.CopyHostPtr | MemFlags.ReadWrite);
+        //        biasMem.Write(BlockModeEnum.Blocking);
+
+        //        BiasMem = biasMem;
+        //    }
+        //}
 
         public void ClearAndPushNetAndState()
         {
@@ -138,7 +198,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             _clProvider.QueueFinish();
         }
 
-        public void ReadWeightsFromLayer(ILayer layer)
+        public void ReadWeightsAndBiasesFromLayer(ILayer layer)
         {
             if (layer == null)
             {
@@ -168,7 +228,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             }
         }
 
-        public void PopWeights()
+        public void PopWeightsAndBiases()
         {
             if (this.WeightMem != null)
             {
@@ -177,7 +237,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
             }
         }
 
-        public void WritebackWeightsToMLP(ILayer layer)
+        public void WritebackWeightsAndBiasesToMLP(ILayer layer)
         {
             if (this.WeightMem != null && this.BiasMem != null)
             {
@@ -198,8 +258,9 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.OpenCL.Mem
         public ILayerState GetLayerState()
         {
             var ls = new LayerState(
-                this.StateMem.Array,
-                _currentLayerTotalNeuronCount);
+                this.StateMem.Array.CloneArray(),
+                _currentLayerTotalNeuronCount
+                );
 
             return ls;
         }

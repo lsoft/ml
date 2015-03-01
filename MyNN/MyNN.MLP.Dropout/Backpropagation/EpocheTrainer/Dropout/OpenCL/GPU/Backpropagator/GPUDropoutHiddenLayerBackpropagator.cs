@@ -19,8 +19,6 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
     {
         private readonly ILearningAlgorithmConfig _config;
         private readonly int _layerIndex;
-        private readonly ILayer _previousLayer;
-        private readonly ILayer _currentLayer;
 
         private readonly IMemLayerContainer _previousLayerContainer;
         private readonly IMemLayerContainer _currentLayerContainer;
@@ -35,14 +33,6 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
         private readonly MemFloat _nablaBias;
 
         private readonly Kernel _updateWeightKernel;
-
-        public MemFloat DeDz
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
 
         public GPUDropoutHiddenLayerBackpropagator(
             CLProvider clProvider,
@@ -104,8 +94,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
 
             _config = config;
             _layerIndex = layerIndex;
-            _previousLayer = previousLayer;
-            _currentLayer = currentLayer;
+
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _currentLayerPropagator = currentLayerPropagator;
@@ -148,7 +137,7 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
         {
             const uint HiddenLocalGroupSize = 64;
             uint HiddenGlobalGroupSize =
-                (uint)_currentLayer.TotalNeuronCount * HiddenLocalGroupSize
+                (uint)_currentLayerContainer.Configuration.TotalNeuronCount * HiddenLocalGroupSize
                 ;
 
             if (firstItemInBatch)
@@ -164,8 +153,8 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                     .SetKernelArg(6, 4, _currentLayerPropagator.MaskShift)
                     .SetKernelArg(7, 4, _currentLayerPropagator.MaskContainer.BitMask)
 
-                    .SetKernelArg(8, 4, _previousLayer.TotalNeuronCount)
-                    .SetKernelArg(9, 4, _currentLayer.TotalNeuronCount)
+                    .SetKernelArg(8, 4, _previousLayerContainer.Configuration.TotalNeuronCount)
+                    .SetKernelArg(9, 4, _currentLayerContainer.Configuration.TotalNeuronCount)
 
                     .SetKernelArg(10, 4, learningRate)
                     .SetKernelArg(11, 4, _config.RegularizationFactor)
@@ -198,8 +187,8 @@ namespace MyNN.MLP.Dropout.Backpropagation.EpocheTrainer.Dropout.OpenCL.GPU.Back
                     .SetKernelArg(6, 4, _currentLayerPropagator.MaskShift)
                     .SetKernelArg(7, 4, _currentLayerPropagator.MaskContainer.BitMask)
 
-                    .SetKernelArg(8, 4, _previousLayer.TotalNeuronCount)
-                    .SetKernelArg(9, 4, _currentLayer.TotalNeuronCount)
+                    .SetKernelArg(8, 4, _previousLayerContainer.Configuration.TotalNeuronCount)
+                    .SetKernelArg(9, 4, _currentLayerContainer.Configuration.TotalNeuronCount)
 
                     .SetKernelArg(10, 4, learningRate)
                     .SetKernelArg(11, 4, _config.RegularizationFactor)

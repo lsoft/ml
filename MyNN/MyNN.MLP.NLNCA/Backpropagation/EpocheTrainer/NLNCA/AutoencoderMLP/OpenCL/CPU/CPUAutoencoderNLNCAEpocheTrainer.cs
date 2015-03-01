@@ -583,17 +583,17 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
                     #region записываем веса в сеть, чтобы следующий цикл просчета uzkii не затер веса (он выполняет PushWeights)
 
                     ////считываем веса с устройства
-                    //PopWeights();
+                    //PopWeightsAndBiases();
 
                     ////write new weights and biases into network
-                    //WritebackWeightsToMLP();
+                    //WritebackWeightsAndBiasesToMLP();
 
                     //считываем веса с устройства
                     foreach (var container in _containers)
                     {
                         if (container != null)
                         {
-                            container.PopWeights();
+                            container.PopWeightsAndBiases();
                         }
                     }
 
@@ -603,7 +603,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
                         var layer = _mlp.Layers[layerIndex];
                         var container = _containers[layerIndex];
 
-                        container.WritebackWeightsToMLP(layer);
+                        container.WritebackWeightsAndBiasesToMLP(layer);
                     }
 
                     #endregion
@@ -684,7 +684,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
             //}
         }
 
-        //private void WritebackWeightsToMLP()
+        //private void WritebackWeightsAndBiasesToMLP()
         //{
         //    //write new weights and biases into network
         //    for (int layerIndex = 1; layerIndex < _mlp.Layers.Length; ++layerIndex)
@@ -705,7 +705,7 @@ namespace MyNN.MLP.NLNCA.Backpropagation.EpocheTrainer.NLNCA.AutoencoderMLP.Open
         //    }
         //}
 
-        //private void PopWeights()
+        //private void PopWeightsAndBiases()
         //{
         //    //считываем веса с устройства
         //    foreach (var container in _containers)

@@ -12,8 +12,6 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
         private readonly IOpenCLMaskContainer _maskContainer;
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
-        private readonly int _prevLayerNeuronTotalCount;
-        private readonly int _currentLayerTotalNeuronCount;
 
         private readonly Kernel _kernel;
 
@@ -32,9 +30,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
             IOpenCLMaskContainer maskContainer,
             IMemLayerContainer previousMemLayerContainer,
             IMemLayerContainer currentMemLayerContainer,
-            IFunction activationFunction,
-            int prevLayerNeuronTotalCount,
-            int currentLayerTotalNeuronCount
+            IFunction activationFunction
             )
         {
             if (clProvider == null)
@@ -66,14 +62,12 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.MaskForward.OpenCL.GPU
             _maskContainer = maskContainer;
             _previousMemLayerContainer = previousMemLayerContainer;
             _currentMemLayerContainer = currentMemLayerContainer;
-            _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
 
             string kernelName;
             var kernelSource = ks.GetKernelSource(
                 activationFunction,
-                currentLayerTotalNeuronCount,
-                prevLayerNeuronTotalCount,
+                currentMemLayerContainer.Configuration.TotalNeuronCount,
+                previousMemLayerContainer.Configuration.TotalNeuronCount,
                 out kernelName
                 );
 

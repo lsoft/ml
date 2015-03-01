@@ -36,14 +36,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
         private readonly IOpenCLDeDyAggregator _currentLayerDeDyAggregator;
 
 
-        public MemFloat DeDz
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
-
         public GPUHiddenLayerBackpropagator(
             CLProvider clProvider,
             IMLP mlp,

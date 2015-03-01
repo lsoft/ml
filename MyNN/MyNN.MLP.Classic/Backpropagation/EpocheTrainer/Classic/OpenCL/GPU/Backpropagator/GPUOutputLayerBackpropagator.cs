@@ -22,8 +22,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
         private readonly IMemLayerContainer _currentLayerContainer;
         private readonly IMemDesiredValuesContainer _desiredValuesContainer;
         private readonly IOpenCLDeDyAggregator _deDyAggregator;
-        private readonly ILayer _outputLayer;
-        private readonly ILayer _preOutputLayer;
         private readonly Kernel _outputKernelIncrement;
         private readonly Kernel _outputKernelOverwrite;
 
@@ -31,14 +29,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
         private readonly MemFloat _nablaBias;
 
         private readonly Kernel _updateWeightKernel;
-
-        public MemFloat DeDz
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
 
 
         public GPUOutputLayerBackpropagator(
@@ -93,14 +83,12 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
 
             var layerIndex = mlp.Layers.Length - 1;
 
-            _outputLayer = mlp.Layers[layerIndex];
-            _preOutputLayer = mlp.Layers[layerIndex - 1];
 
             _nablaWeights = clProvider.CreateFloatMem(
-                _outputLayer.TotalNeuronCount * _preOutputLayer.TotalNeuronCount,
+                _currentLayerContainer.Configuration.TotalNeuronCount * _previousLayerContainer.Configuration.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             _nablaBias = clProvider.CreateFloatMem(
-                _outputLayer.TotalNeuronCount,
+                _currentLayerContainer.Configuration.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             _updateWeightKernel = clProvider.CreateKernel(
@@ -135,7 +123,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
         {
             const uint OutputLocalGroupSize = 128;
             uint OutputGlobalGroupSize =
-                (uint)_outputLayer.TotalNeuronCount * OutputLocalGroupSize;
+                (uint)_currentLayerContainer.Configuration.TotalNeuronCount * OutputLocalGroupSize;
 
             if (firstItemInBatch)
             {
@@ -147,8 +135,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                     .SetKernelArgMem(4, _desiredValuesContainer.DesiredOutput)
                     .SetKernelArgMem(5, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(6, _nablaWeights)
-                    .SetKernelArg(7, 4, _preOutputLayer.TotalNeuronCount)
-                    .SetKernelArg(8, 4, _outputLayer.TotalNeuronCount)
+                    .SetKernelArg(7, 4, _previousLayerContainer.Configuration.TotalNeuronCount)
+                    .SetKernelArg(8, 4, _currentLayerContainer.Configuration.TotalNeuronCount)
                     .SetKernelArg(9, 4, learningRate)
                     .SetKernelArg(10, 4, _config.RegularizationFactor)
                     .SetKernelArg(11, 4, (float)(dataCount))
@@ -175,8 +163,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.OpenCL.GPU.Back
                     .SetKernelArgMem(4, _desiredValuesContainer.DesiredOutput)
                     .SetKernelArgMem(5, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(6, _nablaWeights)
-                    .SetKernelArg(7, 4, _preOutputLayer.TotalNeuronCount)
-                    .SetKernelArg(8, 4, _outputLayer.TotalNeuronCount)
+                    .SetKernelArg(7, 4, _previousLayerContainer.Configuration.TotalNeuronCount)
+                    .SetKernelArg(8, 4, _currentLayerContainer.Configuration.TotalNeuronCount)
                     .SetKernelArg(9, 4, learningRate)
                     .SetKernelArg(10, 4, _config.RegularizationFactor)
                     .SetKernelArg(11, 4, (float)(dataCount))

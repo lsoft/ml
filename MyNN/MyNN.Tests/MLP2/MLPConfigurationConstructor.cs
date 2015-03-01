@@ -6,15 +6,21 @@ using System.Threading.Tasks;
 using MyNN.MLP.Structure;
 using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Neuron;
+using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.Tests.MLP2
 {
     public class MLPConfigurationConstructor
     {
         public static IMLPConfiguration CreateConfiguration(
+            IFunction layerActivationFunction,
             int[] layerSizes
             )
         {
+            if (layerActivationFunction == null)
+            {
+                throw new ArgumentNullException("layerActivationFunction");
+            }
             if (layerSizes == null)
             {
                 throw new ArgumentNullException("layerSizes");
@@ -41,6 +47,7 @@ namespace MyNN.Tests.MLP2
                 }
 
                 var lc = new LayerConfiguration(
+                    layerActivationFunction,
                     new Dimension(1, layerSizes[li]), 
                     firstLayer ? 0 : prevLayerTotalNeuron * currentLayerTotalNeuron,
                     firstLayer ? 0 : currentLayerTotalNeuron,

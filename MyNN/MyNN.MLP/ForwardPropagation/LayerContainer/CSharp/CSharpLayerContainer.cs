@@ -1,4 +1,5 @@
 ﻿using System;
+using MyNN.Common.Other;
 using MyNN.MLP.Structure.Layer;
 
 namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
@@ -6,6 +7,12 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
     public class CSharpLayerContainer : ICSharpLayerContainer
     {
         private readonly int _currentLayerTotalNeuronCount;
+
+        public ILayerConfiguration Configuration
+        {
+            get;
+            private set;
+        }
 
         public float[] WeightMem
         {
@@ -32,11 +39,18 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
         }
 
         public CSharpLayerContainer(
-            int totalNeuronCount,
-            int weightCount,
-            int biasCount
+            ILayerConfiguration layerConfiguration
             )
         {
+            if (layerConfiguration == null)
+            {
+                throw new ArgumentNullException("layerConfiguration");
+            }
+
+            var totalNeuronCount = layerConfiguration.TotalNeuronCount;
+            var weightCount = layerConfiguration.WeightCount;
+            var biasCount = layerConfiguration.BiasCount;
+
             _currentLayerTotalNeuronCount = totalNeuronCount;
 
             //веса
@@ -48,7 +62,31 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             StateMem = new float[totalNeuronCount];
         }
 
+        //public CSharpLayerContainer(
+        //    int totalNeuronCount,
+        //    int weightCount,
+        //    int biasCount
+        //    )
+        //{
+        //    _currentLayerTotalNeuronCount = totalNeuronCount;
+
+        //    //веса
+        //    WeightMem = weightCount > 0 ? new float[weightCount] : null;
+        //    BiasMem = biasCount > 0 ? new float[biasCount] : null;
+
+        //    //нейроны
+        //    NetMem = new float[totalNeuronCount];
+        //    StateMem = new float[totalNeuronCount];
+        //}
+
         public void ClearAndPushNetAndState()
+        {
+            ClearNetAndState();
+
+            PushNetAndState();
+        }
+
+        public void ClearNetAndState()
         {
             var nml = this.NetMem.Length;
             Array.Clear(this.NetMem, 0, nml);
@@ -57,8 +95,17 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             Array.Clear(this.StateMem, 0, sml);
         }
 
+        public void PushNetAndState()
+        {
+            //nothing to do
+        }
+
         public void ReadInput(float[] data)
         {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
             if (data.Length != _currentLayerTotalNeuronCount)
             {
                 throw new ArgumentException("data.Length != _currentLayerTotalNeuronCount");
@@ -72,7 +119,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             }
         }
 
-        public void ReadWeightsFromLayer(ILayer layer)
+        public void ReadWeightsAndBiasesFromLayer(ILayer layer)
         {
             if (layer == null)
             {
@@ -105,12 +152,12 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
             //nothing to do
         }
 
-        public void PopWeights()
+        public void PopWeightsAndBiases()
         {
             //nothing to do
         }
 
-        public void WritebackWeightsToMLP(ILayer layer)
+        public void WritebackWeightsAndBiasesToMLP(ILayer layer)
         {
             if (this.WeightMem != null && this.BiasMem != null)
             {
@@ -124,7 +171,7 @@ namespace MyNN.MLP.ForwardPropagation.LayerContainer.CSharp
         public ILayerState GetLayerState()
         {
             var ls = new LayerState(
-                this.StateMem,
+                this.StateMem.CloneArray(),
                 _currentLayerTotalNeuronCount
                 );
 

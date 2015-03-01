@@ -4,6 +4,7 @@ using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
 using MyNN.Mask;
+using MyNN.MLP.Structure.Neuron.Function;
 using OpenCL.Net.Wrapper;
 
 namespace MyNN.Tests.MLP2.MaskContainers
@@ -15,6 +16,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
         public void Test05()
         {
             var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
+                new LinearFunction(1f), 
                 new int[]
                 {
                     5,
@@ -71,6 +73,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
         public void Test10()
         {
             var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
+                new LinearFunction(1f), 
                 new int[]
                 {
                     5,
@@ -116,6 +119,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
         public void Test01()
         {
             var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
+                new LinearFunction(1f), 
                 new int[]
                 {
                     5,
@@ -161,6 +165,7 @@ namespace MyNN.Tests.MLP2.MaskContainers
         public void Test09()
         {
             var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
+                new LinearFunction(1f), 
                 new int[]
                 {
                     5,

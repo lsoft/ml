@@ -62,7 +62,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
             var layerCount = mlp.Layers.Length;
 
             var result = new IOpenCLDeDyAggregator[layerCount];
-            result[0] = null; //для первого слоя нет пропагатора
+            result[0] = null; //для первого слоя нет аггрегатора
 
             for (var layerIndex = layerCount - 1; layerIndex > 0; layerIndex--)
             {
@@ -100,20 +100,15 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
             var result = new List<ILayerPropagator>();
             result.Add(null); //для первого слоя нет пропагатора
 
-            var ks = new KernelSource();
-
             var layerCount = mlp.Layers.Length;
 
             for (var layerIndex = 1; layerIndex < layerCount; layerIndex++)
             {
                 var p = new LayerPropagator(
                     _clProvider,
-                    ks,
                     containers[layerIndex - 1],
                     containers[layerIndex],
-                    mlp.Layers[layerIndex].LayerActivationFunction,
-                    mlp.Layers[layerIndex - 1].TotalNeuronCount,
-                    mlp.Layers[layerIndex].TotalNeuronCount
+                    mlp.Layers[layerIndex].LayerActivationFunction
                     );
 
                 result.Add(p);
@@ -142,9 +137,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
 
                 var mc = new MemLayerContainer(
                         _clProvider,
-                        currentLayerConfiguration.TotalNeuronCount,
-                        currentLayerConfiguration.WeightCount,
-                        currentLayerConfiguration.BiasCount
+                        currentLayerConfiguration
                         );
 
                 result.Add(mc);

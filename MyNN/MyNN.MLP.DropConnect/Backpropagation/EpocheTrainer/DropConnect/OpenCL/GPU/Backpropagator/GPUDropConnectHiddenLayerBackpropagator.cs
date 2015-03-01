@@ -21,8 +21,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
     {
         private readonly ILearningAlgorithmConfig _config;
         private readonly int _layerIndex;
-        private readonly ILayer _previousLayer;
-        private readonly ILayer _currentLayer;
         
         private readonly IMemLayerContainer _previousLayerContainer;
         private readonly IMemLayerContainer _currentLayerContainer;
@@ -37,14 +35,6 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         private readonly MemFloat _nablaBias;
 
         private readonly Kernel _updateWeightKernel;
-
-        public MemFloat DeDz
-        {
-            get
-            {
-                throw new InvalidOperationException();
-            }
-        }
 
         public GPUDropConnectHiddenLayerBackpropagator(
             CLProvider clProvider,
@@ -101,13 +91,9 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                 throw new ArgumentNullException("currentLayerDeDyAggregator");
             }
 
-            var previousLayer = mlp.Layers[layerIndex - 1];
-            var currentLayer = mlp.Layers[layerIndex];
-
             _config = config;
             _layerIndex = layerIndex;
-            _previousLayer = previousLayer;
-            _currentLayer = currentLayer;
+
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _currentLayerPropagator = currentLayerPropagator;
@@ -115,10 +101,10 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
             _currentLayerDeDyAggregator = currentLayerDeDyAggregator;
 
             _nablaWeights = clProvider.CreateFloatMem(
-                currentLayer.TotalNeuronCount * previousLayer.TotalNeuronCount, //currentLayer.Neurons[0].Weights.Length,
+                _currentLayerContainer.Configuration.TotalNeuronCount * _previousLayerContainer.Configuration.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
             _nablaBias = clProvider.CreateFloatMem(
-                currentLayer.TotalNeuronCount,
+                _currentLayerContainer.Configuration.TotalNeuronCount,
                 MemFlags.CopyHostPtr | MemFlags.ReadWrite);
 
             _updateWeightKernel = clProvider.CreateKernel(
@@ -150,8 +136,7 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
         {
             const uint hiddenLocalSize = 256;
             uint hiddenGlobalSize =
-                hiddenLocalSize*
-                (uint) _currentLayer.TotalNeuronCount;
+                hiddenLocalSize * (uint)_currentLayerContainer.Configuration.TotalNeuronCount;
 
             if (firstItemInBatch)
             {
@@ -162,8 +147,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                     .SetKernelArgMem(3, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(4, _nablaWeights)
                     .SetKernelArgMem(5, _currentLayerPropagator.MaskContainer.MaskMem)
-                    .SetKernelArg(6, 4, _previousLayer.TotalNeuronCount)
-                    .SetKernelArg(7, 4, _currentLayer.TotalNeuronCount)
+                    .SetKernelArg(6, 4, _previousLayerContainer.Configuration.TotalNeuronCount)
+                    .SetKernelArg(7, 4, _currentLayerContainer.Configuration.TotalNeuronCount)
                     .SetKernelArg(8, 4, learningRate)
                     .SetKernelArg(9, 4, _config.RegularizationFactor)
                     .SetKernelArg(10, 4, (float) (dataCount))
@@ -192,8 +177,8 @@ namespace MyNN.MLP.DropConnect.Backpropagation.EpocheTrainer.DropConnect.OpenCL.
                     .SetKernelArgMem(3, _currentLayerContainer.WeightMem)
                     .SetKernelArgMem(4, _nablaWeights)
                     .SetKernelArgMem(5, _currentLayerPropagator.MaskContainer.MaskMem)
-                    .SetKernelArg(6, 4, _previousLayer.TotalNeuronCount)
-                    .SetKernelArg(7, 4, _currentLayer.TotalNeuronCount)
+                    .SetKernelArg(6, 4, _previousLayerContainer.Configuration.TotalNeuronCount)
+                    .SetKernelArg(7, 4, _currentLayerContainer.Configuration.TotalNeuronCount)
                     .SetKernelArg(8, 4, learningRate)
                     .SetKernelArg(9, 4, _config.RegularizationFactor)
                     .SetKernelArg(10, 4, (float) (dataCount))

@@ -12,8 +12,6 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
         private readonly CLProvider _clProvider;
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
-        private readonly int _prevLayerNeuronTotalCount;
-        private readonly int _currentLayerTotalNeuronCount;
         
         private readonly Kernel _kernel;
 
@@ -23,9 +21,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
             IMemLayerContainer previousMemLayerContainer,
             IMemLayerContainer currentMemLayerContainer,
             IFunction activationFunction,
-            VectorizationSizeEnum vse,
-            int prevLayerNeuronTotalCount,
-            int currentLayerTotalNeuronCount
+            VectorizationSizeEnum vse
             )
         {
             if (clProvider == null)
@@ -52,8 +48,6 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
             _clProvider = clProvider;
             _previousMemLayerContainer = previousMemLayerContainer;
             _currentMemLayerContainer = currentMemLayerContainer;
-            _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
 
             string kernelName;
             var kernelSource = ks.GetKernelSource(
@@ -75,9 +69,9 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.CPU
                 .SetKernelArgMem(1, _currentMemLayerContainer.NetMem)
                 .SetKernelArgMem(2, _currentMemLayerContainer.StateMem)
                 .SetKernelArgMem(3, _currentMemLayerContainer.WeightMem)
-                .SetKernelArg(4, 4, _prevLayerNeuronTotalCount)
+                .SetKernelArg(4, 4, _previousMemLayerContainer.Configuration.TotalNeuronCount)
                 .SetKernelArgMem(5, _currentMemLayerContainer.BiasMem)
-                .EnqueueNDRangeKernel(_currentLayerTotalNeuronCount);
+                .EnqueueNDRangeKernel(_currentMemLayerContainer.Configuration.TotalNeuronCount);
         }
 
         public void WaitForCalculationFinished()

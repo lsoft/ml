@@ -89,8 +89,6 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
                     containers[layerIndex - 1],
                     containers[layerIndex],
                     mlp.Layers[layerIndex].LayerActivationFunction,
-                    mlp.Layers[layerIndex - 1].TotalNeuronCount,
-                    mlp.Layers[layerIndex].TotalNeuronCount,
                     inferencer
                     );
 
@@ -120,9 +118,7 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
 
                 var mc = new MemLayerContainer(
                         _clProvider,
-                        currentLayerConfiguration.TotalNeuronCount,
-                        currentLayerConfiguration.WeightCount,
-                        currentLayerConfiguration.BiasCount
+                        currentLayerConfiguration
                         );
 
                 result.Add(mc);

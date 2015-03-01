@@ -60,20 +60,22 @@ namespace MyNN.Tests.MLP2.Inferencer
 
                 var previousContainer = new MemLayerContainer(
                     clProvider,
-                    layer0.TotalNeuronCount,
-                    0,
-                    0
-                    );
+                    new TestLayerConfiguration(
+                        layer0.TotalNeuronCount,
+                        0,
+                        0
+                        ));
 
                 previousContainer.StateMem.Array.Fill(j => structureRandomizer.Next());
                 previousContainer.StateMem.Write(BlockModeEnum.Blocking);
 
                 var currentContainer = new MemLayerContainer(
                     clProvider,
-                    layer1.TotalNeuronCount,
-                    layer0.TotalNeuronCount * layer1.TotalNeuronCount,
-                    layer1.TotalNeuronCount
-                    );
+                    new TestLayerConfiguration(
+                        layer1.TotalNeuronCount,
+                        layer0.TotalNeuronCount * layer1.TotalNeuronCount,
+                        layer1.TotalNeuronCount
+                        ));
 
                 currentContainer.WeightMem.Array.Fill(j => structureRandomizer.Next());
                 currentContainer.WeightMem.Write(BlockModeEnum.Blocking);

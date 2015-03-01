@@ -217,7 +217,7 @@ namespace MyNN.MLP.Backpropagation.EpocheTrainer
             {
                 if (container != null)
                 {
-                    container.PopWeights();
+                    container.PopWeightsAndBiases();
                 }
             }
 
@@ -227,7 +227,7 @@ namespace MyNN.MLP.Backpropagation.EpocheTrainer
                 var layer = _mlp.Layers[layerIndex];
                 var container = _containers[layerIndex];
 
-                container.WritebackWeightsToMLP(layer);
+                container.WritebackWeightsAndBiasesToMLP(layer);
             }
 
         }

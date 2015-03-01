@@ -15,8 +15,6 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
         private readonly IOpenCLMaskContainer _maskContainer;
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
-        private readonly int _prevLayerNeuronTotalCount;
-        private readonly int _currentLayerNonBiasNeuronCount;
         private readonly float _zeroValue0;
         private readonly float _oneValue0;
         private readonly float _zeroValue1;
@@ -49,8 +47,6 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
             IMemLayerContainer previousMemLayerContainer,
             IMemLayerContainer currentMemLayerContainer,
             IFunction activationFunction,
-            int prevLayerNeuronTotalCount,
-            int currentLayerNonBiasNeuronCount,
             float zeroValue0,
             float oneValue0,
             float zeroValue1,
@@ -91,8 +87,6 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
             _maskContainer = maskContainer;
             _previousMemLayerContainer = previousMemLayerContainer;
             _currentMemLayerContainer = currentMemLayerContainer;
-            _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
-            _currentLayerNonBiasNeuronCount = currentLayerNonBiasNeuronCount;
             _zeroValue0 = zeroValue0;
             _oneValue0 = oneValue0;
             _zeroValue1 = zeroValue1;
@@ -101,8 +95,8 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
             string kernelName;
             var kernelSource = ks.GetKernelSource(
                 activationFunction,
-                currentLayerNonBiasNeuronCount,
-                prevLayerNeuronTotalCount,
+                currentMemLayerContainer.Configuration.TotalNeuronCount,
+                previousMemLayerContainer.Configuration.TotalNeuronCount,
                 out kernelName
                 );
 
@@ -114,7 +108,9 @@ namespace MyNN.MLP.Dropout.ForwardPropagation.OpenCL.GPU
         public void ComputeLayer(
             )
         {
-            var maxRandomShift = this._maskContainer.MaskMem.Array.Length - _currentLayerNonBiasNeuronCount;
+            var maxRandomShift = 
+                this._maskContainer.MaskMem.Array.Length - _currentMemLayerContainer.Configuration.TotalNeuronCount;
+            
             this.MaskShift = _randomizer.Next(maxRandomShift);
 
             if (++_maskChanged > 100)

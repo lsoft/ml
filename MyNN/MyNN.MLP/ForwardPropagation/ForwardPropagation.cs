@@ -210,7 +210,7 @@ namespace MyNN.MLP.ForwardPropagation
             for (var layerIndex = 1; layerIndex < layerCount; ++layerIndex)
             {
                 var layer = _mlp.Layers[layerIndex];
-                _containers[layerIndex].ReadWeightsFromLayer(layer);
+                _containers[layerIndex].ReadWeightsAndBiasesFromLayer(layer);
             }
         }
 

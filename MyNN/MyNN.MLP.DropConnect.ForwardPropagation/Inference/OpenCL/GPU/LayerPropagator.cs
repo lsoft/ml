@@ -12,8 +12,6 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
         private readonly CLProvider _clProvider;
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
-        private readonly int _prevLayerNeuronTotalCount;
-        private readonly int _currentLayerTotalNeuronCount;
         private readonly ILayerInferencer _inferencer;
 
         private readonly Kernel _kernel;
@@ -24,8 +22,6 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
             IMemLayerContainer previousMemLayerContainer,
             IMemLayerContainer currentMemLayerContainer,
             IFunction activationFunction,
-            int prevLayerNeuronTotalCount,
-            int currentLayerTotalNeuronCount,
             ILayerInferencer inferencer
             )
         {
@@ -57,15 +53,13 @@ namespace MyNN.MLP.DropConnect.ForwardPropagation.Inference.OpenCL.GPU
             _clProvider = clProvider;
             _previousMemLayerContainer = previousMemLayerContainer;
             _currentMemLayerContainer = currentMemLayerContainer;
-            _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
             _inferencer = inferencer;
 
             string kernelName;
             var kernelSource = ks.GetKernelSource(
                 activationFunction,
-                currentLayerTotalNeuronCount,
-                prevLayerNeuronTotalCount,
+                currentMemLayerContainer.Configuration.TotalNeuronCount,
+                previousMemLayerContainer.Configuration.TotalNeuronCount,
                 out kernelName
                 );
 

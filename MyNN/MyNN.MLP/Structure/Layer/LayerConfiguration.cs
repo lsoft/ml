@@ -1,10 +1,17 @@
 ﻿using System;
 using MyNN.MLP.Structure.Neuron;
+using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.MLP.Structure.Layer
 {
     public class LayerConfiguration : ILayerConfiguration
     {
+        public IFunction LayerActivationFunction
+        {
+            get;
+            private set;
+        }
+
         public IDimension SpatialDimension
         {
             get;
@@ -39,12 +46,14 @@ namespace MyNN.MLP.Structure.Layer
         }
 
         public LayerConfiguration(
+            IFunction layerActivationFunction,
             IDimension spatialDimension,
             int weightCount,
             int biasCount,
             INeuronConfiguration[] neurons
             )
         {
+            //layerActivationFunction allowed to be null (for input layer)
             if (spatialDimension == null)
             {
                 throw new ArgumentNullException("spatialDimension");
@@ -54,6 +63,7 @@ namespace MyNN.MLP.Structure.Layer
                 throw new ArgumentNullException("neurons");
             }
 
+            LayerActivationFunction = layerActivationFunction;
             SpatialDimension = spatialDimension;
             WeightCount = weightCount;
             BiasCount = biasCount;

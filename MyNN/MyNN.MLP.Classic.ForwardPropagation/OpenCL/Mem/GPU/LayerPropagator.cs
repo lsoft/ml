@@ -11,28 +11,19 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
         private readonly CLProvider _clProvider;
         private readonly IMemLayerContainer _previousMemLayerContainer;
         private readonly IMemLayerContainer _currentMemLayerContainer;
-        private readonly int _prevLayerNeuronTotalCount;
-        private readonly int _currentLayerTotalNeuronCount;
 
         private readonly Kernel _kernel;
 
         public LayerPropagator(
             CLProvider clProvider,
-            KernelSource ks,
             IMemLayerContainer previousMemLayerContainer,
             IMemLayerContainer currentMemLayerContainer,
-            IFunction activationFunction,
-            int prevLayerNeuronTotalCount,
-            int currentLayerTotalNeuronCount
+            IFunction activationFunction
             )
         {
             if (clProvider == null)
             {
                 throw new ArgumentNullException("clProvider");
-            }
-            if (ks == null)
-            {
-                throw new ArgumentNullException("ks");
             }
             if (previousMemLayerContainer == null)
             {
@@ -50,14 +41,14 @@ namespace MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU
             _clProvider = clProvider;
             _previousMemLayerContainer = previousMemLayerContainer;
             _currentMemLayerContainer = currentMemLayerContainer;
-            _prevLayerNeuronTotalCount = prevLayerNeuronTotalCount;
-            _currentLayerTotalNeuronCount = currentLayerTotalNeuronCount;
+
+            var ks = new MyNN.MLP.Classic.ForwardPropagation.OpenCL.Mem.GPU.KernelSource();
 
             string kernelName;
             var kernelSource = ks.GetKernelSource(
                 activationFunction,
-                currentLayerTotalNeuronCount,
-                prevLayerNeuronTotalCount,
+                currentMemLayerContainer.Configuration.TotalNeuronCount,
+                previousMemLayerContainer.Configuration.TotalNeuronCount,
                 out kernelName
                 );
 

@@ -54,7 +54,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -108,7 +108,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -159,7 +159,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -210,7 +210,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -261,7 +261,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -312,7 +312,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -365,7 +365,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -418,7 +418,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 plc.PushNetAndState();
 
                 clc.ClearAndPushNetAndState();
-                clc.ReadWeightsFromLayer(l);
+                clc.ReadWeightsAndBiasesFromLayer(l);
                 clProvider.QueueFinish();
 
                 lp.ComputeLayer();
@@ -465,17 +465,19 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
 
             plc = new MemLayerContainer(
                 clProvider,
-                previousLayerNeuronCount,
-                0,
-                0
-                );
+                new TestLayerConfiguration(
+                    previousLayerNeuronCount,
+                    0,
+                    0
+                    ));
 
             clc = new MemLayerContainer(
                 clProvider,
-                currentLayerNeuronCount,
-                currentLayerNeuronCount * previousLayerNeuronCount,
-                currentLayerNeuronCount
-                );
+                new TestLayerConfiguration(
+                    currentLayerNeuronCount,
+                    currentLayerNeuronCount * previousLayerNeuronCount,
+                    currentLayerNeuronCount
+                    ));
 
             var ks = new CPUKernelSource();
 
@@ -485,9 +487,7 @@ namespace MyNN.Tests.MLP2.LayerPropagator.Classic.OpenCL.CPU
                 plc,
                 clc,
                 function,
-                vse,
-                previousLayerNeuronCount,
-                currentLayerNeuronCount
+                vse
                 );
         }
     }
