@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Net.Cache;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.Structure.Neuron;
@@ -61,15 +62,17 @@ namespace MyNN.MLP.Structure.Layer
 
         public int FeatureMapCount
         {
-            get;
-            private set;
+            get
+            {
+                return
+                    this.SpatialDimension.LastDimensionSize;
+            }
         }
 
         public ConvolutionLayer(
             IRandomizer randomizer,
             INeuronFactory neuronFactory,
             IFunction activationFunction,
-            int featureMapCount,
             IDimension spatialDimension,
             IDimension kernelSpatialDimension
             )
@@ -96,7 +99,6 @@ namespace MyNN.MLP.Structure.Layer
             }
 
             LayerActivationFunction = activationFunction;
-            FeatureMapCount = featureMapCount;
             SpatialDimension = spatialDimension;
             KernelSpatialDimension = kernelSpatialDimension;
 
@@ -129,10 +131,8 @@ namespace MyNN.MLP.Structure.Layer
         {
             return
                 new LayerConfiguration(
-                    new Dimension(
-                        this.SpatialDimension.DimensionCount + 1,
-                        this.SpatialDimension.Sizes.CloneAndAppend(FeatureMapCount)
-                        ),
+                    this.LayerActivationFunction,
+                    this.SpatialDimension,
                     this._kernel.Length,
                     this._biases.Length,
                     this.Neurons.ConvertAll(j => j.GetConfiguration())

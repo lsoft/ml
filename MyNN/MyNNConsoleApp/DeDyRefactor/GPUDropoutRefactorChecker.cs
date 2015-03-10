@@ -12,8 +12,6 @@ using MyNN.Common.NewData.Normalizer;
 using MyNN.Common.Other;
 using MyNN.Common.OutputConsole;
 using MyNN.Common.Randomizer;
-using MyNN.Mask;
-using MyNN.Mask.Factory;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
@@ -25,11 +23,9 @@ using MyNN.MLP.Structure.Factory;
 using MyNN.MLP.Structure.Layer.Factory;
 using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
-using OpenCL.Net;
+using MyNNConsoleApp.DeDyRefactor.Fakes;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
-using OpenCL.Net.Wrapper.Mem;
-using OpenCL.Net.Wrapper.Mem.Data;
 
 namespace MyNNConsoleApp.DeDyRefactor
 {
@@ -104,7 +100,6 @@ namespace MyNNConsoleApp.DeDyRefactor
                 5,
                 0.001f,
                 epocheCount,
-                -1f,
                 -1f
                 );
 
@@ -255,91 +250,6 @@ namespace MyNNConsoleApp.DeDyRefactor
 
             return
                 validationDataSet;
-        }
-
-    }
-
-    internal class FakeOpenCLMaskContainerFactory : IOpenCLMaskContainerFactory
-    {
-        private readonly CLProvider _clProvider;
-
-        public FakeOpenCLMaskContainerFactory(
-            CLProvider clProvider
-            )
-        {
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
-            }
-            _clProvider = clProvider;
-        }
-
-        public IOpenCLMaskContainer CreateContainer(long arraySize, float p)
-        {
-            
-            return 
-                new FakeOpenCLMaskContainer(
-                    _clProvider,
-                    arraySize
-                    );
-        }
-    }
-
-    internal class FakeOpenCLMaskContainer : IOpenCLMaskContainer
-    {
-        private readonly object _locker = new object();
-
-        public uint BitMask
-        {
-            get;
-            private set;
-        }
-
-        public MemUint MaskMem
-        {
-            get;
-            private set;
-        }
-
-        public FakeOpenCLMaskContainer(
-            CLProvider clProvider,
-            long arraySize
-            )
-        {
-            if (clProvider == null)
-            {
-                throw new ArgumentNullException("clProvider");
-            }
-
-            this.BitMask = 1;
-
-            MaskMem = clProvider.CreateUintMem(
-                arraySize,
-                MemFlags.CopyHostPtr | MemFlags.ReadOnly);
-
-            for (var cc = 0; cc < this.MaskMem.Array.Length; cc++)
-            {
-                this.MaskMem.Array[cc] = (uint)cc;
-            }
-
-            this.RegenerateMask();
-        }
-
-        public void RegenerateMask()
-        {
-            lock (_locker)
-            {
-                var f = this.MaskMem.Array[0];
-
-                for (var cc = 0; cc < this.MaskMem.Array.Length - 1; cc++)
-                {
-                    this.MaskMem.Array[cc] = this.MaskMem.Array[cc + 1];
-                }
-
-                this.MaskMem.Array[this.MaskMem.Array.Length - 1] = f;
-
-                this.MaskMem.Write(BlockModeEnum.Blocking);
-            }
         }
 
     }

@@ -23,11 +23,11 @@ using MyNN.MLP.Backpropagation.EpocheTrainer;
 using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
-using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropagator;
 using MyNN.MLP.Classic.ForwardPropagation.CSharp;
 using MyNN.MLP.Convolution.Calculator.CSharp;
 using MyNN.MLP.Convolution.ErrorCalculator;
 using MyNN.MLP.Convolution.ErrorCalculator.CSharp;
+using MyNN.MLP.Convolution.ReferencedSquareFloat;
 using MyNN.MLP.DesiredValues;
 using MyNN.MLP.ForwardPropagation;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
@@ -102,8 +102,8 @@ namespace MyNNConsoleApp.Conv
                 1,
                 0f,
                 EpochCount,
-                0.0001f,
-                -1.0f);
+                0.0001f
+                );
 
 
             var desiredValuesContainer = new CSharpDesiredValuesContainer(
@@ -138,14 +138,10 @@ namespace MyNNConsoleApp.Conv
             var containers = new ILayerContainer[mlp.Layers.Length];
 
             containers[0] = new CSharpLayerContainer(
-                mlp.Layers[0].GetConfiguration().TotalNeuronCount,
-                mlp.Layers[0].GetConfiguration().WeightCount,
-                mlp.Layers[0].GetConfiguration().BiasCount
+                mlp.Layers[0].GetConfiguration()
                 );
             containers[1] = new CSharpLayerContainer(
-                mlp.Layers[1].GetConfiguration().TotalNeuronCount,
-                mlp.Layers[1].GetConfiguration().WeightCount,
-                mlp.Layers[1].GetConfiguration().BiasCount
+                mlp.Layers[1].GetConfiguration()
                 );
 
             var propagators = new ILayerPropagator[mlp.Layers.Length];

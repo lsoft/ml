@@ -92,8 +92,8 @@ namespace MyNNConsoleApp.RefactoredForDI
                     1,
                     0.001f,
                     epocheCount,
-                    0.0001f,
-                    -1.0f);
+                    0.0001f
+                    );
 
                 var rootContainer = new FileSystemArtifactContainer(
                     ".",

@@ -26,6 +26,7 @@ using MyNN.MLP.Structure.Factory;
 using MyNN.MLP.Structure.Layer.Factory;
 using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
+using MyNNConsoleApp.DeDyRefactor.Fakes;
 using OpenCL.Net;
 using OpenCL.Net.Wrapper;
 using OpenCL.Net.Wrapper.DeviceChooser;
@@ -105,7 +106,6 @@ namespace MyNNConsoleApp.DeDyRefactor
                 5,
                 0.001f,
                 epocheCount,
-                -1f,
                 -1f
                 );
 

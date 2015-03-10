@@ -4,9 +4,5 @@ namespace MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator
 {
     public interface ICSharpLayerBackpropagator : ILayerBackpropagator
     {
-        //ICSharpDeDyAggregator DeDyCalculator
-        //{
-        //    get;
-        //}
     }
 }

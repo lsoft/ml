@@ -104,10 +104,8 @@
     <Compile Include="MLP2\Forward\Classic\CPU\ForwardState2Fixture.cs" />
     <Compile Include="MLP2\Forward\Classic\CSharp\ForwardState2Fixture.cs" />
     <Compile Include="MLP2\Forward\Classic\CSharp\ForwardOutput2Fixture.cs" />
-    <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForCPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForIntelGPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForNVidiaFixture.cs" />
-    <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForCPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForIntelGPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForNVidiaFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardOutputFixture.cs" />

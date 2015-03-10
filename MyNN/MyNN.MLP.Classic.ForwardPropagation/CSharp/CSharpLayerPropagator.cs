@@ -12,7 +12,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 {
     public class CSharpLayerPropagator : ILayerPropagator
     {
-        private readonly ILayer _currentLayer;
+        private readonly IFullConnectedLayer _currentLayer;
         private readonly ICSharpLayerContainer _previousLayerMemContainer;
         private readonly ICSharpLayerContainer _currentLayerMemContainer;
 
@@ -35,7 +35,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
                 throw new ArgumentNullException("currentLayerMemContainer");
             }
 
-            _currentLayer = currentLayer;
+            _currentLayer = currentLayer as IFullConnectedLayer;
             _previousLayerMemContainer = previousLayerMemContainer;
             _currentLayerMemContainer = currentLayerMemContainer;
         }

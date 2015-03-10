@@ -28,7 +28,6 @@ namespace MyNN.MLP.Structure
             int TotalNeuronCount,
             bool isNeedBiasNeuron);
 
-        IMLPConfiguration GetConfiguration();
 
     }
 }

@@ -76,13 +76,15 @@ namespace MyNN.MLP.Structure.Layer
 
         public int FeatureMapCount
         {
-            get;
-            private set;
+            get
+            {
+                return
+                    this.SpatialDimension.LastDimensionSize;
+            }
         }
 
         public AvgPoolingLayer(
             INeuronFactory neuronFactory,
-            int featureMapCount,
             IDimension spatialDimension,
             float scaleFactor
             )
@@ -100,7 +102,6 @@ namespace MyNN.MLP.Structure.Layer
                 throw new ArgumentException("scaleFactor <= 0f || scaleFactor > 0.5f");
             }
 
-            FeatureMapCount = featureMapCount;
             SpatialDimension = spatialDimension;
             ScaleFactor = scaleFactor;
 
@@ -126,10 +127,8 @@ namespace MyNN.MLP.Structure.Layer
         {
             return
                 new LayerConfiguration(
-                    new Dimension(
-                        this.SpatialDimension.DimensionCount + 1,
-                        this.SpatialDimension.Sizes.CloneAndAppend(FeatureMapCount)
-                        ),
+                    this.LayerActivationFunction,
+                    this.SpatialDimension,
                     0,
                     0,
                     this.Neurons.ConvertAll(j => j.GetConfiguration())

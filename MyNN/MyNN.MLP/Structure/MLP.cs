@@ -135,11 +135,11 @@ namespace MyNN.MLP.Structure
             this._layers = newl;
         }
 
-        public IMLPConfiguration GetConfiguration()
-        {
-            return 
-                new MLPConfiguration(
-                    this.Layers.ConvertAll(j => j.GetConfiguration()));
-        }
+        //public IMLPConfiguration GetConfiguration()
+        //{
+        //    return 
+        //        new MLPConfiguration(
+        //            this.Layers.ConvertAll(j => j.GetConfiguration()));
+        //}
     }
 }

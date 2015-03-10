@@ -142,7 +142,6 @@ namespace MyNNConsoleApp.RefactoredForDI
                     1,
                     0.001f,
                     epocheCount,
-                    -1f,
                     -1f
                     );
 

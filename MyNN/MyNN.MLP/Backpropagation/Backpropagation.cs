@@ -250,9 +250,7 @@ namespace MyNN.MLP.Backpropagation
                 GC.Collect(0);
                 GC.WaitForPendingFinalizers();
                 GC.Collect(0);
-            } while (epochNumber < _config.MaxEpoches &&
-                     currentError > _config.MinError &&
-                     Math.Abs(currentError - lastError) > _config.MinErrorChange);
+            } while (epochNumber < _config.MaxEpoches && currentError > _config.MinError);
 
             return
                 epocheAccuracyRecord;

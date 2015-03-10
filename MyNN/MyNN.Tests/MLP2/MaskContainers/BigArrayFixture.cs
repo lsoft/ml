@@ -15,15 +15,6 @@ namespace MyNN.Tests.MLP2.MaskContainers
         [TestMethod]
         public void Test05()
         {
-            var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
-                new LinearFunction(1f), 
-                new int[]
-                {
-                    5,
-                    5,
-                    5
-                });
-
             var p = 0.5f;
             var correctResult = new diapfloat(p, p/100f);
 
@@ -31,10 +22,10 @@ namespace MyNN.Tests.MLP2.MaskContainers
             Func<CLProvider, IOpenCLMaskContainer> containerProvider =
                 (clProvider) =>
                 {
-                    var previousLayerConfiguration = mlpConfiguration.Layers[1];
-                    var currentLayerConfiguration = mlpConfiguration.Layers[2];
+                    const int previousLayerTotalNeuronCount = 5;
+                    const int currentLayerTotalNeuronCount = 5;
 
-                    var arraySize = (long)currentLayerConfiguration.TotalNeuronCount * (long)previousLayerConfiguration.TotalNeuronCount;
+                    const long arraySize = (long)currentLayerTotalNeuronCount * (long)previousLayerTotalNeuronCount;
 
                     return
                         new BigArrayMaskContainer(
@@ -72,15 +63,6 @@ namespace MyNN.Tests.MLP2.MaskContainers
         [TestMethod]
         public void Test10()
         {
-            var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
-                new LinearFunction(1f), 
-                new int[]
-                {
-                    5,
-                    5,
-                    5
-                });
-
             var p = 1f;
             var correctResult = new diapfloat(p, p, false);
 
@@ -88,10 +70,10 @@ namespace MyNN.Tests.MLP2.MaskContainers
             Func<CLProvider, IOpenCLMaskContainer> containerProvider =
                 (clProvider) =>
                 {
-                    var previousLayerConfiguration = mlpConfiguration.Layers[1];
-                    var currentLayerConfiguration = mlpConfiguration.Layers[2];
+                    const int previousLayerTotalNeuronCount = 5;
+                    const int currentLayerTotalNeuronCount = 5;
 
-                    var arraySize = (long)currentLayerConfiguration.TotalNeuronCount * (long)previousLayerConfiguration.TotalNeuronCount;
+                    const long arraySize = (long)currentLayerTotalNeuronCount * (long)previousLayerTotalNeuronCount;
 
                     return
                         new BigArrayMaskContainer(
@@ -118,15 +100,6 @@ namespace MyNN.Tests.MLP2.MaskContainers
         [TestMethod]
         public void Test01()
         {
-            var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
-                new LinearFunction(1f), 
-                new int[]
-                {
-                    5,
-                    5,
-                    5
-                });
-
             var p = 0.1f;
             var correctResult = new diapfloat(p, p / 100f);
 
@@ -134,10 +107,10 @@ namespace MyNN.Tests.MLP2.MaskContainers
             Func<CLProvider, IOpenCLMaskContainer> containerProvider =
                 (clProvider) =>
                 {
-                    var previousLayerConfiguration = mlpConfiguration.Layers[1];
-                    var currentLayerConfiguration = mlpConfiguration.Layers[2];
+                    const int previousLayerTotalNeuronCount = 5;
+                    const int currentLayerTotalNeuronCount = 5;
 
-                    var arraySize = (long)currentLayerConfiguration.TotalNeuronCount * (long)previousLayerConfiguration.TotalNeuronCount;
+                    const long arraySize = (long)currentLayerTotalNeuronCount * (long)previousLayerTotalNeuronCount;
 
                     return
                         new BigArrayMaskContainer(
@@ -164,15 +137,6 @@ namespace MyNN.Tests.MLP2.MaskContainers
         [TestMethod]
         public void Test09()
         {
-            var mlpConfiguration = MLPConfigurationConstructor.CreateConfiguration(
-                new LinearFunction(1f), 
-                new int[]
-                {
-                    5,
-                    5,
-                    5
-                });
-
             var p = 0.9f;
             var correctResult = new diapfloat(p, p / 100f);
 
@@ -180,10 +144,10 @@ namespace MyNN.Tests.MLP2.MaskContainers
             Func<CLProvider, IOpenCLMaskContainer> containerProvider =
                 (clProvider) =>
                 {
-                    var previousLayerConfiguration = mlpConfiguration.Layers[1];
-                    var currentLayerConfiguration = mlpConfiguration.Layers[2];
+                    const int previousLayerTotalNeuronCount = 5;
+                    const int currentLayerTotalNeuronCount = 5;
 
-                    var arraySize = (long)currentLayerConfiguration.TotalNeuronCount * (long)previousLayerConfiguration.TotalNeuronCount;
+                    const long arraySize = (long)currentLayerTotalNeuronCount * (long)previousLayerTotalNeuronCount;
 
                     return
                         new BigArrayMaskContainer(

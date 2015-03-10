@@ -19,6 +19,15 @@ namespace MyNN.MLP.Structure.Layer
             private set;
         }
 
+        public int LastDimensionSize
+        {
+            get
+            {
+                return
+                    Sizes[Sizes.Length - 1];
+            }
+        }
+
         public int Width
         {
             get

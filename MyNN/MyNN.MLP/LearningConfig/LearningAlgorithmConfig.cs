@@ -55,15 +55,6 @@ namespace MyNN.MLP.LearningConfig
         }
 
         /// <summary>
-        /// If cumulative error change for all training examples is less then MinErrorChange, then algorithm stops 
-        /// </summary>
-        public float MinErrorChange
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
         /// Для сериализатора
         /// </summary>
         public LearningAlgorithmConfig()
@@ -76,8 +67,8 @@ namespace MyNN.MLP.LearningConfig
             int batchSize,
             float regularizationFactor,
             int maxEpoches,
-            float minError,
-            float minErrorChange)
+            float minError
+            )
         {
             if (targetMetrics == null)
             {
@@ -94,7 +85,6 @@ namespace MyNN.MLP.LearningConfig
             RegularizationFactor = regularizationFactor;
             MaxEpoches = maxEpoches;
             MinError = minError;
-            MinErrorChange = minErrorChange;
         }
 
         public void ReassignBatchSize(int batchSize)

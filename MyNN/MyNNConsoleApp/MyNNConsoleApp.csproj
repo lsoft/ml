@@ -126,7 +126,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
+    <Compile Include="Conv\LayerVisualizer.cs" />
+    <Compile Include="Conv\MNISTDataItemLoaderForDelete.cs" />
     <Compile Include="DeDyRefactor\CPURefactorChecker.cs" />
+    <Compile Include="DeDyRefactor\Fakes\FakeOpenCLMaskContainer.cs" />
+    <Compile Include="DeDyRefactor\Fakes\FakeOpenCLMaskContainerFactory.cs" />
     <Compile Include="DeDyRefactor\GPUDropconnectRefactorChecker.cs" />
     <Compile Include="DeDyRefactor\GPUDropoutRefactorChecker.cs" />
     <Compile Include="DeDyRefactor\GPURefactorChecker.cs" />

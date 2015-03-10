@@ -2,12 +2,12 @@
 
 namespace MyNN.MLP.Structure
 {
-    public interface IMLPConfiguration
-    {
-        ILayerConfiguration[] Layers
-        {
-            get;
-        }
+    //public interface IMLPConfiguration
+    //{
+    //    ILayerConfiguration[] Layers
+    //    {
+    //        get;
+    //    }
 
-    }
+    //}
 }

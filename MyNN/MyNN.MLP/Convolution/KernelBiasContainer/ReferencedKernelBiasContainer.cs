@@ -137,6 +137,8 @@ namespace MyNN.MLP.Convolution.KernelBiasContainer
             float batchSize
             )
         {
+            throw new Exception("проверить, что nablaBias и nablaContainer не делятся на batchSize гдето раньше");
+
             if (nablaContainer == null)
             {
                 throw new ArgumentNullException("nablaContainer");

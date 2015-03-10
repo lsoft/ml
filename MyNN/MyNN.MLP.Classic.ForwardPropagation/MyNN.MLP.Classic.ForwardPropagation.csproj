@@ -34,6 +34,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSharp\CSharpFullConnected_ConvolutionLayerPropagator.cs" />
     <Compile Include="CSharp\CSharpLayerPropagator.cs" />
     <Compile Include="CSharp\CSharpPropagatorComponentConstructor.cs" />
     <Compile Include="OpenCL\Mem\CPU\CPUKernelSource.cs" />

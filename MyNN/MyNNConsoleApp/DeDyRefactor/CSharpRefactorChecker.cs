@@ -97,7 +97,6 @@ namespace MyNNConsoleApp.DeDyRefactor
                 5,
                 0.001f,
                 epocheCount,
-                -1f,
                 -1f
                 );
 

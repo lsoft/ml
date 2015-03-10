@@ -13,11 +13,6 @@ namespace MyNN.MLP.Structure.Layer
             get;
         }
 
-        IDimension SpatialDimension
-        {
-            get;
-        }
-        
         /// <summary>
         /// Всего нейронов в слое
         /// </summary>
@@ -25,7 +20,6 @@ namespace MyNN.MLP.Structure.Layer
         {
             get;
         }
-
 
         INeuron[] Neurons
         {
@@ -38,8 +32,6 @@ namespace MyNN.MLP.Structure.Layer
         }
 
         string GetLayerInformation();
-
-        ILayerConfiguration GetConfiguration();
 
         /// <summary>
         /// Получить массив клонированных весов всех нейронов сети
@@ -56,5 +48,13 @@ namespace MyNN.MLP.Structure.Layer
             float[] weights,
             float[] biases
             );
+
+        IDimension SpatialDimension
+        {
+            get;
+        }
+
+        ILayerConfiguration GetConfiguration();
+
     }
 }

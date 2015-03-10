@@ -75,8 +75,8 @@ namespace MyNN.Tests.MLP2.EpocheTrainer
                 10,
                 0.0f,
                 1,
-                0.0f,
-                -1.0f);
+                0.0f
+                );
 
             var validation = 
                 new Validation(

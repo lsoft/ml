@@ -47,14 +47,6 @@ namespace MyNN.MLP.LearningConfig
             get;
         }
 
-        /// <summary>
-        /// If cumulative error change for all training examples is less than MinErrorChange, then algorithm stops 
-        /// </summary>
-        float MinErrorChange
-        {
-            get;
-        }
-
         void ReassignBatchSize(int batchSize);
     }
 }

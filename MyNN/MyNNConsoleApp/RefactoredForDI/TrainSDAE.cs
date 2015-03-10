@@ -174,8 +174,8 @@ namespace MyNNConsoleApp.RefactoredForDI
                         1,
                         0.001f,
                         3,
-                        0f,
-                        -0.0025f);
+                        0f
+                        );
 
                     return conf;
                 },

@@ -7,11 +7,6 @@ using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNN.MLP.Structure.Layer
 {
-    public interface IFullConnectedLayer : ILayer
-    {
-        
-    }
-
     [Serializable]
     public class FullConnectedLayer : IFullConnectedLayer
     {
