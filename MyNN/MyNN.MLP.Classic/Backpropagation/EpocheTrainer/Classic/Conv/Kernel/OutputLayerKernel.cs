@@ -10,19 +10,19 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
 {
     internal class OutputLayerKernel
     {
-        private readonly ILayer _layer;
+        private readonly ILayerConfiguration _layerConfiguration;
         private readonly ILearningAlgorithmConfig _config;
         private readonly IErrorCalculator _errorCalculator;
 
         public OutputLayerKernel(
-            ILayer layer,
+            ILayerConfiguration layerConfiguration,
             ILearningAlgorithmConfig config,
             IErrorCalculator errorCalculator
             )
         {
-            if (layer == null)
+            if (layerConfiguration == null)
             {
-                throw new ArgumentNullException("layer");
+                throw new ArgumentNullException("layerConfiguration");
             }
             if (config == null)
             {
@@ -33,7 +33,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
                 throw new ArgumentNullException("errorCalculator");
             }
 
-            _layer = layer;
+            _layerConfiguration = layerConfiguration;
             _config = config;
             _errorCalculator = errorCalculator;
 
@@ -84,7 +84,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
                 currentLayerState,
                 desiredOutput,
                 _config.TargetMetrics,
-                _layer.LayerActivationFunction,
+                _layerConfiguration.LayerActivationFunction,
                 currentLayerDeDz
                 );
 
@@ -165,7 +165,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
                 currentLayerState,
                 desiredOutput,
                 _config.TargetMetrics,
-                _layer.LayerActivationFunction,
+                _layerConfiguration.LayerActivationFunction,
                 currentLayerDeDz
                 );
 

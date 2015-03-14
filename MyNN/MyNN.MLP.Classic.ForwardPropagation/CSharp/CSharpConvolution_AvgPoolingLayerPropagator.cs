@@ -9,91 +9,77 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 {
     public class CSharpConvolution_AvgPoolingLayerPropagator : ILayerPropagator
     {
-        private readonly IConvolutionLayer _previousLayer;
-        private readonly IAvgPoolingLayer _currentLayer;
-        private readonly ICSharpLayerContainer _previousLayerContainer;
-        private readonly ICSharpLayerContainer _currentLayerMemContainer;
+        private readonly ICSharpConvolutionLayerContainer _previousLayerContainer;
+        private readonly ICSharpAvgPoolingLayerContainer _currentLayerContainer;
         
         public CSharpConvolution_AvgPoolingLayerPropagator(
-            IConvolutionLayer previousLayer,
-            IAvgPoolingLayer currentLayer,
-            ICSharpLayerContainer previousLayerContainer,
-            ICSharpLayerContainer currentLayerMemContainer
+            ICSharpConvolutionLayerContainer previousLayerContainer,
+            ICSharpAvgPoolingLayerContainer currentLayerContainer
             )
         {
-            if (previousLayer == null)
-            {
-                throw new ArgumentNullException("previousLayer");
-            }
-            if (currentLayer == null)
-            {
-                throw new ArgumentNullException("currentLayer");
-            }
             if (previousLayerContainer == null)
             {
                 throw new ArgumentNullException("previousLayerContainer");
             }
-            if (currentLayerMemContainer == null)
+            if (currentLayerContainer == null)
             {
-                throw new ArgumentNullException("currentLayerMemContainer");
+                throw new ArgumentNullException("currentLayerContainer");
             }
-            if (previousLayer.FeatureMapCount != currentLayer.FeatureMapCount)
+            if (previousLayerContainer.Configuration.FeatureMapCount != currentLayerContainer.Configuration.FeatureMapCount)
             {
                 throw new ArgumentException("previousLayer.FeatureMapCount != currentLayer.FeatureMapCount");
             }
-            if (!previousLayer.SpatialDimension.Rescale(currentLayer.ScaleFactor).IsEqual(currentLayer.SpatialDimension))
+            if (!previousLayerContainer.Configuration.SpatialDimension.Rescale(currentLayerContainer.Configuration.ScaleFactor).IsEqual(currentLayerContainer.Configuration.SpatialDimension))
             {
                 throw new ArgumentException("Размеры пред. сверточного слоя и размеры и фактор текущего пулинг слоя не совпадают");
             }
 
-            _previousLayer = previousLayer;
-            _currentLayer = currentLayer;
             _previousLayerContainer = previousLayerContainer;
-            _currentLayerMemContainer = currentLayerMemContainer;
+            _currentLayerContainer = currentLayerContainer;
         }
 
         public void ComputeLayer()
         {
             //downsample
-            for (var fmi = 0; fmi < _currentLayer.FeatureMapCount; fmi++)
+            for (var fmi = 0; fmi < _currentLayerContainer.Configuration.FeatureMapCount; fmi++)
             {
-                var currentNetStateShift = fmi * _currentLayer.SpatialDimension.Multiplied;
+                var currentNetStateShift = fmi * _currentLayerContainer.Configuration.SpatialDimension.Multiplied;
 
                 var currentNet = new ReferencedSquareFloat(
-                    _currentLayer.SpatialDimension,
-                    _currentLayerMemContainer.NetMem,
+                    _currentLayerContainer.Configuration.SpatialDimension,
+                    _currentLayerContainer.NetMem,
                     currentNetStateShift
                     );
 
                 var currentState = new ReferencedSquareFloat(
-                    _currentLayer.SpatialDimension,
-                    _currentLayerMemContainer.StateMem,
+                    _currentLayerContainer.Configuration.SpatialDimension,
+                    _currentLayerContainer.StateMem,
                     currentNetStateShift
                     );
 
-                var previousStateShift = fmi * _previousLayer.SpatialDimension.Multiplied;
+                var previousStateShift = fmi * _previousLayerContainer.Configuration.SpatialDimension.Multiplied;
 
                 var previousState = new ReferencedSquareFloat(
-                    _previousLayer.SpatialDimension,
+                    _previousLayerContainer.Configuration.SpatialDimension,
                     _previousLayerContainer.StateMem,
                     previousStateShift
                     );
 
-                for (var h = 0; h < _currentLayer.SpatialDimension.Height; h++)
+                for (var h = 0; h < _currentLayerContainer.Configuration.SpatialDimension.Height; h++)
                 {
-                    for (var w = 0; w < _currentLayer.SpatialDimension.Width; w++)
+                    for (var w = 0; w < _currentLayerContainer.Configuration.SpatialDimension.Width; w++)
                     {
                         var sum = 0f;
 
-                        for (var hp = h * _currentLayer.InverseScaleFactor; hp < (h * _currentLayer.InverseScaleFactor) + _currentLayer.InverseScaleFactor; hp++)
+                        for (var hp = h * _currentLayerContainer.Configuration.InverseScaleFactor; hp < (h * _currentLayerContainer.Configuration.InverseScaleFactor) + _currentLayerContainer.Configuration.InverseScaleFactor; hp++)
                         {
-                            for (var wp = w * _currentLayer.InverseScaleFactor; wp < (w * _currentLayer.InverseScaleFactor) + _currentLayer.InverseScaleFactor; wp++)
+                            for (var wp = w * _currentLayerContainer.Configuration.InverseScaleFactor; wp < (w * _currentLayerContainer.Configuration.InverseScaleFactor) + _currentLayerContainer.Configuration.InverseScaleFactor; wp++)
                             {
                                 sum += previousState.GetValueFromCoordSafely(wp, hp);
                             }
                         }
 
-                        sum /= _currentLayer.InverseScaleFactor * _currentLayer.InverseScaleFactor;
+                        sum /= _currentLayerContainer.Configuration.InverseScaleFactor * _currentLayerContainer.Configuration.InverseScaleFactor;
 
                         currentNet.SetValueFromCoordSafely(w, h, 0);
                         currentState.SetValueFromCoordSafely(w, h, sum);

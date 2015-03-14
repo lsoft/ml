@@ -104,6 +104,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DeDyAggregator\CPUDeDyAggregator.cs" />
+    <Compile Include="DeDyAggregator\CSharpAvgPoolingDeDyAggregator.cs" />
+    <Compile Include="DeDyAggregator\CSharpStubConvolutionDeDyAggregator.cs" />
     <Compile Include="DeDyAggregator\ICSharpDeDyAggregator.cs" />
     <Compile Include="DeDyAggregator\IOpenCLDeDyAggregator.cs" />
     <Compile Include="DesiredValues\CSharpDesiredValuesContainer.cs" />
@@ -119,7 +121,11 @@
     <Compile Include="ForwardPropagation\ILayerContainer.cs" />
     <Compile Include="ForwardPropagation\ILayerPropagator.cs" />
     <Compile Include="ForwardPropagation\IPropagatorComponentConstructor.cs" />
+    <Compile Include="ForwardPropagation\LayerContainer\CSharp\CSharpAvgPoolingLayerContainer.cs" />
+    <Compile Include="ForwardPropagation\LayerContainer\CSharp\CSharpConvolutionLayerContainer.cs" />
     <Compile Include="ForwardPropagation\LayerContainer\CSharp\CSharpLayerContainer.cs" />
+    <Compile Include="ForwardPropagation\LayerContainer\CSharp\ICSharpAvgPoolingLayerContainer.cs" />
+    <Compile Include="ForwardPropagation\LayerContainer\CSharp\ICSharpConvolutionLayerContainer.cs" />
     <Compile Include="ForwardPropagation\LayerContainer\CSharp\ICSharpLayerContainer.cs" />
     <Compile Include="ForwardPropagation\LayerContainer\OpenCL\Mem\IMemLayerContainer.cs">
       <SubType>Code</SubType>
@@ -145,14 +151,19 @@
     <Compile Include="Structure\IMLPConfiguration.cs" />
     <Compile Include="Structure\IMLPState.cs" />
     <Compile Include="Structure\Layer\AvgPoolingLayer.cs" />
+    <Compile Include="Structure\Layer\AvgPoolingLayerConfiguration.cs" />
     <Compile Include="Structure\Layer\ConvolutionLayer.cs" />
+    <Compile Include="Structure\Layer\ConvolutionLayerConfiguration.cs" />
     <Compile Include="Structure\Layer\Dimension.cs" />
     <Compile Include="Structure\Layer\Factory\ILayerFactory.cs" />
     <Compile Include="Structure\Layer\Factory\LayerFactory.cs" />
     <Compile Include="Structure\Layer\IAvgPoolingLayer.cs" />
+    <Compile Include="Structure\Layer\IAvgPoolingLayerConfiguration.cs" />
     <Compile Include="Structure\Layer\IConvolutionLayer.cs" />
+    <Compile Include="Structure\Layer\IConvolutionLayerConfiguration.cs" />
     <Compile Include="Structure\Layer\IDimension.cs" />
     <Compile Include="Structure\Layer\IFullConnectedLayer.cs" />
+    <Compile Include="Structure\Layer\IFullConnectedLayerConfiguration.cs" />
     <Compile Include="Structure\Layer\ILayer.cs" />
     <Compile Include="Structure\Layer\ILayerConfiguration.cs" />
     <Compile Include="Structure\Layer\ILayerState.cs" />
@@ -161,6 +172,7 @@
     <Compile Include="Structure\Layer\LayerInfo.cs" />
     <Compile Include="Structure\Layer\LayerState.cs" />
     <Compile Include="Structure\Layer\LayerTypeEnum.cs" />
+    <Compile Include="Structure\Layer\WeightBiasIniter\IWeightBiasIniter.cs" />
     <Compile Include="Structure\MLP.cs" />
     <Compile Include="Structure\MLPConfiguration.cs" />
     <Compile Include="Structure\MLPState.cs" />

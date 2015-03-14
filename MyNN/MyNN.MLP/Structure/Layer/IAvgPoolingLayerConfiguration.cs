@@ -1,6 +1,6 @@
 namespace MyNN.MLP.Structure.Layer
 {
-    public interface IAvgPoolingLayer : ILayer
+    public interface IAvgPoolingLayerConfiguration : ILayerConfiguration
     {
         int FeatureMapCount
         {
@@ -16,7 +16,5 @@ namespace MyNN.MLP.Structure.Layer
         {
             get;
         }
-
-        new IAvgPoolingLayerConfiguration GetConfiguration();
     }
 }

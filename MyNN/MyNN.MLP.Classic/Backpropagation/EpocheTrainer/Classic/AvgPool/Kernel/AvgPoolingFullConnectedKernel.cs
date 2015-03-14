@@ -13,49 +13,60 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.AvgPool.Kernel
 {
     public class AvgPoolingFullConnectedKernel
     {
-        private readonly ILayer _layer;
+        private readonly ILayerConfiguration _layerConfiguration;
 
         public AvgPoolingFullConnectedKernel(
-            ILayer layer
+            ILayerConfiguration layerConfiguration
             )
         {
-            if (layer == null)
+            if (layerConfiguration == null)
             {
-                throw new ArgumentNullException("layer");
+                throw new ArgumentNullException("layerConfiguration");
             }
 
-            _layer = layer;
+            _layerConfiguration = layerConfiguration;
         }
 
         public void Calculate(
             int fmiNeuronIndex,
             IReferencedSquareFloat currentLayerDeDz,
-            float[] nextLayerDeDz,
-            float[] nextLayerWeights
+            float[] nextLayerDeDy
             )
         {
+            if (currentLayerDeDz == null)
+            {
+                throw new ArgumentNullException("currentLayerDeDz");
+            }
+            if (nextLayerDeDy == null)
+            {
+                throw new ArgumentNullException("nextLayerDeDy");
+            }
+
             //вычисляем значение ошибки (dE/dz) суммированием по след слою
             //а след слой - полносвязный и у него веса к каждому пулинг
             //нейрону может быть разным
             var neuronIndex = fmiNeuronIndex;
-            for (var i = 0; i < _layer.SpatialDimension.Width; i++)
+            for (var i = 0; i < _layerConfiguration.SpatialDimension.Width; i++)
             {
-                for (var j = 0; j < _layer.SpatialDimension.Height; j++)
+                for (var j = 0; j < _layerConfiguration.SpatialDimension.Height; j++)
                 {
-                    var accDeDy = new KahanAlgorithm.Accumulator();
-                    for (var q = 0; q < nextLayerDeDz.Length; q++)
-                    {
-                        var nextWeightIndex = ComputeWeightIndex(_layer.TotalNeuronCount, q) + neuronIndex; //не векторизуется:(
-                        var wijk = nextLayerWeights[nextWeightIndex];
+                    //var accDeDy = new KahanAlgorithm.Accumulator();
+                    //for (var q = 0; q < nextLayerDeDz.Length; q++)
+                    //{
+                    //    var nextWeightIndex = ComputeWeightIndex(_layerConfiguration.TotalNeuronCount, q) + neuronIndex; //не векторизуется:(
+                    //    var wijk = nextLayerWeights[nextWeightIndex];
 
-                        var ndedz = nextLayerDeDz[q];
+                    //    var ndedz = nextLayerDeDz[q];
 
-                        var multiplied = wijk * ndedz;
+                    //    var multiplied = wijk * ndedz;
 
-                        KahanAlgorithm.AddElement(ref accDeDy, multiplied);
-                    }
+                    //    KahanAlgorithm.AddElement(ref accDeDy, multiplied);
+                    //}
 
-                    var dedz = accDeDy.Sum * 1;
+                    var dedy = nextLayerDeDy[neuronIndex];
+
+                    //var dedz = accDeDy.Sum * 1;
+                    var dedz = dedy * 1;
                     //для avg pooling dedy тоже самое что и  dedz, так как нет функции активации
                     //(или можно сказать функция активации линейна и ее производная равна 1, что
                     //и показано для наглядности в формуле)
@@ -72,14 +83,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.AvgPool.Kernel
             //произведение кронекера на единичную матрицу (или проще - апсемплинг dedz)
             //делаем на слое свертки
 
-        }
-
-        private static int ComputeWeightIndex(
-            int previousLayerNeuronCount,
-            int neuronIndex)
-        {
-            return
-                previousLayerNeuronCount * neuronIndex;
         }
 
     }

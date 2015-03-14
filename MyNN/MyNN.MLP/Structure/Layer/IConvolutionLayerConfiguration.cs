@@ -1,6 +1,6 @@
-namespace MyNN.MLP.Structure.Layer
+﻿namespace MyNN.MLP.Structure.Layer
 {
-    public interface IConvolutionLayer : ILayer
+    public interface IConvolutionLayerConfiguration : ILayerConfiguration
     {
         IDimension KernelSpatialDimension
         {
@@ -11,7 +11,5 @@ namespace MyNN.MLP.Structure.Layer
         {
             get;
         }
-
-        new IConvolutionLayerConfiguration GetConfiguration();
     }
 }

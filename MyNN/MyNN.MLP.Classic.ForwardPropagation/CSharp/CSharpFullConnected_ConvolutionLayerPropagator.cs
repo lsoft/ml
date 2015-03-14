@@ -15,24 +15,18 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 {
     public class CSharpFullConnected_ConvolutionLayerPropagator : ILayerPropagator
     {
-        private readonly IConvolutionLayer _currentLayer;
         private readonly ICSharpLayerContainer _previousLayerContainer;
-        private readonly ICSharpLayerContainer _currentLayerContainer;
+        private readonly ICSharpConvolutionLayerContainer _currentLayerContainer;
         private readonly ICSharpConvolutionCalculator _convolutionCalculator;
         private readonly IFunctionActivator _functionActivator;
 
         public CSharpFullConnected_ConvolutionLayerPropagator(
-            IConvolutionLayer currentLayer,
             ICSharpLayerContainer previousLayerContainer,
-            ICSharpLayerContainer currentLayerContainer,
+            ICSharpConvolutionLayerContainer currentLayerContainer,
             ICSharpConvolutionCalculator convolutionCalculator,
             IFunctionActivator functionActivator
             )
         {
-            if (currentLayer == null)
-            {
-                throw new ArgumentNullException("currentLayer");
-            }
             if (previousLayerContainer == null)
             {
                 throw new ArgumentNullException("previousLayerContainer");
@@ -50,7 +44,6 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
                 throw new ArgumentNullException("functionActivator");
             }
 
-            _currentLayer = currentLayer;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _convolutionCalculator = convolutionCalculator;
@@ -59,13 +52,13 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 
         public void ComputeLayer()
         {
-            for (var fmi = 0; fmi < _currentLayer.FeatureMapCount; fmi++)
+            for (var fmi = 0; fmi < _currentLayerContainer.Configuration.FeatureMapCount; fmi++)
             {
-                var kernelShift = fmi * _currentLayer.KernelSpatialDimension.Multiplied;
+                var kernelShift = fmi * _currentLayerContainer.Configuration.KernelSpatialDimension.Multiplied;
                 var biasShift = fmi;
 
                 var kernelBiasContainer = new ReferencedKernelBiasContainer(
-                    _currentLayer.KernelSpatialDimension,
+                    _currentLayerContainer.Configuration.KernelSpatialDimension,
                     _currentLayerContainer.WeightMem,
                     kernelShift,
                     _currentLayerContainer.BiasMem,

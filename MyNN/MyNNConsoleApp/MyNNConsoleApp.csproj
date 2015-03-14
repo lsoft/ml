@@ -126,6 +126,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedConsole.cs" />
+    <Compile Include="Conv\Convolute2.cs" />
+    <Compile Include="Conv\Convolute3.cs" />
     <Compile Include="Conv\LayerVisualizer.cs" />
     <Compile Include="Conv\MNISTDataItemLoaderForDelete.cs" />
     <Compile Include="DeDyRefactor\CPURefactorChecker.cs" />

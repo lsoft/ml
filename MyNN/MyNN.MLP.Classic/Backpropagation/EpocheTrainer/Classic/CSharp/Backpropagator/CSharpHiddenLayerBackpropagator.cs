@@ -32,7 +32,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             bool needToCalculateDeDy,
             ICSharpLayerContainer previousLayerContainer,
             ICSharpLayerContainer currentLayerContainer,
-            ICSharpLayerContainer nextLayerContainer,
             ICSharpDeDyAggregator nextLayerDeDyAggregator,
             ICSharpDeDyAggregator currentLayerDeDyAggregator
             )
@@ -48,10 +47,6 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             if (currentLayerContainer == null)
             {
                 throw new ArgumentNullException("currentLayerContainer");
-            }
-            if (nextLayerContainer == null)
-            {
-                throw new ArgumentNullException("nextLayerContainer");
             }
             if (nextLayerDeDyAggregator == null)
             {
@@ -76,8 +71,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             _nablaBias = new float[currentLayerContainer.Configuration.TotalNeuronCount];
 
             _hiddenLayerKernel = new HiddenLayerKernel(
-                currentLayerContainer.Configuration,
-                config
+                currentLayerContainer.Configuration
                 );
 
             _updateWeightKernel = new UpdateWeightKernel();

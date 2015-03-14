@@ -8,42 +8,39 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
 {
     internal class ConvolutionPoolingLayerKernel
     {
-        private readonly ILayer _layer;
-        private readonly IAvgPoolingLayer _nextLayer;
+        private readonly IConvolutionLayerConfiguration _currentLayerConfiguration;
 
         public ConvolutionPoolingLayerKernel(
-            ILayer layer,
-            IAvgPoolingLayer nextLayer
+            IConvolutionLayerConfiguration currentLayerConfiguration
             )
         {
-            if (layer == null)
+            if (currentLayerConfiguration == null)
             {
-                throw new ArgumentNullException("layer");
-            }
-            if (nextLayer == null)
-            {
-                throw new ArgumentNullException("nextLayer");
+                throw new ArgumentNullException("currentLayerConfiguration");
             }
 
-            _layer = layer;
-            _nextLayer = nextLayer;
+            _currentLayerConfiguration = currentLayerConfiguration;
         }
 
         public void CalculateOverwrite(
-            IReferencedSquareFloat currentLayerState,
+            IReferencedSquareFloat currentLayerNet, 
+            IReferencedSquareFloat currentLayerDeDz,
             IReferencedSquareFloat previousLayerState,
-            IReferencedSquareFloat deDz,
-            IReferencedSquareFloat nextLayerDeDz,
-
             IReferencedSquareFloat nablaKernel,
             ref float nablaBias,
+
+            IReferencedSquareFloat nextLayerDeDy,
 
             float learningRate
             )
         {
-            if (currentLayerState == null)
+            if (currentLayerNet == null)
             {
-                throw new ArgumentNullException("currentLayerState");
+                throw new ArgumentNullException("currentLayerNet");
+            }
+            if (currentLayerDeDz == null)
+            {
+                throw new ArgumentNullException("currentLayerDeDz");
             }
             if (previousLayerState == null)
             {
@@ -53,31 +50,30 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
             {
                 throw new ArgumentNullException("nablaKernel");
             }
-            if (deDz == null)
+            if (nextLayerDeDy == null)
             {
-                throw new ArgumentNullException("deDz");
-            }
-            if (nextLayerDeDz == null)
-            {
-                throw new ArgumentNullException("nextLayerDeDz");
+                throw new ArgumentNullException("nextLayerDeDy");
             }
 
-            //вычисляем значение ошибки (dE/dz) апсемплингом с пулинг слоя
-            //(реализация неэффективная! переделать!)
-            for (var j = 0; j < currentLayerState.Height; j++)
-            {
-                for (var i = 0; i < currentLayerState.Width; i++)
-                {
-                    var jp = (int)(j * _nextLayer.ScaleFactor);
-                    var ip = (int)(i * _nextLayer.ScaleFactor);
+            //////вычисляем значение ошибки (dE/dz) апсемплингом с пулинг слоя
+            //////(реализация неэффективная! переделать!)
+            //////умножением на _nextLayerConfiguration.ScaleFactor может
+            //////несколько раз браться одно и то же значение из nextLayerDeDz
+            //////можно попробовать предрассчитать индексы и брать готовые
+            ////for (var j = 0; j < currentLayerState.Height; j++)
+            ////{
+            ////    for (var i = 0; i < currentLayerState.Width; i++)
+            ////    {
+            ////        var jp = (int)(j * _nextLayerConfiguration.ScaleFactor);
+            ////        var ip = (int)(i * _nextLayerConfiguration.ScaleFactor);
 
-                    var v = nextLayerDeDz.GetValueFromCoordSafely(ip, jp);
+            ////        var v = nextLayerDeDz.GetValueFromCoordSafely(ip, jp);
 
-                    //v *= _nextLayer.InverseScaleFactor*_nextLayer.InverseScaleFactor;
+            ////        //v *= _nextLayerConfiguration.InverseScaleFactor*_nextLayerConfiguration.InverseScaleFactor;
 
-                    deDz.SetValueFromCoordSafely(i, j, v);
-                }
-            }
+            ////        deDz.SetValueFromCoordSafely(i, j, v);
+            ////    }
+            ////}
 
             //считаем наблу
             for (var a = 0; a < nablaKernel.Width; a++)
@@ -87,11 +83,18 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
                     var dEdw_ab = 0f; //kernel
                     var dEdb_ab = 0f; //bias
 
-                    for (var i = 0; i < currentLayerState.Width; i++)
+                    for (var i = 0; i < currentLayerNet.Width; i++)
                     {
-                        for (var j = 0; j < currentLayerState.Height; j++)
+                        for (var j = 0; j < currentLayerNet.Height; j++)
                         {
-                            var dEdz_ij = deDz.GetValueFromCoordSafely(i, j);
+                            var dedy = nextLayerDeDy.GetValueFromCoordSafely(i, j);
+                            float z = currentLayerNet.GetValueFromCoordSafely(i, j);
+                            float dydz = _currentLayerConfiguration.LayerActivationFunction.ComputeFirstDerivative(z);
+                            var dEdz_ij = dedy * dydz;
+
+                            currentLayerDeDz.SetValueFromCoordSafely(i, j, dEdz_ij);
+
+                            //var dEdz_ij = deDz.GetValueFromCoordSafely(i, j);
 
                             var y = previousLayerState.GetValueFromCoordSafely(
                                 i + a,
@@ -107,13 +110,11 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
                         }
                     }
 
-                    //вычислено dEdw_ab, dEdz_ab
+                    //вычислено dEdw_ab, dEdb_ab
                     nablaKernel.SetValueFromCoordSafely(a, b, dEdw_ab);
                     nablaBias = dEdb_ab * learningRate;
                 }
             }
-
         }
-
     }
 }

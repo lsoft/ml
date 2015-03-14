@@ -34,6 +34,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSharp\CSharpAvgPooling_ConvolutionLayerPropagator.cs" />
+    <Compile Include="CSharp\CSharpConvolution_AvgPoolingLayerPropagator.cs" />
     <Compile Include="CSharp\CSharpFullConnected_ConvolutionLayerPropagator.cs" />
     <Compile Include="CSharp\CSharpLayerPropagator.cs" />
     <Compile Include="CSharp\CSharpPropagatorComponentConstructor.cs" />

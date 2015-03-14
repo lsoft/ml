@@ -60,16 +60,16 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
             Parallel.For(0, currentLayerNeuronCount, neuronIndex =>
             //for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount ; neuronIndex++)
             {
-                float nOut = currentLayerNET[neuronIndex];
-                float deri = _layerConfiguration.LayerActivationFunction.ComputeFirstDerivative(nOut);
+                float z = currentLayerNET[neuronIndex];
+                float dydz = _layerConfiguration.LayerActivationFunction.ComputeFirstDerivative(z);
 
-                float metric = _config.TargetMetrics.CalculatePartialDerivativeByV2Index(
+                float dedy = _config.TargetMetrics.CalculatePartialDerivativeByV2Index(
                     currentLayerLastState,
                     desiredOutput,
                     neuronIndex
                     );
 
-                float dedz = deri*metric;
+                float dedz = dedy * dydz;
 
                 currentLayerDeDz[neuronIndex] = dedz;
 
@@ -125,16 +125,16 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
             Parallel.For(0, currentLayerNeuronCount, neuronIndex =>
             //for (var neuronIndex = 0; neuronIndex < currentLayerNeuronCount ; neuronIndex++)
             {
-                float nOut = currentLayerNET[neuronIndex];
-                float deri = _layerConfiguration.LayerActivationFunction.ComputeFirstDerivative(nOut);
+                float z = currentLayerNET[neuronIndex];
+                float dydz = _layerConfiguration.LayerActivationFunction.ComputeFirstDerivative(z);
 
-                float metric = _config.TargetMetrics.CalculatePartialDerivativeByV2Index(
+                float dedy = _config.TargetMetrics.CalculatePartialDerivativeByV2Index(
                     currentLayerLastState,
                     desiredOutput,
                     neuronIndex
                     );
 
-                float dedz = deri * metric;
+                float dedz = dedy * dydz;
 
                 currentLayerDeDz[neuronIndex] = dedz;
 

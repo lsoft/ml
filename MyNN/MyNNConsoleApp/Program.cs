@@ -11,7 +11,7 @@ namespace MyNNConsoleApp
         {
             using (new CombinedConsole("console.log"))
             {
-                //Convolute2.Do();
+                Convolute3.Do();
 
                 //CSharpRefactorChecker.DoTrain();
                 //CPURefactorChecker.DoTrain();

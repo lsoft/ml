@@ -12,24 +12,17 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
     internal class HiddenLayerKernel
     {
         private readonly ILayerConfiguration _currentLayerConfiguration;
-        private readonly ILearningAlgorithmConfig _config;
 
         public HiddenLayerKernel(
-            ILayerConfiguration currentLayerConfiguration,
-            ILearningAlgorithmConfig config
+            ILayerConfiguration currentLayerConfiguration
             )
         {
             if (currentLayerConfiguration == null)
             {
                 throw new ArgumentNullException("currentLayerConfiguration");
             }
-            if (config == null)
-            {
-                throw new ArgumentNullException("config");
-            }
 
             _currentLayerConfiguration = currentLayerConfiguration;
-            _config = config;
         }
 
         public void CalculateOverwrite(
@@ -75,9 +68,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
                 float dedy = dedyMem[neuronIndex];
 
-                float nOut = currentLayerNET[neuronIndex];
-                var currentDeDz = dedy * _currentLayerConfiguration.LayerActivationFunction.ComputeFirstDerivative(nOut);
-                currentLayerDeDz[neuronIndex] = currentDeDz;
+                float z = currentLayerNET[neuronIndex];
+                float dydz = _currentLayerConfiguration.LayerActivationFunction.ComputeFirstDerivative(z);
+                var dedz = dedy * dydz;
+                currentLayerDeDz[neuronIndex] = dedz;
 
                 int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
@@ -90,14 +84,14 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
                     float regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount;
                     float coef = prevOut + regularizationCoef;
-                    float deltaWeight = learningRate * currentDeDz * coef;
+                    float deltaWeight = learningRate * dedz * coef;
 
                     nabla[currentNablaIndex + currentWeightIndex] = deltaWeight;
                 }
 
                 float deltaBias =
                     learningRate *
-                    currentDeDz *
+                    dedz *
                     (1 + regularizationFactor * currentLayerBias[neuronIndex] / dataCount);
 
                 nablaBias[neuronIndex] = deltaBias;
@@ -150,9 +144,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
                 float dedy = dedyMem[neuronIndex];
 
 
-                float nOut = currentLayerNET[neuronIndex];
-                var currentDeDz = dedy * _currentLayerConfiguration.LayerActivationFunction.ComputeFirstDerivative(nOut);
-                currentLayerDeDz[neuronIndex] = currentDeDz;
+                float z = currentLayerNET[neuronIndex];
+                var dydz = _currentLayerConfiguration.LayerActivationFunction.ComputeFirstDerivative(z);
+                var dedz = dedy*dydz;
+                currentLayerDeDz[neuronIndex] = dedz;
 
                 int currentNablaIndex = ComputeWeightIndex(previousLayerNeuronCount, neuronIndex);
 
@@ -165,14 +160,14 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Kernel
 
                     float regularizationCoef = regularizationFactor * currentLayerWeights[currentWeightIndex] / dataCount;
                     float coef = prevOut + regularizationCoef;
-                    float deltaWeight = learningRate * currentDeDz * coef;
+                    float deltaWeight = learningRate * dedz * coef;
 
                     nabla[currentNablaIndex + currentWeightIndex] += deltaWeight;
                 }
 
                 float deltaBias =
                     learningRate *
-                    currentDeDz *
+                    dedz *
                     (1 + regularizationFactor * currentLayerBias[neuronIndex] / dataCount);
 
                 nablaBias[neuronIndex] += deltaBias;

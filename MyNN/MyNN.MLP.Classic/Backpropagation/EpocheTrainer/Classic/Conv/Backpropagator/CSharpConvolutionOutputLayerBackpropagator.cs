@@ -1,4 +1,5 @@
 using System;
+using MyNN.Common.OutputConsole;
 using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel;
 using MyNN.MLP.Convolution.Calculator.CSharp;
@@ -18,10 +19,8 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
     {
         private readonly ILearningAlgorithmConfig _config;
         private readonly ICSharpLayerContainer _previousLayerContainer;
-        private readonly ICSharpLayerContainer _currentLayerContainer;
+        private readonly ICSharpConvolutionLayerContainer _currentLayerContainer;
         private readonly ICSharpDesiredValuesContainer _desiredValuesContainer;
-        private readonly IConvolutionLayer _outputLayer;
-        private readonly ILayer _preOutputLayer;
 
         private readonly float[] _nablaKernel;
         private float _nablaBias;
@@ -29,26 +28,16 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
         private readonly OutputLayerKernel _outputLayerKernel;
         private readonly UpdateWeightKernel _updateWeightKernel;
 
-        public float[] DeDz
-        {
-            get;
-            private set;
-        }
-
+        private readonly float[] _deDz;
 
         public CSharpConvolutionOutputLayerBackpropagator(
-            IMLP mlp,
             ILearningAlgorithmConfig config,
             ICSharpLayerContainer previousLayerContainer,
-            ICSharpLayerContainer currentLayerContainer,
+            ICSharpConvolutionLayerContainer currentLayerContainer,
             ICSharpDesiredValuesContainer desiredValuesContainer,
             IErrorCalculator errorCalculator
             )
         {
-            if (mlp == null)
-            {
-                throw new ArgumentNullException("mlp");
-            }
             if (config == null)
             {
                 throw new ArgumentNullException("config");
@@ -75,30 +64,23 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
             _currentLayerContainer = currentLayerContainer;
             _desiredValuesContainer = desiredValuesContainer;
 
-            var layerIndex = mlp.Layers.Length - 1;
-
-            var outputLayer = mlp.Layers[layerIndex] as IConvolutionLayer;
-
-            if (outputLayer == null)
-            {
-                throw new ArgumentException("“екущий слой не сверточный");
-            }
-            if (outputLayer.FeatureMapCount != 1)
+            if (currentLayerContainer.Configuration.FeatureMapCount != 1)
             {
                 throw new NotSupportedException("Ётот бекпропагатор используетс€ только дл€ отладки, и не поддерживает множественные фича-мапы");
             }
+            
+            ConsoleAmbientContext.Console.WriteWarning(
+                "Ётот бекпропагатор используетс€ только дл€ отладки, и не поддерживает множественные фича-мапы"
+                );
 
-            _outputLayer = outputLayer;
 
-            _preOutputLayer = mlp.Layers[layerIndex - 1];
-
-            _nablaKernel = new float[_outputLayer.KernelSpatialDimension.Multiplied];
+            _nablaKernel = new float[_currentLayerContainer.Configuration.KernelSpatialDimension.Multiplied];
             _nablaBias = 0f;
 
-            this.DeDz = new float[_outputLayer.SpatialDimension.Multiplied];
+            this._deDz = new float[_currentLayerContainer.Configuration.SpatialDimension.Multiplied];
 
             _outputLayerKernel = new OutputLayerKernel(
-                outputLayer,
+                _currentLayerContainer.Configuration,
                 config,
                 errorCalculator
                 );
@@ -119,32 +101,32 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
             )
         {
             var currentNet = new ReferencedSquareFloat(
-                _outputLayer.SpatialDimension,
+                _currentLayerContainer.Configuration.SpatialDimension,
                 _currentLayerContainer.NetMem,
                 0
                 );
 
             var currentState = new ReferencedSquareFloat(
-                _outputLayer.SpatialDimension,
+                _currentLayerContainer.Configuration.SpatialDimension,
                 _currentLayerContainer.StateMem,
                 0
                 );
 
             var previousState = new ReferencedSquareFloat(
-                _preOutputLayer.SpatialDimension,
+                _previousLayerContainer.Configuration.SpatialDimension,
                 _previousLayerContainer.StateMem,
                 0
                 );
 
             var nabla = new ReferencedSquareFloat(
-                _outputLayer.KernelSpatialDimension,
+                _currentLayerContainer.Configuration.KernelSpatialDimension,
                 _nablaKernel,
                 0
                 );
 
             var dedz = new ReferencedSquareFloat(
-                _outputLayer.SpatialDimension,
-                this.DeDz,
+                _currentLayerContainer.Configuration.SpatialDimension,
+                this._deDz,
                 0
                 );
 
@@ -179,7 +161,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
         public void UpdateWeights()
         {
             var kernelBiasContainer = new ReferencedKernelBiasContainer(
-                _outputLayer.KernelSpatialDimension,
+                _currentLayerContainer.Configuration.KernelSpatialDimension,
                 _currentLayerContainer.WeightMem,
                 0,
                 _currentLayerContainer.BiasMem,
@@ -187,7 +169,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
                 );
 
             var nabla = new ReferencedSquareFloat(
-                _outputLayer.KernelSpatialDimension,
+                _currentLayerContainer.Configuration.KernelSpatialDimension,
                 _nablaKernel,
                 0
                 );

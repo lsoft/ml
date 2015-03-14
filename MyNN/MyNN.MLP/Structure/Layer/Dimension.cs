@@ -62,6 +62,15 @@ namespace MyNN.MLP.Structure.Layer
             params int[] sizes
             )
         {
+            if (sizes == null)
+            {
+                throw new ArgumentNullException("sizes");
+            }
+            if (dimensionCount != sizes.Length)
+            {
+                throw new ArgumentException("dimensionCount != sizes.Length");
+            }
+
             DimensionCount = dimensionCount;
             Sizes = sizes;
         }

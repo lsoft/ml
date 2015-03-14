@@ -13,31 +13,31 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
     public class CSharpLayerPropagator : ILayerPropagator
     {
         private readonly IFullConnectedLayer _currentLayer;
-        private readonly ICSharpLayerContainer _previousLayerMemContainer;
-        private readonly ICSharpLayerContainer _currentLayerMemContainer;
+        private readonly ICSharpLayerContainer _previousLayerContainer;
+        private readonly ICSharpLayerContainer _currentLayerContainer;
 
         public CSharpLayerPropagator(
             ILayer currentLayer,
-            ICSharpLayerContainer previousLayerMemContainer,
-            ICSharpLayerContainer currentLayerMemContainer
+            ICSharpLayerContainer previousLayerContainer,
+            ICSharpLayerContainer currentLayerContainer
             )
         {
             if (currentLayer == null)
             {
                 throw new ArgumentNullException("currentLayer");
             }
-            if (previousLayerMemContainer == null)
+            if (previousLayerContainer == null)
             {
-                throw new ArgumentNullException("previousLayerMemContainer");
+                throw new ArgumentNullException("previousLayerContainer");
             }
-            if (currentLayerMemContainer == null)
+            if (currentLayerContainer == null)
             {
-                throw new ArgumentNullException("currentLayerMemContainer");
+                throw new ArgumentNullException("currentLayerContainer");
             }
 
             _currentLayer = currentLayer as IFullConnectedLayer;
-            _previousLayerMemContainer = previousLayerMemContainer;
-            _currentLayerMemContainer = currentLayerMemContainer;
+            _previousLayerContainer = previousLayerContainer;
+            _currentLayerContainer = currentLayerContainer;
         }
 
 
@@ -46,7 +46,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
             Parallel.For(0, _currentLayer.TotalNeuronCount, neuronIndex =>
             //for (var neuronIndex = 0; neuronIndex < _currentLayer.TotalNeuronCount; neuronIndex++)
             {
-                var previousLayerNeuronCountTotal = _previousLayerMemContainer.StateMem.Length;
+                var previousLayerNeuronCountTotal = _previousLayerContainer.Configuration.TotalNeuronCount;//.StateMem.Length;
 
                 var weightIndex = ComputeWeightIndex(previousLayerNeuronCountTotal, neuronIndex);
 
@@ -58,19 +58,19 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
                 for (var plnIndex = 0; plnIndex < previousLayerNeuronCountTotal; ++plnIndex)
                 {
                     var increment = 
-                        _currentLayerMemContainer.WeightMem[weightIndex++]
-                        * _previousLayerMemContainer.StateMem[plnIndex];
+                        _currentLayerContainer.WeightMem[weightIndex++]
+                        * _previousLayerContainer.StateMem[plnIndex];
 
                     KahanAlgorithm.AddElement(ref acc, increment);
                 }
 
-                var lastNET = acc.Sum + _currentLayerMemContainer.BiasMem[neuronIndex];
+                var lastNET = acc.Sum + _currentLayerContainer.BiasMem[neuronIndex];
 
-                _currentLayerMemContainer.NetMem[neuronIndex] = lastNET;
+                _currentLayerContainer.NetMem[neuronIndex] = lastNET;
 
                 //compute last state
                 var lastState = _currentLayer.LayerActivationFunction.Compute(lastNET);
-                _currentLayerMemContainer.StateMem[neuronIndex] = lastState;
+                _currentLayerContainer.StateMem[neuronIndex] = lastState;
             }
             ); //Parallel.For
         }

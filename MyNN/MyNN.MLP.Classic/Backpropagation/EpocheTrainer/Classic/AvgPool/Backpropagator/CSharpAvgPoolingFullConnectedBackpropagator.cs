@@ -7,6 +7,7 @@ using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.AvgPool.Kernel;
 using MyNN.MLP.Convolution.Calculator.CSharp;
 using MyNN.MLP.Convolution.ReferencedSquareFloat;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
 using MyNN.MLP.Structure.Layer;
 
@@ -14,52 +15,38 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.AvgPool.Backpro
 {
     public class CSharpAvgPoolingFullConnectedBackpropagator : ICSharpLayerBackpropagator
     {
-        private readonly IAvgPoolingLayer _currentLayer;
-        private readonly ICSharpLayerContainer _currentLayerContainer;
-        private readonly ICSharpLayerContainer _nextLayerContainer;
-        private readonly float[] _nextLayerDeDz;
+        private readonly ICSharpAvgPoolingLayerContainer _currentLayerContainer;
+        private readonly ICSharpDeDyAggregator _nextLayerDeDyAggregator;
+        private readonly ICSharpDeDyAggregator _currentLayerDeDyAggregator;
 
         private readonly AvgPoolingFullConnectedKernel _kernel;
 
-        public float[] DeDz
-        {
-            get;
-            private set;
-        }
-
         public CSharpAvgPoolingFullConnectedBackpropagator(
-            IAvgPoolingLayer currentLayer,
-            ICSharpLayerContainer currentLayerContainer,
-            ICSharpLayerContainer nextLayerContainer,
-            float[] nextLayerDeDz
-
+            ICSharpAvgPoolingLayerContainer currentLayerContainer,
+            ICSharpDeDyAggregator nextLayerDeDyAggregator,
+            ICSharpDeDyAggregator currentLayerDeDyAggregator
             )
         {
-            if (currentLayer == null)
-            {
-                throw new ArgumentNullException("currentLayer");
-            }
             if (currentLayerContainer == null)
             {
                 throw new ArgumentNullException("currentLayerContainer");
             }
-            if (nextLayerContainer == null)
+            if (nextLayerDeDyAggregator == null)
             {
-                throw new ArgumentNullException("nextLayerContainer");
+                throw new ArgumentNullException("nextLayerDeDyAggregator");
             }
-            if (nextLayerDeDz == null)
+            if (currentLayerDeDyAggregator == null)
             {
-                throw new ArgumentNullException("nextLayerDeDz");
+                throw new ArgumentNullException("currentLayerDeDyAggregator");
             }
 
-            _currentLayer = currentLayer;
             _currentLayerContainer = currentLayerContainer;
-            _nextLayerContainer = nextLayerContainer;
-            _nextLayerDeDz = nextLayerDeDz;
+            _nextLayerDeDyAggregator = nextLayerDeDyAggregator;
+            _currentLayerDeDyAggregator = currentLayerDeDyAggregator;
 
-            this.DeDz = new float[_currentLayer.GetConfiguration().TotalNeuronCount];
-
-            _kernel = new AvgPoolingFullConnectedKernel(currentLayer);
+            _kernel = new AvgPoolingFullConnectedKernel(
+                _currentLayerContainer.Configuration
+                );
         }
 
         public void Prepare()
@@ -69,23 +56,24 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.AvgPool.Backpro
 
         public void Backpropagate(int dataCount, float learningRate, bool firstItemInBatch)
         {
-            for (var fmi = 0; fmi < _currentLayer.FeatureMapCount; fmi++)
+            for (var fmi = 0; fmi < _currentLayerContainer.Configuration.FeatureMapCount; fmi++)
             {
-                var currentNetStateDeDzShift = fmi * _currentLayer.SpatialDimension.Multiplied;
+                var currentNetStateDeDzShift = fmi * _currentLayerContainer.Configuration.SpatialDimension.Multiplied;
 
                 var dedz = new ReferencedSquareFloat(
-                    _currentLayer.SpatialDimension,
-                    this.DeDz,
+                    _currentLayerContainer.Configuration.SpatialDimension,
+                    _currentLayerDeDyAggregator.DeDz,
                     currentNetStateDeDzShift
                     );
 
                 _kernel.Calculate(
-                    fmi * _currentLayer.SpatialDimension.Multiplied,
+                    fmi * _currentLayerContainer.Configuration.SpatialDimension.Multiplied,
                     dedz,
-                    _nextLayerDeDz,
-                    _nextLayerContainer.WeightMem
+                    _nextLayerDeDyAggregator.DeDy
                     );
             }
+
+            _currentLayerDeDyAggregator.Aggregate();
         }
 
         public void UpdateWeights()

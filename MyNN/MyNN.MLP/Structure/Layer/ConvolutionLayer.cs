@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Cache;
 using MyNN.Common.Other;
 using MyNN.Common.Randomizer;
+using MyNN.MLP.Structure.Layer.WeightBiasIniter;
 using MyNN.MLP.Structure.Neuron;
 using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
@@ -44,7 +45,7 @@ namespace MyNN.MLP.Structure.Layer
             get
             {
                 return
-                    this.FeatureMapCount * this.SpatialDimension.Multiplied;
+                    FeatureMapCount * this.SpatialDimension.Multiplied;
             }
         }
 
@@ -62,25 +63,19 @@ namespace MyNN.MLP.Structure.Layer
 
         public int FeatureMapCount
         {
-            get
-            {
-                return
-                    this.SpatialDimension.LastDimensionSize;
-            }
+            get;
+            private set;
         }
 
         public ConvolutionLayer(
-            IRandomizer randomizer,
             INeuronFactory neuronFactory,
             IFunction activationFunction,
             IDimension spatialDimension,
-            IDimension kernelSpatialDimension
+            int featureMapCount,
+            IDimension kernelSpatialDimension,
+            IWeightBiasIniter weightBiasIniter
             )
         {
-            if (randomizer == null)
-            {
-                throw new ArgumentNullException("randomizer");
-            }
             if (neuronFactory == null)
             {
                 throw new ArgumentNullException("neuronFactory");
@@ -97,17 +92,23 @@ namespace MyNN.MLP.Structure.Layer
             {
                 throw new ArgumentNullException("kernelSpatialDimension");
             }
+            if (weightBiasIniter == null)
+            {
+                throw new ArgumentNullException("weightBiasIniter");
+            }
 
             LayerActivationFunction = activationFunction;
             SpatialDimension = spatialDimension;
+            FeatureMapCount = featureMapCount;
             KernelSpatialDimension = kernelSpatialDimension;
 
             _kernel = new float[FeatureMapCount * KernelSpatialDimension.Multiplied];
-            _kernel.Fill(j => randomizer.Next() - 0.5f);
             _biases = new float[FeatureMapCount];
-            _biases.Fill(j => randomizer.Next() - 0.5f);
 
-            this.Neurons = new INeuron[FeatureMapCount * SpatialDimension.Multiplied];
+            weightBiasIniter.FillWeights(_kernel);
+            weightBiasIniter.FillBiases(_biases);
+
+            this.Neurons = new INeuron[TotalNeuronCount];
 
             for (var ni = 0; ni < this.Neurons.Length; ni++)
             {
@@ -127,12 +128,20 @@ namespace MyNN.MLP.Structure.Layer
                     );
         }
 
-        public ILayerConfiguration GetConfiguration()
+        ILayerConfiguration ILayer.GetConfiguration()
         {
             return
-                new LayerConfiguration(
+                this.GetConfiguration();
+        }
+
+        public IConvolutionLayerConfiguration GetConfiguration()
+        {
+            return
+                new ConvolutionLayerConfiguration(
                     this.LayerActivationFunction,
                     this.SpatialDimension,
+                    this.FeatureMapCount,
+                    this.KernelSpatialDimension,
                     this._kernel.Length,
                     this._biases.Length,
                     this.Neurons.ConvertAll(j => j.GetConfiguration())

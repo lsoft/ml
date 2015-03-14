@@ -105,7 +105,6 @@ namespace MyNN.MLP.Classic.BackpropagationFactory.Classic.CSharp
                         layerIndex > 1,
                         containers[layerIndex - 1] as ICSharpLayerContainer,
                         containers[layerIndex] as ICSharpLayerContainer,
-                        containers[layerIndex + 1] as ICSharpLayerContainer,
                         dedyAggregators[layerIndex + 1] as ICSharpDeDyAggregator,
                         dedyAggregators[layerIndex] as ICSharpDeDyAggregator
                         );

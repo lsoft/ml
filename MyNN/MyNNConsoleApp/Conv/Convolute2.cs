@@ -25,6 +25,7 @@ using MyNN.MLP.Backpropagation.EpocheTrainer.Backpropagator;
 using MyNN.MLP.Backpropagation.Metrics;
 using MyNN.MLP.Backpropagation.Validation;
 using MyNN.MLP.Backpropagation.Validation.AccuracyCalculator;
+using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropagator;
 using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backpropagator;
 using MyNN.MLP.Classic.ForwardPropagation.CSharp;
 using MyNN.MLP.Convolution.Activator;
@@ -40,6 +41,7 @@ using MyNN.MLP.MLPContainer;
 using MyNN.MLP.Structure.Factory;
 using MyNN.MLP.Structure.Layer;
 using MyNN.MLP.Structure.Layer.Factory;
+using MyNN.MLP.Structure.Layer.WeightBiasIniter;
 using MyNN.MLP.Structure.Neuron.Factory;
 using MyNN.MLP.Structure.Neuron.Function;
 
@@ -50,7 +52,7 @@ namespace MyNNConsoleApp.Conv
         const int ImageSize = 28;
         const int KernelSize = 5;
         const int ConvolutionSize = ImageSize - KernelSize + 1;
-        const int EpochCount = 10;
+        const int EpochCount = 5;
         const float LearningRate = 0.01f;
         const int VizCount = 100;
         private const int FeatureMapCount = 5;
@@ -60,19 +62,19 @@ namespace MyNNConsoleApp.Conv
         {
 
             var trainDataSetProvider = GetTrainProvider(
-                60000,
+                6000,
                 false,
                 false
                 );
 
             var validationData = GetValidation(
-                10000,
+                1000,
                 false,
                 false
                 );
 
             var randomizer =
-                new DefaultRandomizer(1);
+                new DefaultRandomizer(2);
 
             var neuronFactory = new NeuronFactory(randomizer);
 
@@ -85,12 +87,15 @@ namespace MyNNConsoleApp.Conv
                 new Dimension(2, ImageSize, ImageSize)
                 );
 
+            var l1Dimension = new Dimension(2, ConvolutionSize, ConvolutionSize);
+            var l1KernelDimension = new Dimension(2, KernelSize, KernelSize);
             var l1 = new ConvolutionLayer(
-                randomizer,
                 neuronFactory,
                 new RLUFunction(),
-                new Dimension(3, ConvolutionSize, ConvolutionSize, FeatureMapCount),
-                new Dimension(2, KernelSize, KernelSize)
+                l1Dimension,
+                FeatureMapCount,
+                l1KernelDimension,
+                new RandomWeightBiasIniter(randomizer)
                 );
 
             var l2 = new FullConnectedLayer(
@@ -122,7 +127,6 @@ namespace MyNNConsoleApp.Conv
                 EpochCount,
                 0.0001f
                 );
-
 
             var desiredValuesContainer = new CSharpDesiredValuesContainer(
                 mlp
@@ -159,19 +163,19 @@ namespace MyNNConsoleApp.Conv
             containers[0] = new CSharpLayerContainer(
                 mlp.Layers[0].GetConfiguration()
                 );
-            containers[1] = new CSharpLayerContainer(
-                mlp.Layers[1].GetConfiguration()
+            containers[1] = new CSharpConvolutionLayerContainer(
+                mlp.Layers[1].GetConfiguration() as IConvolutionLayerConfiguration
                 );
             containers[2] = new CSharpLayerContainer(
                 mlp.Layers[2].GetConfiguration()
                 );
 
+            //----------------------------------------------------------------------
+
             var propagators = new ILayerPropagator[mlp.Layers.Length];
             propagators[1] = new CSharpFullConnected_ConvolutionLayerPropagator(
-                mlp.Layers[0] as IFullConnectedLayer,
-                mlp.Layers[1] as IConvolutionLayer,
                 containers[0] as ICSharpLayerContainer,
-                containers[1] as ICSharpLayerContainer,
+                containers[1] as ICSharpConvolutionLayerContainer,
                 convolutionCalculator,
                 functionActivator
                 );
@@ -181,35 +185,43 @@ namespace MyNNConsoleApp.Conv
                 containers[2] as ICSharpLayerContainer
                 );
 
+            //----------------------------------------------------------------------
+
+            ICSharpDeDyAggregator dedyAggregator0 = null;
+
+            ICSharpDeDyAggregator dedyAggregator1 = null;
+
+            var dedyAggregator2 = new CSharpDeDyAggregator(
+                mlp.Layers[1].TotalNeuronCount,
+                mlp.Layers[2].TotalNeuronCount,
+                (containers[2] as ICSharpLayerContainer).WeightMem
+                );
+
+            //----------------------------------------------------------------------
+
             var fp = new ForwardPropagation(
                 containers,
                 propagators,
                 mlp
                 );
 
-
-            var dedyAggregator = new CSharpDeDyAggregator(
-
-                );
-
+            //----------------------------------------------------------------------
+            
             var backpropagator2 =
                 new CSharpOutputLayerBackpropagator(
                     config,
                     containers[1] as ICSharpLayerContainer,
                     containers[2] as ICSharpLayerContainer,
                     desiredValuesContainer,
-                    dedyAggregator
+                    dedyAggregator2
                     );
 
             var backpropagator1 =
                 new CSharpConvolutionFullConnectedLayerBackpropagator(
                     config,
-                    mlp.Layers[0],
-                    mlp.Layers[1] as IConvolutionLayer,
                     containers[0] as ICSharpLayerContainer,
-                    containers[1] as ICSharpLayerContainer,
-                    containers[2] as ICSharpLayerContainer,
-                    backpropagator2.DeDz
+                    containers[1] as ICSharpConvolutionLayerContainer,
+                    dedyAggregator2
                     );
 
             var backpropagators = new ILayerBackpropagator[]

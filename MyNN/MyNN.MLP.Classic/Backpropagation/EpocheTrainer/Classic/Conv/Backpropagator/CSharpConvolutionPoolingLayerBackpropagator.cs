@@ -4,6 +4,7 @@ using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel;
 using MyNN.MLP.Convolution.Calculator.CSharp;
 using MyNN.MLP.Convolution.KernelBiasContainer;
 using MyNN.MLP.Convolution.ReferencedSquareFloat;
+using MyNN.MLP.DeDyAggregator;
 using MyNN.MLP.ForwardPropagation.LayerContainer.CSharp;
 using MyNN.MLP.LearningConfig;
 using MyNN.MLP.Structure;
@@ -15,14 +16,13 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
     public class CSharpConvolutionPoolingLayerBackpropagator : ICSharpLayerBackpropagator
     {
         private readonly ILearningAlgorithmConfig _config;
-        private readonly ILayer _previousLayer;
-        private readonly IConvolutionLayer _currentLayer;
-        private readonly IAvgPoolingLayer _nextLayer;
+        private readonly IAvgPoolingLayerConfiguration _nextLayerConfiguration;
 
         private readonly ICSharpLayerContainer _previousLayerContainer;
-        private readonly ICSharpLayerContainer _currentLayerContainer;
-
-        private readonly float[] _nextLayerDeDz;
+        private readonly ICSharpConvolutionLayerContainer _currentLayerContainer;
+        private readonly ICSharpDeDyAggregator _nextLayerDeDyAggregator;
+        private readonly ICSharpDeDyAggregator _currentLayerDeDyAggregator;
+        private readonly bool _needToCalculateDeDy;
 
         private readonly float[] _nablaKernel;
         private readonly float[] _nablaBias;
@@ -30,37 +30,23 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
         private readonly ConvolutionPoolingLayerKernel _calculateNablaKernel;
         private readonly UpdateWeightKernel _updateWeightKernel;
 
-        public float[] DeDz
-        {
-            get;
-            private set;
-        }
-
         public CSharpConvolutionPoolingLayerBackpropagator(
             ILearningAlgorithmConfig config,
-            ILayer previousLayer,
-            IConvolutionLayer currentLayer,
-            IAvgPoolingLayer nextLayer,
+            IAvgPoolingLayerConfiguration nextLayerConfiguration,
             ICSharpLayerContainer previousLayerContainer,
-            ICSharpLayerContainer currentLayerContainer,
-            float[] nextLayerDeDz
+            ICSharpConvolutionLayerContainer currentLayerContainer,
+            ICSharpDeDyAggregator nextLayerDeDyAggregator,
+            ICSharpDeDyAggregator currentLayerDeDyAggregator,
+            bool needToCalculateDeDy
             )
         {
             if (config == null)
             {
                 throw new ArgumentNullException("config");
             }
-            if (previousLayer == null)
+            if (nextLayerConfiguration == null)
             {
-                throw new ArgumentNullException("previousLayer");
-            }
-            if (currentLayer == null)
-            {
-                throw new ArgumentNullException("currentLayer");
-            }
-            if (nextLayer == null)
-            {
-                throw new ArgumentNullException("nextLayer");
+                throw new ArgumentNullException("nextLayerConfiguration");
             }
             if (previousLayerContainer == null)
             {
@@ -70,27 +56,28 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
             {
                 throw new ArgumentNullException("currentLayerContainer");
             }
-            if (nextLayerDeDz == null)
+            if (nextLayerDeDyAggregator == null)
             {
-                throw new ArgumentNullException("nextLayerDeDz");
+                throw new ArgumentNullException("nextLayerDeDyAggregator");
+            }
+            if (currentLayerDeDyAggregator == null)
+            {
+                throw new ArgumentNullException("currentLayerDeDyAggregator");
             }
 
             _config = config;
-            _previousLayer = previousLayer;
-            _currentLayer = currentLayer;
-            _nextLayer = nextLayer;
+            _nextLayerConfiguration = nextLayerConfiguration;
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
-            _nextLayerDeDz = nextLayerDeDz;
+            _nextLayerDeDyAggregator = nextLayerDeDyAggregator;
+            _currentLayerDeDyAggregator = currentLayerDeDyAggregator;
+            _needToCalculateDeDy = needToCalculateDeDy;
 
-            _nablaKernel = new float[_currentLayer.GetConfiguration().WeightCount];
-            _nablaBias = new float[_currentLayer.GetConfiguration().BiasCount];
-
-            this.DeDz = new float[_currentLayer.GetConfiguration().TotalNeuronCount];
+            _nablaKernel = new float[_currentLayerContainer.Configuration.WeightCount];
+            _nablaBias = new float[_currentLayerContainer.Configuration.BiasCount];
 
             _calculateNablaKernel = new ConvolutionPoolingLayerKernel(
-                currentLayer,
-                nextLayer
+                _currentLayerContainer.Configuration
                 );
 
             _updateWeightKernel = new UpdateWeightKernel();
@@ -107,54 +94,54 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
             bool firstItemInBatch
             )
         {
-            for (var fmi = 0; fmi < _currentLayer.FeatureMapCount; fmi++)
+            for (var fmi = 0; fmi < _currentLayerContainer.Configuration.FeatureMapCount; fmi++)
             {
                 var previousState = new ReferencedSquareFloat(
-                    _previousLayer.SpatialDimension,
+                    _previousLayerContainer.Configuration.SpatialDimension,
                     _previousLayerContainer.StateMem,
                     0
                     );
 
-                var currentNetStateDeDzShift = fmi * _currentLayer.SpatialDimension.Multiplied;
+                var currentNetStateDeDzShift = fmi * _currentLayerContainer.Configuration.SpatialDimension.Multiplied;
 
-                var currentState = new ReferencedSquareFloat(
-                    _currentLayer.SpatialDimension,
-                    _currentLayerContainer.StateMem,
+                var currentNet = new ReferencedSquareFloat(
+                    _currentLayerContainer.Configuration.SpatialDimension,
+                    _currentLayerContainer.NetMem,
                     currentNetStateDeDzShift
                     );
 
-                var dedz = new ReferencedSquareFloat(
-                    _currentLayer.SpatialDimension,
-                    this.DeDz,
+                var currentLayerDeDz = new ReferencedSquareFloat(
+                    _currentLayerContainer.Configuration.SpatialDimension,
+                    _currentLayerDeDyAggregator.DeDz,
                     currentNetStateDeDzShift
                     );
 
-                var kernelShift = fmi * _currentLayer.KernelSpatialDimension.Multiplied;
+                var kernelShift = fmi * _currentLayerContainer.Configuration.KernelSpatialDimension.Multiplied;
                 var biasShift = fmi;
 
                 var nabla = new ReferencedSquareFloat(
-                    _currentLayer.KernelSpatialDimension,
+                    _currentLayerContainer.Configuration.KernelSpatialDimension,
                     _nablaKernel,
                     kernelShift
                     );
 
-                var nldedzShift = fmi * _nextLayer.SpatialDimension.Multiplied;
+                var nldedzShift = fmi * _nextLayerConfiguration.SpatialDimension.Multiplied;
 
-                var nextLayerDeDz = new ReferencedSquareFloat(
-                    _nextLayer.SpatialDimension,
-                    _nextLayerDeDz,
+                var nextLayerDeDy = new ReferencedSquareFloat(
+                    _currentLayerContainer.Configuration.SpatialDimension, //именно текущий слой!
+                    _nextLayerDeDyAggregator.DeDy,
                     nldedzShift
                     );
 
                 if (firstItemInBatch)
                 {
                     _calculateNablaKernel.CalculateOverwrite(
-                        currentState,
+                        currentNet,
+                        currentLayerDeDz,
                         previousState,
-                        dedz,
-                        nextLayerDeDz,
                         nabla,
                         ref _nablaBias[biasShift],
+                        nextLayerDeDy,
                         learningRate
                         );
                 }
@@ -163,17 +150,22 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
                     throw new NotImplementedException();
                 }
             }
+
+            if (_needToCalculateDeDy)
+            {
+                _currentLayerDeDyAggregator.Aggregate();
+            }
         }
 
         public void UpdateWeights()
         {
-            for (var fmi = 0; fmi < _currentLayer.FeatureMapCount; fmi++)
+            for (var fmi = 0; fmi < _currentLayerContainer.Configuration.FeatureMapCount; fmi++)
             {
-                var kernelShift = fmi*_currentLayer.KernelSpatialDimension.Multiplied;
+                var kernelShift = fmi * _currentLayerContainer.Configuration.KernelSpatialDimension.Multiplied;
                 var biasShift = fmi;
 
                 var kernelBiasContainer = new ReferencedKernelBiasContainer(
-                    _currentLayer.KernelSpatialDimension,
+                    _currentLayerContainer.Configuration.KernelSpatialDimension,
                     _currentLayerContainer.WeightMem,
                     kernelShift,
                     _currentLayerContainer.BiasMem,
@@ -181,7 +173,7 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
                     );
 
                 var nabla = new ReferencedSquareFloat(
-                    _currentLayer.KernelSpatialDimension,
+                    _currentLayerContainer.Configuration.KernelSpatialDimension,
                     _nablaKernel,
                     kernelShift
                     );

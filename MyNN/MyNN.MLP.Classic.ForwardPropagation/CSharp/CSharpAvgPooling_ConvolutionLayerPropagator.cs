@@ -11,37 +11,25 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 {
     public class CSharpAvgPooling_ConvolutionLayerPropagator : ILayerPropagator
     {
-        private readonly IAvgPoolingLayer _previousLayer;
-        private readonly IConvolutionLayer _currentLayer;
-        private readonly ICSharpLayerContainer _previousLayerContainer;
-        private readonly ICSharpLayerContainer _currentLayerMemContainer;
+        private readonly ICSharpAvgPoolingLayerContainer _previousLayerContainer;
+        private readonly ICSharpConvolutionLayerContainer _currentLayerContainer;
         private readonly ICSharpConvolutionCalculator _convolutionCalculator;
         private readonly IFunctionActivator _functionActivator;
 
         public CSharpAvgPooling_ConvolutionLayerPropagator(
-            IAvgPoolingLayer previousLayer,
-            IConvolutionLayer currentLayer,
-            ICSharpLayerContainer previousLayerContainer,
-            ICSharpLayerContainer currentLayerMemContainer,
+            ICSharpAvgPoolingLayerContainer previousLayerContainer,
+            ICSharpConvolutionLayerContainer currentLayerContainer,
             ICSharpConvolutionCalculator convolutionCalculator,
             IFunctionActivator functionActivator
             )
         {
-            if (previousLayer == null)
-            {
-                throw new ArgumentNullException("previousLayer");
-            }
-            if (currentLayer == null)
-            {
-                throw new ArgumentNullException("currentLayer");
-            }
             if (previousLayerContainer == null)
             {
                 throw new ArgumentNullException("previousLayerContainer");
             }
-            if (currentLayerMemContainer == null)
+            if (currentLayerContainer == null)
             {
-                throw new ArgumentNullException("currentLayerMemContainer");
+                throw new ArgumentNullException("currentLayerContainer");
             }
             if (convolutionCalculator == null)
             {
@@ -52,49 +40,47 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
                 throw new ArgumentNullException("functionActivator");
             }
 
-            _previousLayer = previousLayer;
-            _currentLayer = currentLayer;
             _previousLayerContainer = previousLayerContainer;
-            _currentLayerMemContainer = currentLayerMemContainer;
+            _currentLayerContainer = currentLayerContainer;
             _convolutionCalculator = convolutionCalculator;
             _functionActivator = functionActivator;
         }
 
         public void ComputeLayer()
         {
-            for (var currentFmi = 0; currentFmi < _currentLayer.FeatureMapCount; currentFmi++)
+            for (var currentFmi = 0; currentFmi < _currentLayerContainer.Configuration.FeatureMapCount; currentFmi++)
             {
-                var kernelShift = currentFmi * _currentLayer.KernelSpatialDimension.Multiplied;
+                var kernelShift = currentFmi * _currentLayerContainer.Configuration.KernelSpatialDimension.Multiplied;
                 var biasShift = currentFmi;
 
                 var kernelBiasContainer = new ReferencedKernelBiasContainer(
-                    _currentLayer.KernelSpatialDimension,
-                    _currentLayerMemContainer.WeightMem,
+                    _currentLayerContainer.Configuration.KernelSpatialDimension,
+                    _currentLayerContainer.WeightMem,
                     kernelShift,
-                    _currentLayerMemContainer.BiasMem,
+                    _currentLayerContainer.BiasMem,
                     biasShift
                     );
 
-                var currentNetStateShift = currentFmi * _currentLayer.SpatialDimension.Multiplied;
+                var currentNetStateShift = currentFmi * _currentLayerContainer.Configuration.SpatialDimension.Multiplied;
 
                 var currentNet = new ReferencedSquareFloat(
-                    _currentLayer.SpatialDimension,
-                    _currentLayerMemContainer.NetMem,
+                    _currentLayerContainer.Configuration.SpatialDimension,
+                    _currentLayerContainer.NetMem,
                     currentNetStateShift
                     );
 
                 var currentState = new ReferencedSquareFloat(
-                    _currentLayer.SpatialDimension,
-                    _currentLayerMemContainer.StateMem,
+                    _currentLayerContainer.Configuration.SpatialDimension,
+                    _currentLayerContainer.StateMem,
                     currentNetStateShift
                     );
 
-                for (var previousFmi = 0; previousFmi < _previousLayer.FeatureMapCount; previousFmi++)
+                for (var previousFmi = 0; previousFmi < _previousLayerContainer.Configuration.FeatureMapCount; previousFmi++)
                 {
-                    var previousShift = previousFmi * _previousLayer.SpatialDimension.Multiplied;
+                    var previousShift = previousFmi * _previousLayerContainer.Configuration.SpatialDimension.Multiplied;
 
                     var previousState = new ReferencedSquareFloat(
-                        _previousLayer.SpatialDimension,
+                        _previousLayerContainer.Configuration.SpatialDimension,
                         _previousLayerContainer.StateMem,
                         previousShift
                         );
@@ -119,7 +105,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
 
                 //применяем функцию активации
                 _functionActivator.Apply(
-                    _currentLayer.LayerActivationFunction,
+                    _currentLayerContainer.Configuration.LayerActivationFunction,
                     currentNet,
                     currentState
                     );

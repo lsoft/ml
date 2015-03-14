@@ -42,6 +42,19 @@
     <Compile Include="BackpropagationFactory\Classic\CSharp\CSharpBackpropagationFactory.cs" />
     <Compile Include="BackpropagationFactory\Classic\OpenCL\CPU\CPUBackpropagationFactory.cs" />
     <Compile Include="BackpropagationFactory\Classic\OpenCL\GPU\GPUBackpropagationFactory.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\AvgPool\Backpropagator\CSharpAvgPoolingFullConnectedBackpropagator.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\AvgPool\Kernel\AvgPoolingFullConnectedKernel.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\Conv\Backpropagator\CSharpConvolutionFullConnectedLayerBackpropagator.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\Conv\Backpropagator\CSharpConvolutionPoolingLayerBackpropagator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\Conv\Kernel\ConvolutionFullConnectedLayerKernel.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\Conv\Kernel\ConvolutionPoolingLayerKernel.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\Conv\Kernel\UpdateWeightKernel.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Backpropagator\CSharpOutputLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Backpropagator\CSharpHiddenLayerBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\CSharp\Kernel\HiddenLayerKernel.cs" />

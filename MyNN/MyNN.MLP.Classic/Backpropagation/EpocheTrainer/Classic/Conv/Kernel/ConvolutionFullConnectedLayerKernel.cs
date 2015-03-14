@@ -8,41 +8,36 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
 {
     internal class ConvolutionFullConnectedLayerKernel
     {
-        private readonly ILayer _layer;
+        private readonly ILayerConfiguration _layerConfiguration;
 
         public ConvolutionFullConnectedLayerKernel(
-            ILayer layer
+            ILayerConfiguration layerConfiguration
             )
         {
-            if (layer == null)
+            if (layerConfiguration == null)
             {
-                throw new ArgumentNullException("layer");
+                throw new ArgumentNullException("layerConfiguration");
             }
 
-            _layer = layer;
+            _layerConfiguration = layerConfiguration;
         }
 
         public void CalculateOverwrite(
             int fmiNeuronIndex,
             IReferencedSquareFloat currentLayerNet,
-            IReferencedSquareFloat currentLayerState,
             IReferencedSquareFloat previousLayerState,
             IReferencedSquareFloat deDz,
-            float[] nextLayerDeDz,
             IReferencedSquareFloat nablaKernel,
             ref float nablaBias,
 
-            float learningRate,
-            float[] nextLayerWeights
+            float[] nextLayerDeDy,
+
+            float learningRate
             )
         {
             if (currentLayerNet == null)
             {
                 throw new ArgumentNullException("currentLayerNet");
-            }
-            if (currentLayerState == null)
-            {
-                throw new ArgumentNullException("currentLayerState");
             }
             if (previousLayerState == null)
             {
@@ -52,44 +47,46 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
             {
                 throw new ArgumentNullException("nablaKernel");
             }
+            if (nextLayerDeDy == null)
+            {
+                throw new ArgumentNullException("nextLayerDeDy");
+            }
             if (deDz == null)
             {
                 throw new ArgumentNullException("deDz");
             }
-            if (nextLayerWeights == null)
-            {
-                throw new ArgumentNullException("nextLayerWeights");
-            }
-            if (nextLayerDeDz == null)
-            {
-                throw new ArgumentNullException("nextLayerDeDz");
-            }
+
+            var neuronIndex = fmiNeuronIndex;
 
             //вычисляем значение ошибки (dE/dz) суммированием по след слою
             //а след слой - полносвязный и у него веса к каждому сверточному
             //нейрону может быть разным
-            var neuronIndex = fmiNeuronIndex;
             for (var i = 0; i < currentLayerNet.Width; i++)
             {
                 for (var j = 0; j < currentLayerNet.Height; j++)
                 {
-                    var accDeDy = new KahanAlgorithm.Accumulator();
-                    for (var q = 0; q < nextLayerDeDz.Length; q++)
-                    {
-                        var nextWeightIndex = ComputeWeightIndex(_layer.TotalNeuronCount, q) + neuronIndex; //не векторизуется:(
-                        var wijk = nextLayerWeights[nextWeightIndex];
+                    ////счет dedy для следующего полносвязного слоя
+                    ////neuronIndex каждый раз изменяется
+                    //var accDeDy = new KahanAlgorithm.Accumulator();
+                    //for (var q = 0; q < nextLayerDeDz.Length; q++)
+                    //{
+                    //    var nextWeightIndex = ComputeWeightIndex(_layerConfiguration.TotalNeuronCount, q) + neuronIndex; //не векторизуется:(
+                    //    var wijk = nextLayerWeights[nextWeightIndex];
 
-                        var ndedz = nextLayerDeDz[q];
+                    //    var ndedz = nextLayerDeDz[q];
 
-                        var multiplied = wijk * ndedz;
+                    //    var dedy = wijk * ndedz;
 
-                        KahanAlgorithm.AddElement(ref accDeDy, multiplied);
-                    }
+                    //    KahanAlgorithm.AddElement(ref accDeDy, dedy);
+                    //}
+
+                    var dedy = nextLayerDeDy[neuronIndex];
 
                     var z = currentLayerNet.GetValueFromCoordSafely(i, j);
-                    var dydz = _layer.LayerActivationFunction.ComputeFirstDerivative(z);
+                    var dydz = _layerConfiguration.LayerActivationFunction.ComputeFirstDerivative(z);
 
-                    var dedz = accDeDy.Sum * dydz;
+                    //var dedz = accDeDy.Sum * dydz;
+                    var dedz = dedy * dydz;
 
                     deDz.SetValueFromCoordSafely(i, j, dedz);
 
@@ -119,26 +116,18 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
                             var w_mul = dEdz_ij * y * learningRate;
                             dEdw_ab += w_mul;
 
-                            var b_mul = dEdz_ij * learningRate;
+                            var b_mul = dEdz_ij * 1 * learningRate;
                             dEdb_ab += b_mul;
 
                         }
                     }
 
-                    //вычислено dEdw_ab, dEdz_ab
+                    //вычислено dEdw_ab, dEdb_ab
                     nablaKernel.SetValueFromCoordSafely(a, b, dEdw_ab);
                     nablaBias = dEdb_ab * learningRate;
                 }
             }
 
-        }
-
-        private static int ComputeWeightIndex(
-            int previousLayerNeuronCount,
-            int neuronIndex)
-        {
-            return
-                previousLayerNeuronCount * neuronIndex;
         }
 
     }
