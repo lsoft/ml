@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using MyNN.MLP.Convolution.Activator;
 using MyNN.MLP.Convolution.Calculator.CSharp;
+using MyNN.MLP.Convolution.Connector;
 using MyNN.MLP.Convolution.KernelBiasContainer;
 using MyNN.MLP.Convolution.ReferencedSquareFloat;
 using MyNN.MLP.ForwardPropagation;
@@ -15,12 +17,14 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
         private readonly ICSharpConvolutionLayerContainer _currentLayerContainer;
         private readonly ICSharpConvolutionCalculator _convolutionCalculator;
         private readonly IFunctionActivator _functionActivator;
+        private readonly IConnector _connector;
 
         public CSharpAvgPooling_ConvolutionLayerPropagator(
             ICSharpAvgPoolingLayerContainer previousLayerContainer,
             ICSharpConvolutionLayerContainer currentLayerContainer,
             ICSharpConvolutionCalculator convolutionCalculator,
-            IFunctionActivator functionActivator
+            IFunctionActivator functionActivator,
+            IConnector connector
             )
         {
             if (previousLayerContainer == null)
@@ -39,15 +43,22 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
             {
                 throw new ArgumentNullException("functionActivator");
             }
+            if (connector == null)
+            {
+                throw new ArgumentNullException("connector");
+            }
 
             _previousLayerContainer = previousLayerContainer;
             _currentLayerContainer = currentLayerContainer;
             _convolutionCalculator = convolutionCalculator;
             _functionActivator = functionActivator;
+            _connector = connector;
         }
 
         public void ComputeLayer()
         {
+            var processedHash = new HashSet<int>();
+
             for (var currentFmi = 0; currentFmi < _currentLayerContainer.Configuration.FeatureMapCount; currentFmi++)
             {
                 var kernelShift = currentFmi * _currentLayerContainer.Configuration.KernelSpatialDimension.Multiplied;
@@ -75,7 +86,8 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
                     currentNetStateShift
                     );
 
-                for (var previousFmi = 0; previousFmi < _previousLayerContainer.Configuration.FeatureMapCount; previousFmi++)
+                foreach (var previousFmi in _connector.GetPreviousFeatureMapIndexes(currentFmi))
+                //for (var previousFmi = 0; previousFmi < _previousLayerContainer.Configuration.FeatureMapCount; previousFmi++)
                 {
                     var previousShift = previousFmi * _previousLayerContainer.Configuration.SpatialDimension.Multiplied;
 
@@ -85,13 +97,15 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
                         previousShift
                         );
 
-                    if (previousFmi == 0)
+                    if (!processedHash.Contains(currentFmi))
                     {
                         _convolutionCalculator.CalculateConvolutionWithOverwrite(
                             kernelBiasContainer,
                             previousState,
                             currentNet
                             );
+
+                        processedHash.Add(currentFmi);
                     }
                     else
                     {

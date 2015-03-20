@@ -14,8 +14,8 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
         /// нулей, лежащих за границами. Значения светки добавляются в target.
         /// </summary>
         void CalculateBackConvolutionWithIncrement(
-            IReferencedSquareFloat kernelBiasContainer, //think as next layer (e.g. convolution layer) dz\dy
-            IReferencedSquareFloat dataToConvolute, //think as next layer (e.g. convolution layer) dE\dz
+            IReferencedSquareFloat dzdy, //think as next layer (e.g. convolution layer) dz\dy
+            IReferencedSquareFloat dedz, //think as next layer (e.g. convolution layer) dE\dz
             IReferencedSquareFloat target //think as current layer (e.g. pooling layer) dE\dy
             );
 
@@ -24,8 +24,8 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
         /// нулей, лежащих за границами. Значения светки перезаписывают target.
         /// </summary>
         void CalculateBackConvolutionWithOverwrite(
-            IReferencedSquareFloat kernelBiasContainer, //think as next layer (e.g. convolution layer) dz\dy
-            IReferencedSquareFloat dataToConvolute, //think as next layer (e.g. convolution layer) dE\dz
+            IReferencedSquareFloat dzdy, //think as next layer (e.g. convolution layer) dz\dy
+            IReferencedSquareFloat dedz, //think as next layer (e.g. convolution layer) dE\dz
             IReferencedSquareFloat target //think as current layer (e.g. pooling layer) dE\dy
             );
 

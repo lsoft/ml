@@ -2,6 +2,7 @@
 
 namespace MyNN.MLP.Structure.Neuron
 {
+    [Serializable]
     public class PseudoNeuron : INeuron
     {
         public float[] Weights

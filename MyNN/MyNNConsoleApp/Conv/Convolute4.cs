@@ -32,6 +32,7 @@ using MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backpropagat
 using MyNN.MLP.Classic.ForwardPropagation.CSharp;
 using MyNN.MLP.Convolution.Activator;
 using MyNN.MLP.Convolution.Calculator.CSharp;
+using MyNN.MLP.Convolution.Connector;
 using MyNN.MLP.Convolution.KernelBiasContainer;
 using MyNN.MLP.Convolution.ReferencedSquareFloat;
 using MyNN.MLP.DeDyAggregator;
@@ -49,29 +50,35 @@ using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNNConsoleApp.Conv
 {
-    public class Convolute3
+    public class Convolute4
     {
         const int ImageSize = 28;
         const int KernelSize = 5;
-        const int ConvolutionSize = ImageSize - KernelSize + 1;
-        const int EpochCount = 5;
+
+        const int ConvolutionSize0 = ImageSize - KernelSize + 1;
+        const float ScaleFactor0 = 0.5f;
+        const int FeatureMapCount0 = 6;
+
+        const int ConvolutionSize1 = (int)(ConvolutionSize0 * ScaleFactor0) - KernelSize + 1;
+        const float ScaleFactor1 = 0.5f;
+        const int FeatureMapCount1 = 16;
+
+        const int EpochCount = 50;
         const float LearningRate = 0.01f;
         const int VizCount = 100;
-        const int FeatureMapCount = 5;
-        const float ScaleFactor = 0.5f;
 
         public static void Do(
             )
         {
 
             var trainDataSetProvider = GetTrainProvider(
-                6000,
+                60000,
                 false,
                 false
                 );
 
             var validationData = GetValidation(
-                1000,
+                10000,
                 false,
                 false
                 );
@@ -90,7 +97,7 @@ namespace MyNNConsoleApp.Conv
                 new Dimension(2, ImageSize, ImageSize)
                 );
 
-            var l1Dimension = new Dimension(2, ConvolutionSize, ConvolutionSize);
+            var l1Dimension = new Dimension(2, ConvolutionSize0, ConvolutionSize0);
             var l1KernelDimension = new Dimension(2, KernelSize, KernelSize);
             var l1 = new ConvolutionLayer(
                 neuronFactory,
@@ -98,24 +105,45 @@ namespace MyNNConsoleApp.Conv
                 //new HyperbolicTangensFunction(), 
                 new RLUFunction(),
                 l1Dimension,
-                FeatureMapCount,
+                FeatureMapCount0,
                 l1KernelDimension,
-                //new ConvolutionWeightBiasIniter(randomizer, l1KernelDimension, FeatureMapCount)
+                //new ConvolutionWeightBiasIniter(randomizer, l1KernelDimension, FeatureMapCount0)
                 new RandomWeightBiasIniter(randomizer)
                 );
 
             var l2 = new AvgPoolingLayer(
                 neuronFactory,
-                new Dimension(2, (int) (ConvolutionSize*ScaleFactor), (int) (ConvolutionSize*ScaleFactor)),
-                FeatureMapCount,
-                ScaleFactor
+                new Dimension(2, (int) (ConvolutionSize0*ScaleFactor0), (int) (ConvolutionSize0*ScaleFactor0)),
+                FeatureMapCount0,
+                ScaleFactor0
                 );
 
-            var l3 = new FullConnectedLayer(
+            var l3Dimension = new Dimension(2, ConvolutionSize1, ConvolutionSize1);
+            var l3KernelDimension = new Dimension(2, KernelSize, KernelSize);
+            var l3 = new ConvolutionLayer(
+                neuronFactory,
+                //new SigmoidFunction(1f), 
+                //new HyperbolicTangensFunction(), 
+                new RLUFunction(),
+                l3Dimension,
+                FeatureMapCount1,
+                l3KernelDimension,
+                //new ConvolutionWeightBiasIniter(randomizer, l3KernelDimension, FeatureMapCount1)
+                new RandomWeightBiasIniter(randomizer)
+                );
+
+            var l4 = new AvgPoolingLayer(
+                neuronFactory,
+                new Dimension(2, (int)(ConvolutionSize1 * ScaleFactor1), (int)(ConvolutionSize1 * ScaleFactor1)),
+                FeatureMapCount1,
+                ScaleFactor1
+                );
+
+            var l5 = new FullConnectedLayer(
                 neuronFactory,
                 new SigmoidFunction(1f),
                 new Dimension(1, 10),
-                l2.TotalNeuronCount
+                l4.TotalNeuronCount
                 );
 
             var mlp = mlpFactory.CreateMLP(
@@ -125,7 +153,9 @@ namespace MyNNConsoleApp.Conv
                     l0,
                     l1,
                     l2,
-                    l3
+                    l3,
+                    l4,
+                    l5
                 }
                 );
 
@@ -149,14 +179,14 @@ namespace MyNNConsoleApp.Conv
 
             var serialization = new SerializationHelper();
 
-            var rootContainer = 
-                //new FileSystemArtifactContainer(
-                //    ".",
-                //    serialization);
-                new SavelessArtifactContainer(
+            var rootContainer =
+                new FileSystemArtifactContainer(
                     ".",
-                    serialization
-                    );
+                    serialization);
+                //new SavelessArtifactContainer(
+                //    ".",
+                //    serialization
+                //    );
 
             var mlpName = string.Format("conv{0}.mlp", DateTime.Now.ToString("yyyyMMddHHmmss"));
 
@@ -173,6 +203,17 @@ namespace MyNNConsoleApp.Conv
 
             //----------------------------------------------------------------------
 
+            //var connector = new FullConnectedConnector(
+            //    (mlp.Layers[2] as IAvgPoolingLayer).GetConfiguration()
+            //    );
+
+            var connector = new NaiveConnector(
+                (mlp.Layers[2] as IAvgPoolingLayer).GetConfiguration(),
+                3
+                );
+            
+            //----------------------------------------------------------------------
+
             var containers = new ILayerContainer[mlp.Layers.Length];
 
             containers[0] = new CSharpLayerContainer(
@@ -184,8 +225,14 @@ namespace MyNNConsoleApp.Conv
             containers[2] = new CSharpAvgPoolingLayerContainer(
                 mlp.Layers[2].GetConfiguration() as IAvgPoolingLayerConfiguration
                 );
-            containers[3] = new CSharpLayerContainer(
-                mlp.Layers[3].GetConfiguration()
+            containers[3] = new CSharpConvolutionLayerContainer(
+                mlp.Layers[3].GetConfiguration() as IConvolutionLayerConfiguration
+                );
+            containers[4] = new CSharpAvgPoolingLayerContainer(
+                mlp.Layers[4].GetConfiguration() as IAvgPoolingLayerConfiguration
+                );
+            containers[5] = new CSharpLayerContainer(
+                mlp.Layers[5].GetConfiguration()
                 );
 
             //----------------------------------------------------------------------
@@ -201,10 +248,21 @@ namespace MyNNConsoleApp.Conv
                 containers[1] as ICSharpConvolutionLayerContainer,
                 containers[2] as ICSharpAvgPoolingLayerContainer
                 );
-            propagators[3] = new CSharpLayerPropagator(
-                mlp.Layers[3],
-                containers[2] as ICSharpLayerContainer,
-                containers[3] as ICSharpLayerContainer
+            propagators[3] = new CSharpAvgPooling_ConvolutionLayerPropagator(
+                containers[2] as ICSharpAvgPoolingLayerContainer,
+                containers[3] as ICSharpConvolutionLayerContainer,
+                convolutionCalculator,
+                functionActivator,
+                connector
+                );
+            propagators[4] = new CSharpConvolution_AvgPoolingLayerPropagator(
+                containers[3] as ICSharpConvolutionLayerContainer,
+                containers[4] as ICSharpAvgPoolingLayerContainer
+                );
+            propagators[5] = new CSharpLayerPropagator(
+                mlp.Layers[5],
+                containers[4] as ICSharpLayerContainer,
+                containers[5] as ICSharpLayerContainer
                 );
 
             //----------------------------------------------------------------------
@@ -222,10 +280,22 @@ namespace MyNNConsoleApp.Conv
                 (mlp.Layers[2] as IAvgPoolingLayer).GetConfiguration()
                 );
 
-            var dedyAggregator3 = new CSharpDeDyAggregator(
-                mlp.Layers[2].TotalNeuronCount,
-                mlp.Layers[3].TotalNeuronCount,
-                (containers[3] as ICSharpLayerContainer).WeightMem
+            ICSharpDeDyAggregator dedyAggregator3 = new CSharpConvolutionDeDyAggregator(
+                (mlp.Layers[2] as IAvgPoolingLayer).GetConfiguration(),
+                containers[3] as ICSharpConvolutionLayerContainer, 
+                convolutionCalculator,
+                connector
+                );
+
+            ICSharpDeDyAggregator dedyAggregator4 = new CSharpAvgPoolingDeDyAggregator(
+                (mlp.Layers[3] as IConvolutionLayer).GetConfiguration(),
+                (mlp.Layers[4] as IAvgPoolingLayer).GetConfiguration()
+                );
+
+            var dedyAggregator5 = new CSharpDeDyAggregator(
+                mlp.Layers[4].TotalNeuronCount,
+                mlp.Layers[5].TotalNeuronCount,
+                (containers[5] as ICSharpLayerContainer).WeightMem
                 );
 
             //----------------------------------------------------------------------
@@ -237,17 +307,34 @@ namespace MyNNConsoleApp.Conv
                 );
 
 
-            var backpropagator3 =
+            var backpropagator5 =
                 new CSharpOutputLayerBackpropagator(
                     config,
-                    containers[2] as ICSharpLayerContainer,
-                    containers[3] as ICSharpLayerContainer,
+                    containers[4] as ICSharpLayerContainer,
+                    containers[5] as ICSharpLayerContainer,
                     desiredValuesContainer,
                     dedyAggregator3
                     );
 
-            var backpropagator2 = new CSharpAvgPoolingFullConnectedBackpropagator(
-                containers[2] as ICSharpAvgPoolingLayerContainer,
+            var backpropagator4 = new CSharpAvgPoolingFullConnectedBackpropagator(
+                containers[4] as ICSharpAvgPoolingLayerContainer,
+                dedyAggregator5,
+                dedyAggregator4
+                );
+
+            var backpropagator3 =
+                new CSharpConvolutionPoolingLayerBackpropagator(
+                    config,
+                    (mlp.Layers[4] as IAvgPoolingLayer).GetConfiguration(),
+                    containers[2] as ICSharpLayerContainer,
+                    containers[3] as ICSharpConvolutionLayerContainer,
+                    dedyAggregator4,
+                    dedyAggregator3,
+                    true
+                    );
+
+            var backpropagator2 = new CSharpAvgPoolingConvolutionBackpropagator(
+                (containers[2] as ICSharpAvgPoolingLayerContainer).Configuration,
                 dedyAggregator3,
                 dedyAggregator2
                 );
@@ -268,7 +355,9 @@ namespace MyNNConsoleApp.Conv
                 null,
                 backpropagator1, 
                 backpropagator2,
-                backpropagator3
+                backpropagator3,
+                backpropagator4,
+                backpropagator5
             };
 
             var bp = new Backpropagation(
@@ -328,15 +417,15 @@ namespace MyNNConsoleApp.Conv
                     var vi = iter.Current;
 
                     var net = new ReferencedSquareFloat(
-                        new Dimension(2, ConvolutionSize, ConvolutionSize),
+                        new Dimension(2, ConvolutionSize0, ConvolutionSize0),
                         (containers[1] as ICSharpLayerContainer).NetMem,
-                        fmi * ConvolutionSize * ConvolutionSize
+                        fmi * ConvolutionSize0 * ConvolutionSize0
                         );
 
                     var state = new ReferencedSquareFloat(
-                        new Dimension(2, ConvolutionSize, ConvolutionSize),
+                        new Dimension(2, ConvolutionSize0, ConvolutionSize0),
                         (containers[1] as ICSharpLayerContainer).StateMem,
-                        fmi * ConvolutionSize * ConvolutionSize
+                        fmi * ConvolutionSize0 * ConvolutionSize0
                         );
 
                     convolutionCalculator.CalculateConvolutionWithOverwrite(
@@ -353,8 +442,8 @@ namespace MyNNConsoleApp.Conv
 
                     var rescaled = Rescale(
                         (containers[1] as ICSharpLayerContainer).StateMem.GetSubArray(
-                            fmi * ConvolutionSize * ConvolutionSize,
-                            ConvolutionSize * ConvolutionSize)
+                            fmi * ConvolutionSize0 * ConvolutionSize0,
+                            ConvolutionSize0 * ConvolutionSize0)
                         );
 
                     var p = new Pair<float[], float[]>(
@@ -380,11 +469,11 @@ namespace MyNNConsoleApp.Conv
             var result = new float[ImageSize*ImageSize];
 
             var i = 0;
-            for (var y = 0; y < ConvolutionSize; y++)
+            for (var y = 0; y < ConvolutionSize0; y++)
             {
-                for (var x = 0; x < ConvolutionSize; x++)
+                for (var x = 0; x < ConvolutionSize0; x++)
                 {
-                    result[((ImageSize - ConvolutionSize) + y)*ImageSize + (ImageSize - ConvolutionSize) + x] = f[i];
+                    result[((ImageSize - ConvolutionSize0) + y)*ImageSize + (ImageSize - ConvolutionSize0) + x] = f[i];
 
                     i++;
                 }
@@ -426,8 +515,6 @@ namespace MyNNConsoleApp.Conv
                 {
                     return
                         new NoConvertDataItemTransformation();
-                    //new ToAutoencoderDataItemTransformation(
-                    //    dataItemFactory);
                 });
 
             var dataSetFactory = new DataSetFactory(
@@ -478,8 +565,6 @@ namespace MyNNConsoleApp.Conv
                 {
                     return
                         new NoConvertDataItemTransformation();
-                    //new ToAutoencoderDataItemTransformation(
-                    //    dataItemFactory);
                 });
 
             var validationDataSet = new DataSet(

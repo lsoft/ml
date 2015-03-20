@@ -9,14 +9,14 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
     public class NaiveConvolutionCalculator : ICSharpConvolutionCalculator
     {
         public void CalculateBackConvolutionWithIncrement(
-            IReferencedSquareFloat kernelBiasContainer, //think as next layer (e.g. convolution layer) dz\dy
-            IReferencedSquareFloat dataToConvolute, //think as next layer (e.g. convolution layer) dE\dz
+            IReferencedSquareFloat dzdy, //think as next layer (e.g. convolution layer) dz\dy
+            IReferencedSquareFloat dedz, //think as next layer (e.g. convolution layer) dE\dz
             IReferencedSquareFloat target //think as current layer (e.g. pooling layer) dE\dy
             )
         {
             this.CalculateBackConvolution(
-                kernelBiasContainer,
-                dataToConvolute,
+                dzdy,
+                dedz,
                 target,
                 false
                 );
@@ -24,14 +24,14 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
 
 
         public void CalculateBackConvolutionWithOverwrite(
-            IReferencedSquareFloat kernelBiasContainer, //think as next layer (e.g. convolution layer) dz\dy
-            IReferencedSquareFloat dataToConvolute, //think as next layer (e.g. convolution layer) dE\dz
+            IReferencedSquareFloat dzdy, //think as next layer (e.g. convolution layer) dz\dy
+            IReferencedSquareFloat dedz, //think as next layer (e.g. convolution layer) dE\dz
             IReferencedSquareFloat target //think as current layer (e.g. pooling layer) dE\dy
             )
         {
             this.CalculateBackConvolution(
-                kernelBiasContainer,
-                dataToConvolute,
+                dzdy,
+                dedz,
                 target,
                 true
                 );
@@ -128,19 +128,19 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
         }
 
         private void CalculateBackConvolution(
-            IReferencedSquareFloat kernelBiasContainer, //think as next layer (e.g. convolution layer) dz\dy
-            IReferencedSquareFloat dataToConvolute, //think as next layer (e.g. convolution layer) dE\dz
+            IReferencedSquareFloat dzdy, //think as next layer (e.g. convolution layer) dz\dy
+            IReferencedSquareFloat dedz, //think as next layer (e.g. convolution layer) dE\dz
             IReferencedSquareFloat target, //think as current layer (e.g. pooling layer) dE\dy
             bool overwrite
             )
         {
-            if (kernelBiasContainer == null)
+            if (dzdy == null)
             {
-                throw new ArgumentNullException("kernelBiasContainer");
+                throw new ArgumentNullException("dzdy");
             }
-            if (dataToConvolute == null)
+            if (dedz == null)
             {
-                throw new ArgumentNullException("dataToConvolute");
+                throw new ArgumentNullException("dedz");
             }
             if (target == null)
             {
@@ -153,12 +153,12 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
                 for (var j = 0; j < target.Height; j++)
                 {
                     var zSum = 0f;
-                    for (var a = 0; a < kernelBiasContainer.Width; a++)
+                    for (var a = 0; a < dzdy.Width; a++)
                     {
-                        for (var b = 0; b < kernelBiasContainer.Height; b++)
+                        for (var b = 0; b < dzdy.Height; b++)
                         {
-                            var w = kernelBiasContainer.GetValueFromCoordSafely(a, b);
-                            var y = dataToConvolute.GetValueFromCoordPaddedWithZeroes(i - a, j - b);
+                            var w = dzdy.GetValueFromCoordSafely(a, b);
+                            var y = dedz.GetValueFromCoordPaddedWithZeroes(i - a, j - b);
 
                             var z = w * y;
                             zSum += z;

@@ -42,7 +42,11 @@
     <Compile Include="BackpropagationFactory\Classic\CSharp\CSharpBackpropagationFactory.cs" />
     <Compile Include="BackpropagationFactory\Classic\OpenCL\CPU\CPUBackpropagationFactory.cs" />
     <Compile Include="BackpropagationFactory\Classic\OpenCL\GPU\GPUBackpropagationFactory.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\AvgPool\Backpropagator\CSharpAvgPoolingConvolutionBackpropagator.cs" />
     <Compile Include="Backpropagation\EpocheTrainer\Classic\AvgPool\Backpropagator\CSharpAvgPoolingFullConnectedBackpropagator.cs" />
+    <Compile Include="Backpropagation\EpocheTrainer\Classic\AvgPool\Kernel\AvgPoolingConvolutionKernel.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Backpropagation\EpocheTrainer\Classic\AvgPool\Kernel\AvgPoolingFullConnectedKernel.cs">
       <SubType>Code</SubType>
     </Compile>

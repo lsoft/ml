@@ -84,6 +84,7 @@
     <Compile Include="Convolution\Calculator\CSharp\ICSharpConvolutionCalculator.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Convolution\Connector\NaiveConnector.cs" />
     <Compile Include="Convolution\KernelBiasContainer\IReferencedKernelBiasContainer.cs" />
     <Compile Include="Convolution\ReferencedSquareFloat\IReferencedSquareFloat.cs" />
     <Compile Include="Convolution\Calculator\CSharp\NaiveConvolutionCalculator.cs">
@@ -105,6 +106,7 @@
     </Compile>
     <Compile Include="DeDyAggregator\CPUDeDyAggregator.cs" />
     <Compile Include="DeDyAggregator\CSharpAvgPoolingDeDyAggregator.cs" />
+    <Compile Include="DeDyAggregator\CSharpConvolutionDeDyAggregator.cs" />
     <Compile Include="DeDyAggregator\CSharpStubConvolutionDeDyAggregator.cs" />
     <Compile Include="DeDyAggregator\ICSharpDeDyAggregator.cs" />
     <Compile Include="DeDyAggregator\IOpenCLDeDyAggregator.cs" />

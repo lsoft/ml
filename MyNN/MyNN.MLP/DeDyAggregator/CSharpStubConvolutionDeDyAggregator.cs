@@ -1,5 +1,6 @@
 using System;
 using MyNN.Common.Other;
+using MyNN.MLP.Convolution.KernelBiasContainer;
 using MyNN.MLP.Structure.Layer;
 
 namespace MyNN.MLP.DeDyAggregator
