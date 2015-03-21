@@ -33,6 +33,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.AvgPool.Backpro
             {
                 throw new ArgumentNullException("currentLayerDeDyAggregator");
             }
+            if (currentLayerConfiguration.TotalNeuronCount != currentLayerDeDyAggregator.TotalNeuronCount)
+            {
+                throw new ArgumentException("Не совпадает число нейронов текущего слоя и число нейронов в dedy аггрегаторе");
+            }
 
             _currentLayerConfiguration = currentLayerConfiguration;
             _nextLayerDeDyAggregator = nextLayerDeDyAggregator;

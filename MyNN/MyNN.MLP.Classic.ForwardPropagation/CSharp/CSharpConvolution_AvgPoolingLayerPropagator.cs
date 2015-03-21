@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MyNN.MLP.Convolution.Calculator.CSharp;
 using MyNN.MLP.Convolution.ReferencedSquareFloat;
 using MyNN.MLP.ForwardPropagation;
@@ -38,6 +39,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
             _currentLayerContainer = currentLayerContainer;
         }
 
+        //!!! вынести в кернел
         public void ComputeLayer()
         {
             //downsample
@@ -65,7 +67,8 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
                     previousStateShift
                     );
 
-                for (var h = 0; h < _currentLayerContainer.Configuration.SpatialDimension.Height; h++)
+                Parallel.For(0, _currentLayerContainer.Configuration.SpatialDimension.Height, h =>
+                //for (var h = 0; h < _currentLayerContainer.Configuration.SpatialDimension.Height; h++)
                 {
                     for (var w = 0; w < _currentLayerContainer.Configuration.SpatialDimension.Width; w++)
                     {
@@ -85,6 +88,7 @@ namespace MyNN.MLP.Classic.ForwardPropagation.CSharp
                         currentState.SetValueFromCoordSafely(w, h, sum);
                     }
                 }
+                ); //Parallel.For
             }
         }
 

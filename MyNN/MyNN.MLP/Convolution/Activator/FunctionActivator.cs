@@ -30,9 +30,10 @@ namespace MyNN.MLP.Convolution.Activator
             }
 
             //применяем функцию активации
-            for (var i = 0; i < currentNet.Width; i++)
+            Parallel.For(0, currentNet.Height, j =>
+            //for (var j = 0; j < currentNet.Height; j++)
             {
-                for (var j = 0; j < currentNet.Height; j++)
+                for (var i = 0; i < currentNet.Width; i++)
                 {
                     var net = currentNet.GetValueFromCoordSafely(i, j);
 
@@ -41,6 +42,7 @@ namespace MyNN.MLP.Convolution.Activator
                     currentState.SetValueFromCoordSafely(i, j, state);
                 }
             }
+            ); //Parallel.For
         }
     }
 }

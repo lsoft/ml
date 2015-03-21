@@ -50,7 +50,7 @@ using MyNN.MLP.Structure.Neuron.Function;
 
 namespace MyNNConsoleApp.Conv
 {
-    public class Convolute4
+    public class Convolute4Perf
     {
         const int ImageSize = 28;
         const int KernelSize = 5;
@@ -63,8 +63,8 @@ namespace MyNNConsoleApp.Conv
         const float ScaleFactor1 = 0.5f;
         const int FeatureMapCount1 = 16;
 
-        const int EpochCount = 50;
-        const float LearningRate = 0.002f;
+        const int EpochCount = 1;
+        const float LearningRate = 0.01f;
         const int VizCount = 100;
 
         public static void Do(
@@ -72,13 +72,13 @@ namespace MyNNConsoleApp.Conv
         {
 
             var trainDataSetProvider = GetTrainProvider(
-                60000,
+                200,
                 false,
                 false
                 );
 
             var validationData = GetValidation(
-                10000,
+                100,
                 false,
                 false
                 );
@@ -141,16 +141,9 @@ namespace MyNNConsoleApp.Conv
 
             var l5 = new FullConnectedLayer(
                 neuronFactory,
-                new RLUFunction(),
-                new Dimension(1, 500),
-                l4.TotalNeuronCount
-                );
-
-            var l6 = new FullConnectedLayer(
-                neuronFactory,
                 new SigmoidFunction(1f),
                 new Dimension(1, 10),
-                l5.TotalNeuronCount
+                l4.TotalNeuronCount
                 );
 
             var mlp = mlpFactory.CreateMLP(
@@ -162,8 +155,7 @@ namespace MyNNConsoleApp.Conv
                     l2,
                     l3,
                     l4,
-                    l5,
-                    l6
+                    l5
                 }
                 );
 
@@ -188,13 +180,13 @@ namespace MyNNConsoleApp.Conv
             var serialization = new SerializationHelper();
 
             var rootContainer =
-                new FileSystemArtifactContainer(
-                    ".",
-                    serialization);
-                //new SavelessArtifactContainer(
+                //new FileSystemArtifactContainer(
                 //    ".",
-                //    serialization
-                //    );
+                //    serialization);
+                new SavelessArtifactContainer(
+                    ".",
+                    serialization
+                    );
 
             var mlpName = string.Format("conv{0}.mlp", DateTime.Now.ToString("yyyyMMddHHmmss"));
 
@@ -242,9 +234,6 @@ namespace MyNNConsoleApp.Conv
             containers[5] = new CSharpLayerContainer(
                 mlp.Layers[5].GetConfiguration()
                 );
-            containers[6] = new CSharpLayerContainer(
-                mlp.Layers[6].GetConfiguration()
-                );
 
             //----------------------------------------------------------------------
 
@@ -274,11 +263,6 @@ namespace MyNNConsoleApp.Conv
                 mlp.Layers[5],
                 containers[4] as ICSharpLayerContainer,
                 containers[5] as ICSharpLayerContainer
-                );
-            propagators[6] = new CSharpLayerPropagator(
-                mlp.Layers[6],
-                containers[5] as ICSharpLayerContainer,
-                containers[6] as ICSharpLayerContainer
                 );
 
             //----------------------------------------------------------------------
@@ -314,12 +298,6 @@ namespace MyNNConsoleApp.Conv
                 (containers[5] as ICSharpLayerContainer).WeightMem
                 );
 
-            var dedyAggregator6 = new CSharpDeDyAggregator(
-                mlp.Layers[5].TotalNeuronCount,
-                mlp.Layers[6].TotalNeuronCount,
-                (containers[6] as ICSharpLayerContainer).WeightMem
-                );
-
             //----------------------------------------------------------------------
 
             var fp = new ForwardPropagation(
@@ -329,23 +307,13 @@ namespace MyNNConsoleApp.Conv
                 );
 
 
-            var backpropagator6 =
+            var backpropagator5 =
                 new CSharpOutputLayerBackpropagator(
                     config,
-                    containers[5] as ICSharpLayerContainer,
-                    containers[6] as ICSharpLayerContainer,
-                    desiredValuesContainer,
-                    dedyAggregator6
-                    );
-
-            var backpropagator5 =
-                new CSharpHiddenLayerBackpropagator(
-                    config,
-                    true,
                     containers[4] as ICSharpLayerContainer,
                     containers[5] as ICSharpLayerContainer,
-                    dedyAggregator6,
-                    dedyAggregator5
+                    desiredValuesContainer,
+                    dedyAggregator3
                     );
 
             var backpropagator4 = new CSharpAvgPoolingFullConnectedBackpropagator(
@@ -389,8 +357,7 @@ namespace MyNNConsoleApp.Conv
                 backpropagator2,
                 backpropagator3,
                 backpropagator4,
-                backpropagator5,
-                backpropagator6
+                backpropagator5
             };
 
             var bp = new Backpropagation(
@@ -411,9 +378,17 @@ namespace MyNNConsoleApp.Conv
                 fp
                 );
 
-            bp.Train(
+            var r =bp.Train(
                 trainDataSetProvider
                 );
+
+            var diff = r.PerItemError - 0.4172720611095428466796875f;
+
+            Console.WriteLine(
+                "DIFF = {0}",
+                diff);
+
+            return;
 
             //----------------------------------------------------------------------
 

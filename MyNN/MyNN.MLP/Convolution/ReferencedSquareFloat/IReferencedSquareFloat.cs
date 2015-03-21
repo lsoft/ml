@@ -25,6 +25,8 @@ namespace MyNN.MLP.Convolution.ReferencedSquareFloat
 
         void SetValueFromCoordSafely(int readw, int readh, float value);
 
+        void ChangeValueFromCoordSafely(int readw, int readh, float value, int invert_overwrite);
+
         float GetValueFromCoordSafely(int fromw, int fromh);
 
         float GetValueFromCoordPaddedWithZeroes(int fromw, int fromh);

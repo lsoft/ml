@@ -100,6 +100,23 @@ namespace MyNN.MLP.Convolution.ReferencedSquareFloat
             _array[_shift + (readh * Width + readw)] = value;
         }
 
+        public void ChangeValueFromCoordSafely(int readw, int readh, float value, int invert_overwrite)
+        {
+            if (readw < 0 || readw >= Width)
+            {
+                throw new InvalidOperationException("readw < 0 || readw >= Width");
+            }
+            if (readh < 0 || readh >= Height)
+            {
+                throw new InvalidOperationException("readh < 0 || readh >= Height");
+            }
+
+            var index = _shift + (readh*Width + readw);
+            var prev = _array[index];
+
+            _array[index] = value + prev * invert_overwrite;
+        }
+
         public float GetValueFromCoordSafely(int fromw, int fromh)
         {
             if (fromw < 0 || fromw >= Width)

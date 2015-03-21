@@ -58,6 +58,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.CSharp.Backprop
             {
                 throw new ArgumentNullException("deDyAggregator");
             }
+            if (currentLayerContainer.Configuration.TotalNeuronCount != deDyAggregator.TotalNeuronCount)
+            {
+                throw new ArgumentException("Не совпадает число нейронов текущего слоя и число нейронов в dedy аггрегаторе");
+            }
 
             _config = config;
             _previousLayerContainer = previousLayerContainer;

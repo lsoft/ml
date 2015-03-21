@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MyNN.Common.Other;
 using MyNN.MLP.Convolution.Calculator.CSharp;
 using MyNN.MLP.Convolution.ReferencedSquareFloat;
@@ -75,17 +76,21 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
             ////    }
             ////}
 
+            var locker = new object();
+            var nb = 0f;
+
             //считаем наблу
-            for (var a = 0; a < nablaKernel.Width; a++)
+            Parallel.For(0, nablaKernel.Height, b =>
+            //for (var b = 0; b < nablaKernel.Height; b++)
             {
-                for (var b = 0; b < nablaKernel.Height; b++)
+                for (var a = 0; a < nablaKernel.Width; a++)
                 {
                     var dEdw_ab = 0f; //kernel
                     var dEdb_ab = 0f; //bias
 
-                    for (var i = 0; i < currentLayerNet.Width; i++)
+                    for (var j = 0; j < currentLayerNet.Height; j++)
                     {
-                        for (var j = 0; j < currentLayerNet.Height; j++)
+                        for (var i = 0; i < currentLayerNet.Width; i++)
                         {
                             var dedy = nextLayerDeDy.GetValueFromCoordSafely(i, j);
                             float z = currentLayerNet.GetValueFromCoordSafely(i, j);
@@ -112,9 +117,17 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Kernel
 
                     //вычислено dEdw_ab, dEdb_ab
                     nablaKernel.SetValueFromCoordSafely(a, b, dEdw_ab);
-                    nablaBias = dEdb_ab * learningRate;
+                    //nablaBias = dEdb_ab * learningRate;
+
+                    lock (locker)
+                    {
+                        nb += dEdb_ab * learningRate;
+                    }
                 }
             }
+            ); //Parallel.For
+
+            nablaBias += nb;
         }
     }
 }

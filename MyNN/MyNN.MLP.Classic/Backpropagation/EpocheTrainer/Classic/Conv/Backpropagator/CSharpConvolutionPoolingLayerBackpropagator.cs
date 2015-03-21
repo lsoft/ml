@@ -64,6 +64,10 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
             {
                 throw new ArgumentNullException("currentLayerDeDyAggregator");
             }
+            if (currentLayerContainer.Configuration.TotalNeuronCount != currentLayerDeDyAggregator.TotalNeuronCount)
+            {
+                throw new ArgumentException("Не совпадает число нейронов текущего слоя и число нейронов в dedy аггрегаторе");
+            }
 
             _config = config;
             _nextLayerConfiguration = nextLayerConfiguration;
@@ -124,6 +128,14 @@ namespace MyNN.MLP.Classic.Backpropagation.EpocheTrainer.Classic.Conv.Backpropag
                     _nablaKernel,
                     kernelShift
                     );
+
+                //var nabla = new ReferencedKernelBiasContainer(
+                //    _currentLayerContainer.Configuration.KernelSpatialDimension,
+                //    _nablaKernel,
+                //    kernelShift,
+                //    _nablaBias,
+                //    biasShift
+                //    );
 
                 var nldedzShift = fmi * _nextLayerConfiguration.SpatialDimension.Multiplied;
 

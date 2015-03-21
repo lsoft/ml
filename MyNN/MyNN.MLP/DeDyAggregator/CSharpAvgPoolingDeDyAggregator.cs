@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using MyNN.Common.Other;
 using MyNN.MLP.Convolution.ReferencedSquareFloat;
 using MyNN.MLP.Structure.Layer;
@@ -63,7 +64,8 @@ namespace MyNN.MLP.DeDyAggregator
         public void Aggregate(
             )
         {
-            for (var fmi = 0; fmi < _featureMapCount; fmi++)
+            Parallel.For(0, _featureMapCount, fmi =>
+            //for (var fmi = 0; fmi < _featureMapCount; fmi++)
             {
                 var dedyShift = fmi * _previousLayerConfiguration.SpatialDimension.Multiplied;
 
@@ -99,6 +101,7 @@ namespace MyNN.MLP.DeDyAggregator
                     }
                 }
             }
+            ); //Parallel.For
         }
 
         public void ClearAndWrite(

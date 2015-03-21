@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MyNN.Common.Randomizer;
 using MyNN.MLP.Convolution.KernelBiasContainer;
 using MyNN.MLP.Convolution.ReferencedSquareFloat;
@@ -18,7 +19,7 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
                 dzdy,
                 dedz,
                 target,
-                false
+                1//false
                 );
         }
 
@@ -33,7 +34,7 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
                 dzdy,
                 dedz,
                 target,
-                true
+                0//true
                 );
         }
 
@@ -47,7 +48,7 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
                 kernelBiasContainer,
                 dataToConvolute,
                 target,
-                false
+                1//false
                 );
         }
 
@@ -61,7 +62,7 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
                 kernelBiasContainer,
                 dataToConvolute,
                 target,
-                true
+                0//true
                 );
         }
 
@@ -71,7 +72,7 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
             IReferencedKernelBiasContainer kernelBiasContainer,
             IReferencedSquareFloat dataToConvolute,
             IReferencedSquareFloat target,
-            bool overwrite
+            int invert_overwrite
             )
         {
             if (kernelBiasContainer == null)
@@ -88,14 +89,15 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
             }
 
             //делаем свертку
-            for (var i = 0; i < target.Width; i++)
+            Parallel.For(0, target.Height, j =>
+            //for (var j = 0; j < target.Height; j++)
             {
-                for (var j = 0; j < target.Height; j++)
+                for (var i = 0; i < target.Width; i++)
                 {
                     var zSum = 0f;
-                    for (var a = 0; a < kernelBiasContainer.Width; a++)
+                    for (var b = 0; b < kernelBiasContainer.Height; b++)
                     {
-                        for (var b = 0; b < kernelBiasContainer.Height; b++)
+                        for (var a = 0; a < kernelBiasContainer.Width; a++)
                         {
                             var w = kernelBiasContainer.GetValueFromCoordSafely(a, b);
                             var y = dataToConvolute.GetValueFromCoordSafely(i + a, j + b);
@@ -107,31 +109,40 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
 
                     zSum += kernelBiasContainer.Bias;
 
-                    if (overwrite)
-                    {
-                        target.SetValueFromCoordSafely(
-                            i,
-                            j,
-                            zSum
-                            );
-                    }
-                    else
-                    {
-                        target.AddValueFromCoordSafely(
-                            i,
-                            j,
-                            zSum
-                            );
-                    }
+                    target.ChangeValueFromCoordSafely(
+                        i,
+                        j,
+                        zSum,
+                        invert_overwrite
+                        );
+
+                    //if(invert_overwrite == 0)
+                    ////if (overwrite)
+                    //{
+                    //    target.SetValueFromCoordSafely(
+                    //        i,
+                    //        j,
+                    //        zSum
+                    //        );
+                    //}
+                    //else
+                    //{
+                    //    target.AddValueFromCoordSafely(
+                    //        i,
+                    //        j,
+                    //        zSum
+                    //        );
+                    //}
                 }
             }
+            );//Parallel.For
         }
 
         private void CalculateBackConvolution(
             IReferencedSquareFloat dzdy, //think as next layer (e.g. convolution layer) dz\dy
             IReferencedSquareFloat dedz, //think as next layer (e.g. convolution layer) dE\dz
             IReferencedSquareFloat target, //think as current layer (e.g. pooling layer) dE\dy
-            bool overwrite
+            int invert_overwrite
             )
         {
             if (dzdy == null)
@@ -148,14 +159,15 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
             }
 
             //делаем свертку
-            for (var i = 0; i < target.Width; i++)
+            Parallel.For(0, target.Height, j =>
+            //for (var j = 0; j < target.Height; j++)
             {
-                for (var j = 0; j < target.Height; j++)
+                for (var i = 0; i < target.Width; i++)
                 {
                     var zSum = 0f;
-                    for (var a = 0; a < dzdy.Width; a++)
+                    for (var b = 0; b < dzdy.Height; b++)
                     {
-                        for (var b = 0; b < dzdy.Height; b++)
+                        for (var a = 0; a < dzdy.Width; a++)
                         {
                             var w = dzdy.GetValueFromCoordSafely(a, b);
                             var y = dedz.GetValueFromCoordPaddedWithZeroes(i - a, j - b);
@@ -165,24 +177,31 @@ namespace MyNN.MLP.Convolution.Calculator.CSharp
                         }
                     }
 
-                    if (overwrite)
-                    {
-                        target.SetValueFromCoordSafely(
-                            i,
-                            j,
-                            zSum
-                            );
-                    }
-                    else
-                    {
-                        target.AddValueFromCoordSafely(
-                            i,
-                            j,
-                            zSum
-                            );
-                    }
+                    target.ChangeValueFromCoordSafely(
+                        i,
+                        j,
+                        zSum,
+                        invert_overwrite);
+
+                    //if (overwrite)
+                    //{
+                    //    target.SetValueFromCoordSafely(
+                    //        i,
+                    //        j,
+                    //        zSum
+                    //        );
+                    //}
+                    //else
+                    //{
+                    //    target.AddValueFromCoordSafely(
+                    //        i,
+                    //        j,
+                    //        zSum
+                    //        );
+                    //}
                 }
             }
+            ); //Parallel.For
         }
 
         #endregion

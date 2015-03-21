@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using MyNN.Common.Other;
 using MyNN.MLP.Convolution.Calculator.CSharp;
 using MyNN.MLP.Convolution.Connector;
@@ -78,9 +81,10 @@ namespace MyNN.MLP.DeDyAggregator
         public void Aggregate(
             )
         {
-            var processedHash = new HashSet<int>();
-
-            for (var currentFmi = 0; currentFmi < _aggregateLayerContainer.Configuration.FeatureMapCount; currentFmi++)
+            var processedDict = new ConcurrentDictionary<int, bool>();
+            
+            Parallel.For(0, _aggregateLayerContainer.Configuration.FeatureMapCount, currentFmi =>
+            //for (var currentFmi = 0; currentFmi < _aggregateLayerContainer.Configuration.FeatureMapCount; currentFmi++)
             {
                 //var kernelShift = currentFmi * _aggregateLayerContainer.Configuration.KernelSpatialDimension.Multiplied;
                 //var biasShift = currentFmi;
@@ -120,7 +124,7 @@ namespace MyNN.MLP.DeDyAggregator
                         previousDeDyShift
                         );
 
-                    if(!processedHash.Contains(previousFmi))
+                    if(!processedDict.ContainsKey(previousFmi))
                     //if (currentFmi == 0)
                     {
                         _convolutionCalculator.CalculateBackConvolutionWithOverwrite(
@@ -129,7 +133,11 @@ namespace MyNN.MLP.DeDyAggregator
                             dedy
                             );
 
-                        processedHash.Add(previousFmi);
+                        processedDict.AddOrUpdate(
+                            previousFmi,
+                            true,
+                            (a, b) => true
+                            );
                     }
                     else
                     {
@@ -141,7 +149,7 @@ namespace MyNN.MLP.DeDyAggregator
                     }
                 }
             }
-
+            ); //Parallel.For
         }
 
         public void ClearAndWrite(
