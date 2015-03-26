@@ -230,6 +230,7 @@ namespace MyNN.Common.Other
 
             return true;
         }
+
         public static bool ValuesAreEqual(float[] array0, float[] array1, float epsilon, out float maxDiff)
         {
             if (array0 == null && array1 == null)
@@ -261,6 +262,61 @@ namespace MyNN.Common.Other
                 if (currentDiff > maxDiff)
                 {
                     maxDiff = currentDiff;
+                }
+            }
+
+            if (maxDiff > epsilon)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool ValuesAreEqual(
+            float[,] array0, 
+            float[,] array1, 
+            float epsilon, 
+            out float maxDiff
+            )
+        {
+            if (array0 == null && array1 == null)
+            {
+                maxDiff = 0;
+                return true;
+            }
+            if (array0 != null && array1 == null)
+            {
+                maxDiff = float.MaxValue;
+                return false;
+            }
+            if (array0 == null && array1 != null)
+            {
+                maxDiff = float.MaxValue;
+                return false;
+            }
+            if (array0.GetLength(0) != array1.GetLength(0))
+            {
+                maxDiff = float.MaxValue;
+                return false;
+            }
+            if (array0.GetLength(1) != array1.GetLength(1))
+            {
+                maxDiff = float.MaxValue;
+                return false;
+            }
+
+            maxDiff = 0;
+            for (var i0 = 0; i0 < array0.GetLength(0); i0++)
+            {
+                for (var i1 = 0; i1 < array0.GetLength(1); i1++)
+                {
+                    var currentDiff = (array0[i0, i1] >= array1[i0, i1] ? array0[i0, i1] - array1[i0, i1] : array1[i0, i1] - array0[i0, i1]);
+
+                    if (currentDiff > maxDiff)
+                    {
+                        maxDiff = currentDiff;
+                    }
                 }
             }
 
@@ -415,6 +471,26 @@ namespace MyNN.Common.Other
             }
 
             return result;
+        }
+
+        public static T[] ToLine<T>(
+            this T[,] a
+            )
+        {
+            var r = new T[a.GetLength(0) * a.GetLength(1)];
+
+            var toi = 0;
+            for (var h = 0; h < a.GetLength(0); h++)
+            {
+                for (var w = 0; w < a.GetLength(1); w++)
+                {
+                    r[toi] = a[h, w];
+
+                    toi++;
+                }
+            }
+
+            return r;
         }
     }
 

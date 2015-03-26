@@ -14,7 +14,7 @@ using OpenCL.Net.Wrapper.Mem;
 namespace MyNN.Tests.MLP2.DeDy
 {
     [TestClass]
-    public class DeDyFixture
+    public class ClassicDeDyFixture
     {
         [TestMethod]
         public void TestCPU()

@@ -90,7 +90,8 @@
     <Compile Include="MLP2\ActivationFunction\OpenCL\Value\RLUOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Value\SigmoidOpenCLFixture.cs" />
     <Compile Include="MLP2\ActivationFunction\OpenCL\Value\SparsifierOpenCLFixture.cs" />
-    <Compile Include="MLP2\DeDy\DeDyFixture.cs" />
+    <Compile Include="MLP2\Convolution\CSharpConvolutionCalculatorFixture.cs" />
+    <Compile Include="MLP2\DeDy\ClassicDeDyFixture.cs" />
     <Compile Include="MLP2\Dodf\Generation1\DoDfFixture.cs" />
     <Compile Include="MLP2\Dodf\DodfTester.cs" />
     <Compile Include="MLP2\EpocheTrainer\GPUEpocheTrainerFixture.cs" />
