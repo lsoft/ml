@@ -28,6 +28,18 @@ namespace MyNN.MLP.Convolution.Activator
             {
                 throw new ArgumentNullException("currentState");
             }
+            if (currentNet.SpatialDimension.Multiplied != currentState.SpatialDimension.Multiplied)
+            {
+                throw new ArgumentException("currentNet.SpatialDimension.Multiplied != currentState.SpatialDimension.Multiplied");
+            }
+            if (currentNet.Width != currentState.Width)
+            {
+                throw new ArgumentException("currentNet.Width != currentState.Width");
+            }
+            if (currentNet.Height != currentState.Height)
+            {
+                throw new ArgumentException("currentNet.Height != currentState.Height");
+            }
 
             //применяем функцию активации
             Parallel.For(0, currentNet.Height, j =>

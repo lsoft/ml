@@ -53,18 +53,20 @@ namespace MyNNConsoleApp.Conv
     public class Convolute4
     {
         const int ImageSize = 28;
-        const int KernelSize = 5;
 
-        const int ConvolutionSize0 = ImageSize - KernelSize + 1;
+
+        const int KernelSize0 = 5;
+        const int ConvolutionSize0 = ImageSize - KernelSize0 + 1;
         const float ScaleFactor0 = 0.5f;
-        const int FeatureMapCount0 = 6;
+        const int FeatureMapCount0 = 5;
 
-        const int ConvolutionSize1 = (int)(ConvolutionSize0 * ScaleFactor0) - KernelSize + 1;
+        const int KernelSize1 = 3;
+        const int ConvolutionSize1 = (int)(ConvolutionSize0 * ScaleFactor0) - KernelSize1 + 1;
         const float ScaleFactor1 = 0.5f;
-        const int FeatureMapCount1 = 16;
+        const int FeatureMapCount1 = 12;
 
         const int EpochCount = 50;
-        const float LearningRate = 0.002f;
+        const float LearningRate = 0.001f;
         const int VizCount = 100;
 
         public static void Do(
@@ -73,13 +75,13 @@ namespace MyNNConsoleApp.Conv
 
             var trainDataSetProvider = GetTrainProvider(
                 60000,
-                false,
+                true,
                 false
                 );
 
             var validationData = GetValidation(
                 10000,
-                false,
+                true,
                 false
                 );
 
@@ -98,12 +100,12 @@ namespace MyNNConsoleApp.Conv
                 );
 
             var l1Dimension = new Dimension(2, ConvolutionSize0, ConvolutionSize0);
-            var l1KernelDimension = new Dimension(2, KernelSize, KernelSize);
+            var l1KernelDimension = new Dimension(2, KernelSize0, KernelSize0);
             var l1 = new ConvolutionLayer(
                 neuronFactory,
                 //new SigmoidFunction(1f), 
-                //new HyperbolicTangensFunction(), 
-                new RLUFunction(),
+                new HyperbolicTangensFunction(), 
+                //new RLUFunction(),
                 l1Dimension,
                 FeatureMapCount0,
                 l1KernelDimension,
@@ -119,12 +121,12 @@ namespace MyNNConsoleApp.Conv
                 );
 
             var l3Dimension = new Dimension(2, ConvolutionSize1, ConvolutionSize1);
-            var l3KernelDimension = new Dimension(2, KernelSize, KernelSize);
+            var l3KernelDimension = new Dimension(2, KernelSize1, KernelSize1);
             var l3 = new ConvolutionLayer(
                 neuronFactory,
                 //new SigmoidFunction(1f), 
-                //new HyperbolicTangensFunction(), 
-                new RLUFunction(),
+                new HyperbolicTangensFunction(), 
+                //new RLUFunction(),
                 l3Dimension,
                 FeatureMapCount1,
                 l3KernelDimension,
@@ -141,8 +143,9 @@ namespace MyNNConsoleApp.Conv
 
             var l5 = new FullConnectedLayer(
                 neuronFactory,
-                new RLUFunction(),
-                new Dimension(1, 500),
+                //new SigmoidFunction(1f),
+                new HyperbolicTangensFunction(),
+                new Dimension(1, 150),
                 l4.TotalNeuronCount
                 );
 
@@ -173,7 +176,7 @@ namespace MyNNConsoleApp.Conv
 
             var config = new LearningAlgorithmConfig(
                 new HalfSquaredEuclidianDistance(),
-                new ConstLearningRate(LearningRate), 
+                new LinearLearningRate(LearningRate, 0.99f), 
                 1,
                 0f,
                 EpochCount,
@@ -430,15 +433,15 @@ namespace MyNNConsoleApp.Conv
 
                 LayerVisualizer.Show(
                     "kernel " + fmi,
-                    weights.GetSubArray(fmi * KernelSize * KernelSize, KernelSize * KernelSize),
-                    KernelSize,
-                    KernelSize
+                    weights.GetSubArray(fmi * KernelSize0 * KernelSize0, KernelSize0 * KernelSize0),
+                    KernelSize0,
+                    KernelSize0
                     );
 
                 var kernelBiasContainer = new ReferencedKernelBiasContainer(
-                    new Dimension(2, KernelSize, KernelSize),
+                    new Dimension(2, KernelSize0, KernelSize0),
                     weights,
-                    fmi * KernelSize * KernelSize,
+                    fmi * KernelSize0 * KernelSize0,
                     biases,
                     fmi
                     );

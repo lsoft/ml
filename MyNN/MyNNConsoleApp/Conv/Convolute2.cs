@@ -52,7 +52,7 @@ namespace MyNNConsoleApp.Conv
         const int ImageSize = 28;
         const int KernelSize = 5;
         const int ConvolutionSize = ImageSize - KernelSize + 1;
-        const int EpochCount = 5;
+        const int EpochCount = 50;
         const float LearningRate = 0.01f;
         const int VizCount = 100;
         private const int FeatureMapCount = 5;
@@ -62,14 +62,14 @@ namespace MyNNConsoleApp.Conv
         {
 
             var trainDataSetProvider = GetTrainProvider(
-                6000,
-                false,
+                60000,
+                true,
                 false
                 );
 
             var validationData = GetValidation(
-                1000,
-                false,
+                10000,
+                true,
                 false
                 );
 
@@ -91,7 +91,7 @@ namespace MyNNConsoleApp.Conv
             var l1KernelDimension = new Dimension(2, KernelSize, KernelSize);
             var l1 = new ConvolutionLayer(
                 neuronFactory,
-                new RLUFunction(),
+                new HyperbolicTangensFunction(), 
                 l1Dimension,
                 FeatureMapCount,
                 l1KernelDimension,
@@ -121,11 +121,11 @@ namespace MyNNConsoleApp.Conv
 
             var config = new LearningAlgorithmConfig(
                 new HalfSquaredEuclidianDistance(),
-                new ConstLearningRate(LearningRate), 
+                new LinearLearningRate(LearningRate, 0.98f), 
                 1,
                 0f,
                 EpochCount,
-                0.0001f
+                -0.01f
                 );
 
             var desiredValuesContainer = new CSharpDesiredValuesContainer(

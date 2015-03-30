@@ -109,6 +109,7 @@
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardOutput2ForNVidiaFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForIntelGPUFixture.cs" />
     <Compile Include="MLP2\Forward\Classic\GPU\ForwardState2ForNVidiaFixture.cs" />
+    <Compile Include="MLP2\Forward\Convolution\CSharp\FullConnectedConvolutionFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardOutputFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardStateDisableMaskFixture.cs" />
     <Compile Include="MLP2\Forward\DropConnect\OpenCL\CPU\ForwardStateDisableOutputLayerFixture.cs" />

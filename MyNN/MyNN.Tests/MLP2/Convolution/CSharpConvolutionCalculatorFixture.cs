@@ -499,6 +499,103 @@ namespace MyNN.Tests.MLP2.Convolution
 
         }
 
+        [TestMethod]
+        public void TestBackIncrement()
+        {
+            const int datadim = 3;
+            const int datatotal = datadim * datadim;
+
+            const int kerneldim = 2;
+            const int kerneltotal = kerneldim * kerneldim;
+
+            const int targetdim = 4;
+            const int targettotal = targetdim * targetdim;
+
+            var datasd = new Dimension(2, datadim, datadim);
+            var kernelsd = new Dimension(2, kerneldim, kerneldim);
+            var targetsd = new Dimension(2, targetdim, targetdim);
+
+            var data = new float[datatotal];
+
+            var kernel = new float[kerneltotal];
+
+            var target = new float[targettotal];
+
+            var d = new ReferencedSquareFloat(
+                datasd,
+                data,
+                0
+                );
+
+            var k = new ReferencedSquareFloat(
+                kernelsd,
+                kernel,
+                0
+                );
+
+
+            var t = new ReferencedSquareFloat(
+                targetsd,
+                target,
+                0
+                );
+
+            //data:
+            var datavalues = new float[,]
+            {
+                { 1,  2,  3,  },
+                { 3,  2, -1,  },
+                { 1,  1,  0,  },
+            };
+
+            //180 degrees flipped kernel:
+            //-2   3
+            // 2   1
+
+            FillSquare(d, datavalues);
+
+
+            //kernel
+            var kernelvalues = new float[,]
+            {
+                { 1,  2, },
+                { 3, -2, },
+            };
+
+            FillSquare(k, kernelvalues);
+
+            //target:
+            target.Fill(1f);
+
+            //right target:
+            var righttargervalues = new float[,]
+            {
+                {  2,   5,   8,   7 },
+                {  7,  13,   9,  -7 },
+                { 11,   4,  -4,   3 },
+                {  4,   2,  -1,   1 },
+            };
+
+            var cc = new NaiveConvolutionCalculator(
+                );
+
+            cc.CalculateBackConvolutionWithIncrement(
+                k,
+                d,
+                t
+                );
+
+            float maxDiff;
+            var r = ArrayOperations.ValuesAreEqual(
+                target,
+                righttargervalues.ToLine(),
+                float.Epsilon,
+                out maxDiff
+                );
+
+            Assert.IsTrue(r);
+
+        }
 
         private void FillKb(
             IReferencedKernelBiasContainer target,

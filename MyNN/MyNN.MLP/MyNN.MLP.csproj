@@ -84,6 +84,8 @@
     <Compile Include="Convolution\Calculator\CSharp\ICSharpConvolutionCalculator.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Convolution\Connector\FullConnectedConnector.cs" />
+    <Compile Include="Convolution\Connector\IConnector.cs" />
     <Compile Include="Convolution\Connector\NaiveConnector.cs" />
     <Compile Include="Convolution\KernelBiasContainer\IReferencedKernelBiasContainer.cs" />
     <Compile Include="Convolution\ReferencedSquareFloat\IReferencedSquareFloat.cs" />

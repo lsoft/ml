@@ -54,6 +54,7 @@ namespace MyNN.MLP.Structure.Layer
             )
         {
             //layerActivationFunction allowed to be null (for input layer)
+
             if (spatialDimension == null)
             {
                 throw new ArgumentNullException("spatialDimension");
