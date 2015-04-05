@@ -8,11 +8,16 @@ namespace MyNN.MLP.Backpropagation.Metrics
     [Serializable]
     public class MultiClassLogLoss : IMetrics
     {
-        private const double ExtremeValue = 10e-15d;
-        private const double ExtremeValueM1 = 1 - 10e-15d;
+        private readonly double _extremeValue;// = 10e-15d;
+        private readonly double _extremeValueM1;// = 1 - 10e-15d;
 
-        public MultiClassLogLoss()
+        public MultiClassLogLoss(
+            double extremeValue = 10e-15d
+            )
         {
+            _extremeValue = extremeValue;
+            _extremeValueM1 = 1d - extremeValue;
+
             ConsoleAmbientContext.Console.WriteWarning("MultiClassLogLoss is not verified and completed in terms of first derivative");
         }
 
@@ -38,7 +43,7 @@ namespace MyNN.MLP.Backpropagation.Metrics
             for (var j = 0; j < desiredValues.Length; j++)
             {
                 var normalizedprection = predictedValues[j]/sum;
-                var p = Math.Max(Math.Min(normalizedprection, ExtremeValueM1), ExtremeValue);
+                var p = Math.Max(Math.Min(normalizedprection, _extremeValueM1), _extremeValue);
 
                 var atom = desiredValues[j] * Math.Log(p, Math.E);
 
