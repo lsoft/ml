@@ -1,2 +1,2 @@
-MYNN = A Most Ympressive Neural Network Library :) 
-joke! it's just my machine learning experiments, no more
+My machine learning experiments, no more. Not very interesting.
+It utilizes OpenCL in order to reach good performance. There are kernels for CPU OpenCL and GPU OpenCL. Unfortunately my Xeon Phi card is not working stable so Phi kernels did not implemented :/
